@@ -32,13 +32,13 @@ export const PasswordResetFinishPage = () => {
       <ValidatedForm onSubmit={handleValidSubmit}>
         <ValidatedField
           name="newPassword"
-          label="New password"
-          placeholder="New password"
+          label="Nova senha"
+          placeholder="Nova senha"
           type="password"
           validate={{
-            required: { value: true, message: 'Your password is required.' },
-            minLength: { value: 4, message: 'Your password is required to be at least 4 characters.' },
-            maxLength: { value: 50, message: 'Your password cannot be longer than 50 characters.' },
+            required: { value: true, message: 'A senha é obrigatória.' },
+            minLength: { value: 4, message: 'A senha deve ter pelo menos 4 caracteres' },
+            maxLength: { value: 50, message: 'A senha não pode ter mais de 50 caracteres' },
           }}
           onChange={updatePassword}
           data-cy="resetPassword"
@@ -46,19 +46,19 @@ export const PasswordResetFinishPage = () => {
         <PasswordStrengthBar password={password} />
         <ValidatedField
           name="confirmPassword"
-          label="New password confirmation"
-          placeholder="Confirm the new password"
+          label="Confirmação de nova senha"
+          placeholder="Confirme a nova senha"
           type="password"
           validate={{
-            required: { value: true, message: 'Your confirmation password is required.' },
-            minLength: { value: 4, message: 'Your confirmation password is required to be at least 4 characters.' },
-            maxLength: { value: 50, message: 'Your confirmation password cannot be longer than 50 characters.' },
-            validate: v => v === password || 'The password and its confirmation do not match!',
+            required: { value: true, message: 'A confirmação da senha é obrigatória.' },
+            minLength: { value: 4, message: 'A confirmação da senha deve ter pelo menos 4 caracteres' },
+            maxLength: { value: 50, message: 'A confirmação da senha não pode ter mais de 50 caracteres' },
+            validate: v => v === password || 'A senha e sua confirmação devem ser iguais!',
           }}
           data-cy="confirmResetPassword"
         />
         <Button color="success" type="submit" data-cy="submit">
-          Validate new password
+          Validar nova senha
         </Button>
       </ValidatedForm>
     );
@@ -76,7 +76,7 @@ export const PasswordResetFinishPage = () => {
     <div>
       <Row className="justify-content-center">
         <Col md="4">
-          <h1>Reset password</h1>
+          <h1>Criar nova senha</h1>
           <div>{key ? getResetForm() : null}</div>
         </Col>
       </Row>

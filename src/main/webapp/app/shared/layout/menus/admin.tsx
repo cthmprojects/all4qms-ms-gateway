@@ -10,16 +10,16 @@ const adminMenuItems = () => (
       Gateway
     </MenuItem>
     <MenuItem icon="users" to="/admin/user-management">
-      User management
+      Gerenciamento de usuário
     </MenuItem>
     <MenuItem icon="tachometer-alt" to="/admin/metrics">
-      Metrics
+      Métricas
     </MenuItem>
     <MenuItem icon="heart" to="/admin/health">
-      Health
+      Estado do Sistema
     </MenuItem>
     <MenuItem icon="cogs" to="/admin/configuration">
-      Configuration
+      Configuração
     </MenuItem>
     <MenuItem icon="tasks" to="/admin/logs">
       Logs
@@ -34,18 +34,10 @@ const openAPIItem = () => (
   </MenuItem>
 );
 
-const databaseItem = () => (
-  <DropdownItem tag="a" href="http://localhost:8092/" target="_tab">
-    <FontAwesomeIcon icon="database" fixedWidth /> Database
-  </DropdownItem>
-);
-
-export const AdminMenu = ({ showOpenAPI, showDatabase }) => (
-  <NavDropdown icon="users-cog" name="Administration" id="admin-menu" data-cy="adminMenu">
+export const AdminMenu = ({ showOpenAPI }) => (
+  <NavDropdown icon="users-cog" name="Administração" id="admin-menu" data-cy="adminMenu">
     {adminMenuItems()}
     {showOpenAPI && openAPIItem()}
-
-    {showDatabase && databaseItem()}
   </NavDropdown>
 );
 

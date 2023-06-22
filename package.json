@@ -1,8 +1,8 @@
 {
-  "name": "ms-gateway",
+  "name": "all-4-qms-ms-gateway",
   "version": "0.0.1-SNAPSHOT",
   "private": true,
-  "description": "Description for msGateway",
+  "description": "Description for all4qmsMsGateway",
   "license": "UNLICENSED",
   "scripts": {
     "app:start": "./mvnw",
@@ -70,7 +70,7 @@
     "webpack-dev-server": "webpack serve"
   },
   "config": {
-    "backend_port": 8080,
+    "backend_port": "8080",
     "default_environment": "prod",
     "packaging": "jar"
   },
@@ -81,6 +81,7 @@
     "@reduxjs/toolkit": "1.8.5",
     "axios": "0.27.2",
     "bootstrap": "5.2.0",
+    "bootswatch": "5.2.0",
     "dayjs": "1.11.5",
     "lodash": "4.17.21",
     "path-browserify": "1.0.1",

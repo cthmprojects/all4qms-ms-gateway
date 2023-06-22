@@ -41,12 +41,12 @@ export const HealthPage = () => {
   return (
     <div>
       <h2 id="health-page-heading" data-cy="healthPageHeading">
-        Health Checks
+        Estado do Sistema
       </h2>
       <p>
         <Button onClick={fetchSystemHealth} color={isFetching ? 'btn btn-danger' : 'btn btn-primary'} disabled={isFetching}>
           <FontAwesomeIcon icon="sync" />
-          &nbsp; Refresh
+          &nbsp; Atualizar
         </Button>
       </p>
       <Row>
@@ -54,9 +54,9 @@ export const HealthPage = () => {
           <Table bordered aria-describedby="health-page-heading">
             <thead>
               <tr>
-                <th>Service name</th>
-                <th>Status</th>
-                <th>Details</th>
+                <th>Nome do Serviço</th>
+                <th>Estado</th>
+                <th>Detalhes</th>
               </tr>
             </thead>
             <tbody>

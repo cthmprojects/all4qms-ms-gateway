@@ -18,6 +18,7 @@ public class TestContainersSpringContextCustomizerFactory implements ContextCust
 
     private Logger log = LoggerFactory.getLogger(TestContainersSpringContextCustomizerFactory.class);
 
+    private static SqlTestContainer devTestContainer;
     private static SqlTestContainer prodTestContainer;
 
     @Override
@@ -29,6 +30,31 @@ public class TestContainersSpringContextCustomizerFactory implements ContextCust
             if (null != sqlAnnotation) {
                 log.debug("detected the EmbeddedSQL annotation on class {}", testClass.getName());
                 log.info("Warming up the sql database");
+                if (
+                    Arrays
+                        .asList(context.getEnvironment().getActiveProfiles())
+                        .contains("test" + JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)
+                ) {
+                    if (null == devTestContainer) {
+                        try {
+                            Class<? extends SqlTestContainer> containerClass = (Class<? extends SqlTestContainer>) Class.forName(
+                                this.getClass().getPackageName() + ".PostgreSqlTestContainer"
+                            );
+                            devTestContainer = beanFactory.createBean(containerClass);
+                            beanFactory.registerSingleton(containerClass.getName(), devTestContainer);
+                            // ((DefaultListableBeanFactory)beanFactory).registerDisposableBean(containerClass.getName(), devTestContainer);
+                        } catch (ClassNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    testValues =
+                        testValues.and(
+                            "spring.r2dbc.url=" + devTestContainer.getTestContainer().getJdbcUrl().replace("jdbc", "r2dbc") + ""
+                        );
+                    testValues = testValues.and("spring.r2dbc.username=" + devTestContainer.getTestContainer().getUsername());
+                    testValues = testValues.and("spring.r2dbc.password=" + devTestContainer.getTestContainer().getPassword());
+                    testValues = testValues.and("spring.liquibase.url=" + devTestContainer.getTestContainer().getJdbcUrl() + "");
+                }
                 if (
                     Arrays
                         .asList(context.getEnvironment().getActiveProfiles())

@@ -13,7 +13,7 @@ import entitiesReducers from './reducers';
 
 export default () => {
   const store = getStore();
-  store.injectReducer('msgateway', combineReducers(entitiesReducers as ReducersMapObject));
+  store.injectReducer('all4qmsmsgateway', combineReducers(entitiesReducers as ReducersMapObject));
   return (
     <div>
       <ErrorBoundaryRoutes>

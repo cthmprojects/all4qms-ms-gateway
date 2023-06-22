@@ -87,13 +87,13 @@ export const UserManagement = () => {
   return (
     <div>
       <h2 id="user-management-page-heading" data-cy="userManagementPageHeading">
-        Users
+        Usuários
         <div className="d-flex justify-content-end">
           <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
-            <FontAwesomeIcon icon="sync" spin={loading} /> Refresh list
+            <FontAwesomeIcon icon="sync" spin={loading} /> Atualizar lista
           </Button>
           <Link to="new" className="btn btn-primary jh-create-entity">
-            <FontAwesomeIcon icon="plus" /> Create a new user
+            <FontAwesomeIcon icon="plus" /> Adicionar
           </Link>
         </div>
       </h2>
@@ -101,7 +101,7 @@ export const UserManagement = () => {
         <thead>
           <tr>
             <th className="hand" onClick={sort('id')}>
-              ID
+              Código
               <FontAwesomeIcon icon="sort" />
             </th>
             <th className="hand" onClick={sort('login')}>
@@ -109,21 +109,21 @@ export const UserManagement = () => {
               <FontAwesomeIcon icon="sort" />
             </th>
             <th className="hand" onClick={sort('email')}>
-              Email
+              E-mail
               <FontAwesomeIcon icon="sort" />
             </th>
             <th />
-            <th>Profiles</th>
+            <th>Perfis</th>
             <th className="hand" onClick={sort('createdDate')}>
-              Created date
+              Criado em
               <FontAwesomeIcon icon="sort" />
             </th>
             <th className="hand" onClick={sort('lastModifiedBy')}>
-              Modified by
+              Modificado por
               <FontAwesomeIcon icon="sort" />
             </th>
             <th id="modified-date-sort" className="hand" onClick={sort('lastModifiedDate')}>
-              Modified date
+              Modificado em
               <FontAwesomeIcon icon="sort" />
             </th>
             <th />
@@ -142,11 +142,11 @@ export const UserManagement = () => {
               <td>
                 {user.activated ? (
                   <Button color="success" onClick={toggleActive(user)}>
-                    Activated
+                    Ativo
                   </Button>
                 ) : (
                   <Button color="danger" onClick={toggleActive(user)}>
-                    Deactivated
+                    Inativo
                   </Button>
                 )}
               </td>
@@ -171,13 +171,13 @@ export const UserManagement = () => {
               <td className="text-end">
                 <div className="btn-group flex-btn-group-container">
                   <Button tag={Link} to={user.login} color="info" size="sm">
-                    <FontAwesomeIcon icon="eye" /> <span className="d-none d-md-inline">View</span>
+                    <FontAwesomeIcon icon="eye" /> <span className="d-none d-md-inline">Visualizar</span>
                   </Button>
                   <Button tag={Link} to={`${user.login}/edit`} color="primary" size="sm">
-                    <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Edit</span>
+                    <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
                   </Button>
                   <Button tag={Link} to={`${user.login}/delete`} color="danger" size="sm" disabled={account.login === user.login}>
-                    <FontAwesomeIcon icon="trash" /> <span className="d-none d-md-inline">Delete</span>
+                    <FontAwesomeIcon icon="trash" /> <span className="d-none d-md-inline">Excluir</span>
                   </Button>
                 </div>
               </td>

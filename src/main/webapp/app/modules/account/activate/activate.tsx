@@ -7,9 +7,9 @@ import { activateAction, reset } from './activate.reducer';
 
 const successAlert = (
   <Alert color="success">
-    <strong>Your user account has been activated.</strong> Please
+    <strong>Sua conta de usuário foi ativada com sucesso.</strong> Favor
     <Link to="/login" className="alert-link">
-      sign in
+      entrar
     </Link>
     .
   </Alert>
@@ -17,7 +17,7 @@ const successAlert = (
 
 const failureAlert = (
   <Alert color="danger">
-    <strong>Your user could not be activated.</strong> Please use the registration form to sign up.
+    <strong>Seu usuário não pode ser ativado.</strong> Favor utilizar o formulário de cadastro para criar uma nova conta.
   </Alert>
 );
 
@@ -41,7 +41,7 @@ export const ActivatePage = () => {
     <div>
       <Row className="justify-content-center">
         <Col md="8">
-          <h1>Activation</h1>
+          <h1>Ativação</h1>
           {activationSuccess ? successAlert : undefined}
           {activationFailure ? failureAlert : undefined}
         </Col>

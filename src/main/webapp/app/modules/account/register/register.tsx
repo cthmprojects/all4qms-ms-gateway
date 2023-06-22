@@ -19,7 +19,7 @@ export const RegisterPage = () => {
   );
 
   const handleValidSubmit = ({ username, email, firstPassword }) => {
-    dispatch(handleRegister({ login: username, email, password: firstPassword, langKey: 'en' }));
+    dispatch(handleRegister({ login: username, email, password: firstPassword, langKey: 'pt-br' }));
   };
 
   const updatePassword = event => setPassword(event.target.value);
@@ -37,7 +37,7 @@ export const RegisterPage = () => {
       <Row className="justify-content-center">
         <Col md="8">
           <h1 id="register-title" data-cy="registerTitle">
-            Registration
+            Cadastro
           </h1>
         </Col>
       </Row>
@@ -46,71 +46,71 @@ export const RegisterPage = () => {
           <ValidatedForm id="register-form" onSubmit={handleValidSubmit}>
             <ValidatedField
               name="username"
-              label="Username"
-              placeholder="Your username"
+              label="Usuário"
+              placeholder="Seu usuário"
               validate={{
-                required: { value: true, message: 'Your username is required.' },
+                required: { value: true, message: 'O usuário é obrigatório.' },
                 pattern: {
                   value: /^[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$|^[_.@A-Za-z0-9-]+$/,
                   message: 'Your username is invalid.',
                 },
-                minLength: { value: 1, message: 'Your username is required to be at least 1 character.' },
-                maxLength: { value: 50, message: 'Your username cannot be longer than 50 characters.' },
+                minLength: { value: 1, message: 'O usuário deve ter pelo menos 1 caractere.' },
+                maxLength: { value: 50, message: 'O usuário não pode ter mais de 50 caracteres.' },
               }}
               data-cy="username"
             />
             <ValidatedField
               name="email"
-              label="Email"
-              placeholder="Your email"
+              label="E-mail"
+              placeholder="Seu e-mail"
               type="email"
               validate={{
-                required: { value: true, message: 'Your email is required.' },
-                minLength: { value: 5, message: 'Your email is required to be at least 5 characters.' },
-                maxLength: { value: 254, message: 'Your email cannot be longer than 50 characters.' },
-                validate: v => isEmail(v) || 'Your email is invalid.',
+                required: { value: true, message: 'O e-mail é obrigatório.' },
+                minLength: { value: 5, message: 'O e-mail deve ter pelo menos 5 caracteres' },
+                maxLength: { value: 254, message: 'O e-mail não pode ter mais de 50 caracteres' },
+                validate: v => isEmail(v) || 'E-mail inválido.',
               }}
               data-cy="email"
             />
             <ValidatedField
               name="firstPassword"
-              label="New password"
-              placeholder="New password"
+              label="Nova senha"
+              placeholder="Nova senha"
               type="password"
               onChange={updatePassword}
               validate={{
-                required: { value: true, message: 'Your password is required.' },
-                minLength: { value: 4, message: 'Your password is required to be at least 4 characters.' },
-                maxLength: { value: 50, message: 'Your password cannot be longer than 50 characters.' },
+                required: { value: true, message: 'A senha é obrigatória.' },
+                minLength: { value: 4, message: 'A senha deve ter pelo menos 4 caracteres' },
+                maxLength: { value: 50, message: 'A senha não pode ter mais de 50 caracteres' },
               }}
               data-cy="firstPassword"
             />
             <PasswordStrengthBar password={password} />
             <ValidatedField
               name="secondPassword"
-              label="New password confirmation"
-              placeholder="Confirm the new password"
+              label="Confirmação de nova senha"
+              placeholder="Confirme a nova senha"
               type="password"
               validate={{
-                required: { value: true, message: 'Your confirmation password is required.' },
-                minLength: { value: 4, message: 'Your confirmation password is required to be at least 4 characters.' },
-                maxLength: { value: 50, message: 'Your confirmation password cannot be longer than 50 characters.' },
-                validate: v => v === password || 'The password and its confirmation do not match!',
+                required: { value: true, message: 'A confirmação da senha é obrigatória.' },
+                minLength: { value: 4, message: 'A confirmação da senha deve ter pelo menos 4 caracteres' },
+                maxLength: { value: 50, message: 'A confirmação da senha não pode ter mais de 50 caracteres' },
+                validate: v => v === password || 'A senha e sua confirmação devem ser iguais!',
               }}
               data-cy="secondPassword"
             />
             <Button id="register-submit" color="primary" type="submit" data-cy="submit">
-              Register
+              Cadastrar
             </Button>
           </ValidatedForm>
           <p>&nbsp;</p>
           <Alert color="warning">
-            <span>If you want to</span>
-            <a className="alert-link">sign in</a>
+            <span>Se deseja</span>
+            <a className="alert-link">entrar</a>
             <span>
-              , you can try the default accounts:
-              <br />- Administrator (login=&quot;admin&quot; and password=&quot;admin&quot;) <br />- User (login=&quot;user&quot; and
-              password=&quot;user&quot;).
+              , utilize as seguintes contas padrões:
+              <br />- Administrador (usuário=&quot;admin&quot; and senha=&quot;admin&quot;) <br />- Usuário (usuário=&quot;user&quot; e
+              senha=&quot;user&quot;).
             </span>
           </Alert>
         </Col>

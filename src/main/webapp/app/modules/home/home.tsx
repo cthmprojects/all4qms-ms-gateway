@@ -16,44 +16,44 @@ export const Home = () => {
         <span className="hipster rounded" />
       </Col>
       <Col md="9">
-        <h2>Welcome, Java Hipster!</h2>
-        <p className="lead">This is your homepage</p>
+        <h2>Bem vindo, All4QMS Gateway!</h2>
+        <p className="lead">Esta é a página principal</p>
         {account?.login ? (
           <div>
-            <Alert color="success">You are logged in as user &quot;{account.login}&quot;.</Alert>
+            <Alert color="success">Você está logado como &quot;{account.login}&quot;.</Alert>
           </div>
         ) : (
           <div>
             <Alert color="warning">
-              If you want to
+              Se deseja
               <span>&nbsp;</span>
               <Link to="/login" className="alert-link">
-                sign in
+                entrar
               </Link>
-              , you can try the default accounts:
-              <br />- Administrator (login=&quot;admin&quot; and password=&quot;admin&quot;) <br />- User (login=&quot;user&quot; and
-              password=&quot;user&quot;).
+              , utilize as seguintes contas padrões:
+              <br />- Administrador (usuário=&quot;admin&quot; and senha=&quot;admin&quot;) <br />- Usuário (usuário=&quot;user&quot; e
+              senha=&quot;user&quot;).
             </Alert>
 
             <Alert color="warning">
-              You don&apos;t have an account yet?&nbsp;
+              Não possui uma conta ainda?&nbsp;
               <Link to="/account/register" className="alert-link">
-                Register a new account
+                Crie uma nova conta
               </Link>
             </Alert>
           </div>
         )}
-        <p>If you have any question on JHipster:</p>
+        <p>Em caso de dúvida sobre o JHipster:</p>
 
         <ul>
           <li>
             <a href="https://www.jhipster.tech/" target="_blank" rel="noopener noreferrer">
-              JHipster homepage
+              Página principal JHipster
             </a>
           </li>
           <li>
             <a href="https://stackoverflow.com/tags/jhipster/info" target="_blank" rel="noopener noreferrer">
-              JHipster on Stack Overflow
+              JHipster no Stack Overflow
             </a>
           </li>
           <li>
@@ -63,18 +63,18 @@ export const Home = () => {
           </li>
           <li>
             <a href="https://gitter.im/jhipster/generator-jhipster" target="_blank" rel="noopener noreferrer">
-              JHipster public chat room
+              Sala de bate-papo pública JHipster
             </a>
           </li>
           <li>
             <a href="https://twitter.com/jhipster" target="_blank" rel="noopener noreferrer">
-              follow @jhipster on Twitter
+              siga @jhipster no Twitter
             </a>
           </li>
         </ul>
 
         <p>
-          If you like JHipster, don&apos;t forget to give us a star on{' '}
+          Se você gosta do JHipster, não se esqueça de avaliar no{' '}
           <a href="https://github.com/jhipster/generator-jhipster" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>

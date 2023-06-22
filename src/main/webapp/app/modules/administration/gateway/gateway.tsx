@@ -78,7 +78,7 @@ export const GatewayPage = () => {
       <p>
         <Button onClick={gatewayRoutes} color={isFetching ? 'danger' : 'primary'} disabled={isFetching}>
           <FontAwesomeIcon icon="sync" />
-          &nbsp; Refresh
+          &nbsp; Atualizar
         </Button>
       </p>
 
@@ -86,8 +86,8 @@ export const GatewayPage = () => {
         <thead>
           <tr key="header">
             <th>URL</th>
-            <th>Service</th>
-            <th>Available servers</th>
+            <th>Serviço</th>
+            <th>Servidores disponíveis</th>
           </tr>
         </thead>
         <tbody>

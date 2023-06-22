@@ -39,48 +39,48 @@ export const SettingsPage = () => {
       <Row className="justify-content-center">
         <Col md="8">
           <h2 id="settings-title">
-            User settings for [<strong>{account.login}</strong>]
+            Configurações para o usuário [<strong>{account.login}</strong>]
           </h2>
           <ValidatedForm id="settings-form" onSubmit={handleValidSubmit} defaultValues={account}>
             <ValidatedField
               name="firstName"
-              label="First Name"
+              label="Nome"
               id="firstName"
-              placeholder="Your first name"
+              placeholder="Seu nome"
               validate={{
-                required: { value: true, message: 'Your first name is required.' },
-                minLength: { value: 1, message: 'Your first name is required to be at least 1 character' },
-                maxLength: { value: 50, message: 'Your first name cannot be longer than 50 characters' },
+                required: { value: true, message: 'O nome é obrigatório.' },
+                minLength: { value: 1, message: 'O nome deve ter pelo menos 1 caractere' },
+                maxLength: { value: 50, message: 'O nome não pode ter mais de 50 caracteres' },
               }}
               data-cy="firstname"
             />
             <ValidatedField
               name="lastName"
-              label="Last Name"
+              label="Sobrenome"
               id="lastName"
-              placeholder="Your last name"
+              placeholder="Seu sobrenome"
               validate={{
-                required: { value: true, message: 'Your last name is required.' },
-                minLength: { value: 1, message: 'Your last name is required to be at least 1 character' },
-                maxLength: { value: 50, message: 'Your last name cannot be longer than 50 characters' },
+                required: { value: true, message: 'O sobrenome é obrigatório.' },
+                minLength: { value: 1, message: 'O sobrenome deve ter pelo menos 1 caractere' },
+                maxLength: { value: 50, message: 'O sobrenome não pode ter mais de 50 caracteres' },
               }}
               data-cy="lastname"
             />
             <ValidatedField
               name="email"
-              label="Email"
-              placeholder="Your email"
+              label="E-mail"
+              placeholder="Seu e-mail"
               type="email"
               validate={{
-                required: { value: true, message: 'Your email is required.' },
-                minLength: { value: 5, message: 'Your email is required to be at least 5 characters.' },
-                maxLength: { value: 254, message: 'Your email cannot be longer than 50 characters.' },
-                validate: v => isEmail(v) || 'Your email is invalid.',
+                required: { value: true, message: 'O e-mail é obrigatório.' },
+                minLength: { value: 5, message: 'O e-mail deve ter pelo menos 5 caracteres' },
+                maxLength: { value: 254, message: 'O e-mail não pode ter mais de 50 caracteres' },
+                validate: v => isEmail(v) || 'E-mail inválido.',
               }}
               data-cy="email"
             />
             <Button color="primary" type="submit" data-cy="submit">
-              Save
+              Salvar
             </Button>
           </ValidatedForm>
         </Col>
