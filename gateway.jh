@@ -1,0 +1,54 @@
+//Usuario
+
+entity Usuario {
+    setorUsuario Integer, /*FK*/
+    isGestor Boolean,
+    gestorUsuario Integer, /*FK*/
+    funcaoUsuario Integer, /*FK*/
+}
+
+entity Funcao {
+    nomeFuncao String
+}
+
+entity Setor {
+    nomeSetor String //Manufatura   
+}
+
+entity Processo {
+	numeroProcesso String required,
+    nomeProcesso String maxlength(255),
+    descricaoProcesso String maxlength(4000),
+    setorProcesso String,
+    responsavelProcessos String,
+    responsavelSetor String
+}
+
+entity Pendencias {
+	respPendencia Integer /*FK*/ //Usuário
+    nomePendencia String //Descricao == "detalhesNaoConformidade"
+    statusPendencia Boolean //Falso == Não lido
+    linkPendencia String //Caminho para acessar a pendencia
+    tipoPendencia EnumTipoPend
+}
+
+enum EnumTipoPend {
+	Atividade
+    Notificacao
+}
+
+relationship OneToOne {
+  Usuario{funcaoUsuario} to FuncaoUsuario,
+  Usuario{gestorUsuario} to Usuario,
+  Usuario{perfilUsuario} to PerfilUsuario,
+  Usuario{setorUsuario} to SetorUsuario,
+  Pendencias{respPendencia} to Usuario,
+  Usuario{internalUser} to User
+}
+
+relationship ManyToMany {
+	Processo to Usuario
+}
+
+dto * with mapstruct
+service * with serviceClass
