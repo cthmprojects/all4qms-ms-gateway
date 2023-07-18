@@ -1,0 +1,73 @@
+{
+  "applications": "*",
+  "changelogDate": "20230704185509",
+  "databaseType": "sql",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "processo",
+  "fields": [
+    {
+      "fieldName": "numero",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "nome",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "descricao",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "setor",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "responsavel",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "setorResponsavel",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "criadoEm",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "atualizadoEm",
+      "fieldType": "ZonedDateTime"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Processo",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityField": "nome",
+      "otherEntityName": "usuario",
+      "ownerSide": true,
+      "relationshipName": "criadoPor",
+      "relationshipType": "one-to-one"
+    },
+    {
+      "otherEntityField": "nome",
+      "otherEntityName": "usuario",
+      "ownerSide": true,
+      "relationshipName": "atualizadoPor",
+      "relationshipType": "one-to-one"
+    },
+    {
+      "otherEntityField": "nome",
+      "otherEntityName": "usuario",
+      "otherEntityRelationshipName": "processos",
+      "ownerSide": false,
+      "relationshipName": "usuario",
+      "relationshipType": "many-to-many"
+    }
+  ],
+  "service": "serviceClass"
+}
