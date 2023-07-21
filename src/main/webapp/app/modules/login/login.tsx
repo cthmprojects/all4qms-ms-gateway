@@ -45,7 +45,7 @@ export const Login = () => {
   return (
     <div className="fatherDiv">
       <div className="leftDiv">
-        <img src="caminho/para/imagem" alt="Logo" style={{ width: '200px', marginBottom: '30px' }} />
+        <img src="../../content/images/PDCAI logo.jpg" alt="Logo" style={{ width: '200px', marginBottom: '30px' }} />
 
         <TextField required id="outlined-required" label="Usuário" value={username} onChange={handleUsernameChange} className="textField" />
         <TextField
@@ -70,7 +70,9 @@ export const Login = () => {
           <span className="esqueciSenha">Esqueci minha senha</span>
         </div>
       </div>
-      <div className="rightDiv">{/* Conteúdo da div da direita */}</div>
+      <div className="rightDiv">
+        <img src="../../content/images/login img.jpg" />
+      </div>
     </div>
   );
 };

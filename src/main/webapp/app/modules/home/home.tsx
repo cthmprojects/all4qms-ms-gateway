@@ -7,8 +7,14 @@ import { Row, Col, Alert } from 'reactstrap';
 
 import { useAppSelector } from 'app/config/store';
 
-export const Home = () => {
+export interface IHomeProps {
+  checkAuth: () => void;
+}
+
+export const Home = (props: IHomeProps) => {
   const account = useAppSelector(state => state.authentication.account);
+
+  props.checkAuth();
 
   return (
     <Row>

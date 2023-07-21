@@ -17,6 +17,10 @@ import { AUTHORITIES } from 'app/config/constants';
 
 const loading = <div>loading ...</div>;
 
+export interface IRoutesProps {
+  checkAuth: () => void;
+}
+
 const Account = Loadable({
   loader: () => import(/* webpackChunkName: "account" */ 'app/modules/account'),
   loading: () => loading,
@@ -27,7 +31,7 @@ const Admin = Loadable({
   loading: () => loading,
 });
 
-const AppRoutes = () => {
+const AppRoutes = (props: IRoutesProps) => {
   return (
     <div className="view-routes">
       <ErrorBoundaryRoutes>
@@ -35,7 +39,7 @@ const AppRoutes = () => {
           index
           element={
             <PrivateRoute hasAnyAuthorities={[AUTHORITIES.ADMIN, AUTHORITIES.USER]}>
-              <Home />
+              <Home checkAuth={props.checkAuth} />
             </PrivateRoute>
           }
         />

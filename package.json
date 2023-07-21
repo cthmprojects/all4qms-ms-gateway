@@ -75,9 +75,12 @@
     "packaging": "jar"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@fortawesome/fontawesome-svg-core": "6.2.0",
     "@fortawesome/free-solid-svg-icons": "6.2.0",
     "@fortawesome/react-fontawesome": "0.2.0",
+    "@mui/material": "^5.14.0",
     "@reduxjs/toolkit": "1.8.5",
     "axios": "0.27.2",
     "bootstrap": "5.2.0",
