@@ -1,0 +1,64 @@
+{
+  "applications": "*",
+  "changelogDate": "20230704185510",
+  "databaseType": "sql",
+  "dto": "mapstruct",
+  "embedded": false,
+  "entityTableName": "pendencia",
+  "fields": [
+    {
+      "fieldName": "nome",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "Boolean"
+    },
+    {
+      "fieldName": "lidaEm",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "link",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "tipo",
+      "fieldType": "EnumTipoPend",
+      "fieldValues": "Atividade,Notificacao"
+    },
+    {
+      "fieldName": "criadoEm",
+      "fieldType": "ZonedDateTime"
+    }
+  ],
+  "fluentMethods": true,
+  "jpaMetamodelFiltering": false,
+  "name": "Pendencia",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityField": "nome",
+      "otherEntityName": "usuario",
+      "ownerSide": true,
+      "relationshipName": "responsavel",
+      "relationshipType": "one-to-one"
+    },
+    {
+      "otherEntityField": "nome",
+      "otherEntityName": "usuario",
+      "ownerSide": true,
+      "relationshipName": "criadoPor",
+      "relationshipType": "one-to-one"
+    },
+    {
+      "otherEntityField": "nome",
+      "otherEntityName": "usuario",
+      "ownerSide": true,
+      "relationshipName": "atualizadoPor",
+      "relationshipType": "one-to-one"
+    }
+  ],
+  "service": "serviceClass"
+}

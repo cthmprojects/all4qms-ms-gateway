@@ -2,8 +2,9 @@ import './header.scss';
 
 import React, { useEffect, useState } from 'react';
 
-import { Navbar, Nav, NavbarToggler, Collapse } from 'reactstrap';
+import { Navbar, Nav, NavbarToggler, Collapse, Alert } from 'reactstrap';
 import LoadingBar from 'react-redux-loading-bar';
+import { useAppSelector } from 'app/config/store';
 
 import { Home, Brand } from './header-components';
 import { AdminMenu, EntitiesMenu, AccountMenu } from '../menus';
@@ -29,6 +30,7 @@ const Header = (props: IHeaderProps) => {
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
   /* jhipster-needle-add-element-to-menu - JHipster will add new menu items here */
+  const account = useAppSelector(state => state.authentication.account);
 
   return (
     <>

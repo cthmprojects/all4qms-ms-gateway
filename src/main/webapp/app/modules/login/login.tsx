@@ -47,7 +47,7 @@ export const Login = () => {
       <div className="leftDiv">
         <img src="../../content/images/PDCAI logo.jpg" alt="Logo" style={{ width: '200px', marginBottom: '30px' }} />
 
-        <TextField required id="outlined-required" label="Usuário" value={username} onChange={handleUsernameChange} className="textField" />
+        <TextField id="outlined-required" label="Usuário" value={username} onChange={handleUsernameChange} className="textField" />
         <TextField
           id="outlined-password-input"
           label="Senha"

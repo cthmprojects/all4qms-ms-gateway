@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <!--
+        Added the entity Processo.
+    -->
+    <changeSet id="20230704185509-1" author="jhipster">
+        <createTable tableName="processo">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="numero" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="nome" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="descricao" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="setor" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="responsavel" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="setor_responsavel" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="criado_em" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="atualizado_em" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="criado_por_id" type="bigint">
+                <constraints nullable="true" unique="true" uniqueConstraintName="ux_processo__criado_por_id" />
+            </column>
+            <column name="atualizado_por_id" type="bigint">
+                <constraints nullable="true" unique="true" uniqueConstraintName="ux_processo__atualizado_por_id" />
+            </column>
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+        </createTable>
+        <dropDefaultValue tableName="processo" columnName="criado_em" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="processo" columnName="atualizado_em" columnDataType="${datetimeType}"/>
+    </changeSet>
+
+    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
+
+    <!--
+        Load sample data generated with Faker.js
+        - This data can be easily edited using a CSV editor (or even MS Excel) and
+          is located in the 'src/main/resources/config/liquibase/fake-data' directory
+        - By default this data is applied when running with the JHipster 'dev' profile.
+          This can be customized by adding or removing 'faker' in the 'spring.liquibase.contexts'
+          Spring Boot configuration key.
+    -->
+<!--    <changeSet id="20230704185509-1-data" author="jhipster" context="faker">-->
+<!--        <loadData-->
+<!--                  file="config/liquibase/fake-data/processo.csv"-->
+<!--                  separator=";"-->
+<!--                  tableName="processo"-->
+<!--                  usePreparedStatements="true">-->
+<!--            <column name="id" type="numeric"/>-->
+<!--            <column name="numero" type="string"/>-->
+<!--            <column name="nome" type="string"/>-->
+<!--            <column name="descricao" type="string"/>-->
+<!--            <column name="setor" type="string"/>-->
+<!--            <column name="responsavel" type="string"/>-->
+<!--            <column name="setor_responsavel" type="string"/>-->
+<!--            <column name="criado_em" type="date"/>-->
+<!--            <column name="atualizado_em" type="date"/>-->
+<!--            &lt;!&ndash; jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here &ndash;&gt;-->
+<!--        </loadData>-->
+<!--    </changeSet>-->
+</databaseChangeLog>

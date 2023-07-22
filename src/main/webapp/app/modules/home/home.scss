@@ -59,3 +59,15 @@ Main page styles
   background-color: #ffffff;
   padding: 20px;
 }
+
+.main {
+  margin-top: 10em;
+}
+
+.container {
+  width: 30%;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
