@@ -68,3 +68,9 @@ Main page styles
     height: 100%;
   }
 }
+
+@media screen and (max-width: 900px) {
+  .rightDiv {
+    display: none;
+  }
+}
