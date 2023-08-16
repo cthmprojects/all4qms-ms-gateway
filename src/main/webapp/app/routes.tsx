@@ -14,6 +14,7 @@ import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import PageNotFound from 'app/shared/error/page-not-found';
 import { AUTHORITIES } from 'app/config/constants';
 import { Home } from './modules/home/home';
+import RncRoutes from './modules/rnc';
 
 const loading = <div>loading ...</div>;
 
@@ -45,6 +46,7 @@ const AppRoutes = (props: IRoutesProps) => {
         />
         <Route path="login" element={<Login />} />
         <Route path="logout" element={<Logout />} />
+        <Route path="rnc" element={<RncRoutes />} />
         <Route path="account">
           <Route
             path="*"

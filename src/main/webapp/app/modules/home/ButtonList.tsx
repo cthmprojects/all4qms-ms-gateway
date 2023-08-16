@@ -8,7 +8,7 @@ const ButtonList = () => {
     { icon: 'mdi:file-document-edit-outline', link: '/pagina2', legenda: 'Informações documentadas' },
     { icon: 'mdi:crosshairs', link: '/pagina3', legenda: 'Riscos e Oportunidades' },
     { icon: 'mdi:file-document-check-outline', link: '/pagina3', legenda: 'Auditorias' },
-    { icon: 'mdi:file-document-alert-outline', link: '/pagina3', legenda: 'RNC / OM' },
+    { icon: 'mdi:file-document-alert-outline', link: '/rnc', legenda: 'RNC / OM' },
     { icon: 'mdi:chart-line', link: '/pagina3', legenda: 'Indicadores de desempenho' },
     { icon: 'mdi:file-sign', link: '/pagina3', legenda: 'Análise crítica' },
   ];
