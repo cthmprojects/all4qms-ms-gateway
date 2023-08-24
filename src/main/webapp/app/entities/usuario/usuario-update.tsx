@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row, Col, FormText } from 'reactstrap';
-import { isNumber, ValidatedField, ValidatedForm } from 'react-jhipster';
+import { isNumber, Translate, translate, ValidatedField, ValidatedForm } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { convertDateTimeFromServer, convertDateTimeToServer, displayDefaultDateTime } from 'app/shared/util/date-utils';
@@ -17,6 +17,8 @@ import { IUser } from 'app/shared/model/user.model';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import { IProcesso } from 'app/shared/model/processo.model';
 import { getEntities as getProcessos } from 'app/entities/processo/processo.reducer';
+import { IPendencia } from 'app/shared/model/pendencia.model';
+import { getEntities as getPendencias } from 'app/entities/pendencia/pendencia.reducer';
 import { IUsuario } from 'app/shared/model/usuario.model';
 import { getEntity, updateEntity, createEntity, reset } from './usuario.reducer';
 
@@ -33,6 +35,7 @@ export const UsuarioUpdate = () => {
   const setors = useAppSelector(state => state.all4qmsmsgateway.setor.entities);
   const users = useAppSelector(state => state.userManagement.users);
   const processos = useAppSelector(state => state.all4qmsmsgateway.processo.entities);
+  const pendencias = useAppSelector(state => state.all4qmsmsgateway.pendencia.entities);
   const usuarioEntity = useAppSelector(state => state.all4qmsmsgateway.usuario.entity);
   const loading = useAppSelector(state => state.all4qmsmsgateway.usuario.loading);
   const updating = useAppSelector(state => state.all4qmsmsgateway.usuario.updating);
@@ -54,6 +57,7 @@ export const UsuarioUpdate = () => {
     dispatch(getSetors({}));
     dispatch(getUsers({}));
     dispatch(getProcessos({}));
+    dispatch(getPendencias({}));
   }, []);
 
   useEffect(() => {
@@ -109,7 +113,7 @@ export const UsuarioUpdate = () => {
       <Row className="justify-content-center">
         <Col md="8">
           <h2 id="all4QmsMsGatewayApp.usuario.home.createOrEditLabel" data-cy="UsuarioCreateUpdateHeading">
-            Criar ou editar Usuario
+            <Translate contentKey="all4QmsMsGatewayApp.usuario.home.createOrEditLabel">Create or edit a Usuario</Translate>
           </h2>
         </Col>
       </Row>
@@ -119,7 +123,16 @@ export const UsuarioUpdate = () => {
             <p>Loading...</p>
           ) : (
             <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity}>
-              {!isNew ? <ValidatedField name="id" required readOnly id="usuario-id" label="Código" validate={{ required: true }} /> : null}
+              {!isNew ? (
+                <ValidatedField
+                  name="id"
+                  required
+                  readOnly
+                  id="usuario-id"
+                  label={translate('global.field.id')}
+                  validate={{ required: true }}
+                />
+              ) : null}
               <ValidatedField
                 label="Nome"
                 id="usuario-nome"
@@ -127,7 +140,7 @@ export const UsuarioUpdate = () => {
                 data-cy="nome"
                 type="text"
                 validate={{
-                  required: { value: true, message: 'O campo é obrigatório.' },
+                  required: { value: true, message: translate('entity.validation.required') },
                 }}
               />
               <ValidatedField label="Email" id="usuario-email" name="email" data-cy="email" type="text" />
@@ -221,12 +234,15 @@ export const UsuarioUpdate = () => {
               <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/usuario" replace color="info">
                 <FontAwesomeIcon icon="arrow-left" />
                 &nbsp;
-                <span className="d-none d-md-inline">Voltar</span>
+                <span className="d-none d-md-inline">
+                  <Translate contentKey="entity.action.back">Back</Translate>
+                </span>
               </Button>
               &nbsp;
               <Button color="primary" id="save-entity" data-cy="entityCreateSaveButton" type="submit" disabled={updating}>
                 <FontAwesomeIcon icon="save" />
-                &nbsp; Salvar
+                &nbsp;
+                <Translate contentKey="entity.action.save">Save</Translate>
               </Button>
             </ValidatedForm>
           )}

@@ -281,7 +281,7 @@ class PendenciaResourceIT {
         webTestClient
             .get()
             .uri(ENTITY_API_URL_ID, Long.MAX_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_PROBLEM_JSON)
             .exchange()
             .expectStatus()
             .isNotFound();
@@ -406,7 +406,7 @@ class PendenciaResourceIT {
         Pendencia partialUpdatedPendencia = new Pendencia();
         partialUpdatedPendencia.setId(pendencia.getId());
 
-        partialUpdatedPendencia.nome(UPDATED_NOME).status(UPDATED_STATUS).lidaEm(UPDATED_LIDA_EM).link(UPDATED_LINK).tipo(UPDATED_TIPO);
+        partialUpdatedPendencia.status(UPDATED_STATUS).tipo(UPDATED_TIPO).criadoEm(UPDATED_CRIADO_EM);
 
         webTestClient
             .patch()
@@ -421,12 +421,12 @@ class PendenciaResourceIT {
         List<Pendencia> pendenciaList = pendenciaRepository.findAll().collectList().block();
         assertThat(pendenciaList).hasSize(databaseSizeBeforeUpdate);
         Pendencia testPendencia = pendenciaList.get(pendenciaList.size() - 1);
-        assertThat(testPendencia.getNome()).isEqualTo(UPDATED_NOME);
+        assertThat(testPendencia.getNome()).isEqualTo(DEFAULT_NOME);
         assertThat(testPendencia.getStatus()).isEqualTo(UPDATED_STATUS);
-        assertThat(testPendencia.getLidaEm()).isEqualTo(UPDATED_LIDA_EM);
-        assertThat(testPendencia.getLink()).isEqualTo(UPDATED_LINK);
+        assertThat(testPendencia.getLidaEm()).isEqualTo(DEFAULT_LIDA_EM);
+        assertThat(testPendencia.getLink()).isEqualTo(DEFAULT_LINK);
         assertThat(testPendencia.getTipo()).isEqualTo(UPDATED_TIPO);
-        assertThat(testPendencia.getCriadoEm()).isEqualTo(DEFAULT_CRIADO_EM);
+        assertThat(testPendencia.getCriadoEm()).isEqualTo(UPDATED_CRIADO_EM);
     }
 
     @Test

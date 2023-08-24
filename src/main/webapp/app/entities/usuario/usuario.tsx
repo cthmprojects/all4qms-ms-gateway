@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Table } from 'reactstrap';
-import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
+import { Translate, TextFormat, getPaginationState, JhiPagination, JhiItemCount } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
-import { IUsuario } from 'app/shared/model/usuario.model';
 import { getEntities } from './usuario.reducer';
 
 export const Usuario = () => {
@@ -19,7 +18,7 @@ export const Usuario = () => {
   const navigate = useNavigate();
 
   const [paginationState, setPaginationState] = useState(
-    overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
+    overridePaginationStateWithQueryParams(getPaginationState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
 
   const usuarioList = useAppSelector(state => state.all4qmsmsgateway.usuario.entities);
@@ -81,17 +80,29 @@ export const Usuario = () => {
     sortEntities();
   };
 
+  const getSortIconByFieldName = (fieldName: string) => {
+    const sortFieldName = paginationState.sort;
+    const order = paginationState.order;
+    if (sortFieldName !== fieldName) {
+      return faSort;
+    } else {
+      return order === ASC ? faSortUp : faSortDown;
+    }
+  };
+
   return (
     <div>
       <h2 id="usuario-heading" data-cy="UsuarioHeading">
-        Usuarios
+        <Translate contentKey="all4QmsMsGatewayApp.usuario.home.title">Usuarios</Translate>
         <div className="d-flex justify-content-end">
           <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
-            <FontAwesomeIcon icon="sync" spin={loading} /> Atualizar lista
+            <FontAwesomeIcon icon="sync" spin={loading} />{' '}
+            <Translate contentKey="all4QmsMsGatewayApp.usuario.home.refreshListLabel">Refresh List</Translate>
           </Button>
           <Link to="/usuario/new" className="btn btn-primary jh-create-entity" id="jh-create-entity" data-cy="entityCreateButton">
             <FontAwesomeIcon icon="plus" />
-            &nbsp; Criar novo Usuario
+            &nbsp;
+            <Translate contentKey="all4QmsMsGatewayApp.usuario.home.createLabel">Create new Usuario</Translate>
           </Link>
         </div>
       </h2>
@@ -101,40 +112,47 @@ export const Usuario = () => {
             <thead>
               <tr>
                 <th className="hand" onClick={sort('id')}>
-                  ID <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.id">ID</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('id')} />
                 </th>
                 <th className="hand" onClick={sort('nome')}>
-                  Nome <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.nome">Nome</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('nome')} />
                 </th>
                 <th className="hand" onClick={sort('email')}>
-                  Email <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.email">Email</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('email')} />
                 </th>
                 <th className="hand" onClick={sort('isGestor')}>
-                  Is Gestor <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.isGestor">Is Gestor</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('isGestor')} />
                 </th>
                 <th className="hand" onClick={sort('criadoEm')}>
-                  Criado Em <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.criadoEm">Criado Em</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('criadoEm')} />
                 </th>
                 <th className="hand" onClick={sort('atualizadoEm')}>
-                  Atualizado Em <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.atualizadoEm">Atualizado Em</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('atualizadoEm')} />
                 </th>
                 <th>
-                  Funcao <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.funcao">Funcao</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  Gestor <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.gestor">Gestor</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  Setor <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.setor">Setor</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  User <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.user">User</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  Criado Por <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.criadoPor">Criado Por</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  Atualizado Por <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.usuario.atualizadoPor">Atualizado Por</Translate>{' '}
+                  <FontAwesomeIcon icon="sort" />
                 </th>
                 <th />
               </tr>
@@ -163,7 +181,10 @@ export const Usuario = () => {
                   <td className="text-end">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`/usuario/${usuario.id}`} color="info" size="sm" data-cy="entityDetailsButton">
-                        <FontAwesomeIcon icon="eye" /> <span className="d-none d-md-inline">Visualizar</span>
+                        <FontAwesomeIcon icon="eye" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.view">View</Translate>
+                        </span>
                       </Button>
                       <Button
                         tag={Link}
@@ -172,7 +193,10 @@ export const Usuario = () => {
                         size="sm"
                         data-cy="entityEditButton"
                       >
-                        <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
+                        <FontAwesomeIcon icon="pencil-alt" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.edit">Edit</Translate>
+                        </span>
                       </Button>
                       <Button
                         tag={Link}
@@ -181,7 +205,10 @@ export const Usuario = () => {
                         size="sm"
                         data-cy="entityDeleteButton"
                       >
-                        <FontAwesomeIcon icon="trash" /> <span className="d-none d-md-inline">Excluir</span>
+                        <FontAwesomeIcon icon="trash" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.delete">Delete</Translate>
+                        </span>
                       </Button>
                     </div>
                   </td>
@@ -190,7 +217,11 @@ export const Usuario = () => {
             </tbody>
           </Table>
         ) : (
-          !loading && <div className="alert alert-warning">Nenhum Usuario encontrado</div>
+          !loading && (
+            <div className="alert alert-warning">
+              <Translate contentKey="all4QmsMsGatewayApp.usuario.home.notFound">No Usuarios found</Translate>
+            </div>
+          )
         )}
       </div>
       {totalItems ? (

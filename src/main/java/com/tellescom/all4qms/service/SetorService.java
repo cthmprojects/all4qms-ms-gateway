@@ -4,6 +4,10 @@ import com.tellescom.all4qms.domain.Setor;
 import com.tellescom.all4qms.repository.SetorRepository;
 import com.tellescom.all4qms.service.dto.SetorDTO;
 import com.tellescom.all4qms.service.mapper.SetorMapper;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -91,6 +95,16 @@ public class SetorService {
      */
     public Flux<SetorDTO> findAllWithEagerRelationships(Pageable pageable) {
         return setorRepository.findAllWithEagerRelationships(pageable).map(setorMapper::toDto);
+    }
+
+    /**
+     *  Get all the setors where Usuario is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<SetorDTO> findAllWhereUsuarioIsNull() {
+        log.debug("Request to get all setors where Usuario is null");
+        return setorRepository.findAllWhereUsuarioIsNull().map(setorMapper::toDto);
     }
 
     /**

@@ -1,11 +1,11 @@
 package com.tellescom.all4qms.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import javax.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
@@ -41,11 +41,15 @@ public class Usuario implements Serializable {
     private ZonedDateTime atualizadoEm;
 
     @Transient
+    @Transient
+    @Transient
     private Funcao funcao;
 
     @Transient
     private Usuario gestor;
 
+    @Transient
+    @Transient
     @Transient
     private Setor setor;
 
@@ -61,6 +65,64 @@ public class Usuario implements Serializable {
     @Transient
     @JsonIgnoreProperties(value = { "criadoPor", "atualizadoPor", "usuarios" }, allowSetters = true)
     private Set<Processo> processos = new HashSet<>();
+
+    @Transient
+    @Transient
+    @Transient
+    private Usuario usuario;
+
+    @Transient
+    @Transient
+    @Transient
+    private Usuario usuario;
+
+    @Transient
+    @Transient
+    @Transient
+    private Usuario usuario;
+
+    @Transient
+    @Transient
+    @Transient
+    private Funcao funcao;
+
+    @Transient
+    @Transient
+    @Transient
+    private Funcao funcao;
+
+    @Transient
+    @Transient
+    @Transient
+    private Setor setor;
+
+    @Transient
+    @Transient
+    @Transient
+    private Setor setor;
+
+    @Transient
+    @Transient
+    private Processo processo;
+
+    @Transient
+    @Transient
+    private Processo processo;
+
+    @Transient
+    @Transient
+    @Transient
+    private Pendencia pendencia;
+
+    @Transient
+    @Transient
+    @Transient
+    private Pendencia pendencia;
+
+    @Transient
+    @Transient
+    @Transient
+    private Pendencia pendencia;
 
     @Column("funcao_id")
     private Long funcaoId;
@@ -266,6 +328,214 @@ public class Usuario implements Serializable {
     public Usuario removeProcessos(Processo processo) {
         this.processos.remove(processo);
         processo.getUsuarios().remove(this);
+        return this;
+    }
+
+    public Usuario getUsuario() {
+        return this.usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        if (this.usuario != null) {
+            this.usuario.setGestor(null);
+        }
+        if (usuario != null) {
+            usuario.setGestor(this);
+        }
+        this.usuario = usuario;
+    }
+
+    public Usuario usuario(Usuario usuario) {
+        this.setUsuario(usuario);
+        return this;
+    }
+
+    public Usuario getUsuario() {
+        return this.usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        if (this.usuario != null) {
+            this.usuario.setCriadoPor(null);
+        }
+        if (usuario != null) {
+            usuario.setCriadoPor(this);
+        }
+        this.usuario = usuario;
+    }
+
+    public Usuario usuario(Usuario usuario) {
+        this.setUsuario(usuario);
+        return this;
+    }
+
+    public Usuario getUsuario() {
+        return this.usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        if (this.usuario != null) {
+            this.usuario.setAtualizadoPor(null);
+        }
+        if (usuario != null) {
+            usuario.setAtualizadoPor(this);
+        }
+        this.usuario = usuario;
+    }
+
+    public Usuario usuario(Usuario usuario) {
+        this.setUsuario(usuario);
+        return this;
+    }
+
+    public Funcao getFuncao() {
+        return this.funcao;
+    }
+
+    public void setFuncao(Funcao funcao) {
+        this.funcao = funcao;
+        this.funcaoId = funcao != null ? funcao.getId() : null;
+    }
+
+    public Usuario funcao(Funcao funcao) {
+        this.setFuncao(funcao);
+        return this;
+    }
+
+    public Funcao getFuncao() {
+        return this.funcao;
+    }
+
+    public void setFuncao(Funcao funcao) {
+        this.funcao = funcao;
+        this.funcaoId = funcao != null ? funcao.getId() : null;
+    }
+
+    public Usuario funcao(Funcao funcao) {
+        this.setFuncao(funcao);
+        return this;
+    }
+
+    public Setor getSetor() {
+        return this.setor;
+    }
+
+    public void setSetor(Setor setor) {
+        this.setor = setor;
+        this.setorId = setor != null ? setor.getId() : null;
+    }
+
+    public Usuario setor(Setor setor) {
+        this.setSetor(setor);
+        return this;
+    }
+
+    public Setor getSetor() {
+        return this.setor;
+    }
+
+    public void setSetor(Setor setor) {
+        this.setor = setor;
+        this.setorId = setor != null ? setor.getId() : null;
+    }
+
+    public Usuario setor(Setor setor) {
+        this.setSetor(setor);
+        return this;
+    }
+
+    public Processo getProcesso() {
+        return this.processo;
+    }
+
+    public void setProcesso(Processo processo) {
+        if (this.processo != null) {
+            this.processo.setCriadoPor(null);
+        }
+        if (processo != null) {
+            processo.setCriadoPor(this);
+        }
+        this.processo = processo;
+    }
+
+    public Usuario processo(Processo processo) {
+        this.setProcesso(processo);
+        return this;
+    }
+
+    public Processo getProcesso() {
+        return this.processo;
+    }
+
+    public void setProcesso(Processo processo) {
+        if (this.processo != null) {
+            this.processo.setAtualizadoPor(null);
+        }
+        if (processo != null) {
+            processo.setAtualizadoPor(this);
+        }
+        this.processo = processo;
+    }
+
+    public Usuario processo(Processo processo) {
+        this.setProcesso(processo);
+        return this;
+    }
+
+    public Pendencia getPendencia() {
+        return this.pendencia;
+    }
+
+    public void setPendencia(Pendencia pendencia) {
+        if (this.pendencia != null) {
+            this.pendencia.setResponsavel(null);
+        }
+        if (pendencia != null) {
+            pendencia.setResponsavel(this);
+        }
+        this.pendencia = pendencia;
+    }
+
+    public Usuario pendencia(Pendencia pendencia) {
+        this.setPendencia(pendencia);
+        return this;
+    }
+
+    public Pendencia getPendencia() {
+        return this.pendencia;
+    }
+
+    public void setPendencia(Pendencia pendencia) {
+        if (this.pendencia != null) {
+            this.pendencia.setCriadoPor(null);
+        }
+        if (pendencia != null) {
+            pendencia.setCriadoPor(this);
+        }
+        this.pendencia = pendencia;
+    }
+
+    public Usuario pendencia(Pendencia pendencia) {
+        this.setPendencia(pendencia);
+        return this;
+    }
+
+    public Pendencia getPendencia() {
+        return this.pendencia;
+    }
+
+    public void setPendencia(Pendencia pendencia) {
+        if (this.pendencia != null) {
+            this.pendencia.setAtualizadoPor(null);
+        }
+        if (pendencia != null) {
+            pendencia.setAtualizadoPor(this);
+        }
+        this.pendencia = pendencia;
+    }
+
+    public Usuario pendencia(Pendencia pendencia) {
+        this.setPendencia(pendencia);
         return this;
     }
 

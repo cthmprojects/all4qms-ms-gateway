@@ -1,0 +1,35 @@
+{
+  "changelogDate": "20230813120713",
+  "databaseType": "sql",
+  "dto": "mapstruct",
+  "entityTableName": "anexo",
+  "fields": [
+    {
+      "fieldName": "nomeArquivo",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "nomeOriginal",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "extensao",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "criadoEm",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "atualizadoEm",
+      "fieldType": "ZonedDateTime"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Anexo",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

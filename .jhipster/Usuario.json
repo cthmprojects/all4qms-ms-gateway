@@ -39,6 +39,7 @@
       "otherEntityName": "funcao",
       "ownerSide": true,
       "relationshipName": "funcao",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -46,6 +47,7 @@
       "otherEntityName": "usuario",
       "ownerSide": true,
       "relationshipName": "gestor",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -53,6 +55,7 @@
       "otherEntityName": "setor",
       "ownerSide": true,
       "relationshipName": "setor",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -60,6 +63,7 @@
       "otherEntityName": "user",
       "ownerSide": true,
       "relationshipName": "user",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -67,6 +71,7 @@
       "otherEntityName": "usuario",
       "ownerSide": true,
       "relationshipName": "criadoPor",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -74,6 +79,7 @@
       "otherEntityName": "usuario",
       "ownerSide": true,
       "relationshipName": "atualizadoPor",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -82,8 +88,10 @@
       "otherEntityRelationshipName": "usuario",
       "ownerSide": true,
       "relationshipName": "processos",
+      "relationshipSide": "left",
       "relationshipType": "many-to-many"
     }
   ],
+  "searchEngine": "no",
   "service": "serviceClass"
 }

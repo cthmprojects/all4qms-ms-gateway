@@ -293,7 +293,7 @@ class UsuarioResourceIT {
         webTestClient
             .get()
             .uri(ENTITY_API_URL_ID, Long.MAX_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_PROBLEM_JSON)
             .exchange()
             .expectStatus()
             .isNotFound();
@@ -416,7 +416,7 @@ class UsuarioResourceIT {
         Usuario partialUpdatedUsuario = new Usuario();
         partialUpdatedUsuario.setId(usuario.getId());
 
-        partialUpdatedUsuario.nome(UPDATED_NOME).email(UPDATED_EMAIL).atualizadoEm(UPDATED_ATUALIZADO_EM);
+        partialUpdatedUsuario.nome(UPDATED_NOME).isGestor(UPDATED_IS_GESTOR);
 
         webTestClient
             .patch()
@@ -432,10 +432,10 @@ class UsuarioResourceIT {
         assertThat(usuarioList).hasSize(databaseSizeBeforeUpdate);
         Usuario testUsuario = usuarioList.get(usuarioList.size() - 1);
         assertThat(testUsuario.getNome()).isEqualTo(UPDATED_NOME);
-        assertThat(testUsuario.getEmail()).isEqualTo(UPDATED_EMAIL);
-        assertThat(testUsuario.getIsGestor()).isEqualTo(DEFAULT_IS_GESTOR);
+        assertThat(testUsuario.getEmail()).isEqualTo(DEFAULT_EMAIL);
+        assertThat(testUsuario.getIsGestor()).isEqualTo(UPDATED_IS_GESTOR);
         assertThat(testUsuario.getCriadoEm()).isEqualTo(DEFAULT_CRIADO_EM);
-        assertThat(testUsuario.getAtualizadoEm()).isEqualTo(UPDATED_ATUALIZADO_EM);
+        assertThat(testUsuario.getAtualizadoEm()).isEqualTo(DEFAULT_ATUALIZADO_EM);
     }
 
     @Test

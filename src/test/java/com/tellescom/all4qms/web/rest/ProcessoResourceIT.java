@@ -322,7 +322,7 @@ class ProcessoResourceIT {
         webTestClient
             .get()
             .uri(ENTITY_API_URL_ID, Long.MAX_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_PROBLEM_JSON)
             .exchange()
             .expectStatus()
             .isNotFound();
@@ -451,7 +451,7 @@ class ProcessoResourceIT {
         Processo partialUpdatedProcesso = new Processo();
         partialUpdatedProcesso.setId(processo.getId());
 
-        partialUpdatedProcesso.setor(UPDATED_SETOR).responsavel(UPDATED_RESPONSAVEL).setorResponsavel(UPDATED_SETOR_RESPONSAVEL);
+        partialUpdatedProcesso.nome(UPDATED_NOME).criadoEm(UPDATED_CRIADO_EM);
 
         webTestClient
             .patch()
@@ -467,12 +467,12 @@ class ProcessoResourceIT {
         assertThat(processoList).hasSize(databaseSizeBeforeUpdate);
         Processo testProcesso = processoList.get(processoList.size() - 1);
         assertThat(testProcesso.getNumero()).isEqualTo(DEFAULT_NUMERO);
-        assertThat(testProcesso.getNome()).isEqualTo(DEFAULT_NOME);
+        assertThat(testProcesso.getNome()).isEqualTo(UPDATED_NOME);
         assertThat(testProcesso.getDescricao()).isEqualTo(DEFAULT_DESCRICAO);
-        assertThat(testProcesso.getSetor()).isEqualTo(UPDATED_SETOR);
-        assertThat(testProcesso.getResponsavel()).isEqualTo(UPDATED_RESPONSAVEL);
-        assertThat(testProcesso.getSetorResponsavel()).isEqualTo(UPDATED_SETOR_RESPONSAVEL);
-        assertThat(testProcesso.getCriadoEm()).isEqualTo(DEFAULT_CRIADO_EM);
+        assertThat(testProcesso.getSetor()).isEqualTo(DEFAULT_SETOR);
+        assertThat(testProcesso.getResponsavel()).isEqualTo(DEFAULT_RESPONSAVEL);
+        assertThat(testProcesso.getSetorResponsavel()).isEqualTo(DEFAULT_SETOR_RESPONSAVEL);
+        assertThat(testProcesso.getCriadoEm()).isEqualTo(UPDATED_CRIADO_EM);
         assertThat(testProcesso.getAtualizadoEm()).isEqualTo(DEFAULT_ATUALIZADO_EM);
     }
 

@@ -282,7 +282,7 @@ class FuncaoResourceIT {
         webTestClient
             .get()
             .uri(ENTITY_API_URL_ID, Long.MAX_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_PROBLEM_JSON)
             .exchange()
             .expectStatus()
             .isNotFound();

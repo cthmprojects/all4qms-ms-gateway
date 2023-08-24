@@ -1,11 +1,11 @@
 package com.tellescom.all4qms.service.dto;
 
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.validation.constraints.*;
 
 /**
  * A DTO for the {@link com.tellescom.all4qms.domain.Usuario} entity.

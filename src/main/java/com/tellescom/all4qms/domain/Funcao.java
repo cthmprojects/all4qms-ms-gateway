@@ -1,9 +1,9 @@
 package com.tellescom.all4qms.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import javax.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
@@ -40,6 +40,9 @@ public class Funcao implements Serializable {
 
     @Transient
     private Usuario atualizadoPor;
+
+    @Transient
+    private Usuario usuario;
 
     @Column("criado_por_id")
     private Long criadoPorId;
@@ -139,6 +142,25 @@ public class Funcao implements Serializable {
 
     public Funcao atualizadoPor(Usuario usuario) {
         this.setAtualizadoPor(usuario);
+        return this;
+    }
+
+    public Usuario getUsuario() {
+        return this.usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        if (this.usuario != null) {
+            this.usuario.setFuncao(null);
+        }
+        if (usuario != null) {
+            usuario.setFuncao(this);
+        }
+        this.usuario = usuario;
+    }
+
+    public Funcao usuario(Usuario usuario) {
+        this.setUsuario(usuario);
         return this;
     }
 

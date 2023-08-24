@@ -4,6 +4,10 @@ import com.tellescom.all4qms.domain.Usuario;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.UsuarioMapper;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -91,6 +95,126 @@ public class UsuarioService {
      */
     public Flux<UsuarioDTO> findAllWithEagerRelationships(Pageable pageable) {
         return usuarioRepository.findAllWithEagerRelationships(pageable).map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Usuario is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereUsuarioIsNull() {
+        log.debug("Request to get all usuarios where Usuario is null");
+        return usuarioRepository.findAllWhereUsuarioIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Usuario is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereUsuarioIsNull() {
+        log.debug("Request to get all usuarios where Usuario is null");
+        return usuarioRepository.findAllWhereUsuarioIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Usuario is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereUsuarioIsNull() {
+        log.debug("Request to get all usuarios where Usuario is null");
+        return usuarioRepository.findAllWhereUsuarioIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Funcao is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereFuncaoIsNull() {
+        log.debug("Request to get all usuarios where Funcao is null");
+        return usuarioRepository.findAllWhereFuncaoIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Funcao is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereFuncaoIsNull() {
+        log.debug("Request to get all usuarios where Funcao is null");
+        return usuarioRepository.findAllWhereFuncaoIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Setor is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereSetorIsNull() {
+        log.debug("Request to get all usuarios where Setor is null");
+        return usuarioRepository.findAllWhereSetorIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Setor is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereSetorIsNull() {
+        log.debug("Request to get all usuarios where Setor is null");
+        return usuarioRepository.findAllWhereSetorIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Processo is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereProcessoIsNull() {
+        log.debug("Request to get all usuarios where Processo is null");
+        return usuarioRepository.findAllWhereProcessoIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Processo is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWhereProcessoIsNull() {
+        log.debug("Request to get all usuarios where Processo is null");
+        return usuarioRepository.findAllWhereProcessoIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Pendencia is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWherePendenciaIsNull() {
+        log.debug("Request to get all usuarios where Pendencia is null");
+        return usuarioRepository.findAllWherePendenciaIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Pendencia is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWherePendenciaIsNull() {
+        log.debug("Request to get all usuarios where Pendencia is null");
+        return usuarioRepository.findAllWherePendenciaIsNull().map(usuarioMapper::toDto);
+    }
+
+    /**
+     *  Get all the usuarios where Pendencia is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UsuarioDTO> findAllWherePendenciaIsNull() {
+        log.debug("Request to get all usuarios where Pendencia is null");
+        return usuarioRepository.findAllWherePendenciaIsNull().map(usuarioMapper::toDto);
     }
 
     /**

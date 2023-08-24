@@ -1,11 +1,11 @@
 package com.tellescom.all4qms.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import javax.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
@@ -56,7 +56,30 @@ public class Processo implements Serializable {
     private Usuario atualizadoPor;
 
     @Transient
-    @JsonIgnoreProperties(value = { "funcao", "gestor", "setor", "user", "criadoPor", "atualizadoPor", "processos" }, allowSetters = true)
+    @JsonIgnoreProperties(
+        value = {
+            "funcao",
+            "gestor",
+            "setor",
+            "user",
+            "criadoPor",
+            "atualizadoPor",
+            "processos",
+            "usuario",
+            "usuario",
+            "usuario",
+            "funcao",
+            "funcao",
+            "setor",
+            "setor",
+            "processo",
+            "processo",
+            "pendencia",
+            "pendencia",
+            "pendencia",
+        },
+        allowSetters = true
+    )
     private Set<Usuario> usuarios = new HashSet<>();
 
     @Column("criado_por_id")

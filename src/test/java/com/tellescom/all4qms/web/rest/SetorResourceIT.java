@@ -282,7 +282,7 @@ class SetorResourceIT {
         webTestClient
             .get()
             .uri(ENTITY_API_URL_ID, Long.MAX_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_PROBLEM_JSON)
             .exchange()
             .expectStatus()
             .isNotFound();
@@ -399,7 +399,7 @@ class SetorResourceIT {
         Setor partialUpdatedSetor = new Setor();
         partialUpdatedSetor.setId(setor.getId());
 
-        partialUpdatedSetor.descricao(UPDATED_DESCRICAO).criadoEm(UPDATED_CRIADO_EM);
+        partialUpdatedSetor.nome(UPDATED_NOME).descricao(UPDATED_DESCRICAO).atualizadoEm(UPDATED_ATUALIZADO_EM);
 
         webTestClient
             .patch()
@@ -414,10 +414,10 @@ class SetorResourceIT {
         List<Setor> setorList = setorRepository.findAll().collectList().block();
         assertThat(setorList).hasSize(databaseSizeBeforeUpdate);
         Setor testSetor = setorList.get(setorList.size() - 1);
-        assertThat(testSetor.getNome()).isEqualTo(DEFAULT_NOME);
+        assertThat(testSetor.getNome()).isEqualTo(UPDATED_NOME);
         assertThat(testSetor.getDescricao()).isEqualTo(UPDATED_DESCRICAO);
-        assertThat(testSetor.getCriadoEm()).isEqualTo(UPDATED_CRIADO_EM);
-        assertThat(testSetor.getAtualizadoEm()).isEqualTo(DEFAULT_ATUALIZADO_EM);
+        assertThat(testSetor.getCriadoEm()).isEqualTo(DEFAULT_CRIADO_EM);
+        assertThat(testSetor.getAtualizadoEm()).isEqualTo(UPDATED_ATUALIZADO_EM);
     }
 
     @Test

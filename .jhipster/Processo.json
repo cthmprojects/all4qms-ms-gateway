@@ -51,6 +51,7 @@
       "otherEntityName": "usuario",
       "ownerSide": true,
       "relationshipName": "criadoPor",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -58,6 +59,7 @@
       "otherEntityName": "usuario",
       "ownerSide": true,
       "relationshipName": "atualizadoPor",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -66,8 +68,10 @@
       "otherEntityRelationshipName": "processos",
       "ownerSide": false,
       "relationshipName": "usuario",
+      "relationshipSide": "right",
       "relationshipType": "many-to-many"
     }
   ],
+  "searchEngine": "no",
   "service": "serviceClass"
 }

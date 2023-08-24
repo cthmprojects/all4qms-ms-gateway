@@ -24,6 +24,8 @@
     "ci:e2e:teardown": "npm run ci:e2e:teardown:docker",
     "ci:e2e:teardown:docker": "npm run docker:db:down --if-present && npm run docker:others:down && docker ps -a",
     "ci:frontend:test": "npm run webapp:build:$npm_package_config_default_environment && npm run test-ci",
+    "ci:server:await": "echo \"Waiting for services to start\" && npm run ci:server:await:all4qmsmsgateway && echo \"Services started\"",
+    "ci:server:await:all4qmsmsgateway": "wait-on -t 180000 http-get://localhost:$npm_package_config_backend_port/management/health",
     "clean-www": "rimraf target/classes/static/app/{src,target/}",
     "cleanup": "rimraf target/classes/static/",
     "docker:app:up": "docker-compose -f src/main/docker/app.yml up -d",

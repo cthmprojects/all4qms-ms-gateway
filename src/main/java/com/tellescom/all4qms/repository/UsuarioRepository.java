@@ -67,6 +67,42 @@ public interface UsuarioRepository extends ReactiveCrudRepository<Usuario, Long>
     )
     Flux<Usuario> findByProcessos(Long id);
 
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select usuario_id from usuario)")
+    Flux<Usuario> findAllWhereUsuarioIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select usuario_id from usuario)")
+    Flux<Usuario> findAllWhereUsuarioIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select usuario_id from usuario)")
+    Flux<Usuario> findAllWhereUsuarioIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select funcao_id from funcao)")
+    Flux<Usuario> findAllWhereFuncaoIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select funcao_id from funcao)")
+    Flux<Usuario> findAllWhereFuncaoIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select setor_id from setor)")
+    Flux<Usuario> findAllWhereSetorIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select setor_id from setor)")
+    Flux<Usuario> findAllWhereSetorIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select processo_id from processo)")
+    Flux<Usuario> findAllWhereProcessoIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select processo_id from processo)")
+    Flux<Usuario> findAllWhereProcessoIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select pendencia_id from pendencia)")
+    Flux<Usuario> findAllWherePendenciaIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select pendencia_id from pendencia)")
+    Flux<Usuario> findAllWherePendenciaIsNull();
+
+    @Query("SELECT * FROM usuario entity WHERE entity.id not in (select pendencia_id from pendencia)")
+    Flux<Usuario> findAllWherePendenciaIsNull();
+
     @Override
     <S extends Usuario> Mono<S> save(S entity);
 

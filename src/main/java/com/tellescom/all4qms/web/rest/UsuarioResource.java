@@ -4,14 +4,14 @@ import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.UsuarioService;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -174,14 +174,75 @@ public class UsuarioResource {
      * @param pageable the pagination information.
      * @param request a {@link ServerHttpRequest} request.
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
+     * @param filter the filter of the request.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of usuarios in body.
      */
-    @GetMapping("/usuarios")
+    @GetMapping(value = "/usuarios", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<List<UsuarioDTO>>> getAllUsuarios(
-        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable,
         ServerHttpRequest request,
+        @RequestParam(required = false) String filter,
         @RequestParam(required = false, defaultValue = "false") boolean eagerload
     ) {
+        if ("usuario-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where usuario is null");
+            return usuarioService.findAllWhereUsuarioIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("usuario-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where usuario is null");
+            return usuarioService.findAllWhereUsuarioIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("usuario-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where usuario is null");
+            return usuarioService.findAllWhereUsuarioIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("funcao-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where funcao is null");
+            return usuarioService.findAllWhereFuncaoIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("funcao-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where funcao is null");
+            return usuarioService.findAllWhereFuncaoIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("setor-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where setor is null");
+            return usuarioService.findAllWhereSetorIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("setor-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where setor is null");
+            return usuarioService.findAllWhereSetorIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("processo-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where processo is null");
+            return usuarioService.findAllWhereProcessoIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("processo-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where processo is null");
+            return usuarioService.findAllWhereProcessoIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("pendencia-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where pendencia is null");
+            return usuarioService.findAllWherePendenciaIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("pendencia-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where pendencia is null");
+            return usuarioService.findAllWherePendenciaIsNull().collectList().map(ResponseEntity::ok);
+        }
+
+        if ("pendencia-is-null".equals(filter)) {
+            log.debug("REST request to get all Usuarios where pendencia is null");
+            return usuarioService.findAllWherePendenciaIsNull().collectList().map(ResponseEntity::ok);
+        }
         log.debug("REST request to get a page of Usuarios");
         return usuarioService
             .countAll()
