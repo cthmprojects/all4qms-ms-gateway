@@ -41,7 +41,6 @@ export const App = () => {
     isOpenAPIEnabled = useAppSelector(state => state.applicationProfile.isOpenAPIEnabled);
   };
 
-  const paddingTop = '0px';
   return (
     <BrowserRouter basename={baseHref}>
       <div>
