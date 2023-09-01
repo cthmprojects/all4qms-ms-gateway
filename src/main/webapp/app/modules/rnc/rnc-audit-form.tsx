@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import TextField from '@mui/material/TextField';
+import Checkbox from '@mui/material/Checkbox';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
 
 function RncAuditForm() {
   const [formulario, setFormulario] = useState({
@@ -29,11 +34,10 @@ function RncAuditForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1>Auditoria Interna</h1>
       <div>
-        <label htmlFor="norma">Norma:</label>
-        <input
-          type="text"
+        <TextField
+          label="Norma"
+          variant="outlined"
           id="norma"
           name="norma"
           value={formulario.norma}
@@ -41,8 +45,9 @@ function RncAuditForm() {
         />
       </div>
       <div>
-        <label htmlFor="rnc">Número RNC:</label>
-        <input
+        <TextField
+          label="Número RNC"
+          variant="outlined"
           type="number"
           id="rnc"
           name="rnc"
@@ -51,9 +56,9 @@ function RncAuditForm() {
         />
       </div>
       <div>
-        <label htmlFor="requisitoNorma">Requisito da Norma:</label>
-        <input
-          type="text"
+        <TextField
+          label="Requisito da Norma"
+          variant="outlined"
           id="requisitoNorma"
           name="requisitoNorma"
           value={formulario.requisitoNorma}
@@ -61,8 +66,9 @@ function RncAuditForm() {
         />
       </div>
       <div>
-        <label htmlFor="numeroRelatorio">Número do Relatório:</label>
-        <input
+        <TextField
+          label="Número do Relatório"
+          variant="outlined"
           type="number"
           id="numeroRelatorio"
           name="numeroRelatorio"
@@ -70,12 +76,12 @@ function RncAuditForm() {
           onChange={handleInputChange}
         />
       </div>
-
-    <h2>Descrição</h2>
-
       <div>
-        <label htmlFor="naoConfirmidade">Não Confirmidade:</label>
-        <textarea
+        <TextField
+          label="Não Conformidade"
+          variant="outlined"
+          multiline
+          rows={4}
           id="naoConfirmidade"
           name="naoConfirmidade"
           value={formulario.naoConfirmidade}
@@ -83,8 +89,11 @@ function RncAuditForm() {
         />
       </div>
       <div>
-        <label htmlFor="requisitoDescumprido">Requisito Descumprido:</label>
-        <textarea
+        <TextField
+          label="Requisito Descumprido"
+          variant="outlined"
+          multiline
+          rows={4}
           id="requisitoDescumprido"
           name="requisitoDescumprido"
           value={formulario.requisitoDescumprido}
@@ -92,8 +101,11 @@ function RncAuditForm() {
         />
       </div>
       <div>
-        <label htmlFor="evidenciaObjetiva">Evidência Objetiva:</label>
-        <textarea
+        <TextField
+          label="Evidência Objetiva"
+          variant="outlined"
+          multiline
+          rows={4}
           id="evidenciaObjetiva"
           name="evidenciaObjetiva"
           value={formulario.evidenciaObjetiva}
@@ -103,8 +115,7 @@ function RncAuditForm() {
       <div>
         <label>
           Reiciência:
-          <input
-            type="checkbox"
+          <Checkbox
             name="reiciencia"
             checked={formulario.reiciencia}
             onChange={handleInputChange}
@@ -113,26 +124,28 @@ function RncAuditForm() {
       </div>
       {formulario.reiciencia && (
         <div>
-          <label htmlFor="documentoAnterior">Documento Anterior:</label>
-          <select
+          <TextField
+            label="Documento Anterior"
+            variant="outlined"
+            select
             id="documentoAnterior"
             name="documentoAnterior"
             value={formulario.documentoAnterior}
             onChange={handleInputChange}
           >
-            <option value="" disabled>
-              Selecione um documento anterior
-            </option>
-            <option value="documento1">Documento 1</option>
-            <option value="documento2">Documento 2</option>
-            <option value="documento3">Documento 3</option>
-          </select>
+            <MenuItem value="">
+              <em>Selecione um documento anterior</em>
+            </MenuItem>
+            <MenuItem value="documento1">Documento 1</MenuItem>
+            <MenuItem value="documento2">Documento 2</MenuItem>
+            <MenuItem value="documento3">Documento 3</MenuItem>
+          </TextField>
         </div>
       )}
       <div>
-        <button type="button">Voltar</button>
-        <button type="submit">Salvar</button>
-        <button type="button">Avançar</button>
+        <Button type="button">Voltar</Button>
+        <Button type="submit">Salvar</Button>
+        <Button type="button">Avançar</Button>
       </div>
     </form>
   );
