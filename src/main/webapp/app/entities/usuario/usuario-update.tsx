@@ -228,7 +228,12 @@ export const UsuarioUpdate = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12} className="">
-              <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }}>
+              <Button
+                variant="contained"
+                className="me-3"
+                style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+                onClick={() => navigate('/usuario')}
+              >
                 Voltar
               </Button>
               <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
