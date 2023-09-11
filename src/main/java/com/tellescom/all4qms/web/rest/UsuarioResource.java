@@ -1,32 +1,29 @@
 package com.tellescom.all4qms.web.rest;
 
 import com.tellescom.all4qms.repository.UsuarioRepository;
+import com.tellescom.all4qms.service.UserService;
 import com.tellescom.all4qms.service.UsuarioService;
+import com.tellescom.all4qms.service.dto.AdminUserDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
+import com.tellescom.all4qms.service.dto.UsuarioRequest;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
@@ -48,9 +45,13 @@ public class UsuarioResource {
 
     private final UsuarioService usuarioService;
 
+    private final UserService userService;
+
     private final UsuarioRepository usuarioRepository;
 
-    public UsuarioResource(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
+    public UsuarioResource(UsuarioService usuarioService, UserService userService, UsuarioRepository usuarioRepository) {
+        this.userService = userService;
+        this.applicationName = applicationName;
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
     }
@@ -63,11 +64,54 @@ public class UsuarioResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/usuarios")
-    public Mono<ResponseEntity<UsuarioDTO>> createUsuario(@Valid @RequestBody UsuarioDTO usuarioDTO) throws URISyntaxException {
-        log.debug("REST request to save Usuario : {}", usuarioDTO);
+    public Mono<ResponseEntity<UsuarioDTO>> createUsuario(@Valid @RequestBody UsuarioRequest newUsuario) throws URISyntaxException {
+        log.debug("REST request to save Usuario : {}", newUsuario);
+
+        log.debug(newUsuario.getNome());
+        String[] partesDoNome = newUsuario.getNome().split(" ");
+        String primeiroNome = "";
+        StringBuilder sobrenome = new StringBuilder();
+
+        if (partesDoNome.length >= 2) {
+            primeiroNome = partesDoNome[0];
+
+            for (int i = 1; i < partesDoNome.length; i++) {
+                sobrenome.append(partesDoNome[i]);
+                if (i < partesDoNome.length - 1) {
+                    sobrenome.append(" ");
+                }
+            }
+        }
+
+        log.debug(primeiroNome);
+        log.debug(sobrenome.toString());
+
+        AdminUserDTO userDTO = new AdminUserDTO();
+        UsuarioDTO usuarioDTO = new UsuarioDTO();
+
+        // Criação do Usuário Jhipster
+        userDTO.setId(newUsuario.getId());
+        userDTO.setFirstName(primeiroNome);
+        userDTO.setLastName(sobrenome.toString());
+        userDTO.setEmail(newUsuario.getEmail());
+        userDTO.setLogin(primeiroNome + "." + partesDoNome[partesDoNome.length - 1]);
+
+        // Criação do Usuário ALL4QMS
+        usuarioDTO.setId(newUsuario.getId());
+        usuarioDTO.setEmail(newUsuario.getEmail());
+        usuarioDTO.setNome(newUsuario.getNome());
+        usuarioDTO.setFuncao(newUsuario.getFuncao());
+        usuarioDTO.setSetor(newUsuario.getSetor());
+        usuarioDTO.setIsGestor(newUsuario.getisGestor());
+        usuarioDTO.setGestor(newUsuario.getGestor());
+        usuarioDTO.setProcessos(newUsuario.getProcessos());
+
         if (usuarioDTO.getId() != null) {
             throw new BadRequestAlertException("A new usuario cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        log.debug("AAAAAAAAAAAA");
+        userService.createUser(userDTO);
+
         return usuarioService
             .save(usuarioDTO)
             .map(result -> {

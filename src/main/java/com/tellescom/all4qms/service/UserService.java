@@ -145,6 +145,7 @@ public class UserService {
 
     @Transactional
     public Mono<User> createUser(AdminUserDTO userDTO) {
+        log.debug("AAAAAAAAAAAA");
         User user = new User();
         user.setLogin(userDTO.getLogin().toLowerCase());
         user.setFirstName(userDTO.getFirstName());
@@ -154,6 +155,7 @@ public class UserService {
         }
         user.setImageUrl(userDTO.getImageUrl());
         if (userDTO.getLangKey() == null) {
+            log.debug(userDTO.getLangKey());
             user.setLangKey(Constants.DEFAULT_LANGUAGE); // default language
         } else {
             user.setLangKey(userDTO.getLangKey());
