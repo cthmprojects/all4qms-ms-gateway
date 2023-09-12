@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Table } from 'reactstrap';
-import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
+import { Translate, TextFormat, getPaginationState, JhiPagination, JhiItemCount } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
-import { IFuncao } from 'app/shared/model/funcao.model';
 import { getEntities } from './funcao.reducer';
 
 export const Funcao = () => {
@@ -19,7 +18,7 @@ export const Funcao = () => {
   const navigate = useNavigate();
 
   const [paginationState, setPaginationState] = useState(
-    overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
+    overridePaginationStateWithQueryParams(getPaginationState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
 
   const funcaoList = useAppSelector(state => state.all4qmsmsgateway.funcao.entities);
@@ -81,17 +80,29 @@ export const Funcao = () => {
     sortEntities();
   };
 
+  const getSortIconByFieldName = (fieldName: string) => {
+    const sortFieldName = paginationState.sort;
+    const order = paginationState.order;
+    if (sortFieldName !== fieldName) {
+      return faSort;
+    } else {
+      return order === ASC ? faSortUp : faSortDown;
+    }
+  };
+
   return (
     <div>
       <h2 id="funcao-heading" data-cy="FuncaoHeading">
-        Funcaos
+        <Translate contentKey="all4QmsMsGatewayApp.funcao.home.title">Funcaos</Translate>
         <div className="d-flex justify-content-end">
           <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
-            <FontAwesomeIcon icon="sync" spin={loading} /> Atualizar lista
+            <FontAwesomeIcon icon="sync" spin={loading} />{' '}
+            <Translate contentKey="all4QmsMsGatewayApp.funcao.home.refreshListLabel">Refresh List</Translate>
           </Button>
           <Link to="/funcao/new" className="btn btn-primary jh-create-entity" id="jh-create-entity" data-cy="entityCreateButton">
             <FontAwesomeIcon icon="plus" />
-            &nbsp; Criar novo Funcao
+            &nbsp;
+            <Translate contentKey="all4QmsMsGatewayApp.funcao.home.createLabel">Create new Funcao</Translate>
           </Link>
         </div>
       </h2>
@@ -101,25 +112,31 @@ export const Funcao = () => {
             <thead>
               <tr>
                 <th className="hand" onClick={sort('id')}>
-                  ID <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.funcao.id">ID</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('id')} />
                 </th>
                 <th className="hand" onClick={sort('nome')}>
-                  Nome <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.funcao.nome">Nome</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('nome')} />
                 </th>
                 <th className="hand" onClick={sort('descricao')}>
-                  Descricao <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.funcao.descricao">Descricao</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('descricao')} />
                 </th>
                 <th className="hand" onClick={sort('criadoEm')}>
-                  Criado Em <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.funcao.criadoEm">Criado Em</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('criadoEm')} />
                 </th>
                 <th className="hand" onClick={sort('atualizadoEm')}>
-                  Atualizado Em <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.funcao.atualizadoEm">Atualizado Em</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('atualizadoEm')} />
                 </th>
                 <th>
-                  Criado Por <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.funcao.criadoPor">Criado Por</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  Atualizado Por <FontAwesomeIcon icon="sort" />
+                  <Translate contentKey="all4QmsMsGatewayApp.funcao.atualizadoPor">Atualizado Por</Translate>{' '}
+                  <FontAwesomeIcon icon="sort" />
                 </th>
                 <th />
               </tr>
@@ -141,7 +158,10 @@ export const Funcao = () => {
                   <td className="text-end">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`/funcao/${funcao.id}`} color="info" size="sm" data-cy="entityDetailsButton">
-                        <FontAwesomeIcon icon="eye" /> <span className="d-none d-md-inline">Visualizar</span>
+                        <FontAwesomeIcon icon="eye" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.view">View</Translate>
+                        </span>
                       </Button>
                       <Button
                         tag={Link}
@@ -150,7 +170,10 @@ export const Funcao = () => {
                         size="sm"
                         data-cy="entityEditButton"
                       >
-                        <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
+                        <FontAwesomeIcon icon="pencil-alt" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.edit">Edit</Translate>
+                        </span>
                       </Button>
                       <Button
                         tag={Link}
@@ -159,7 +182,10 @@ export const Funcao = () => {
                         size="sm"
                         data-cy="entityDeleteButton"
                       >
-                        <FontAwesomeIcon icon="trash" /> <span className="d-none d-md-inline">Excluir</span>
+                        <FontAwesomeIcon icon="trash" />{' '}
+                        <span className="d-none d-md-inline">
+                          <Translate contentKey="entity.action.delete">Delete</Translate>
+                        </span>
                       </Button>
                     </div>
                   </td>
@@ -168,7 +194,11 @@ export const Funcao = () => {
             </tbody>
           </Table>
         ) : (
-          !loading && <div className="alert alert-warning">Nenhum Funcao encontrado</div>
+          !loading && (
+            <div className="alert alert-warning">
+              <Translate contentKey="all4QmsMsGatewayApp.funcao.home.notFound">No Funcaos found</Translate>
+            </div>
+          )
         )}
       </div>
       {totalItems ? (

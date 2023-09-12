@@ -4,6 +4,7 @@ import com.tellescom.all4qms.domain.Processo;
 import com.tellescom.all4qms.repository.ProcessoRepository;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.mapper.ProcessoMapper;
+import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ public class ProcessoService {
      */
     public Mono<ProcessoDTO> save(ProcessoDTO processoDTO) {
         log.debug("Request to save Processo : {}", processoDTO);
+        processoDTO.setCriadoEm(Instant.now());
         return processoRepository.save(processoMapper.toEntity(processoDTO)).map(processoMapper::toDto);
     }
 
@@ -49,6 +51,7 @@ public class ProcessoService {
      */
     public Mono<ProcessoDTO> update(ProcessoDTO processoDTO) {
         log.debug("Request to update Processo : {}", processoDTO);
+        processoDTO.setAtualizadoEm(Instant.now());
         return processoRepository.save(processoMapper.toEntity(processoDTO)).map(processoMapper::toDto);
     }
 
@@ -60,7 +63,7 @@ public class ProcessoService {
      */
     public Mono<ProcessoDTO> partialUpdate(ProcessoDTO processoDTO) {
         log.debug("Request to partially update Processo : {}", processoDTO);
-
+        processoDTO.setAtualizadoEm(Instant.now());
         return processoRepository
             .findById(processoDTO.getId())
             .map(existingProcesso -> {

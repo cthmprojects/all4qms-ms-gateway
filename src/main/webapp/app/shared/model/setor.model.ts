@@ -9,6 +9,7 @@ export interface ISetor {
   atualizadoEm?: string | null;
   criadoPor?: IUsuario | null;
   atualizadoPor?: IUsuario | null;
+  usuario?: IUsuario | null;
 }
 
 export const defaultValue: Readonly<ISetor> = {};

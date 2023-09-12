@@ -12,18 +12,21 @@
                                  baseTableName="pendencia"
                                  constraintName="fk_pendencia__responsavel_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="criado_por_id"
                                  baseTableName="pendencia"
                                  constraintName="fk_pendencia__criado_por_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="atualizado_por_id"
                                  baseTableName="pendencia"
                                  constraintName="fk_pendencia__atualizado_por_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
     </changeSet>
 </databaseChangeLog>

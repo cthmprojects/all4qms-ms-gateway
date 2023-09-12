@@ -1,9 +1,9 @@
 package com.tellescom.all4qms.service.dto;
 
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
-import javax.validation.constraints.*;
 
 /**
  * A DTO for the {@link com.tellescom.all4qms.domain.Funcao} entity.
@@ -18,9 +18,9 @@ public class FuncaoDTO implements Serializable {
 
     private String descricao;
 
-    private ZonedDateTime criadoEm;
+    private Instant criadoEm;
 
-    private ZonedDateTime atualizadoEm;
+    private Instant atualizadoEm;
 
     private UsuarioDTO criadoPor;
 
@@ -50,19 +50,19 @@ public class FuncaoDTO implements Serializable {
         this.descricao = descricao;
     }
 
-    public ZonedDateTime getCriadoEm() {
+    public Instant getCriadoEm() {
         return criadoEm;
     }
 
-    public void setCriadoEm(ZonedDateTime criadoEm) {
+    public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 
-    public ZonedDateTime getAtualizadoEm() {
+    public Instant getAtualizadoEm() {
         return atualizadoEm;
     }
 
-    public void setAtualizadoEm(ZonedDateTime atualizadoEm) {
+    public void setAtualizadoEm(Instant atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
     }
 

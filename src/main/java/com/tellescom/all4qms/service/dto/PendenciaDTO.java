@@ -2,7 +2,7 @@ package com.tellescom.all4qms.service.dto;
 
 import com.tellescom.all4qms.domain.enumeration.EnumTipoPend;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -17,13 +17,13 @@ public class PendenciaDTO implements Serializable {
 
     private Boolean status;
 
-    private ZonedDateTime lidaEm;
+    private Instant lidaEm;
 
     private String link;
 
     private EnumTipoPend tipo;
 
-    private ZonedDateTime criadoEm;
+    private Instant criadoEm;
 
     private UsuarioDTO responsavel;
 
@@ -55,11 +55,11 @@ public class PendenciaDTO implements Serializable {
         this.status = status;
     }
 
-    public ZonedDateTime getLidaEm() {
+    public Instant getLidaEm() {
         return lidaEm;
     }
 
-    public void setLidaEm(ZonedDateTime lidaEm) {
+    public void setLidaEm(Instant lidaEm) {
         this.lidaEm = lidaEm;
     }
 
@@ -79,11 +79,11 @@ public class PendenciaDTO implements Serializable {
         this.tipo = tipo;
     }
 
-    public ZonedDateTime getCriadoEm() {
+    public Instant getCriadoEm() {
         return criadoEm;
     }
 
-    public void setCriadoEm(ZonedDateTime criadoEm) {
+    public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 

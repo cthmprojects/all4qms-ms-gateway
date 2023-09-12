@@ -2,7 +2,7 @@ package com.tellescom.all4qms.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import javax.validation.constraints.*;
@@ -44,10 +44,10 @@ public class Processo implements Serializable {
     private String setorResponsavel;
 
     @Column("criado_em")
-    private ZonedDateTime criadoEm;
+    private Instant criadoEm;
 
     @Column("atualizado_em")
-    private ZonedDateTime atualizadoEm;
+    private Instant atualizadoEm;
 
     @Transient
     private Usuario criadoPor;
@@ -56,7 +56,30 @@ public class Processo implements Serializable {
     private Usuario atualizadoPor;
 
     @Transient
-    @JsonIgnoreProperties(value = { "funcao", "gestor", "setor", "user", "criadoPor", "atualizadoPor", "processos" }, allowSetters = true)
+    @JsonIgnoreProperties(
+        value = {
+            "funcao",
+            "gestor",
+            "setor",
+            "user",
+            "criadoPor",
+            "atualizadoPor",
+            "processos",
+            "usuario",
+            "usuario",
+            "usuario",
+            "funcao",
+            "funcao",
+            "setor",
+            "setor",
+            "processo",
+            "processo",
+            "pendencia",
+            "pendencia",
+            "pendencia",
+        },
+        allowSetters = true
+    )
     private Set<Usuario> usuarios = new HashSet<>();
 
     @Column("criado_por_id")
@@ -158,29 +181,29 @@ public class Processo implements Serializable {
         this.setorResponsavel = setorResponsavel;
     }
 
-    public ZonedDateTime getCriadoEm() {
+    public Instant getCriadoEm() {
         return this.criadoEm;
     }
 
-    public Processo criadoEm(ZonedDateTime criadoEm) {
+    public Processo criadoEm(Instant criadoEm) {
         this.setCriadoEm(criadoEm);
         return this;
     }
 
-    public void setCriadoEm(ZonedDateTime criadoEm) {
+    public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 
-    public ZonedDateTime getAtualizadoEm() {
+    public Instant getAtualizadoEm() {
         return this.atualizadoEm;
     }
 
-    public Processo atualizadoEm(ZonedDateTime atualizadoEm) {
+    public Processo atualizadoEm(Instant atualizadoEm) {
         this.setAtualizadoEm(atualizadoEm);
         return this;
     }
 
-    public void setAtualizadoEm(ZonedDateTime atualizadoEm) {
+    public void setAtualizadoEm(Instant atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
     }
 

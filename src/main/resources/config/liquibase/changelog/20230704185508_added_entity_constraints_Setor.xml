@@ -12,12 +12,14 @@
                                  baseTableName="setor"
                                  constraintName="fk_setor__criado_por_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="atualizado_por_id"
                                  baseTableName="setor"
                                  constraintName="fk_setor__atualizado_por_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
     </changeSet>
 </databaseChangeLog>

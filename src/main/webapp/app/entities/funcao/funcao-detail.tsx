@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
-import { TextFormat } from 'react-jhipster';
+import { Translate, TextFormat } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
@@ -22,41 +22,63 @@ export const FuncaoDetail = () => {
   return (
     <Row>
       <Col md="8">
-        <h2 data-cy="funcaoDetailsHeading">Funcao</h2>
+        <h2 data-cy="funcaoDetailsHeading">
+          <Translate contentKey="all4QmsMsGatewayApp.funcao.detail.title">Funcao</Translate>
+        </h2>
         <dl className="jh-entity-details">
           <dt>
-            <span id="id">Código</span>
+            <span id="id">
+              <Translate contentKey="global.field.id">ID</Translate>
+            </span>
           </dt>
           <dd>{funcaoEntity.id}</dd>
           <dt>
-            <span id="nome">Nome</span>
+            <span id="nome">
+              <Translate contentKey="all4QmsMsGatewayApp.funcao.nome">Nome</Translate>
+            </span>
           </dt>
           <dd>{funcaoEntity.nome}</dd>
           <dt>
-            <span id="descricao">Descricao</span>
+            <span id="descricao">
+              <Translate contentKey="all4QmsMsGatewayApp.funcao.descricao">Descricao</Translate>
+            </span>
           </dt>
           <dd>{funcaoEntity.descricao}</dd>
           <dt>
-            <span id="criadoEm">Criado Em</span>
+            <span id="criadoEm">
+              <Translate contentKey="all4QmsMsGatewayApp.funcao.criadoEm">Criado Em</Translate>
+            </span>
           </dt>
           <dd>{funcaoEntity.criadoEm ? <TextFormat value={funcaoEntity.criadoEm} type="date" format={APP_DATE_FORMAT} /> : null}</dd>
           <dt>
-            <span id="atualizadoEm">Atualizado Em</span>
+            <span id="atualizadoEm">
+              <Translate contentKey="all4QmsMsGatewayApp.funcao.atualizadoEm">Atualizado Em</Translate>
+            </span>
           </dt>
           <dd>
             {funcaoEntity.atualizadoEm ? <TextFormat value={funcaoEntity.atualizadoEm} type="date" format={APP_DATE_FORMAT} /> : null}
           </dd>
-          <dt>Criado Por</dt>
+          <dt>
+            <Translate contentKey="all4QmsMsGatewayApp.funcao.criadoPor">Criado Por</Translate>
+          </dt>
           <dd>{funcaoEntity.criadoPor ? funcaoEntity.criadoPor.nome : ''}</dd>
-          <dt>Atualizado Por</dt>
+          <dt>
+            <Translate contentKey="all4QmsMsGatewayApp.funcao.atualizadoPor">Atualizado Por</Translate>
+          </dt>
           <dd>{funcaoEntity.atualizadoPor ? funcaoEntity.atualizadoPor.nome : ''}</dd>
         </dl>
         <Button tag={Link} to="/funcao" replace color="info" data-cy="entityDetailsBackButton">
-          <FontAwesomeIcon icon="arrow-left" /> <span className="d-none d-md-inline">Voltar</span>
+          <FontAwesomeIcon icon="arrow-left" />{' '}
+          <span className="d-none d-md-inline">
+            <Translate contentKey="entity.action.back">Back</Translate>
+          </span>
         </Button>
         &nbsp;
         <Button tag={Link} to={`/funcao/${funcaoEntity.id}/edit`} replace color="primary">
-          <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
+          <FontAwesomeIcon icon="pencil-alt" />{' '}
+          <span className="d-none d-md-inline">
+            <Translate contentKey="entity.action.edit">Edit</Translate>
+          </span>
         </Button>
       </Col>
     </Row>

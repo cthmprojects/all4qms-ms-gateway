@@ -1,9 +1,8 @@
 package com.tellescom.all4qms.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tellescom.all4qms.domain.enumeration.EnumTipoPend;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
@@ -29,7 +28,7 @@ public class Pendencia implements Serializable {
     private Boolean status;
 
     @Column("lida_em")
-    private ZonedDateTime lidaEm;
+    private Instant lidaEm;
 
     @Column("link")
     private String link;
@@ -38,7 +37,7 @@ public class Pendencia implements Serializable {
     private EnumTipoPend tipo;
 
     @Column("criado_em")
-    private ZonedDateTime criadoEm;
+    private Instant criadoEm;
 
     @Transient
     private Usuario responsavel;
@@ -99,16 +98,16 @@ public class Pendencia implements Serializable {
         this.status = status;
     }
 
-    public ZonedDateTime getLidaEm() {
+    public Instant getLidaEm() {
         return this.lidaEm;
     }
 
-    public Pendencia lidaEm(ZonedDateTime lidaEm) {
+    public Pendencia lidaEm(Instant lidaEm) {
         this.setLidaEm(lidaEm);
         return this;
     }
 
-    public void setLidaEm(ZonedDateTime lidaEm) {
+    public void setLidaEm(Instant lidaEm) {
         this.lidaEm = lidaEm;
     }
 
@@ -138,16 +137,16 @@ public class Pendencia implements Serializable {
         this.tipo = tipo;
     }
 
-    public ZonedDateTime getCriadoEm() {
+    public Instant getCriadoEm() {
         return this.criadoEm;
     }
 
-    public Pendencia criadoEm(ZonedDateTime criadoEm) {
+    public Pendencia criadoEm(Instant criadoEm) {
         this.setCriadoEm(criadoEm);
         return this;
     }
 
-    public void setCriadoEm(ZonedDateTime criadoEm) {
+    public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 

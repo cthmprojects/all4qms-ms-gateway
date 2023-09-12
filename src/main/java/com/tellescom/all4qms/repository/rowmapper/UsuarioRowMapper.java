@@ -2,7 +2,7 @@ package com.tellescom.all4qms.repository.rowmapper;
 
 import com.tellescom.all4qms.domain.Usuario;
 import io.r2dbc.spi.Row;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.function.BiFunction;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +29,8 @@ public class UsuarioRowMapper implements BiFunction<Row, String, Usuario> {
         entity.setNome(converter.fromRow(row, prefix + "_nome", String.class));
         entity.setEmail(converter.fromRow(row, prefix + "_email", String.class));
         entity.setIsGestor(converter.fromRow(row, prefix + "_is_gestor", Boolean.class));
-        entity.setCriadoEm(converter.fromRow(row, prefix + "_criado_em", ZonedDateTime.class));
-        entity.setAtualizadoEm(converter.fromRow(row, prefix + "_atualizado_em", ZonedDateTime.class));
+        entity.setCriadoEm(converter.fromRow(row, prefix + "_criado_em", Instant.class));
+        entity.setAtualizadoEm(converter.fromRow(row, prefix + "_atualizado_em", Instant.class));
         entity.setFuncaoId(converter.fromRow(row, prefix + "_funcao_id", Long.class));
         entity.setGestorId(converter.fromRow(row, prefix + "_gestor_id", Long.class));
         entity.setSetorId(converter.fromRow(row, prefix + "_setor_id", Long.class));

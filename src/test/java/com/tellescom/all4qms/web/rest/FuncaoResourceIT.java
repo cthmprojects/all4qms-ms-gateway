@@ -1,6 +1,5 @@
 package com.tellescom.all4qms.web.rest;
 
-import static com.tellescom.all4qms.web.rest.TestUtil.sameInstant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -15,9 +14,7 @@ import com.tellescom.all4qms.service.dto.FuncaoDTO;
 import com.tellescom.all4qms.service.mapper.FuncaoMapper;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -53,11 +50,11 @@ class FuncaoResourceIT {
     private static final String DEFAULT_DESCRICAO = "AAAAAAAAAA";
     private static final String UPDATED_DESCRICAO = "BBBBBBBBBB";
 
-    private static final ZonedDateTime DEFAULT_CRIADO_EM = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_CRIADO_EM = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_CRIADO_EM = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_CRIADO_EM = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
-    private static final ZonedDateTime DEFAULT_ATUALIZADO_EM = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_ATUALIZADO_EM = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_ATUALIZADO_EM = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_ATUALIZADO_EM = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String ENTITY_API_URL = "/api/funcaos";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
@@ -226,9 +223,9 @@ class FuncaoResourceIT {
             .jsonPath("$.[*].descricao")
             .value(hasItem(DEFAULT_DESCRICAO))
             .jsonPath("$.[*].criadoEm")
-            .value(hasItem(sameInstant(DEFAULT_CRIADO_EM)))
+            .value(hasItem(DEFAULT_CRIADO_EM.toString()))
             .jsonPath("$.[*].atualizadoEm")
-            .value(hasItem(sameInstant(DEFAULT_ATUALIZADO_EM)));
+            .value(hasItem(DEFAULT_ATUALIZADO_EM.toString()));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -271,9 +268,9 @@ class FuncaoResourceIT {
             .jsonPath("$.descricao")
             .value(is(DEFAULT_DESCRICAO))
             .jsonPath("$.criadoEm")
-            .value(is(sameInstant(DEFAULT_CRIADO_EM)))
+            .value(is(DEFAULT_CRIADO_EM.toString()))
             .jsonPath("$.atualizadoEm")
-            .value(is(sameInstant(DEFAULT_ATUALIZADO_EM)));
+            .value(is(DEFAULT_ATUALIZADO_EM.toString()));
     }
 
     @Test
@@ -282,7 +279,7 @@ class FuncaoResourceIT {
         webTestClient
             .get()
             .uri(ENTITY_API_URL_ID, Long.MAX_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_PROBLEM_JSON)
             .exchange()
             .expectStatus()
             .isNotFound();
@@ -399,7 +396,7 @@ class FuncaoResourceIT {
         Funcao partialUpdatedFuncao = new Funcao();
         partialUpdatedFuncao.setId(funcao.getId());
 
-        partialUpdatedFuncao.descricao(UPDATED_DESCRICAO).criadoEm(UPDATED_CRIADO_EM).atualizadoEm(UPDATED_ATUALIZADO_EM);
+        partialUpdatedFuncao.atualizadoEm(UPDATED_ATUALIZADO_EM);
 
         webTestClient
             .patch()
@@ -415,8 +412,8 @@ class FuncaoResourceIT {
         assertThat(funcaoList).hasSize(databaseSizeBeforeUpdate);
         Funcao testFuncao = funcaoList.get(funcaoList.size() - 1);
         assertThat(testFuncao.getNome()).isEqualTo(DEFAULT_NOME);
-        assertThat(testFuncao.getDescricao()).isEqualTo(UPDATED_DESCRICAO);
-        assertThat(testFuncao.getCriadoEm()).isEqualTo(UPDATED_CRIADO_EM);
+        assertThat(testFuncao.getDescricao()).isEqualTo(DEFAULT_DESCRICAO);
+        assertThat(testFuncao.getCriadoEm()).isEqualTo(DEFAULT_CRIADO_EM);
         assertThat(testFuncao.getAtualizadoEm()).isEqualTo(UPDATED_ATUALIZADO_EM);
     }
 

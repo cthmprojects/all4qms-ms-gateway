@@ -4,14 +4,14 @@ import com.tellescom.all4qms.repository.ProcessoRepository;
 import com.tellescom.all4qms.service.ProcessoService;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -176,9 +176,9 @@ public class ProcessoResource {
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of processos in body.
      */
-    @GetMapping("/processos")
+    @GetMapping(value = "/processos", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<List<ProcessoDTO>>> getAllProcessos(
-        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable,
         ServerHttpRequest request,
         @RequestParam(required = false, defaultValue = "false") boolean eagerload
     ) {
