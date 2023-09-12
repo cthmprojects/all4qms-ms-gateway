@@ -176,7 +176,7 @@ public class PendenciaResource {
      */
     @GetMapping(value = "/pendencias", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<List<PendenciaDTO>>> getAllPendencias(
-        @org.springdoc.core.annotations.ParameterObject Pageable pageable,
+        Pageable pageable,
         ServerHttpRequest request,
         @RequestParam(required = false, defaultValue = "false") boolean eagerload
     ) {
