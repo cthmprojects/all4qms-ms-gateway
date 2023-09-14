@@ -109,8 +109,8 @@ public class UsuarioResource {
         if (usuarioDTO.getId() != null) {
             throw new BadRequestAlertException("A new usuario cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
         log.debug("AAAAAAAAAAAA");
-        userService.createUser(userDTO);
 
         return usuarioService
             .save(usuarioDTO)
