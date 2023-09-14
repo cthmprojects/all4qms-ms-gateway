@@ -83,7 +83,7 @@ export const Usuario = () => {
   };
 
   return (
-    <GeneralList title="Lista de usuários" />
+    <GeneralList />
     // <div>
     //   <h2 id="usuario-heading" data-cy="UsuarioHeading">
     //     Usuarios
