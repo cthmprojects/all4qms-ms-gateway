@@ -1,0 +1,44 @@
+.padding-container {
+  padding: 30px 50px;
+}
+
+.container-style {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.link {
+  text-decoration: 'none';
+  color: '#49a7ea';
+  font-weight: 400;
+}
+
+.title {
+  margin: 0px;
+  font-weight: 400;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  font-size: 2rem;
+}
+
+.primary-button {
+  background: #e6b200 !important;
+  color: #4e4d4d !important;
+  width: 10%;
+  min-width: 100px;
+}
+
+.secondary-button {
+  background: #d9d9d9 !important;
+  color: #4e4d4d !important;
+  width: 10%;
+  min-width: 100px;
+}
+
+.update-button {
+  background: #1ab2d8 !important;
+  color: #4e4d4d !important;
+  width: 10%;
+  min-width: 100px;
+}

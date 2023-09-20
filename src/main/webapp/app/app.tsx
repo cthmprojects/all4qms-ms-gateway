@@ -41,10 +41,9 @@ export const App = () => {
     isOpenAPIEnabled = useAppSelector(state => state.applicationProfile.isOpenAPIEnabled);
   };
 
-  const paddingTop = '0px';
   return (
     <BrowserRouter basename={baseHref}>
-      <div style={{ paddingTop }}>
+      <div>
         <ToastContainer position={toast.POSITION.TOP_LEFT} className="toastify-container" toastClassName="toastify-toast" />
         <ErrorBoundary>
           <Header
@@ -56,11 +55,9 @@ export const App = () => {
           />
         </ErrorBoundary>
         <div id="app-view-container">
-          <Card>
-            <ErrorBoundary>
-              <AppRoutes checkAuth={checkAuth} />
-            </ErrorBoundary>
-          </Card>
+          <ErrorBoundary>
+            <AppRoutes checkAuth={checkAuth} />
+          </ErrorBoundary>
           <Footer isAuthenticated={isAuthenticated} />
         </div>
       </div>
