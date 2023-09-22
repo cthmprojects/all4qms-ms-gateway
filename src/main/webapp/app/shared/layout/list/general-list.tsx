@@ -43,6 +43,8 @@ export interface IHeaderProps {
 }
 
 const GeneralList = () => {
+  const navigate = useNavigate();
+
   const columns = ['Dessert (100g serving)', 'Calories', 'Fat', 'Carbs', 'Protein'];
 
   const rows = [
@@ -95,14 +97,14 @@ const GeneralList = () => {
     <div className="padding-container">
       <div className="container-style">
         <Breadcrumbs aria-label="breadcrumb">
-          <Link color="primary" to={'/'}>
+          <Link style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }} to={'/'}>
             Home
           </Link>
           <Typography className="link">Usuários</Typography>
         </Breadcrumbs>
         <h1 className="title">Usuários</h1>
         <div style={{ paddingBottom: '30px' }}>
-          <Button variant="contained" className="primary-button" style={{ marginRight: '10px' }}>
+          <Button variant="contained" className="primary-button" style={{ marginRight: '10px' }} onClick={() => navigate('/usuario/new')}>
             CADASTRAR
           </Button>
           <Button variant="contained" className="update-button">

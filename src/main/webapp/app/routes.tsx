@@ -46,7 +46,7 @@ const AppRoutes = (props: IRoutesProps) => {
         />
         <Route path="login" element={<Login />} />
         <Route path="logout" element={<Logout />} />
-        <Route path="rnc" element={<RncRoutes />} />
+        <Route path="rnc/*" element={<RncRoutes />} />
         <Route path="account">
           <Route
             path="*"
