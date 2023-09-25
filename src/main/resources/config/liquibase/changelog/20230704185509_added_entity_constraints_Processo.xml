@@ -12,12 +12,14 @@
                                  baseTableName="processo"
                                  constraintName="fk_processo__criado_por_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="atualizado_por_id"
                                  baseTableName="processo"
                                  constraintName="fk_processo__atualizado_por_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
     </changeSet>
 </databaseChangeLog>

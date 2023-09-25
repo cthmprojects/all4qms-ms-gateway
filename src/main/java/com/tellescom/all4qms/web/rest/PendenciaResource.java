@@ -174,9 +174,9 @@ public class PendenciaResource {
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of pendencias in body.
      */
-    @GetMapping("/pendencias")
+    @GetMapping(value = "/pendencias", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<List<PendenciaDTO>>> getAllPendencias(
-        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        Pageable pageable,
         ServerHttpRequest request,
         @RequestParam(required = false, defaultValue = "false") boolean eagerload
     ) {

@@ -2,6 +2,7 @@ package com.tellescom.all4qms.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,10 +36,10 @@ public class Usuario implements Serializable {
     private Boolean isGestor;
 
     @Column("criado_em")
-    private ZonedDateTime criadoEm;
+    private Instant criadoEm;
 
     @Column("atualizado_em")
-    private ZonedDateTime atualizadoEm;
+    private Instant atualizadoEm;
 
     @Transient
     private Funcao funcao;
@@ -134,29 +135,29 @@ public class Usuario implements Serializable {
         this.isGestor = isGestor;
     }
 
-    public ZonedDateTime getCriadoEm() {
+    public Instant getCriadoEm() {
         return this.criadoEm;
     }
 
-    public Usuario criadoEm(ZonedDateTime criadoEm) {
+    public Usuario criadoEm(Instant criadoEm) {
         this.setCriadoEm(criadoEm);
         return this;
     }
 
-    public void setCriadoEm(ZonedDateTime criadoEm) {
+    public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 
-    public ZonedDateTime getAtualizadoEm() {
+    public Instant getAtualizadoEm() {
         return this.atualizadoEm;
     }
 
-    public Usuario atualizadoEm(ZonedDateTime atualizadoEm) {
+    public Usuario atualizadoEm(Instant atualizadoEm) {
         this.setAtualizadoEm(atualizadoEm);
         return this;
     }
 
-    public void setAtualizadoEm(ZonedDateTime atualizadoEm) {
+    public void setAtualizadoEm(Instant atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
     }
 

@@ -1,6 +1,5 @@
 package com.tellescom.all4qms.web.rest;
 
-import static com.tellescom.all4qms.web.rest.TestUtil.sameInstant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -15,9 +14,7 @@ import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.mapper.ProcessoMapper;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -65,11 +62,11 @@ class ProcessoResourceIT {
     private static final String DEFAULT_SETOR_RESPONSAVEL = "AAAAAAAAAA";
     private static final String UPDATED_SETOR_RESPONSAVEL = "BBBBBBBBBB";
 
-    private static final ZonedDateTime DEFAULT_CRIADO_EM = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_CRIADO_EM = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_CRIADO_EM = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_CRIADO_EM = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
-    private static final ZonedDateTime DEFAULT_ATUALIZADO_EM = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_ATUALIZADO_EM = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_ATUALIZADO_EM = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_ATUALIZADO_EM = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String ENTITY_API_URL = "/api/processos";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
@@ -258,9 +255,9 @@ class ProcessoResourceIT {
             .jsonPath("$.[*].setorResponsavel")
             .value(hasItem(DEFAULT_SETOR_RESPONSAVEL))
             .jsonPath("$.[*].criadoEm")
-            .value(hasItem(sameInstant(DEFAULT_CRIADO_EM)))
+            .value(hasItem(DEFAULT_CRIADO_EM.toString()))
             .jsonPath("$.[*].atualizadoEm")
-            .value(hasItem(sameInstant(DEFAULT_ATUALIZADO_EM)));
+            .value(hasItem(DEFAULT_ATUALIZADO_EM.toString()));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -311,9 +308,9 @@ class ProcessoResourceIT {
             .jsonPath("$.setorResponsavel")
             .value(is(DEFAULT_SETOR_RESPONSAVEL))
             .jsonPath("$.criadoEm")
-            .value(is(sameInstant(DEFAULT_CRIADO_EM)))
+            .value(is(DEFAULT_CRIADO_EM.toString()))
             .jsonPath("$.atualizadoEm")
-            .value(is(sameInstant(DEFAULT_ATUALIZADO_EM)));
+            .value(is(DEFAULT_ATUALIZADO_EM.toString()));
     }
 
     @Test
@@ -322,7 +319,7 @@ class ProcessoResourceIT {
         webTestClient
             .get()
             .uri(ENTITY_API_URL_ID, Long.MAX_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_PROBLEM_JSON)
             .exchange()
             .expectStatus()
             .isNotFound();
@@ -451,7 +448,12 @@ class ProcessoResourceIT {
         Processo partialUpdatedProcesso = new Processo();
         partialUpdatedProcesso.setId(processo.getId());
 
-        partialUpdatedProcesso.setor(UPDATED_SETOR).responsavel(UPDATED_RESPONSAVEL).setorResponsavel(UPDATED_SETOR_RESPONSAVEL);
+        partialUpdatedProcesso
+            .descricao(UPDATED_DESCRICAO)
+            .setor(UPDATED_SETOR)
+            .responsavel(UPDATED_RESPONSAVEL)
+            .setorResponsavel(UPDATED_SETOR_RESPONSAVEL)
+            .criadoEm(UPDATED_CRIADO_EM);
 
         webTestClient
             .patch()
@@ -468,11 +470,11 @@ class ProcessoResourceIT {
         Processo testProcesso = processoList.get(processoList.size() - 1);
         assertThat(testProcesso.getNumero()).isEqualTo(DEFAULT_NUMERO);
         assertThat(testProcesso.getNome()).isEqualTo(DEFAULT_NOME);
-        assertThat(testProcesso.getDescricao()).isEqualTo(DEFAULT_DESCRICAO);
+        assertThat(testProcesso.getDescricao()).isEqualTo(UPDATED_DESCRICAO);
         assertThat(testProcesso.getSetor()).isEqualTo(UPDATED_SETOR);
         assertThat(testProcesso.getResponsavel()).isEqualTo(UPDATED_RESPONSAVEL);
         assertThat(testProcesso.getSetorResponsavel()).isEqualTo(UPDATED_SETOR_RESPONSAVEL);
-        assertThat(testProcesso.getCriadoEm()).isEqualTo(DEFAULT_CRIADO_EM);
+        assertThat(testProcesso.getCriadoEm()).isEqualTo(UPDATED_CRIADO_EM);
         assertThat(testProcesso.getAtualizadoEm()).isEqualTo(DEFAULT_ATUALIZADO_EM);
     }
 

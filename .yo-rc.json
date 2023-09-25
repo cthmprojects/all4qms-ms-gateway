@@ -31,6 +31,7 @@
     "microfrontends": [],
     "nativeLanguage": "pt-br",
     "otherModules": [],
+    "packageFolder": "com/tellescom/all4qms",
     "packageName": "com.tellescom.all4qms",
     "pages": [],
     "prodDatabaseType": "postgresql",

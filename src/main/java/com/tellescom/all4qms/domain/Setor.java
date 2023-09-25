@@ -2,7 +2,7 @@ package com.tellescom.all4qms.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import javax.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -30,16 +30,19 @@ public class Setor implements Serializable {
     private String descricao;
 
     @Column("criado_em")
-    private ZonedDateTime criadoEm;
+    private Instant criadoEm;
 
     @Column("atualizado_em")
-    private ZonedDateTime atualizadoEm;
+    private Instant atualizadoEm;
 
     @Transient
     private Usuario criadoPor;
 
     @Transient
     private Usuario atualizadoPor;
+
+    @Transient
+    private Usuario usuario;
 
     @Column("criado_por_id")
     private Long criadoPorId;
@@ -88,29 +91,29 @@ public class Setor implements Serializable {
         this.descricao = descricao;
     }
 
-    public ZonedDateTime getCriadoEm() {
+    public Instant getCriadoEm() {
         return this.criadoEm;
     }
 
-    public Setor criadoEm(ZonedDateTime criadoEm) {
+    public Setor criadoEm(Instant criadoEm) {
         this.setCriadoEm(criadoEm);
         return this;
     }
 
-    public void setCriadoEm(ZonedDateTime criadoEm) {
+    public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 
-    public ZonedDateTime getAtualizadoEm() {
+    public Instant getAtualizadoEm() {
         return this.atualizadoEm;
     }
 
-    public Setor atualizadoEm(ZonedDateTime atualizadoEm) {
+    public Setor atualizadoEm(Instant atualizadoEm) {
         this.setAtualizadoEm(atualizadoEm);
         return this;
     }
 
-    public void setAtualizadoEm(ZonedDateTime atualizadoEm) {
+    public void setAtualizadoEm(Instant atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
     }
 
@@ -139,6 +142,25 @@ public class Setor implements Serializable {
 
     public Setor atualizadoPor(Usuario usuario) {
         this.setAtualizadoPor(usuario);
+        return this;
+    }
+
+    public Usuario getUsuario() {
+        return this.usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        if (this.usuario != null) {
+            this.usuario.setSetor(null);
+        }
+        if (usuario != null) {
+            usuario.setSetor(this);
+        }
+        this.usuario = usuario;
+    }
+
+    public Setor usuario(Usuario usuario) {
+        this.setUsuario(usuario);
         return this;
     }
 

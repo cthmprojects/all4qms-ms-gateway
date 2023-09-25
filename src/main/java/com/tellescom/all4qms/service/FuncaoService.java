@@ -4,6 +4,11 @@ import com.tellescom.all4qms.domain.Funcao;
 import com.tellescom.all4qms.repository.FuncaoRepository;
 import com.tellescom.all4qms.service.dto.FuncaoDTO;
 import com.tellescom.all4qms.service.mapper.FuncaoMapper;
+import java.time.Instant;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +43,7 @@ public class FuncaoService {
      */
     public Mono<FuncaoDTO> save(FuncaoDTO funcaoDTO) {
         log.debug("Request to save Funcao : {}", funcaoDTO);
+        funcaoDTO.setCriadoEm(Instant.now());
         return funcaoRepository.save(funcaoMapper.toEntity(funcaoDTO)).map(funcaoMapper::toDto);
     }
 
@@ -49,6 +55,7 @@ public class FuncaoService {
      */
     public Mono<FuncaoDTO> update(FuncaoDTO funcaoDTO) {
         log.debug("Request to update Funcao : {}", funcaoDTO);
+        funcaoDTO.setAtualizadoEm(Instant.now());
         return funcaoRepository.save(funcaoMapper.toEntity(funcaoDTO)).map(funcaoMapper::toDto);
     }
 
@@ -60,7 +67,7 @@ public class FuncaoService {
      */
     public Mono<FuncaoDTO> partialUpdate(FuncaoDTO funcaoDTO) {
         log.debug("Request to partially update Funcao : {}", funcaoDTO);
-
+        funcaoDTO.setAtualizadoEm(Instant.now());
         return funcaoRepository
             .findById(funcaoDTO.getId())
             .map(existingFuncao -> {
@@ -91,6 +98,16 @@ public class FuncaoService {
      */
     public Flux<FuncaoDTO> findAllWithEagerRelationships(Pageable pageable) {
         return funcaoRepository.findAllWithEagerRelationships(pageable).map(funcaoMapper::toDto);
+    }
+
+    /**
+     *  Get all the funcaos where Usuario is {@code null}.
+     *  @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public Flux<FuncaoDTO> findAllWhereUsuarioIsNull() {
+        log.debug("Request to get all funcaos where Usuario is null");
+        return funcaoRepository.findAllWhereUsuarioIsNull().map(funcaoMapper::toDto);
     }
 
     /**

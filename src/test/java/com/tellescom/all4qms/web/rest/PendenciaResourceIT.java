@@ -1,6 +1,5 @@
 package com.tellescom.all4qms.web.rest;
 
-import static com.tellescom.all4qms.web.rest.TestUtil.sameInstant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -16,9 +15,7 @@ import com.tellescom.all4qms.service.dto.PendenciaDTO;
 import com.tellescom.all4qms.service.mapper.PendenciaMapper;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -54,8 +51,8 @@ class PendenciaResourceIT {
     private static final Boolean DEFAULT_STATUS = false;
     private static final Boolean UPDATED_STATUS = true;
 
-    private static final ZonedDateTime DEFAULT_LIDA_EM = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_LIDA_EM = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_LIDA_EM = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_LIDA_EM = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String DEFAULT_LINK = "AAAAAAAAAA";
     private static final String UPDATED_LINK = "BBBBBBBBBB";
@@ -63,8 +60,8 @@ class PendenciaResourceIT {
     private static final EnumTipoPend DEFAULT_TIPO = EnumTipoPend.Atividade;
     private static final EnumTipoPend UPDATED_TIPO = EnumTipoPend.Notificacao;
 
-    private static final ZonedDateTime DEFAULT_CRIADO_EM = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_CRIADO_EM = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_CRIADO_EM = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_CRIADO_EM = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String ENTITY_API_URL = "/api/pendencias";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
@@ -217,13 +214,13 @@ class PendenciaResourceIT {
             .jsonPath("$.[*].status")
             .value(hasItem(DEFAULT_STATUS.booleanValue()))
             .jsonPath("$.[*].lidaEm")
-            .value(hasItem(sameInstant(DEFAULT_LIDA_EM)))
+            .value(hasItem(DEFAULT_LIDA_EM.toString()))
             .jsonPath("$.[*].link")
             .value(hasItem(DEFAULT_LINK))
             .jsonPath("$.[*].tipo")
             .value(hasItem(DEFAULT_TIPO.toString()))
             .jsonPath("$.[*].criadoEm")
-            .value(hasItem(sameInstant(DEFAULT_CRIADO_EM)));
+            .value(hasItem(DEFAULT_CRIADO_EM.toString()));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -266,13 +263,13 @@ class PendenciaResourceIT {
             .jsonPath("$.status")
             .value(is(DEFAULT_STATUS.booleanValue()))
             .jsonPath("$.lidaEm")
-            .value(is(sameInstant(DEFAULT_LIDA_EM)))
+            .value(is(DEFAULT_LIDA_EM.toString()))
             .jsonPath("$.link")
             .value(is(DEFAULT_LINK))
             .jsonPath("$.tipo")
             .value(is(DEFAULT_TIPO.toString()))
             .jsonPath("$.criadoEm")
-            .value(is(sameInstant(DEFAULT_CRIADO_EM)));
+            .value(is(DEFAULT_CRIADO_EM.toString()));
     }
 
     @Test
@@ -281,7 +278,7 @@ class PendenciaResourceIT {
         webTestClient
             .get()
             .uri(ENTITY_API_URL_ID, Long.MAX_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_PROBLEM_JSON)
             .exchange()
             .expectStatus()
             .isNotFound();
@@ -406,7 +403,7 @@ class PendenciaResourceIT {
         Pendencia partialUpdatedPendencia = new Pendencia();
         partialUpdatedPendencia.setId(pendencia.getId());
 
-        partialUpdatedPendencia.nome(UPDATED_NOME).status(UPDATED_STATUS).lidaEm(UPDATED_LIDA_EM).link(UPDATED_LINK).tipo(UPDATED_TIPO);
+        partialUpdatedPendencia.nome(UPDATED_NOME).status(UPDATED_STATUS).link(UPDATED_LINK);
 
         webTestClient
             .patch()
@@ -423,9 +420,9 @@ class PendenciaResourceIT {
         Pendencia testPendencia = pendenciaList.get(pendenciaList.size() - 1);
         assertThat(testPendencia.getNome()).isEqualTo(UPDATED_NOME);
         assertThat(testPendencia.getStatus()).isEqualTo(UPDATED_STATUS);
-        assertThat(testPendencia.getLidaEm()).isEqualTo(UPDATED_LIDA_EM);
+        assertThat(testPendencia.getLidaEm()).isEqualTo(DEFAULT_LIDA_EM);
         assertThat(testPendencia.getLink()).isEqualTo(UPDATED_LINK);
-        assertThat(testPendencia.getTipo()).isEqualTo(UPDATED_TIPO);
+        assertThat(testPendencia.getTipo()).isEqualTo(DEFAULT_TIPO);
         assertThat(testPendencia.getCriadoEm()).isEqualTo(DEFAULT_CRIADO_EM);
     }
 

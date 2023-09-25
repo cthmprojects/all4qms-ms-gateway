@@ -8,7 +8,7 @@ export interface IPendencia {
   status?: boolean | null;
   lidaEm?: string | null;
   link?: string | null;
-  tipo?: EnumTipoPend | null;
+  tipo?: keyof typeof EnumTipoPend | null;
   criadoEm?: string | null;
   responsavel?: IUsuario | null;
   criadoPor?: IUsuario | null;
