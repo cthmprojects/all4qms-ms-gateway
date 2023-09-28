@@ -174,14 +174,20 @@ public class FuncaoResource {
      * @param pageable the pagination information.
      * @param request a {@link ServerHttpRequest} request.
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
+     * @param filter the filter of the request.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of funcaos in body.
      */
-    @GetMapping("/funcaos")
+    @GetMapping(value = "/funcaos", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<List<FuncaoDTO>>> getAllFuncaos(
-        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        Pageable pageable,
         ServerHttpRequest request,
+        @RequestParam(required = false) String filter,
         @RequestParam(required = false, defaultValue = "false") boolean eagerload
     ) {
+        if ("usuario-is-null".equals(filter)) {
+            log.debug("REST request to get all Funcaos where usuario is null");
+            return funcaoService.findAllWhereUsuarioIsNull().collectList().map(ResponseEntity::ok);
+        }
         log.debug("REST request to get a page of Funcaos");
         return funcaoService
             .countAll()

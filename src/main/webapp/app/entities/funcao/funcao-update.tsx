@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row, Col, FormText } from 'reactstrap';
-import { isNumber, ValidatedField, ValidatedForm } from 'react-jhipster';
+import { isNumber, Translate, translate, ValidatedField, ValidatedForm } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { convertDateTimeFromServer, convertDateTimeToServer, displayDefaultDateTime } from 'app/shared/util/date-utils';
@@ -84,7 +84,7 @@ export const FuncaoUpdate = () => {
       <Row className="justify-content-center">
         <Col md="8">
           <h2 id="all4QmsMsGatewayApp.funcao.home.createOrEditLabel" data-cy="FuncaoCreateUpdateHeading">
-            Criar ou editar Funcao
+            <Translate contentKey="all4QmsMsGatewayApp.funcao.home.createOrEditLabel">Create or edit a Funcao</Translate>
           </h2>
         </Col>
       </Row>
@@ -94,7 +94,16 @@ export const FuncaoUpdate = () => {
             <p>Loading...</p>
           ) : (
             <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity}>
-              {!isNew ? <ValidatedField name="id" required readOnly id="funcao-id" label="Código" validate={{ required: true }} /> : null}
+              {!isNew ? (
+                <ValidatedField
+                  name="id"
+                  required
+                  readOnly
+                  id="funcao-id"
+                  label={translate('global.field.id')}
+                  validate={{ required: true }}
+                />
+              ) : null}
               <ValidatedField
                 label="Nome"
                 id="funcao-nome"
@@ -102,7 +111,7 @@ export const FuncaoUpdate = () => {
                 data-cy="nome"
                 type="text"
                 validate={{
-                  required: { value: true, message: 'O campo é obrigatório.' },
+                  required: { value: true, message: translate('entity.validation.required') },
                 }}
               />
               <ValidatedField label="Descricao" id="funcao-descricao" name="descricao" data-cy="descricao" type="text" />
@@ -145,12 +154,15 @@ export const FuncaoUpdate = () => {
               <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/funcao" replace color="info">
                 <FontAwesomeIcon icon="arrow-left" />
                 &nbsp;
-                <span className="d-none d-md-inline">Voltar</span>
+                <span className="d-none d-md-inline">
+                  <Translate contentKey="entity.action.back">Back</Translate>
+                </span>
               </Button>
               &nbsp;
               <Button color="primary" id="save-entity" data-cy="entityCreateSaveButton" type="submit" disabled={updating}>
                 <FontAwesomeIcon icon="save" />
-                &nbsp; Salvar
+                &nbsp;
+                <Translate contentKey="entity.action.save">Save</Translate>
               </Button>
             </ValidatedForm>
           )}

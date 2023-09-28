@@ -1,7 +1,7 @@
 package com.tellescom.all4qms.service.dto;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 import javax.validation.constraints.*;
 
@@ -26,9 +26,9 @@ public class ProcessoDTO implements Serializable {
 
     private String setorResponsavel;
 
-    private ZonedDateTime criadoEm;
+    private Instant criadoEm;
 
-    private ZonedDateTime atualizadoEm;
+    private Instant atualizadoEm;
 
     private UsuarioDTO criadoPor;
 
@@ -90,19 +90,19 @@ public class ProcessoDTO implements Serializable {
         this.setorResponsavel = setorResponsavel;
     }
 
-    public ZonedDateTime getCriadoEm() {
+    public Instant getCriadoEm() {
         return criadoEm;
     }
 
-    public void setCriadoEm(ZonedDateTime criadoEm) {
+    public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 
-    public ZonedDateTime getAtualizadoEm() {
+    public Instant getAtualizadoEm() {
         return atualizadoEm;
     }
 
-    public void setAtualizadoEm(ZonedDateTime atualizadoEm) {
+    public void setAtualizadoEm(Instant atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
     }
 

@@ -1,0 +1,16 @@
+#root{
+  display: flex;
+  flex-direction: column;
+  height: 43.2rem;
+}
+
+body{
+  background: #F3F3F3;
+}
+
+div{
+  display: flex;
+  justify-content: center;
+}
+
+

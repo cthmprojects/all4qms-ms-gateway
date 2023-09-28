@@ -4,6 +4,7 @@ import com.tellescom.all4qms.domain.Pendencia;
 import com.tellescom.all4qms.repository.PendenciaRepository;
 import com.tellescom.all4qms.service.dto.PendenciaDTO;
 import com.tellescom.all4qms.service.mapper.PendenciaMapper;
+import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ public class PendenciaService {
      */
     public Mono<PendenciaDTO> save(PendenciaDTO pendenciaDTO) {
         log.debug("Request to save Pendencia : {}", pendenciaDTO);
+        pendenciaDTO.setCriadoEm(Instant.now());
         return pendenciaRepository.save(pendenciaMapper.toEntity(pendenciaDTO)).map(pendenciaMapper::toDto);
     }
 
@@ -60,7 +62,7 @@ public class PendenciaService {
      */
     public Mono<PendenciaDTO> partialUpdate(PendenciaDTO pendenciaDTO) {
         log.debug("Request to partially update Pendencia : {}", pendenciaDTO);
-
+        pendenciaDTO.setLidaEm(Instant.now());
         return pendenciaRepository
             .findById(pendenciaDTO.getId())
             .map(existingPendencia -> {

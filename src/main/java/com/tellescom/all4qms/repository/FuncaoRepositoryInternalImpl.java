@@ -7,7 +7,7 @@ import com.tellescom.all4qms.repository.rowmapper.FuncaoRowMapper;
 import com.tellescom.all4qms.repository.rowmapper.UsuarioRowMapper;
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

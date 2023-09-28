@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
-import { TextFormat } from 'react-jhipster';
+import { Translate, TextFormat } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
@@ -22,57 +22,87 @@ export const ProcessoDetail = () => {
   return (
     <Row>
       <Col md="8">
-        <h2 data-cy="processoDetailsHeading">Processo</h2>
+        <h2 data-cy="processoDetailsHeading">
+          <Translate contentKey="all4QmsMsGatewayApp.processo.detail.title">Processo</Translate>
+        </h2>
         <dl className="jh-entity-details">
           <dt>
-            <span id="id">Código</span>
+            <span id="id">
+              <Translate contentKey="global.field.id">ID</Translate>
+            </span>
           </dt>
           <dd>{processoEntity.id}</dd>
           <dt>
-            <span id="numero">Numero</span>
+            <span id="numero">
+              <Translate contentKey="all4QmsMsGatewayApp.processo.numero">Numero</Translate>
+            </span>
           </dt>
           <dd>{processoEntity.numero}</dd>
           <dt>
-            <span id="nome">Nome</span>
+            <span id="nome">
+              <Translate contentKey="all4QmsMsGatewayApp.processo.nome">Nome</Translate>
+            </span>
           </dt>
           <dd>{processoEntity.nome}</dd>
           <dt>
-            <span id="descricao">Descricao</span>
+            <span id="descricao">
+              <Translate contentKey="all4QmsMsGatewayApp.processo.descricao">Descricao</Translate>
+            </span>
           </dt>
           <dd>{processoEntity.descricao}</dd>
           <dt>
-            <span id="setor">Setor</span>
+            <span id="setor">
+              <Translate contentKey="all4QmsMsGatewayApp.processo.setor">Setor</Translate>
+            </span>
           </dt>
           <dd>{processoEntity.setor}</dd>
           <dt>
-            <span id="responsavel">Responsavel</span>
+            <span id="responsavel">
+              <Translate contentKey="all4QmsMsGatewayApp.processo.responsavel">Responsavel</Translate>
+            </span>
           </dt>
           <dd>{processoEntity.responsavel}</dd>
           <dt>
-            <span id="setorResponsavel">Setor Responsavel</span>
+            <span id="setorResponsavel">
+              <Translate contentKey="all4QmsMsGatewayApp.processo.setorResponsavel">Setor Responsavel</Translate>
+            </span>
           </dt>
           <dd>{processoEntity.setorResponsavel}</dd>
           <dt>
-            <span id="criadoEm">Criado Em</span>
+            <span id="criadoEm">
+              <Translate contentKey="all4QmsMsGatewayApp.processo.criadoEm">Criado Em</Translate>
+            </span>
           </dt>
           <dd>{processoEntity.criadoEm ? <TextFormat value={processoEntity.criadoEm} type="date" format={APP_DATE_FORMAT} /> : null}</dd>
           <dt>
-            <span id="atualizadoEm">Atualizado Em</span>
+            <span id="atualizadoEm">
+              <Translate contentKey="all4QmsMsGatewayApp.processo.atualizadoEm">Atualizado Em</Translate>
+            </span>
           </dt>
           <dd>
             {processoEntity.atualizadoEm ? <TextFormat value={processoEntity.atualizadoEm} type="date" format={APP_DATE_FORMAT} /> : null}
           </dd>
-          <dt>Criado Por</dt>
+          <dt>
+            <Translate contentKey="all4QmsMsGatewayApp.processo.criadoPor">Criado Por</Translate>
+          </dt>
           <dd>{processoEntity.criadoPor ? processoEntity.criadoPor.nome : ''}</dd>
-          <dt>Atualizado Por</dt>
+          <dt>
+            <Translate contentKey="all4QmsMsGatewayApp.processo.atualizadoPor">Atualizado Por</Translate>
+          </dt>
           <dd>{processoEntity.atualizadoPor ? processoEntity.atualizadoPor.nome : ''}</dd>
         </dl>
         <Button tag={Link} to="/processo" replace color="info" data-cy="entityDetailsBackButton">
-          <FontAwesomeIcon icon="arrow-left" /> <span className="d-none d-md-inline">Voltar</span>
+          <FontAwesomeIcon icon="arrow-left" />{' '}
+          <span className="d-none d-md-inline">
+            <Translate contentKey="entity.action.back">Back</Translate>
+          </span>
         </Button>
         &nbsp;
         <Button tag={Link} to={`/processo/${processoEntity.id}/edit`} replace color="primary">
-          <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
+          <FontAwesomeIcon icon="pencil-alt" />{' '}
+          <span className="d-none d-md-inline">
+            <Translate contentKey="entity.action.edit">Edit</Translate>
+          </span>
         </Button>
       </Col>
     </Row>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Button, Row, Col, FormText } from 'reactstrap';
+import { Row, Col, FormText } from 'reactstrap';
 import { isNumber, ValidatedField, ValidatedForm } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -19,6 +19,19 @@ import { IProcesso } from 'app/shared/model/processo.model';
 import { getEntities as getProcessos } from 'app/entities/processo/processo.reducer';
 import { IUsuario } from 'app/shared/model/usuario.model';
 import { getEntity, updateEntity, createEntity, reset } from './usuario.reducer';
+import {
+  Breadcrumbs,
+  Button,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 export const UsuarioUpdate = () => {
   const dispatch = useAppDispatch();
@@ -37,6 +50,17 @@ export const UsuarioUpdate = () => {
   const loading = useAppSelector(state => state.all4qmsmsgateway.usuario.loading);
   const updating = useAppSelector(state => state.all4qmsmsgateway.usuario.updating);
   const updateSuccess = useAppSelector(state => state.all4qmsmsgateway.usuario.updateSuccess);
+  const [formData, setFormData] = useState({
+    email: '',
+    fullName: '',
+    profile: '',
+    login: '',
+    manager: false,
+    managerProfile: '',
+    sector: '',
+    role: '',
+    processes: '',
+  });
 
   const handleClose = () => {
     navigate('/usuario' + location.search);
@@ -104,17 +128,121 @@ export const UsuarioUpdate = () => {
           processos: usuarioEntity?.processos?.map(e => e.id.toString()),
         };
 
+  const handleChange = event => {
+    const { name, value, type, checked } = event.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSubmit = event => {
+    event.preventDefault();
+  };
+
   return (
-    <div>
-      <Row className="justify-content-center">
-        <Col md="8">
-          <h2 id="all4QmsMsGatewayApp.usuario.home.createOrEditLabel" data-cy="UsuarioCreateUpdateHeading">
-            Criar ou editar Usuario
-          </h2>
-        </Col>
+    <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
+      <Row className="justify-content-center mt-5">
+        <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">
+          <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+            Home
+          </Link>
+          <Link to={'/'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
+            Gerenciamento
+          </Link>
+          <Typography style={{ color: '#606060' }}>Criação e edição de usuário</Typography>
+        </Breadcrumbs>
+        <h2 id="all4QmsMsGatewayApp.usuario.home.createOrEditLabel" data-cy="UsuarioCreateUpdateHeading" className="ms-5 mt-5">
+          Criar ou editar Usuario
+        </h2>
       </Row>
-      <Row className="justify-content-center">
-        <Col md="8">
+      <Row className="ms-3 me-3 mt-3">
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <TextField label="Email" name="email" value={formData.email} onChange={handleChange} fullWidth />
+            </Grid>
+            <Grid item xs={8}>
+              <TextField label="Nome completo" name="fullName" value={formData.fullName} onChange={handleChange} fullWidth />
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel>Perfil</InputLabel>
+                <Select label="Perfil" name="profile" value={formData.profile} onChange={handleChange}>
+                  <MenuItem value="admin">Admin</MenuItem>
+                  <MenuItem value="user">Usuário</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <TextField label="Login" name="login" value={formData.login} onChange={handleChange} fullWidth />
+              </FormControl>
+            </Grid>
+            <Grid item xs={1}>
+              <FormControlLabel control={<Checkbox name="manager" checked={formData.manager} onChange={handleChange} />} label="Gestor" />
+            </Grid>
+            <Grid item xs={3}>
+              <FormControl fullWidth>
+                <InputLabel>Gestor</InputLabel>
+                <Select name="Gestor" label="Gestor" value={formData.managerProfile} onChange={handleChange}>
+                  <MenuItem value="1">Admin</MenuItem>
+                  <MenuItem value="2">Usuário</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel>Setor</InputLabel>
+                <Select name="setor" label="Setor" value={formData.sector} onChange={handleChange}>
+                  <MenuItem value=""></MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel>Função</InputLabel>
+                <Select name="role" label="Função" value={formData.role} onChange={handleChange}>
+                  {funcaos
+                    ? funcaos.map(otherEntity => (
+                        <MenuItem value={otherEntity.id} key={otherEntity.id}>
+                          {otherEntity.nome}
+                        </MenuItem>
+                      ))
+                    : null}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel>Processos</InputLabel>
+                <Select name="processes" label="Processos" value={formData.processes} onChange={handleChange}>
+                  {processos
+                    ? processos.map(otherEntity => (
+                        <MenuItem value={otherEntity.id} key={otherEntity.id}>
+                          {otherEntity.nome}
+                        </MenuItem>
+                      ))
+                    : null}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} className="">
+              <Button
+                variant="contained"
+                className="me-3"
+                style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+                onClick={() => navigate('/usuario')}
+              >
+                Voltar
+              </Button>
+              <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+                Salvar
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+        {/* <Col md="8">
           {loading ? (
             <p>Loading...</p>
           ) : (
@@ -230,7 +358,7 @@ export const UsuarioUpdate = () => {
               </Button>
             </ValidatedForm>
           )}
-        </Col>
+        </Col> */}
       </Row>
     </div>
   );

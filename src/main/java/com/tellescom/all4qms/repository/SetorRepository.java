@@ -38,6 +38,9 @@ public interface SetorRepository extends ReactiveCrudRepository<Setor, Long>, Se
     @Query("SELECT * FROM setor entity WHERE entity.atualizado_por_id IS NULL")
     Flux<Setor> findAllWhereAtualizadoPorIsNull();
 
+    @Query("SELECT * FROM setor entity WHERE entity.id not in (select usuario_id from usuario)")
+    Flux<Setor> findAllWhereUsuarioIsNull();
+
     @Override
     <S extends Setor> Mono<S> save(S entity);
 

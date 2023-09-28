@@ -17,11 +17,11 @@
     },
     {
       "fieldName": "criadoEm",
-      "fieldType": "ZonedDateTime"
+      "fieldType": "Instant"
     },
     {
       "fieldName": "atualizadoEm",
-      "fieldType": "ZonedDateTime"
+      "fieldType": "Instant"
     }
   ],
   "fluentMethods": true,
@@ -35,6 +35,7 @@
       "otherEntityName": "usuario",
       "ownerSide": true,
       "relationshipName": "criadoPor",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     },
     {
@@ -42,8 +43,10 @@
       "otherEntityName": "usuario",
       "ownerSide": true,
       "relationshipName": "atualizadoPor",
+      "relationshipSide": "left",
       "relationshipType": "one-to-one"
     }
   ],
+  "searchEngine": "no",
   "service": "serviceClass"
 }

@@ -16,6 +16,7 @@ import { hasAnyAuthority } from 'app/shared/auth/private-route';
 import ErrorBoundary from 'app/shared/error/error-boundary';
 import { AUTHORITIES } from 'app/config/constants';
 import AppRoutes from 'app/routes';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const baseHref = document.querySelector('base').getAttribute('href').replace(/\/$/, '');
 
@@ -27,16 +28,23 @@ export const App = () => {
     dispatch(getProfile());
   }, []);
 
-  const isAuthenticated = useAppSelector(state => state.authentication.isAuthenticated);
-  const isAdmin = useAppSelector(state => hasAnyAuthority(state.authentication.account.authorities, [AUTHORITIES.ADMIN]));
-  const ribbonEnv = useAppSelector(state => state.applicationProfile.ribbonEnv);
-  const isInProduction = useAppSelector(state => state.applicationProfile.inProduction);
-  const isOpenAPIEnabled = useAppSelector(state => state.applicationProfile.isOpenAPIEnabled);
+  let isAuthenticated = useAppSelector(state => state.authentication.isAuthenticated);
+  let isAdmin = useAppSelector(state => hasAnyAuthority(state.authentication.account.authorities, [AUTHORITIES.ADMIN]));
+  let ribbonEnv = useAppSelector(state => state.applicationProfile.ribbonEnv);
+  let isInProduction = useAppSelector(state => state.applicationProfile.inProduction);
+  let isOpenAPIEnabled = useAppSelector(state => state.applicationProfile.isOpenAPIEnabled);
 
-  const paddingTop = '60px';
+  const checkAuth = () => {
+    isAuthenticated = useAppSelector(state => state.authentication.isAuthenticated);
+    isAdmin = useAppSelector(state => hasAnyAuthority(state.authentication.account.authorities, [AUTHORITIES.ADMIN]));
+    ribbonEnv = useAppSelector(state => state.applicationProfile.ribbonEnv);
+    isInProduction = useAppSelector(state => state.applicationProfile.inProduction);
+    isOpenAPIEnabled = useAppSelector(state => state.applicationProfile.isOpenAPIEnabled);
+  };
+
   return (
     <BrowserRouter basename={baseHref}>
-      <div className="app-container" style={{ paddingTop }}>
+      <div>
         <ToastContainer position={toast.POSITION.TOP_LEFT} className="toastify-container" toastClassName="toastify-toast" />
         <ErrorBoundary>
           <Header
@@ -47,13 +55,11 @@ export const App = () => {
             isOpenAPIEnabled={isOpenAPIEnabled}
           />
         </ErrorBoundary>
-        <div className="container-fluid view-container" id="app-view-container">
-          <Card className="jh-card">
-            <ErrorBoundary>
-              <AppRoutes />
-            </ErrorBoundary>
-          </Card>
-          <Footer />
+        <div id="app-view-container">
+          <ErrorBoundary>
+            <AppRoutes checkAuth={checkAuth} />
+          </ErrorBoundary>
+          <Footer isAuthenticated={isAuthenticated} />
         </div>
       </div>
     </BrowserRouter>

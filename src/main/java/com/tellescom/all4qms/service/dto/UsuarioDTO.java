@@ -1,6 +1,7 @@
 package com.tellescom.all4qms.service.dto;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -22,9 +23,9 @@ public class UsuarioDTO implements Serializable {
 
     private Boolean isGestor;
 
-    private ZonedDateTime criadoEm;
+    private Instant criadoEm;
 
-    private ZonedDateTime atualizadoEm;
+    private Instant atualizadoEm;
 
     private FuncaoDTO funcao;
 
@@ -72,19 +73,19 @@ public class UsuarioDTO implements Serializable {
         this.isGestor = isGestor;
     }
 
-    public ZonedDateTime getCriadoEm() {
+    public Instant getCriadoEm() {
         return criadoEm;
     }
 
-    public void setCriadoEm(ZonedDateTime criadoEm) {
+    public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 
-    public ZonedDateTime getAtualizadoEm() {
+    public Instant getAtualizadoEm() {
         return atualizadoEm;
     }
 
-    public void setAtualizadoEm(ZonedDateTime atualizadoEm) {
+    public void setAtualizadoEm(Instant atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
     }
 

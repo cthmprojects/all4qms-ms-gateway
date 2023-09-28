@@ -38,6 +38,9 @@ public interface FuncaoRepository extends ReactiveCrudRepository<Funcao, Long>, 
     @Query("SELECT * FROM funcao entity WHERE entity.atualizado_por_id IS NULL")
     Flux<Funcao> findAllWhereAtualizadoPorIsNull();
 
+    @Query("SELECT * FROM funcao entity WHERE entity.id not in (select usuario_id from usuario)")
+    Flux<Funcao> findAllWhereUsuarioIsNull();
+
     @Override
     <S extends Funcao> Mono<S> save(S entity);
 

@@ -12,48 +12,56 @@
                                  baseTableName="usuario"
                                  constraintName="fk_usuario__funcao_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="funcao"/>
+                                 referencedTableName="funcao"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="gestor_id"
                                  baseTableName="usuario"
                                  constraintName="fk_usuario__gestor_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="setor_id"
                                  baseTableName="usuario"
                                  constraintName="fk_usuario__setor_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="setor"/>
+                                 referencedTableName="setor"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="usuario"
                                  constraintName="fk_usuario__user_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="jhi_user"/>
+                                 referencedTableName="jhi_user"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="criado_por_id"
                                  baseTableName="usuario"
                                  constraintName="fk_usuario__criado_por_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="atualizado_por_id"
                                  baseTableName="usuario"
                                  constraintName="fk_usuario__atualizado_por_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="usuario_id"
                                  baseTableName="rel_usuario__processos"
                                  constraintName="fk_rel_usuario__processos__usuario_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="usuario"/>
+                                 referencedTableName="usuario"
+                                 />
 
         <addForeignKeyConstraint baseColumnNames="processos_id"
                                  baseTableName="rel_usuario__processos"
                                  constraintName="fk_rel_usuario__processos__processos_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="processo"/>
+                                 referencedTableName="processo"
+                                 />
     </changeSet>
 </databaseChangeLog>
