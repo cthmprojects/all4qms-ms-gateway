@@ -85,7 +85,11 @@ Navbar styles
   z-index: 1031;
 }
 
-.bg-primary{
-  background: var(--background-paper-elevation-0, #FFF) !important;
-  height:8%;
+.bg-primary {
+  background: var(--background-paper-elevation-0, #fff) !important;
+  height: 8%;
+}
+
+.remove-margin-top-icon span {
+  margin-top: 0 !important;
 }
