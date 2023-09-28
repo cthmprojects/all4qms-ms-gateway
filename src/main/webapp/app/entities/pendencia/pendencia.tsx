@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Table } from 'reactstrap';
-import { Translate, TextFormat, getPaginationState, JhiPagination, JhiItemCount } from 'react-jhipster';
+import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
@@ -9,6 +9,7 @@ import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.cons
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
+import { IPendencia } from 'app/shared/model/pendencia.model';
 import { getEntities } from './pendencia.reducer';
 
 export const Pendencia = () => {
@@ -18,7 +19,7 @@ export const Pendencia = () => {
   const navigate = useNavigate();
 
   const [paginationState, setPaginationState] = useState(
-    overridePaginationStateWithQueryParams(getPaginationState(location, ITEMS_PER_PAGE, 'id'), location.search)
+    overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
 
   const pendenciaList = useAppSelector(state => state.all4qmsmsgateway.pendencia.entities);
@@ -80,29 +81,17 @@ export const Pendencia = () => {
     sortEntities();
   };
 
-  const getSortIconByFieldName = (fieldName: string) => {
-    const sortFieldName = paginationState.sort;
-    const order = paginationState.order;
-    if (sortFieldName !== fieldName) {
-      return faSort;
-    } else {
-      return order === ASC ? faSortUp : faSortDown;
-    }
-  };
-
   return (
     <div>
       <h2 id="pendencia-heading" data-cy="PendenciaHeading">
-        <Translate contentKey="all4QmsMsGatewayApp.pendencia.home.title">Pendencias</Translate>
+        Pendencias
         <div className="d-flex justify-content-end">
           <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
-            <FontAwesomeIcon icon="sync" spin={loading} />{' '}
-            <Translate contentKey="all4QmsMsGatewayApp.pendencia.home.refreshListLabel">Refresh List</Translate>
+            <FontAwesomeIcon icon="sync" spin={loading} /> Atualizar lista
           </Button>
           <Link to="/pendencia/new" className="btn btn-primary jh-create-entity" id="jh-create-entity" data-cy="entityCreateButton">
             <FontAwesomeIcon icon="plus" />
-            &nbsp;
-            <Translate contentKey="all4QmsMsGatewayApp.pendencia.home.createLabel">Create new Pendencia</Translate>
+            &nbsp; Criar novo Pendencia
           </Link>
         </div>
       </h2>
@@ -112,42 +101,34 @@ export const Pendencia = () => {
             <thead>
               <tr>
                 <th className="hand" onClick={sort('id')}>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.id">ID</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('id')} />
+                  ID <FontAwesomeIcon icon="sort" />
                 </th>
                 <th className="hand" onClick={sort('nome')}>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.nome">Nome</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('nome')} />
+                  Nome <FontAwesomeIcon icon="sort" />
                 </th>
                 <th className="hand" onClick={sort('status')}>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.status">Status</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('status')} />
+                  Status <FontAwesomeIcon icon="sort" />
                 </th>
                 <th className="hand" onClick={sort('lidaEm')}>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.lidaEm">Lida Em</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('lidaEm')} />
+                  Lida Em <FontAwesomeIcon icon="sort" />
                 </th>
                 <th className="hand" onClick={sort('link')}>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.link">Link</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('link')} />
+                  Link <FontAwesomeIcon icon="sort" />
                 </th>
                 <th className="hand" onClick={sort('tipo')}>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.tipo">Tipo</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('tipo')} />
+                  Tipo <FontAwesomeIcon icon="sort" />
                 </th>
                 <th className="hand" onClick={sort('criadoEm')}>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.criadoEm">Criado Em</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('criadoEm')} />
+                  Criado Em <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.responsavel">Responsavel</Translate> <FontAwesomeIcon icon="sort" />
+                  Responsavel <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.criadoPor">Criado Por</Translate> <FontAwesomeIcon icon="sort" />
+                  Criado Por <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
-                  <Translate contentKey="all4QmsMsGatewayApp.pendencia.atualizadoPor">Atualizado Por</Translate>{' '}
-                  <FontAwesomeIcon icon="sort" />
+                  Atualizado Por <FontAwesomeIcon icon="sort" />
                 </th>
                 <th />
               </tr>
@@ -180,10 +161,7 @@ export const Pendencia = () => {
                   <td className="text-end">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`/pendencia/${pendencia.id}`} color="info" size="sm" data-cy="entityDetailsButton">
-                        <FontAwesomeIcon icon="eye" />{' '}
-                        <span className="d-none d-md-inline">
-                          <Translate contentKey="entity.action.view">View</Translate>
-                        </span>
+                        <FontAwesomeIcon icon="eye" /> <span className="d-none d-md-inline">Visualizar</span>
                       </Button>
                       <Button
                         tag={Link}
@@ -192,10 +170,7 @@ export const Pendencia = () => {
                         size="sm"
                         data-cy="entityEditButton"
                       >
-                        <FontAwesomeIcon icon="pencil-alt" />{' '}
-                        <span className="d-none d-md-inline">
-                          <Translate contentKey="entity.action.edit">Edit</Translate>
-                        </span>
+                        <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
                       </Button>
                       <Button
                         tag={Link}
@@ -204,10 +179,7 @@ export const Pendencia = () => {
                         size="sm"
                         data-cy="entityDeleteButton"
                       >
-                        <FontAwesomeIcon icon="trash" />{' '}
-                        <span className="d-none d-md-inline">
-                          <Translate contentKey="entity.action.delete">Delete</Translate>
-                        </span>
+                        <FontAwesomeIcon icon="trash" /> <span className="d-none d-md-inline">Excluir</span>
                       </Button>
                     </div>
                   </td>
@@ -216,11 +188,7 @@ export const Pendencia = () => {
             </tbody>
           </Table>
         ) : (
-          !loading && (
-            <div className="alert alert-warning">
-              <Translate contentKey="all4QmsMsGatewayApp.pendencia.home.notFound">No Pendencias found</Translate>
-            </div>
-          )
+          !loading && <div className="alert alert-warning">Nenhum Pendencia encontrado</div>
         )}
       </div>
       {totalItems ? (

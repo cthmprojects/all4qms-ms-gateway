@@ -35,7 +35,7 @@ const openAPIItem = () => (
 );
 
 export const AdminMenu = ({ showOpenAPI }) => (
-  <NavDropdown icon="users-cog" name="Administração" id="admin-menu" data-cy="adminMenu">
+  <NavDropdown icon="users-cog" color="black" name="Administração" id="admin-menu" data-cy="adminMenu">
     {adminMenuItems()}
     {showOpenAPI && openAPIItem()}
   </NavDropdown>
