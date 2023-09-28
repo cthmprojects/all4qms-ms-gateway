@@ -2,22 +2,22 @@ entity Usuario {
 	nome String required,
     email String,
     isGestor Boolean,
-    criadoEm ZonedDateTime,
-    atualizadoEm ZonedDateTime
+    criadoEm Instant,
+    atualizadoEm Instant
 }
 
 entity Funcao {
     nome String required,
     descricao String,
-    criadoEm ZonedDateTime,
-    atualizadoEm ZonedDateTime
+    criadoEm Instant,
+    atualizadoEm Instant
 }
 
 entity Setor {
     nome String required, //Manufatura
     descricao String,
-    criadoEm ZonedDateTime,
-    atualizadoEm ZonedDateTime
+    criadoEm Instant,
+    atualizadoEm Instant
 }
 
 entity Processo {
@@ -27,17 +27,17 @@ entity Processo {
     setor String,
     responsavel String,
     setorResponsavel String,
-    criadoEm ZonedDateTime,
-    atualizadoEm ZonedDateTime
+    criadoEm Instant,
+    atualizadoEm Instant
 }
 
 entity Pendencia {
     nome String //Descricao == "detalhesNaoConformidade"
     status Boolean, //Falso == Não lido
-    lidaEm ZonedDateTime,
+    lidaEm Instant,
     link String, //Caminho para acessar a pendencia
     tipo EnumTipoPend,
-    criadoEm ZonedDateTime,
+    criadoEm Instant,
 }
 
 enum EnumTipoPend {
@@ -46,10 +46,15 @@ enum EnumTipoPend {
 }
 
 relationship OneToOne {
+    Usuario{user(login)} to User
+}
+
+
+relationship OneToMany {
+	Usuario{pendencia(nome)} to Pendencia,
 	Usuario{funcao(nome)} to Funcao,
     Usuario{gestor(nome)} to Usuario,
     Usuario{setor(nome)} to Setor,
-    Usuario{user(login)} to User,
    	Usuario{criadoPor(nome)} to Usuario,
     Usuario{atualizadoPor(nome)} to Usuario,
     Funcao{criadoPor(nome)} to Usuario,
@@ -62,6 +67,8 @@ relationship OneToOne {
     Pendencia{criadoPor(nome)} to Usuario,
     Pendencia{atualizadoPor(nome)} to Usuario
 }
+
+
 
 relationship ManyToMany {
 	Usuario{processos(nome)} to Processo{usuario(nome)}
