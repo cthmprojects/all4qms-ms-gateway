@@ -76,7 +76,7 @@ public final class TestUtil {
         @Override
         protected boolean matchesSafely(String item, Description mismatchDescription) {
             try {
-                if (!date.isEqual(ZonedDateTime.parse(item))) {
+                if (!date.equals(Instant.parse(item))) {
                     mismatchDescription.appendText("was ").appendValue(item);
                     return false;
                 }
