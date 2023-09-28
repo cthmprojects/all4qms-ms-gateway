@@ -25,7 +25,7 @@ eureka:
     prefer-ip-address: true
   client:
     service-url:
-      defaultZone: http://admin:${jhipster.registry.password}@localhost:8761/eureka/
+      defaultZone: ${QMS_REGISTRY_HTTP:http}://admin:${jhipster.registry.password}@${QMS_REGISTRY_HOST:localhost:8761}/eureka/
 
 spring:
   devtools:
@@ -39,7 +39,7 @@ spring:
       indent-output: true
   cloud:
     config:
-      uri: http://admin:${jhipster.registry.password}@localhost:8761/config
+      uri: ${QMS_REGISTRY_HTTP:http}://admin:${jhipster.registry.password}@${QMS_REGISTRY_HOST:localhost:8761}/config
       # name of the config server's property source (file.yml) that we want to use
       name: all4qmsMsGateway
       profile: dev

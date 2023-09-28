@@ -18,7 +18,7 @@ spring:
   cloud:
     config:
       fail-fast: false # if not in "prod" profile, do not force to use Spring Cloud Config
-      uri: http://admin:${jhipster.registry.password}@localhost:8761/config
+      uri: ${QMS_REGISTRY_HTTP:http}://admin:${jhipster.registry.password}@${QMS_REGISTRY_HOST:localhost:8761}/config
       # name of the config server's property source (file.yml) that we want to use
       name: all4qmsMsGateway
       profile: dev # profile(s) of the property source
