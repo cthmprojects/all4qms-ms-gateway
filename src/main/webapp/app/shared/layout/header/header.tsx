@@ -1,13 +1,12 @@
 import './header.scss';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { Navbar, Nav, NavbarToggler, Collapse, Alert } from 'reactstrap';
+import { Navbar, Nav, NavbarToggler } from 'reactstrap';
 import LoadingBar from 'react-redux-loading-bar';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
-import { Home, Brand } from './header-components';
-import { AdminMenu, EntitiesMenu, AccountMenu } from '../menus';
+import { Brand } from './header-components';
 import { IconButton, Menu } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -15,9 +14,10 @@ import MailIcon from '@mui/icons-material/Mail';
 import Button from '@mui/material/Button';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Badge from '@mui/material/Badge';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { logout } from 'app/shared/reducers/authentication';
 import MenuItem from '@mui/material/MenuItem';
+import { Build } from '@mui/icons-material';
 
 export interface IHeaderProps {
   isAuthenticated: boolean;
@@ -30,6 +30,7 @@ export interface IHeaderProps {
 const Header = (props: IHeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorAdm, setAnchorAdm] = React.useState(null);
 
   const location = useLocation();
   const dispatch = useAppDispatch();
@@ -37,6 +38,16 @@ const Header = (props: IHeaderProps) => {
 
   const userMenuOpen = Boolean(anchorEl);
   const navigate = useNavigate();
+
+  const admMenuOpen = Boolean(anchorAdm);
+
+  const handleOpenAdmMenu = event => {
+    setAnchorAdm(event.currentTarget);
+  };
+
+  const handleCloseAdmMenu = () => {
+    setAnchorAdm(null);
+  };
 
   const handleOpenUserMenu = event => {
     setAnchorEl(event.currentTarget);
@@ -66,6 +77,52 @@ const Header = (props: IHeaderProps) => {
             <NavbarToggler aria-label="Menu" onClick={toggleMenu} />
             <Brand />
             <Nav id="header-tabs" className="ms-auto" navbar>
+              {props.isAuthenticated && props.isAdmin ? (
+                <>
+                  <IconButton onClick={handleOpenAdmMenu} sx={{ marginRight: '13px' }}>
+                    <Build />
+                  </IconButton>
+                  <Menu open={admMenuOpen} anchorEl={anchorAdm} onClose={handleCloseAdmMenu}>
+                    <MenuItem>
+                      <Link to={'/admin/gateway'} target="_blank">
+                        Gateway
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to={'/admin/user-management'} target="_blank">
+                        Gerenciamento de usuário
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to={'/admin/metrics'} target="_blank">
+                        Métricas
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to={'/admin/health'} target="_blank">
+                        Estado do Sistema
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to={'/admin/configuration'} target="_blank">
+                        Configuração
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to={'/admin/logs'} target="_blank">
+                        Logs
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to={'/admin/docs'} target="_blank">
+                        Swagger
+                      </Link>
+                    </MenuItem>
+                  </Menu>
+                </>
+              ) : (
+                <></>
+              )}
               <Badge badgeContent={4} color="primary" sx={{ marginRight: '13px' }}>
                 <MailIcon color="action" />
               </Badge>
