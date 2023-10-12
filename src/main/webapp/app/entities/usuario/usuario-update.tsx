@@ -157,22 +157,50 @@ export const UsuarioUpdate = () => {
         </h2>
       </Row>
       <Row className="ms-3 me-3 mt-3">
-        <form onSubmit={handleSubmit}>
+        <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity}>
           <Grid container spacing={2}>
             <Grid item xs={4}>
-              <TextField label="Email" name="email" value={formData.email} onChange={handleChange} fullWidth />
+              <ValidatedField
+                label="Email"
+                id="usuario-email"
+                name="email"
+                data-cy="email"
+                type="text"
+                validate={{
+                  required: { value: true, message: 'O campo é obrigatório.' },
+                }}
+              />
             </Grid>
             <Grid item xs={8}>
-              <TextField label="Nome completo" name="fullName" value={formData.fullName} onChange={handleChange} fullWidth />
+              <ValidatedField
+                label="Nome"
+                id="usuario-nome"
+                name="nome"
+                data-cy="nome"
+                type="text"
+                validate={{
+                  required: { value: true, message: 'O campo é obrigatório.' },
+                }}
+              />
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
-                <InputLabel>Perfil</InputLabel>
-                <Select label="Perfil" name="profile" value={formData.profile} onChange={handleChange}>
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="user">Usuário</MenuItem>
-                </Select>
-              </FormControl>
+              <ValidatedField id="usuario-funcao" name="funcao" data-cy="funcao" label="Funcao" type="select">
+                <option value="" key="0" />
+                {funcaos
+                  ? funcaos.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.nome}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
+              {/* <FormControl fullWidth>
+                  <InputLabel>Perfil</InputLabel>
+                  <Select label="Perfil" name="profile" value={formData.profile} onChange={handleChange}>
+                    <MenuItem value="admin">Admin</MenuItem>
+                    <MenuItem value="user">Usuário</MenuItem>
+                  </Select>
+                </FormControl> */}
             </Grid>
             <Grid item xs={4}>
               <FormControl fullWidth>
@@ -183,49 +211,81 @@ export const UsuarioUpdate = () => {
               <FormControlLabel control={<Checkbox name="manager" checked={formData.manager} onChange={handleChange} />} label="Gestor" />
             </Grid>
             <Grid item xs={3}>
-              <FormControl fullWidth>
-                <InputLabel>Gestor</InputLabel>
-                <Select name="Gestor" label="Gestor" value={formData.managerProfile} onChange={handleChange}>
-                  <MenuItem value="1">Admin</MenuItem>
-                  <MenuItem value="2">Usuário</MenuItem>
-                </Select>
-              </FormControl>
+              <ValidatedField id="usuario-gestor" name="gestor" data-cy="gestor" label="Gestor" type="select">
+                <option value="" key="0" />
+                {usuarios
+                  ? usuarios.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.nome}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
+              {/* <FormControl fullWidth>
+                  <InputLabel>Gestor</InputLabel>
+                  <Select name="Gestor" label="Gestor" value={formData.managerProfile} onChange={handleChange}>
+                    <MenuItem value="1">Admin</MenuItem>
+                    <MenuItem value="2">Usuário</MenuItem>
+                  </Select>
+                </FormControl> */}
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
-                <InputLabel>Setor</InputLabel>
-                <Select name="setor" label="Setor" value={formData.sector} onChange={handleChange}>
-                  <MenuItem value=""></MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={4}>
-              <FormControl fullWidth>
-                <InputLabel>Função</InputLabel>
-                <Select name="role" label="Função" value={formData.role} onChange={handleChange}>
-                  {funcaos
-                    ? funcaos.map(otherEntity => (
-                        <MenuItem value={otherEntity.id} key={otherEntity.id}>
-                          {otherEntity.nome}
-                        </MenuItem>
+              <ValidatedField id="usuario-setor" name="setor" data-cy="setor" label="Setor" type="select">
+                <option value="" key="0" />
+                {setors
+                  ? setors.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.nome}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
+              {/* <FormControl fullWidth>
+                  <InputLabel>Setor</InputLabel>
+                  <Select name="setor" label="Setor" value={formData.sector}>
+                    {
+                      setors.map(setor => (
+                        <MenuItem value={setor.id}>{setor.nome}</MenuItem>
                       ))
-                    : null}
-                </Select>
-              </FormControl>
+                    }
+                  </Select>
+                </FormControl> */}
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
-                <InputLabel>Processos</InputLabel>
-                <Select name="processes" label="Processos" value={formData.processes} onChange={handleChange}>
-                  {processos
-                    ? processos.map(otherEntity => (
-                        <MenuItem value={otherEntity.id} key={otherEntity.id}>
-                          {otherEntity.nome}
-                        </MenuItem>
-                      ))
-                    : null}
-                </Select>
-              </FormControl>
+              <ValidatedField id="usuario-funcao" name="funcao" data-cy="funcao" label="Funcao" type="select">
+                <option value="" key="0" />
+                {funcaos
+                  ? funcaos.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.nome}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
+            </Grid>
+            <Grid item xs={4}>
+              <ValidatedField label="Processos" id="usuario-processos" data-cy="processos" type="select" multiple name="processos">
+                <option value="" key="0" />
+                {processos
+                  ? processos.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.nome}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
+              {/* <FormControl fullWidth>
+                  <InputLabel>Processos</InputLabel>
+                  <Select name="processes" label="Processos" value={formData.processes} onChange={handleChange}>
+                    {processos
+                      ? processos.map(otherEntity => (
+                          <MenuItem value={otherEntity.id} key={otherEntity.id}>
+                            {otherEntity.nome}
+                          </MenuItem>
+                        ))
+                      : null}
+                  </Select>
+                </FormControl> */}
             </Grid>
             <Grid item xs={12} className="">
               <Button
@@ -241,7 +301,7 @@ export const UsuarioUpdate = () => {
               </Button>
             </Grid>
           </Grid>
-        </form>
+        </ValidatedForm>
         {/* <Col md="8">
           {loading ? (
             <p>Loading...</p>
