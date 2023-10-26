@@ -14,6 +14,7 @@ import Funcao from './funcao';
 import Setor from './setor';
 import Processo from './processo';
 import Pendencia from './pendencia';
+import Parametros from './parametros';
 /* jhipster-needle-add-route-import - JHipster will add routes here */
 
 export default () => {
@@ -28,6 +29,7 @@ export default () => {
         <Route path="setor/*" element={<Setor />} />
         <Route path="processo/*" element={<Processo />} />
         <Route path="pendencia/*" element={<Pendencia />} />
+        <Route path="parametros/*" element={<Pendencia />} />
         {/* jhipster-needle-add-route-path - JHipster will add routes here */}
       </ErrorBoundaryRoutes>
     </div>

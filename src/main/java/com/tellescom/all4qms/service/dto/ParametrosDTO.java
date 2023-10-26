@@ -1,9 +1,9 @@
 package com.tellescom.all4qms.service.dto;
 
-import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
+import javax.validation.constraints.*;
 
 /**
  * A DTO for the {@link com.tellescom.all4qms.domain.Parametros} entity.
