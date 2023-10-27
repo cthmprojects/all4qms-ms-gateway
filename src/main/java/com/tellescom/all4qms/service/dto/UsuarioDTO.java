@@ -20,23 +20,14 @@ public class UsuarioDTO implements Serializable {
     private String nome;
 
     private String email;
-
     private Boolean isGestor;
-
     private Instant criadoEm;
-
     private Instant atualizadoEm;
-
     private FuncaoDTO funcao;
-
     private UsuarioDTO gestor;
-
     private SetorDTO setor;
-
     private UserDTO user;
-
     private UsuarioDTO criadoPor;
-
     private UsuarioDTO atualizadoPor;
 
     private Set<ProcessoDTO> processos = new HashSet<>();
