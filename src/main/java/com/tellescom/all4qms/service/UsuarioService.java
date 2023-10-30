@@ -84,6 +84,11 @@ public class UsuarioService {
         return usuarioRepository.findAllBy(pageable).map(usuarioMapper::toDto);
     }
 
+    public Flux<UsuarioDTO> findAllGestors(Pageable pageable) {
+        log.debug("Request to get all Gestors");
+        return usuarioRepository.findAllGestors().map(usuarioMapper::toDto);
+    }
+
     /**
      * Get all the usuarios with eager load of many-to-many relationships.
      *

@@ -3,6 +3,7 @@ package com.tellescom.all4qms.web.rest;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.UsuarioService;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
+import com.tellescom.all4qms.service.dto.UsuarioRequest;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -180,9 +181,26 @@ public class UsuarioResource {
     public Mono<ResponseEntity<List<UsuarioDTO>>> getAllUsuarios(
         @org.springdoc.api.annotations.ParameterObject Pageable pageable,
         ServerHttpRequest request,
+        @RequestParam(required = false, name = "isGestor", defaultValue = "false") boolean isGestor,
         @RequestParam(required = false, defaultValue = "false") boolean eagerload
     ) {
         log.debug("REST request to get a page of Usuarios");
+        if (isGestor) {
+            return usuarioService
+                .countAll()
+                .zipWith(usuarioService.findAllGestors(pageable).collectList())
+                .map(countWithEntities ->
+                    ResponseEntity
+                        .ok()
+                        .headers(
+                            PaginationUtil.generatePaginationHttpHeaders(
+                                UriComponentsBuilder.fromHttpRequest(request),
+                                new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
+                            )
+                        )
+                        .body(countWithEntities.getT2())
+                );
+        }
         return usuarioService
             .countAll()
             .zipWith(usuarioService.findAll(pageable).collectList())
