@@ -97,7 +97,12 @@ const RncList = () => {
         </Breadcrumbs>
         <h1 className="title">Lista RNC</h1>
         <div style={{ paddingBottom: '30px' }}>
-          <Button variant="contained" className="primary-button" style={{ marginRight: '10px' }} onClick={() => navigate('/rnc/new')}>
+          <Button
+            variant="contained"
+            className="primary-button"
+            style={{ marginRight: '10px', width: '150px' }}
+            onClick={() => navigate('/rnc/new')}
+          >
             NOVO REGISTRO
           </Button>
         </div>

@@ -1,21 +1,12 @@
 import React, { useState } from 'react';
-import {
-  Breadcrumbs,
-  Button,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { Row } from 'reactstrap';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import './rnc-new.css';
+import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
+import DescriptionRnc from './register-types/description/description';
+import RepetitionRnc from './register-types/repetition/repetition-rnc';
 
 export const RNCNew = () => {
   const navigate = useNavigate();
@@ -38,111 +29,81 @@ export const RNCNew = () => {
           Cadastrar RNC
         </h2>
       </Row>
-      <Row className="ms-3 me-3 mt-3">
+      <Row className="ms-3 me-3 mt-3" fullWidth>
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={1}>
-              <TextField label="Nº" name="number" fullWidth disabled value={1} />
-            </Grid>
-            <Grid item xs={3}>
-              <TextField label="Emitido por:" name="emissor" fullWidth value={'Admin'} disabled />
-            </Grid>
-            <Grid item xs={2}>
-              <FormControl fullWidth>
-                <InputLabel>Processo ou empresa</InputLabel>
-                <Select label="Processo ou empresa" name="processo">
-                  <MenuItem value="1">Produção</MenuItem>
-                  <MenuItem value="2">Engenharia de teste</MenuItem>
-                  <MenuItem value="3">Estoque</MenuItem>
-                  <MenuItem value="4">Expedição</MenuItem>
-                  <MenuItem value="5">PCP</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={4}>
-              <FormControl fullWidth>
-                <InputLabel>Encaminhado para:</InputLabel>
-                <Select label="Encaminhado para:" name="encaminhado">
-                  <MenuItem value="1">Usuário 1</MenuItem>
-                  <MenuItem value="2">Usuário 2</MenuItem>
-                  <MenuItem value="3">Usuário 3</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={2}>
-              <FormControl fullWidth>
-                <DatePicker selected={date} onChange={date => setDate(date)} className="date-picker" />
-              </FormControl>
-            </Grid>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+            <TextField label="Nº" name="number" disabled value={1} className="form-field" />
 
-            {/* <Grid item xs={4}>
-                            <FormControl fullWidth>
-                                <TextField label="Login" name="login" fullWidth />
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={1}>
-                        <FormControlLabel control={<Checkbox name="manager" />} label="Gestor" />
-                        </Grid>
-                        <Grid item xs={3}>
-                        <FormControl fullWidth>
-                            <InputLabel>Gestor</InputLabel>
-                            <Select name="Gestor" label="Gestor" >
-                            <MenuItem value="1">Admin</MenuItem>
-                            <MenuItem value="2">Usuário</MenuItem>
-                            </Select>
-                        </FormControl>
-                        </Grid>
-                        <Grid item xs={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>Setor</InputLabel>
-                            <Select name="setor" label="Setor" >
-                            <MenuItem value=""></MenuItem>
-                            </Select>
-                        </FormControl>
-                        </Grid>
-                        <Grid item xs={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>Função</InputLabel>
-                            <Select name="role" label="Função">
-                            {funcaos
-                                ? funcaos.map(otherEntity => (
-                                    <MenuItem value={otherEntity.id} key={otherEntity.id}>
-                                    {otherEntity.nome}
-                                    </MenuItem>
-                                ))
-                                : null}
-                            </Select>
-                        </FormControl>
-                        </Grid>
-                        <Grid item xs={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>Processos</InputLabel>
-                            <Select name="processes" label="Processos">
-                            {processos
-                                ? processos.map(otherEntity => (
-                                    <MenuItem value={otherEntity.id} key={otherEntity.id}>
-                                    {otherEntity.nome}
-                                    </MenuItem>
-                                ))
-                                : null}
-                            </Select>
-                        </FormControl>
-                        </Grid> */}
-            <Grid item xs={12} className="">
-              <Button
-                variant="contained"
-                className="me-3"
-                style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-                onClick={() => navigate('/usuario')}
-              >
-                Voltar
-              </Button>
-              <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-                Salvar
-              </Button>
-            </Grid>
-          </Grid>
+            <TextField label="Emitido por:" name="emissor" value={'Admin'} disabled className="form-field" />
+
+            <FormControl className="form-field">
+              <InputLabel>Processo ou empresa</InputLabel>
+              <Select label="Processo ou empresa">
+                <MenuItem value="1">Produção</MenuItem>
+                <MenuItem value="2">Engenharia de teste</MenuItem>
+                <MenuItem value="3">Estoque</MenuItem>
+                <MenuItem value="4">Expedição</MenuItem>
+                <MenuItem value="5">PCP</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl className="form-field">
+              <InputLabel>Encaminhado para:</InputLabel>
+              <Select label="Encaminhado para:" name="encaminhado">
+                <MenuItem value="1">Usuário 1</MenuItem>
+                <MenuItem value="2">Usuário 2</MenuItem>
+                <MenuItem value="3">Usuário 3</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl className="form-field">
+              <DatePicker selected={date} onChange={date => setDate(date)} className="date-picker" />
+            </FormControl>
+            <div className="mt-2">
+              <FormControl className="form-field">
+                <InputLabel>Tipo</InputLabel>
+                <Select label="Selecione o tipo" name="encaminhado">
+                  <MenuItem value="1">NC</MenuItem>
+                  <MenuItem value="2">OM</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl className="form-field">
+                <InputLabel>Origem</InputLabel>
+                <Select label="Selecione a origem" name="encaminhado">
+                  <MenuItem value="1">Auditoria externa</MenuItem>
+                  <MenuItem value="1">Auditoria interna</MenuItem>
+                  <MenuItem value="1">Cliente</MenuItem>
+                  <MenuItem value="1">Matéria prima</MenuItem>
+                  <MenuItem value="1">Produto acabado</MenuItem>
+                  <MenuItem value="1">Outros</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+          </div>
+          <div className="mt-2" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              variant="contained"
+              className="me-3"
+              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+              onClick={() => navigate('/rnc')}
+            >
+              Voltar
+            </Button>
+            <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+              Salvar
+            </Button>
+          </div>
         </form>
+      </Row>
+      <Row className="ms-3 me-3 mt-3" fullWidth>
+        <ExternalAuditRegister />
+      </Row>
+      <Row className="ms-3 me-3 mt-3" fullWidth>
+        <DescriptionRnc />
+      </Row>
+      <Row className="ms-3 me-3 mt-3" fullWidth>
+        <RepetitionRnc />
       </Row>
     </div>
   );

@@ -3,3 +3,12 @@
   border-radius: 5px;
   padding: 17px;
 }
+
+.react-datepicker__input-container input {
+  max-width: 189px;
+}
+
+.form-field {
+  width: 200px;
+  height: 60px;
+}
