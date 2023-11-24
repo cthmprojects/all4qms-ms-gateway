@@ -1,11 +1,12 @@
 package com.tellescom.all4qms.domain;
 
-import java.io.Serializable;
-import java.time.Instant;
-import javax.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * A Parametro.
