@@ -4,6 +4,15 @@ import com.tellescom.all4qms.repository.ParametroRepository;
 import com.tellescom.all4qms.service.ParametroService;
 import com.tellescom.all4qms.service.dto.ParametroDTO;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
+<<<<<<< HEAD
+=======
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Objects;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+>>>>>>> 60170c5 (Ajustes Parametros)
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
