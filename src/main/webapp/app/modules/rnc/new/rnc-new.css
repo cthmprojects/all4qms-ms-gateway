@@ -2,13 +2,41 @@
   border: 1px solid #c6c6c6;
   border-radius: 5px;
   padding: 17px;
-}
-
-.react-datepicker__input-container input {
-  max-width: 189px;
+  width: 100%;
 }
 
 .form-field {
   width: 200px;
   height: 60px;
+}
+
+.rnc-form-field {
+  width: 100%;
+  max-width: calc(12.5% - 0.5rem);
+  height: 60px;
+  min-width: 150px !important;
+}
+
+#rnc-text-field {
+  height: 26px;
+}
+
+#mui-component-select-forwarded {
+  height: 27px !important;
+}
+
+#mui-component-select-processOrigin {
+  height: 27px !important;
+}
+
+#mui-component-select-processTarget {
+  height: 27px !important;
+}
+
+#mui-component-select-type {
+  height: 27px !important;
+}
+
+#mui-component-select-origin {
+  height: 27px !important;
 }

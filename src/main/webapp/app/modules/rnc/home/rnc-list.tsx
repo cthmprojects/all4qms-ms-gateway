@@ -109,33 +109,33 @@ const RncList = () => {
         <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
           <Button
             variant="contained"
-            className="primary-button me-2"
-            style={{ marginRight: '10px', width: '200px', height: '58px' }}
+            className="primary-button me-2 rnc-list-form-field"
+            style={{ marginRight: '10px', height: '58px' }}
             onClick={() => navigate('/rnc/new')}
           >
             NOVO REGISTRO
           </Button>
           <FormControl className="me-2">
-            <DatePicker selected={startDate} onChange={date => setStartDate(date)} className="date-picker" />
+            <DatePicker selected={startDate} onChange={date => setStartDate(date)} className="rnc-list-date-picker" />
           </FormControl>
           <FormControl className="me-2">
-            <DatePicker selected={endDate} onChange={date => setEndDate(date)} className="date-picker" />
+            <DatePicker selected={endDate} onChange={date => setEndDate(date)} className="rnc-list-date-picker" />
           </FormControl>
-          <FormControl className="form-field me-2">
+          <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Status</InputLabel>
             <Select label="Selecione" name="">
               <MenuItem value="1">Finalizado</MenuItem>
               <MenuItem value="2">Outro</MenuItem>
             </Select>
           </FormControl>
-          <FormControl className="form-field me-2">
+          <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Processo</InputLabel>
             <Select label="Selecione" name="">
               <MenuItem value="1">Produção</MenuItem>
               <MenuItem value="2">Outro</MenuItem>
             </Select>
           </FormControl>
-          <FormControl className="form-field me-2">
+          <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Tipo</InputLabel>
             <Select label="Selecione" name="">
               <MenuItem value="1">NC</MenuItem>
