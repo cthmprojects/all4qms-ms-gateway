@@ -1,9 +1,17 @@
 #outlined-adornment-search {
-  height: 38px !important;
+  height: 36px !important;
 }
 
 #search-filter {
   /* 200px search buttons + 8px margin */
   width: calc(100% - 6 * 208px) !important;
-  height: 71px;
+  height: 77px;
+
+  min-width: 200px;
+}
+
+.mui-label-transform {
+  margin-top: 10px;
+  background-color: #fff;
+  /* transform: translate(14px, 25px) scale(1) !important; */
 }

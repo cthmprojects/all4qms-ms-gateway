@@ -18,11 +18,11 @@ import {
   TableRow,
   TextField,
   Typography,
+  Select,
 } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import React, { useState } from 'react';
 import { Card, Row } from 'reactstrap';
-import { Select } from 'app/shared/components-form/select/select';
 import './rnc.css';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
@@ -110,22 +110,42 @@ const RncList = () => {
           <Button
             variant="contained"
             className="primary-button me-2"
-            style={{ marginRight: '10px', width: '200px', height: '58px', marginTop: '6px' }}
+            style={{ marginRight: '10px', width: '200px', height: '58px' }}
             onClick={() => navigate('/rnc/new')}
           >
             NOVO REGISTRO
           </Button>
-          <FormControl className="mt-2 me-2">
+          <FormControl className="me-2">
             <DatePicker selected={startDate} onChange={date => setStartDate(date)} className="date-picker" />
           </FormControl>
-          <FormControl className="me-2 mt-2">
+          <FormControl className="me-2">
             <DatePicker selected={endDate} onChange={date => setEndDate(date)} className="date-picker" />
           </FormControl>
-          <Select label="Status" options={['Finalizado', 'Outro']}></Select>
-          <Select label="Processo" options={['Produção', 'Outro']}></Select>
-          <Select label="Tipo" options={['NC', 'OM']} className="me-2"></Select>
+          <FormControl className="form-field me-2">
+            <InputLabel>Status</InputLabel>
+            <Select label="Selecione" name="">
+              <MenuItem value="1">Finalizado</MenuItem>
+              <MenuItem value="2">Outro</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl className="form-field me-2">
+            <InputLabel>Processo</InputLabel>
+            <Select label="Selecione" name="">
+              <MenuItem value="1">Produção</MenuItem>
+              <MenuItem value="2">Outro</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl className="form-field me-2">
+            <InputLabel>Tipo</InputLabel>
+            <Select label="Selecione" name="">
+              <MenuItem value="1">NC</MenuItem>
+              <MenuItem value="2">OM</MenuItem>
+            </Select>
+          </FormControl>
           <FormControl id="search-filter">
-            <InputLabel htmlFor="outlined-adornment-search">Pesquisa</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
+              Pesquisar
+            </InputLabel>
             <OutlinedInput
               id="outlined-adornment-search"
               endAdornment={
