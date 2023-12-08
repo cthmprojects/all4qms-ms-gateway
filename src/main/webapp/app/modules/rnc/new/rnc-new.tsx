@@ -7,7 +7,7 @@ import './rnc-new.css';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
 import DescriptionRnc from './register-types/description/description';
 import RepetitionRnc from './register-types/repetition/repetition-rnc';
-import Input from './../../../shared/components-form/input';
+import Input from '../../../shared/components-form/input/input';
 
 export const RNCNew = () => {
   const navigate = useNavigate();
@@ -34,9 +34,9 @@ export const RNCNew = () => {
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             <Input label="Nº" text={1} disabled />
-            <Input label="Emitido por:" text={'Admin'} disabled style={{ marginLeft: '10px' }} />
+            <Input label="Emitido por:" text={'Admin'} disabled className="ms-2" />
 
-            <FormControl className="form-field me-2">
+            <FormControl className="form-field me-2 ms-2">
               <InputLabel>Processo ou empresa</InputLabel>
               <Select label="Processo ou empresa">
                 <MenuItem value="1">Produção</MenuItem>

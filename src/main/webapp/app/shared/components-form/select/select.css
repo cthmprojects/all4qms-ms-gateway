@@ -1,0 +1,109 @@
+.body {
+  position: relative;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.wrap {
+  position: absolute;
+  right: 0;
+  top: 40%;
+  width: 350px;
+  left: 0;
+  margin: 0 auto;
+}
+
+/* select starting stylings ------------------------------*/
+.select-material {
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  position: relative;
+  width: 200px;
+  top: 4px;
+  border-radius: 4px;
+  border: 1px solid #c6c6c6;
+  padding: 0 10px;
+}
+
+.select-text {
+  position: relative;
+  font-family: inherit;
+  background-color: transparent;
+  width: 100%;
+  height: 60px;
+  font-size: 16px;
+  border: none;
+  box-shadow: none;
+}
+
+/* Remove focus */
+.select-text:focus {
+  outline: none;
+  border: none;
+}
+
+/* Use custom arrow */
+.select-material .select-text {
+  appearance: none;
+  -webkit-appearance: none;
+  text-overflow: '';
+}
+
+.select-material:after {
+  position: absolute;
+  top: 18px;
+  right: 10px;
+  /* Styling the down arrow */
+}
+
+/* LABEL ======================================= */
+.select-label {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 18px;
+  font-weight: normal;
+  position: absolute;
+  pointer-events: none;
+  left: 0;
+  top: 35px;
+  transition: 0.2s ease all;
+}
+
+/* active state */
+.select-text:focus ~ .select-label,
+.select-text:valid ~ .select-label {
+  color: #858585;
+  top: 5px;
+  transition: 0.2s ease all;
+  font-size: 14px;
+}
+
+/* BOTTOM BARS ================================= */
+.select-bar {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.select-bar:before,
+.select-bar:after {
+  content: '';
+  height: 0;
+  width: 0;
+  bottom: 3px;
+  position: absolute;
+  background: #2f80ed;
+  transition: 0.2s ease all;
+}
+
+.select-bar:before {
+  left: 50%;
+}
+
+.select-bar:after {
+  right: 50%;
+}
+
+/* active state */
+/* .select-text:focus ~ .select-bar:before, .select-text:focus ~ .select-bar:after {
+	width: 50%;
+} */
+
+/* HIGHLIGHTER ================================== */

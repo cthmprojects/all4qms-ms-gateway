@@ -1,0 +1,9 @@
+#outlined-adornment-search {
+  height: 38px !important;
+}
+
+#search-filter {
+  /* 200px search buttons + 8px margin */
+  width: calc(100% - 6 * 208px) !important;
+  height: 71px;
+}

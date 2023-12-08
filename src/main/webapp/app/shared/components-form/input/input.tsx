@@ -7,9 +7,10 @@ export interface InputProps {
   disabled: boolean;
   handleChange?: (value: string) => void;
   style?: React.CSSProperties;
+  className?: string;
 }
 
-export const Input = ({ text, label, disabled = false, handleChange, style }: InputProps) => {
+export const Input = ({ text, label, disabled = false, handleChange, style, className }: InputProps) => {
   const [value, setValue] = useState(text.toString());
 
   const handleValueChange = (value: string) => {
@@ -20,7 +21,7 @@ export const Input = ({ text, label, disabled = false, handleChange, style }: In
   };
 
   return (
-    <div className="group" style={style}>
+    <div className={`group ${className}`} style={style}>
       <label htmlFor="e">{label}</label>
       <input onChange={e => handleValueChange(e.target.value)} disabled={disabled} value={value} className="rnc-input" id="e" />
     </div>
