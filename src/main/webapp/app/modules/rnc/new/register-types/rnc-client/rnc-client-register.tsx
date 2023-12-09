@@ -155,6 +155,7 @@ export const ClientRegister = ({ onClientChange }) => {
             <TextField label="Lote" name="lot" className="ms-3 m-2" sx={{ width: '20% !important' }} />
             <FormControl className="m-2">
               <DatePicker
+                // locale='pt-BR'
                 selected={clientForm.deliveryDate.value}
                 onChange={date => handleChange({ ...clientForm, deliveryDate: { value: date, error: clientForm.deliveryDate.error } })}
                 className="date-picker date-picker-rnc-client"
@@ -174,6 +175,7 @@ export const ClientRegister = ({ onClientChange }) => {
             />
             <FormControl className="m-2">
               <DatePicker
+                // locale='pt-BR'
                 selected={clientForm.nfDate.value}
                 onChange={date => handleChange({ ...clientForm, nfDate: { value: date, error: clientForm.nfDate.error } })}
                 className="date-picker date-picker-rnc-client"

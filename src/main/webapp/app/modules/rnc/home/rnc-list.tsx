@@ -116,10 +116,20 @@ const RncList = () => {
             NOVO REGISTRO
           </Button>
           <FormControl className="me-2">
-            <DatePicker selected={startDate} onChange={date => setStartDate(date)} className="rnc-list-date-picker" />
+            <DatePicker
+              // locale='pt-BR'
+              selected={startDate}
+              onChange={date => setStartDate(date)}
+              className="rnc-list-date-picker"
+            />
           </FormControl>
           <FormControl className="me-2">
-            <DatePicker selected={endDate} onChange={date => setEndDate(date)} className="rnc-list-date-picker" />
+            <DatePicker
+              // locale='pt-BR'
+              selected={endDate}
+              onChange={date => setEndDate(date)}
+              className="rnc-list-date-picker"
+            />
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Status</InputLabel>

@@ -7,7 +7,7 @@ export const DescriptionRnc = () => {
   return (
     <Card>
       <h3 className="m-3">Descrição</h3>
-      <Divider variant="middle" />
+      <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
       <TextField label="Não conformidade" placeholder="Escreva aqui" fullWidth sx={{ mt: 2 }} />
       <TextField label="Requisito descumprido" placeholder="Escreva aqui" fullWidth sx={{ mt: 2 }} />
       <TextField label="Evidência objetiva" placeholder="Escreva aqui" fullWidth sx={{ mt: 2 }} />

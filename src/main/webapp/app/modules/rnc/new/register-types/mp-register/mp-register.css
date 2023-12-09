@@ -28,13 +28,26 @@
 .react-datepicker-popper {
   z-index: 1000 !important;
   transform: translate(-12px, -211px) !important;
-  position: relative !important;
 }
 
 .react-datepicker__triangle {
   display: none !important;
 }
 
-.react-datepicker__tab-loop {
-  position: absolute !important;
+.select-mp {
+  width: 30%;
+  height: 56px;
+  min-width: 150px !important;
+}
+
+#mui-component-select-identifiedStep {
+  height: 24px !important;
+}
+
+.select-mp-inspection {
+  width: 20% !important;
+}
+
+#mui-component-select-inspection-type {
+  height: 24px !important;
 }

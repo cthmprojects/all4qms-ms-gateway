@@ -7,7 +7,7 @@ export const InternalAuditRegister = () => {
     <>
       <Card>
         <h2 className="m-3">Auditoria Interna</h2>
-        <Divider variant="middle" />
+        <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <TextField fullWidth label="Norma" name="norma" disabled className="form-field m-3" />
           <TextField fullWidth label="Número NC" name="numeroNC" className="form-field m-3" />

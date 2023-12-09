@@ -21,6 +21,7 @@ import RepetitionRnc from './register-types/repetition/repetition-rnc';
 import Input from '../../../shared/components-form/input/input';
 import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
+import MPRegister from './register-types/mp-register/mp-register';
 
 export const RNCNew = () => {
   const navigate = useNavigate();
@@ -68,6 +69,10 @@ export const RNCNew = () => {
     console.log(data);
   };
 
+  const setMPRegister = data => {
+    console.log(data);
+  };
+
   const renderComponents = () => {
     switch (firstForm.origin.value) {
       case 'externalAudit':
@@ -76,6 +81,8 @@ export const RNCNew = () => {
         return <InternalAuditRegister />;
       case 'client':
         return <ClientRegister onClientChange={setClientRegister} />;
+      case 'mp':
+        return <MPRegister onMPChange={setMPRegister} />;
     }
   };
 
@@ -202,7 +209,7 @@ export const RNCNew = () => {
                 <MenuItem value="externalAudit">Auditoria externa</MenuItem>
                 <MenuItem value="internalAudit">Auditoria interna</MenuItem>
                 <MenuItem value="client">Cliente</MenuItem>
-                <MenuItem value="rawMaterial">Matéria prima</MenuItem>
+                <MenuItem value="mp">Matéria prima</MenuItem>
                 <MenuItem value="endProduct">Produto acabado</MenuItem>
                 <MenuItem value="others">Outros</MenuItem>
               </Select>
