@@ -19,6 +19,8 @@ import ExternalAuditRegister from './register-types/external-audit/external-audi
 import DescriptionRnc from './register-types/description/description';
 import RepetitionRnc from './register-types/repetition/repetition-rnc';
 import Input from '../../../shared/components-form/input/input';
+import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
+import ClientRegister from './register-types/rnc-client/rnc-client-register';
 
 export const RNCNew = () => {
   const navigate = useNavigate();
@@ -62,10 +64,18 @@ export const RNCNew = () => {
     console.log(firstForm);
   };
 
+  const setClientRegister = data => {
+    console.log(data);
+  };
+
   const renderComponents = () => {
     switch (firstForm.origin.value) {
       case 'externalAudit':
         return <ExternalAuditRegister />;
+      case 'internalAudit':
+        return <InternalAuditRegister />;
+      case 'client':
+        return <ClientRegister onClientChange={setClientRegister} />;
     }
   };
 
@@ -225,93 +235,6 @@ export const RNCNew = () => {
           </Row>
         </>
       ) : null}
-
-      {/* <Row className="ms-3 me-3 mt-3" fullWidth>
-        <ExternalAuditRegister />
-      </Row>
-      <Row className="ms-3 me-3 mt-3" fullWidth>
-        <DescriptionRnc />
-      </Row>
-      <Row className="ms-3 me-3 mt-3" fullWidth>
-        <RepetitionRnc />
-      </Row> */}
-
-      {/* <Row className="ms-3 me-3 mt-3" fullWidth>
-        <form onSubmit={handleSubmit}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-            <TextField label="Nº" name="number" disabled value={1} className="form-field" />
-
-            <TextField label="Emitido por:" name="emissor" value={'Admin'} disabled className="form-field" />
-
-            <FormControl className="form-field">
-              <InputLabel>Processo ou empresa</InputLabel>
-              <Select label="Processo ou empresa">
-                <MenuItem value="1">Produção</MenuItem>
-                <MenuItem value="2">Engenharia de teste</MenuItem>
-                <MenuItem value="3">Estoque</MenuItem>
-                <MenuItem value="4">Expedição</MenuItem>
-                <MenuItem value="5">PCP</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl className="form-field">
-              <InputLabel>Encaminhado para:</InputLabel>
-              <Select label="Encaminhado para:" name="encaminhado">
-                <MenuItem value="1">Usuário 1</MenuItem>
-                <MenuItem value="2">Usuário 2</MenuItem>
-                <MenuItem value="3">Usuário 3</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl className="form-field">
-              <DatePicker selected={date} onChange={date => setDate(date)} className="date-picker" />
-            </FormControl>
-            <div className="mt-2">
-              <FormControl className="form-field">
-                <InputLabel>Tipo</InputLabel>
-                <Select label="Selecione o tipo" name="encaminhado">
-                  <MenuItem value="1">NC</MenuItem>
-                  <MenuItem value="2">OM</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl className="form-field">
-                <InputLabel>Origem</InputLabel>
-                <Select label="Selecione a origem" name="encaminhado">
-                  <MenuItem value="1">Auditoria externa</MenuItem>
-                  <MenuItem value="1">Auditoria interna</MenuItem>
-                  <MenuItem value="1">Cliente</MenuItem>
-                  <MenuItem value="1">Matéria prima</MenuItem>
-                  <MenuItem value="1">Produto acabado</MenuItem>
-                  <MenuItem value="1">Outros</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-          </div>
-          <div className="mt-2" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant="contained"
-              className="me-3"
-              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => navigate('/rnc')}
-            >
-              Voltar
-            </Button>
-            <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-              Salvar
-            </Button>
-          </div>
-        </form>
-      </Row>
-      <Row className="ms-3 me-3 mt-3" fullWidth>
-        <ExternalAuditRegister />
-      </Row>
-      <Row className="ms-3 me-3 mt-3" fullWidth>
-        <DescriptionRnc />
-      </Row>
-      <Row className="ms-3 me-3 mt-3" fullWidth>
-        <RepetitionRnc />
-      </Row> */}
     </div>
   );
 };

@@ -12,13 +12,13 @@ export const DescriptionRnc = () => {
       <TextField label="Requisito descumprido" placeholder="Escreva aqui" fullWidth sx={{ mt: 2 }} />
       <TextField label="Evidência objetiva" placeholder="Escreva aqui" fullWidth sx={{ mt: 2 }} />
       <div className="mb-3 mt-3" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <IconButton>
+        <IconButton sx={{ width: '50px', height: '50px' }}>
           <UploadFileOutlined></UploadFileOutlined>
         </IconButton>
-        <IconButton>
+        <IconButton sx={{ width: '50px', height: '50px' }}>
           <EditOutlined></EditOutlined>
         </IconButton>
-        <IconButton>
+        <IconButton sx={{ width: '50px', height: '50px' }}>
           <DeleteOutlined></DeleteOutlined>
         </IconButton>
         <Fab color="primary" aria-label="add" size="medium">
