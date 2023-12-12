@@ -10,7 +10,16 @@ import {
   Select,
   TextField,
   Typography,
+  Box,
+  Card,
+  CardActions,
+  CardContent,
+  IconButton,
+  Divider,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Row } from 'reactstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
@@ -26,6 +35,10 @@ import MPRegister from './register-types/mp-register/mp-register';
 export const RNCNew = () => {
   const navigate = useNavigate();
   const [firstForm, setFirstForm] = useState({
+    decision: {
+      value: '',
+      error: false,
+    },
     number: {
       value: '1',
       error: false,
@@ -60,6 +73,11 @@ export const RNCNew = () => {
     },
   });
 
+  const [native, setNative] = useState('');
+  const onNativeChange = e => {
+    setNative(e.target.value);
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
     console.log(firstForm);
@@ -86,6 +104,7 @@ export const RNCNew = () => {
     }
   };
 
+  /*
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
       <Row className="justify-content-center mt-5">
@@ -242,6 +261,162 @@ export const RNCNew = () => {
           </Row>
         </>
       ) : null}
+    </div>
+  );
+  */
+
+  return (
+    <div>
+      <Card sx={{ minWidth: 275 }}>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            Análise de Abrangência da NC
+          </Typography>
+          <br />
+          <div>
+            <label>
+              Palavra-chave
+              <input type="text" name="keyword" />
+            </label>
+            <IconButton color="secondary" aria-label="Adicionar palavra chave">
+              <AddIcon />
+            </IconButton>
+          </div>
+          <div>
+            <textarea id="postTextAreaId" name="postContent" rows={3} cols={80} />
+          </div>
+        </CardContent>
+      </Card>
+      <Divider light />
+      <Card sx={{ minWidth: 275 }}>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            Ação Imediata / Disposição para conter a NC
+          </Typography>
+          <br />
+          <div>
+            <TextField label="Descrição da ação" defaultValue="Descrição" />
+            <TextField label="Prazo" defaultValue="Prazo" />
+            <TextField label="Responsável" defaultValue="Responsável" />
+            <TextField label="Status" defaultValue="Status" />
+            <IconButton color="secondary" aria-label="Editar">
+              <EditIcon />
+            </IconButton>
+            <IconButton color="secondary" aria-label="Remover">
+              <DeleteIcon />
+            </IconButton>
+            <IconButton color="secondary" aria-label="Adicionar">
+              <AddIcon />
+            </IconButton>
+          </div>
+        </CardContent>
+      </Card>
+      <Divider light />
+      <Card sx={{ minWidth: 275 }}>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            Decisão sobre Matéria-Prima/Insumo ou Decisão sobre Produto Acabado
+          </Typography>
+          <br />
+          <div>
+            <FormControl sx={{ m: 1, minWidth: 200 }} size="small">
+              <InputLabel>Decisão</InputLabel>
+              <Select
+                label="Decisão"
+                name="decision"
+                value={firstForm.decision.value}
+                onChange={event => setFirstForm({ ...firstForm, decision: { value: event.target.value, error: firstForm.decision.error } })}
+              >
+                <MenuItem value="1">Produção</MenuItem>
+                <MenuItem value="2">Engenharia de teste</MenuItem>
+                <MenuItem value="3">Estoque</MenuItem>
+                <MenuItem value="4">Expedição</MenuItem>
+                <MenuItem value="5">PCP</MenuItem>
+              </Select>
+            </FormControl>
+            <label>
+              Descrição da Decisão:
+              <TextField label="Descrição" name="descriptionDecision" size="small" />
+            </label>
+            <input type="date" value={native} onChange={onNativeChange} />
+          </div>
+          <br />
+          <div>
+            <TextField label="Responsável" defaultValue="" />
+            <TextField label="Quantidade selecionada" defaultValue="" />
+            <TextField label="Quantidade aprovada" defaultValue="" />
+            <TextField label="Quantidade reprovada" defaultValue="" />
+            <TextField label="% Rejeição" defaultValue="" />
+          </div>
+          <br />
+        </CardContent>
+      </Card>
+      <Divider light />
+      <Card sx={{ minWidth: 275 }}>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            Investigação de Causas
+          </Typography>
+          <br />
+          <div>
+            <div>
+              <textarea id="ncTextAreaId" name="ncArea" rows={5} cols={20} />
+            </div>
+            <div>
+              <TextField label="Porquê" defaultValue="Porquê" size="small" />
+              <TextField label="Porquê" defaultValue="Porquê" size="small" />
+              <TextField label="Porquê" defaultValue="Porquê" size="small" />
+            </div>
+            <div>
+              <TextField label="Porquê" defaultValue="Porquê" size="small" />
+              <TextField label="Porquê" defaultValue="Porquê" size="small" />
+              <TextField label="Porquê" defaultValue="Porquê" size="small" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Divider light />
+      <Card sx={{ minWidth: 275 }}>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            5 Porquês
+          </Typography>
+          <br />
+          <div>
+            <TextField label="Descrição da ação" defaultValue="Descrição" />
+            <TextField label="Prazo" defaultValue="Prazo" />
+            <TextField label="Responsável" defaultValue="Responsável" />
+            <TextField label="Status" defaultValue="Status" />
+          </div>
+        </CardContent>
+      </Card>
+      <Divider light />
+      <Card sx={{ minWidth: 275 }}>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            Plano de Ação Corretiva
+          </Typography>
+          <br />
+          <div>
+            <TextField label="Descrição da ação" defaultValue="Descrição" />
+            <TextField label="Prazo" defaultValue="Prazo" />
+            <TextField label="Responsável" defaultValue="Responsável" />
+            <TextField label="Status" defaultValue="Status" />
+            <TextField label="Verificação" defaultValue="Verificação" />
+            <TextField label="Responsável Verificação" defaultValue="Responsável" />
+
+            <IconButton color="secondary" aria-label="Editar">
+              <EditIcon />
+            </IconButton>
+            <IconButton color="secondary" aria-label="Remover">
+              <DeleteIcon />
+            </IconButton>
+            <IconButton color="secondary" aria-label="Adicionar">
+              <AddIcon />
+            </IconButton>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
