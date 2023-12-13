@@ -2,11 +2,6 @@
   width: 70% !important;
 }
 
-.date-picker-rnc-client {
-  height: 56px !important;
-  border-radius: 4px;
-}
-
 .date-label {
   color: rgba(0, 0, 0, 0.6);
   transform: translate(-5px, -67px) scale(0.75);

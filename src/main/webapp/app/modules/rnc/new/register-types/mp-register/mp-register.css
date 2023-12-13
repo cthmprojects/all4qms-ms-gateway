@@ -7,6 +7,11 @@
   border-radius: 4px;
 }
 
+.date-picker-rnc-client[disabled] {
+  background-color: #fff;
+  border: 1px solid rgb(0 0 0 / 27%);
+}
+
 .date-label {
   color: rgba(0, 0, 0, 0.6);
   transform: translate(-5px, -67px) scale(0.75);
