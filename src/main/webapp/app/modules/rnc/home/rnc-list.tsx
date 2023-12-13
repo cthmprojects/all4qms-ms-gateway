@@ -120,16 +120,22 @@ const RncList = () => {
               // locale='pt-BR'
               selected={startDate}
               onChange={date => setStartDate(date)}
-              className="rnc-list-date-picker"
+              className="rnc-list-date-picker mt-4"
             />
+            <label htmlFor="" className="rnc-list-date-label">
+              Ínicio
+            </label>
           </FormControl>
           <FormControl className="me-2">
             <DatePicker
               // locale='pt-BR'
               selected={endDate}
               onChange={date => setEndDate(date)}
-              className="rnc-list-date-picker"
+              className="rnc-list-date-picker mt-4"
             />
+            <label htmlFor="" className="rnc-list-date-label">
+              Fim
+            </label>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Status</InputLabel>

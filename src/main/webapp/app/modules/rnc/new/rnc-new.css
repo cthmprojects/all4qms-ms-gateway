@@ -22,6 +22,20 @@
   min-width: 150px !important;
 }
 
+.rnc-date-label {
+  color: rgba(0, 0, 0, 0.6);
+  transform: translate(7px, -70px) scale(0.75);
+  font-size: 1rem;
+  line-height: 1.4375rem;
+  font-weight: 400;
+  width: 40px;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: #fff;
+  outline: none;
+  z-index: 100;
+  padding-left: 3px;
+}
+
 #rnc-text-field {
   height: 26px;
 }
