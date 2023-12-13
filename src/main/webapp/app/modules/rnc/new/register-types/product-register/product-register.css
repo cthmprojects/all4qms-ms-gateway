@@ -1,0 +1,48 @@
+.text-field-70 {
+  width: 70% !important;
+}
+
+.date-label {
+  color: rgba(0, 0, 0, 0.6);
+  transform: translate(-5px, -67px) scale(0.75);
+  font-size: 1rem;
+  line-height: 1.4375rem;
+  font-weight: 400;
+  width: 118px;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: #fff;
+  outline: none;
+  z-index: 100;
+}
+
+.date-label-nf {
+  transform: translate(0px, -67px) scale(0.75);
+  width: 66px;
+}
+
+.react-datepicker-popper {
+  z-index: 1000 !important;
+  transform: translate(-12px, -211px) !important;
+}
+
+.react-datepicker__triangle {
+  display: none !important;
+}
+
+.select-mp {
+  width: 30%;
+  height: 56px;
+  min-width: 150px !important;
+}
+
+#mui-component-select-identifiedStep {
+  height: 24px !important;
+}
+
+.select-mp-inspection {
+  width: 20% !important;
+}
+
+#mui-component-select-inspection-type {
+  height: 24px !important;
+}
