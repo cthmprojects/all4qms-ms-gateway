@@ -17,6 +17,7 @@ import {
   CardContent,
   IconButton,
   Divider,
+  Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -26,10 +27,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import Grid from '@mui/material/Grid';
+import { Row } from 'reactstrap';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 
-export const GeneralRegister = ({ onRegisterChange }) => {
+export const GeneralRegister = () => {
   const [registerForm, setRegisterForm] = useState({
     decision: {
       value: '',
@@ -139,7 +142,7 @@ export const GeneralRegister = ({ onRegisterChange }) => {
 
   const handleChange = (value: any) => {
     setRegisterForm(value);
-    onRegisterChange(registerForm);
+    // onRegisterChange(registerForm);
   };
 
   const [checkedIshikawa, setCheckedIshikawa] = React.useState(true);
@@ -154,36 +157,50 @@ export const GeneralRegister = ({ onRegisterChange }) => {
 
   return (
     <>
-      <div className="padding-container">
-        <div className="container-style">
-          <Breadcrumbs aria-label="breadcrumb">
+      <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
+        <Row className="justify-content-center mt-5">
+          <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">
             <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
               Home
             </Link>
-            <Typography className="link">RNC</Typography>
+            <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
+              RNC
+            </Link>
           </Breadcrumbs>
+        </Row>
+        <div className="container-style">
           <Card sx={{ minWidth: 275 }}>
             <CardContent>
               <Typography variant="h5" component="div">
                 Análise de Abrangência da NC
               </Typography>
               <br />
-              <div className="m-2">
-                <label htmlFor="text-field-keyword" className="m-2">
-                  Palavra-chave:
-                </label>
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+                <span className="me-2" style={{ fontWeight: '500', fontSize: '16px', marginTop: '0px', color: '#384150' }}>
+                  Palavra chave
+                </span>
+                <LocalOfferIcon sx={{ color: '#707070' }} />
                 <TextField
+                  className="ms-2"
                   id="text-field-keyword"
-                  label="palavra"
-                  className="m-2"
+                  label="Escreva aqui..."
+                  style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
                   onChange={e => handleChange({ ...registerForm, keyword: { value: e.target.value, error: registerForm.keyword.error } })}
                 />
                 <IconButton aria-label="Adicionar palavra chave">
-                  <AddIcon />
+                  <AddCircleIcon fontSize="large" />
                 </IconButton>
               </div>
-              <div>
-                <textarea id="postTextAreaId" value={registerForm.keywords.value} name="postContent" rows={3} cols={80} />
+              <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px' }}>
+                <Chip label="Software" onClick={() => {}} onDelete={() => {}} />
+                {/* <textarea 
+                  id="postTextAreaId" 
+                  value={registerForm.keywords.value} 
+                  name="postContent" 
+                  rows={3} 
+                  cols={80}
+                  style={{ width: '100%'}} 
+                /> */}
               </div>
             </CardContent>
           </Card>

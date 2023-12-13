@@ -382,7 +382,13 @@ export const RNCNew = () => {
               <Button variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150' }}>
                 Salvar
               </Button>
-              <Button className="ms-3" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+              <Button
+                className="ms-3"
+                variant="contained"
+                color="primary"
+                style={{ background: '#e6b200', color: '#4e4d4d' }}
+                onClick={() => navigate('/rnc/general')}
+              >
                 Avançar
               </Button>
             </div>
