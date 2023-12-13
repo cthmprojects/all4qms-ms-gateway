@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Breadcrumbs,
   Button,
@@ -22,6 +22,8 @@ import Input from '../../../shared/components-form/input/input';
 import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import MPRegister from './register-types/mp-register/mp-register';
+import ProductRegister from './register-types/product-register/product-register';
+import OthersRegister from './register-types/others-register/others-register';
 
 export const RNCNew = () => {
   const navigate = useNavigate();
@@ -60,9 +62,52 @@ export const RNCNew = () => {
     },
   });
 
+  const [secondForm, setSecondForm] = useState(false);
+  const [formError, setFormError] = useState(false);
+
+  const validateProcessOrigin = () => {
+    let valid = true;
+    if (firstForm.processOrigin.value == '') {
+      setFirstForm({ ...firstForm, processOrigin: { value: '', error: true } });
+      setFormError(true);
+      valid = false;
+    } else {
+      setFirstForm({ ...firstForm, processOrigin: { value: '', error: false } });
+      setFormError(false);
+    }
+
+    return valid;
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
-    console.log(firstForm);
+
+    if (!validateProcessOrigin()) {
+      return;
+    }
+
+    if (firstForm.forwarded.value == '') {
+      setFirstForm({ ...firstForm, forwarded: { value: '', error: true } });
+      setFormError(true);
+      return;
+    }
+    if (firstForm.processTarget.value == '') {
+      setFirstForm({ ...firstForm, processTarget: { value: '', error: true } });
+      setFormError(true);
+      return;
+    }
+    if (firstForm.type.value == '') {
+      setFirstForm({ ...firstForm, type: { value: '', error: true } });
+      setFormError(true);
+      return;
+    }
+    if (firstForm.origin.value == '') {
+      setFirstForm({ ...firstForm, origin: { value: '', error: true } });
+      setFormError(true);
+      return;
+    }
+
+    setSecondForm(true);
   };
 
   const setClientRegister = data => {
@@ -70,6 +115,14 @@ export const RNCNew = () => {
   };
 
   const setMPRegister = data => {
+    console.log(data);
+  };
+
+  const setProductRegister = data => {
+    console.log(data);
+  };
+
+  const setOthersRegister = data => {
     console.log(data);
   };
 
@@ -83,6 +136,10 @@ export const RNCNew = () => {
         return <ClientRegister onClientChange={setClientRegister} />;
       case 'mp':
         return <MPRegister onMPChange={setMPRegister} />;
+      case 'endProduct':
+        return <ProductRegister onProductRegisterChange={setProductRegister} />;
+      case 'others':
+        return <OthersRegister onOthersRegisterChange={setOthersRegister} />;
     }
   };
 
@@ -130,7 +187,10 @@ export const RNCNew = () => {
               <Select
                 label="Processo ou empresa"
                 name="processOrigin"
+                disabled={secondForm}
                 value={firstForm.processOrigin.value}
+                // error={}
+                error={firstForm.processOrigin.error}
                 onChange={event =>
                   setFirstForm({ ...firstForm, processOrigin: { value: event.target.value, error: firstForm.processOrigin.error } })
                 }
@@ -148,7 +208,9 @@ export const RNCNew = () => {
               <Select
                 label="Encaminhado para:"
                 name="forwarded"
+                disabled={secondForm}
                 value={firstForm.forwarded.value}
+                error={firstForm.forwarded.error}
                 onChange={event =>
                   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
                 }
@@ -164,7 +226,9 @@ export const RNCNew = () => {
               <Select
                 label="Processo ou empresa"
                 name="processTarget"
+                disabled={secondForm}
                 value={firstForm.processTarget.value}
+                error={firstForm.processTarget.error}
                 onChange={event =>
                   setFirstForm({ ...firstForm, processTarget: { value: event.target.value, error: firstForm.processTarget.error } })
                 }
@@ -180,6 +244,7 @@ export const RNCNew = () => {
             <FormControl className="mb-2 rnc-form-field me-2">
               <DatePicker
                 selected={firstForm.date.value}
+                disabled={secondForm}
                 onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
                 className="date-picker"
               />
@@ -190,6 +255,8 @@ export const RNCNew = () => {
               <Select
                 label="Selecione o tipo"
                 name="type"
+                disabled={secondForm}
+                error={firstForm.type.error}
                 value={firstForm.type.value}
                 onChange={event => setFirstForm({ ...firstForm, type: { value: event.target.value, error: firstForm.type.error } })}
               >
@@ -203,7 +270,9 @@ export const RNCNew = () => {
               <Select
                 label="Selecione a origem"
                 name="origin"
+                disabled={secondForm}
                 value={firstForm.origin.value}
+                error={firstForm.origin.error}
                 onChange={event => setFirstForm({ ...firstForm, origin: { value: event.target.value, error: firstForm.origin.error } })}
               >
                 <MenuItem value="externalAudit">Auditoria externa</MenuItem>
@@ -215,23 +284,34 @@ export const RNCNew = () => {
               </Select>
             </FormControl>
           </div>
-          <div className="mt-2 me-2" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant="contained"
-              className="me-3"
-              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => navigate('/rnc')}
-            >
-              Voltar
-            </Button>
-            <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-              Salvar
-            </Button>
-          </div>
+          {secondForm ? null : (
+            <div className="mt-2 me-2" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                variant="contained"
+                className="me-3"
+                style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+                onClick={() => navigate('/rnc')}
+              >
+                Voltar
+              </Button>
+              <Button type="submit" variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150' }}>
+                Salvar
+              </Button>
+              <Button
+                className="ms-3"
+                type="submit"
+                variant="contained"
+                color="primary"
+                style={{ background: '#e6b200', color: '#4e4d4d' }}
+              >
+                Avançar
+              </Button>
+            </div>
+          )}
         </form>
       </div>
 
-      {firstForm.origin.value ? (
+      {secondForm ? (
         <>
           <Row className="ms-3 me-3 mt-3">{renderComponents()}</Row>
           <Row className="ms-3 me-3 mt-3">
@@ -239,6 +319,24 @@ export const RNCNew = () => {
           </Row>
           <Row className="ms-3 me-3 mt-3" fullWidth>
             <RepetitionRnc />
+          </Row>
+          <Row className="m-3">
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                variant="contained"
+                className="me-3"
+                style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+                onClick={() => navigate('/rnc')}
+              >
+                Voltar
+              </Button>
+              <Button variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150' }}>
+                Salvar
+              </Button>
+              <Button className="ms-3" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+                Avançar
+              </Button>
+            </div>
           </Row>
         </>
       ) : null}

@@ -5,6 +5,11 @@
   width: 100%;
 }
 
+.date-picker[disabled] {
+  background-color: #fff;
+  border: 1px solid rgb(0 0 0 / 27%);
+}
+
 .form-field {
   width: 200px;
   height: 60px;
