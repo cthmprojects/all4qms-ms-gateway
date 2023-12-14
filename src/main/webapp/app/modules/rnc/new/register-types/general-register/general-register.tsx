@@ -193,6 +193,7 @@ export const GeneralRegister = () => {
               </div>
               <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px' }}>
                 <Chip label="Software" onClick={() => {}} onDelete={() => {}} />
+                <Chip label="Documents" onClick={() => {}} onDelete={() => {}} />
                 {/* <textarea 
                   id="postTextAreaId" 
                   value={registerForm.keywords.value} 
@@ -210,11 +211,9 @@ export const GeneralRegister = () => {
               <Typography variant="h5" component="div">
                 Ação Imediata / Disposição para conter a NC
               </Typography>
-              <IconButton color="secondary" aria-label="Adicionar">
-                <AddIcon />
-              </IconButton>
+
               <br />
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
                 <TextField
                   label="Descrição da ação"
                   className="m-2"
@@ -244,11 +243,14 @@ export const GeneralRegister = () => {
                   onChange={e => handleChange({ ...registerForm, status: { value: e.target.value, error: registerForm.status.error } })}
                 />
 
-                <IconButton color="secondary" aria-label="Editar">
-                  <EditIcon />
+                <IconButton aria-label="Editar">
+                  <EditIcon fontSize="medium" />
                 </IconButton>
-                <IconButton color="secondary" aria-label="Remover">
-                  <DeleteIcon />
+                <IconButton aria-label="Remover">
+                  <DeleteIcon fontSize="medium" />
+                </IconButton>
+                <IconButton color="secondary" aria-label="Adicionar">
+                  <AddIcon fontSize="large" />
                 </IconButton>
               </div>
             </CardContent>
@@ -260,37 +262,47 @@ export const GeneralRegister = () => {
                 Decisão sobre Matéria-Prima/Insumo ou Decisão sobre Produto Acabado
               </Typography>
               <br />
-              <div>
-                <InputLabel>Decisão</InputLabel>
-                <Select
-                  label="Decisão"
-                  name="decision"
-                  value={registerForm.decision.value}
-                  onChange={event =>
-                    setRegisterForm({ ...registerForm, decision: { value: event.target.value, error: registerForm.decision.error } })
-                  }
-                >
-                  <MenuItem value="1">Decisão 1</MenuItem>
-                  <MenuItem value="2">Decisão 2</MenuItem>
-                  <MenuItem value="3">Decisão 3</MenuItem>
-                  <MenuItem value="4">Decisão 4</MenuItem>
-                  <MenuItem value="5">Decisão 5</MenuItem>
-                </Select>
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+                <FormControl className="mb-2 rnc-form-field me-2">
+                  <Select
+                    label="Decisão"
+                    name="decision"
+                    value={registerForm.decision.value}
+                    onChange={event =>
+                      setRegisterForm({ ...registerForm, decision: { value: event.target.value, error: registerForm.decision.error } })
+                    }
+                  >
+                    <MenuItem value="1">Decisão 1</MenuItem>
+                    <MenuItem value="2">Decisão 2</MenuItem>
+                    <MenuItem value="3">Decisão 3</MenuItem>
+                    <MenuItem value="4">Decisão 4</MenuItem>
+                    <MenuItem value="5">Decisão 5</MenuItem>
+                  </Select>
+                </FormControl>
+                <div>
+                  <TextField label="Descrição" name="descriptionDecision" className="ms-2" />
+                </div>
 
-                <TextField label="Descrição" name="descriptionDecision" />
-                <DatePicker
-                  selected={registerForm.implementationDate.value}
-                  onChange={date =>
-                    handleChange({ ...registerForm, implementationDate: { value: date, error: registerForm.implementationDate.error } })
-                  }
-                  className="date-picker"
-                  id="date-picker-general-register"
-                />
+                <FormControl className="mb-2 rnc-form-field me-2">
+                  <DatePicker
+                    selected={registerForm.implementationDate.value}
+                    onChange={date =>
+                      handleChange({ ...registerForm, implementationDate: { value: date, error: registerForm.implementationDate.error } })
+                    }
+                    className="date-picker"
+                    id="date-picker-general-register"
+                  />
+                  <label htmlFor="" className="rnc-date-label">
+                    Data
+                  </label>
+                </FormControl>
               </div>
               <br />
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
                 <TextField
                   label="Responsável"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
                   onChange={event =>
                     setRegisterForm({
                       ...registerForm,
@@ -300,6 +312,8 @@ export const GeneralRegister = () => {
                 />
                 <TextField
                   label="Quantidade selecionada"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
                   onChange={event =>
                     setRegisterForm({
                       ...registerForm,
@@ -309,6 +323,8 @@ export const GeneralRegister = () => {
                 />
                 <TextField
                   label="Quantidade aprovada"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
                   onChange={event =>
                     setRegisterForm({
                       ...registerForm,
@@ -318,6 +334,8 @@ export const GeneralRegister = () => {
                 />
                 <TextField
                   label="Quantidade reprovada"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
                   onChange={event =>
                     setRegisterForm({
                       ...registerForm,
@@ -327,6 +345,8 @@ export const GeneralRegister = () => {
                 />
                 <TextField
                   label="% Rejeição"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
                   onChange={event =>
                     setRegisterForm({
                       ...registerForm,
@@ -345,113 +365,91 @@ export const GeneralRegister = () => {
                 Investigação de Causas
               </Typography>
               <br />
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+                <FormControlLabel control={<Checkbox />} onChange={handleCheckIshikawaChange} label="ISHIKAWA" />
+                <textarea id="ncIshikawaTextAreaId" name="ncArea" rows={5} cols={30} />
                 <div>
-                  <FormControlLabel control={<Checkbox />} onChange={handleCheckIshikawaChange} label="ISHIKAWA" />
+                  <div>
+                    <TextField
+                      label="Meio Ambiente"
+                      className="m-2"
+                      onChange={e =>
+                        handleChange({
+                          ...registerForm,
+                          causaMeioAmbiente: { value: e.target.value, error: registerForm.causaMeioAmbiente.error },
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Máquina"
+                      className="m-2"
+                      onChange={e =>
+                        handleChange({ ...registerForm, causaMaquina: { value: e.target.value, error: registerForm.causaMaquina.error } })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <TextField
+                      label="Mão de obra"
+                      className="m-2"
+                      onChange={e =>
+                        handleChange({ ...registerForm, causaMaoObra: { value: e.target.value, error: registerForm.causaMaoObra.error } })
+                      }
+                    />
+                    <TextField
+                      label="Medição"
+                      className="m-2"
+                      onChange={e =>
+                        handleChange({ ...registerForm, causaMedicao: { value: e.target.value, error: registerForm.causaMedicao.error } })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <TextField
+                      label="Método"
+                      className="m-2"
+                      onChange={e =>
+                        handleChange({ ...registerForm, causaMedicao: { value: e.target.value, error: registerForm.causaMedicao.error } })
+                      }
+                    />
+                    <TextField
+                      label="Matéria-prima"
+                      className="m-2"
+                      onChange={e =>
+                        handleChange({
+                          ...registerForm,
+                          causaMateriaPrima: { value: e.target.value, error: registerForm.causaMateriaPrima.error },
+                        })
+                      }
+                    />
+                  </div>
                 </div>
-                <Grid container spacing={2}>
-                  <Grid item xs>
-                    <div>
-                      <textarea id="ncIshikawaTextAreaId" name="ncArea" rows={5} cols={20} />
-                    </div>
-                  </Grid>
-                  <Grid item container xs spacing={3}>
-                    <Grid item xs>
-                      <TextField
-                        label="Meio Ambiente"
-                        onChange={e =>
-                          handleChange({
-                            ...registerForm,
-                            causaMeioAmbiente: { value: e.target.value, error: registerForm.causaMeioAmbiente.error },
-                          })
-                        }
-                      />
-                      <TextField
-                        label="Máquina"
-                        onChange={e =>
-                          handleChange({ ...registerForm, causaMaquina: { value: e.target.value, error: registerForm.causaMaquina.error } })
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs>
-                      <TextField
-                        label="Mão de obra"
-                        onChange={e =>
-                          handleChange({ ...registerForm, causaMaoObra: { value: e.target.value, error: registerForm.causaMaoObra.error } })
-                        }
-                      />
-                      <TextField
-                        label="Medição"
-                        onChange={e =>
-                          handleChange({ ...registerForm, causaMedicao: { value: e.target.value, error: registerForm.causaMedicao.error } })
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs>
-                      <TextField
-                        label="Método"
-                        onChange={e =>
-                          handleChange({ ...registerForm, causaMedicao: { value: e.target.value, error: registerForm.causaMedicao.error } })
-                        }
-                      />
-                      <TextField
-                        label="Matéria-prima"
-                        onChange={e =>
-                          handleChange({
-                            ...registerForm,
-                            causaMateriaPrima: { value: e.target.value, error: registerForm.causaMateriaPrima.error },
-                          })
-                        }
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
               </div>
               <Divider light />
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+                <FormControlLabel control={<Checkbox />} onChange={handleCheckFiveWhy} label="Resposta dos 5 porquês" />
                 <div>
-                  <FormControlLabel control={<Checkbox />} onChange={handleCheckFiveWhy} label="Resposta dos 5 porquês" />
+                  <textarea id="ncPorqueTextAreaId" rows={5} cols={30} />
                 </div>
                 <div>
-                  <Grid container spacing={2}>
-                    <Grid item xs>
-                      <div>
-                        <textarea id="ncPorqueTextAreaId" rows={5} cols={20} />
-                      </div>
-                    </Grid>
-                    <Grid item xs={5} direction="column" sm container>
-                      <Grid item xs>
-                        <div>
-                          <TextField label="Porquê" />
-                        </div>
-                      </Grid>
-                      <Grid item xs>
-                        <div>
-                          <TextField label="Porquê" />
-                        </div>
-                      </Grid>
-                      <Grid item xs>
-                        <div>
-                          <TextField label="Porquê" />
-                        </div>
-                      </Grid>
-                      <Grid item xs>
-                        <div>
-                          <TextField label="Porquê" />
-                        </div>
-                      </Grid>
-                      <Grid item xs>
-                        <div>
-                          <TextField label="Porquê" />
-                        </div>
-                      </Grid>
-                    </Grid>
-                    <Grid item xs>
-                      <div>
-                        <textarea id="causaPorqueTextAreaId" rows={5} cols={20} />
-                      </div>
-                    </Grid>
-                  </Grid>
+                  <div>
+                    <TextField label="Porquê" className="m-2" />
+                  </div>
+                  <div>
+                    <TextField label="Porquê" className="m-2" />
+                  </div>
+                  <div>
+                    <TextField label="Porquê" className="m-2" />
+                  </div>
+                  <div>
+                    <TextField label="Porquê" className="m-2" />
+                  </div>
+                  <div>
+                    <TextField label="Porquê" className="m-2" />
+                  </div>
+                </div>
+                <div>
+                  <textarea id="causaPorqueTextAreaId" rows={5} cols={30} />
                 </div>
               </div>
             </CardContent>
@@ -464,7 +462,7 @@ export const GeneralRegister = () => {
                 Plano de Ação Corretiva
               </Typography>
               <br />
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
                 <TextField
                   label="Descrição da ação"
                   onChange={e =>
@@ -515,14 +513,14 @@ export const GeneralRegister = () => {
                   }
                 />
 
-                <IconButton color="secondary" aria-label="Editar">
-                  <EditIcon />
+                <IconButton aria-label="Editar">
+                  <EditIcon fontSize="medium" />
                 </IconButton>
-                <IconButton color="secondary" aria-label="Remover">
-                  <DeleteIcon />
+                <IconButton aria-label="Remover">
+                  <DeleteIcon fontSize="medium" />
                 </IconButton>
                 <IconButton color="secondary" aria-label="Adicionar">
-                  <AddIcon />
+                  <AddIcon fontSize="large" />
                 </IconButton>
               </div>
             </CardContent>
