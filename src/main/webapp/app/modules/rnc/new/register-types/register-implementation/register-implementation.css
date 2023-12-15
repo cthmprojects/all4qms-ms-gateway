@@ -1,0 +1,10 @@
+#rnc-text-field-implementation {
+  height: 26px;
+}
+
+.rnc-form-field-implementation {
+  width: 30%;
+  max-width: 400px;
+  height: 60px;
+  min-width: 200px !important;
+}
