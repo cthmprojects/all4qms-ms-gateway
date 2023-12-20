@@ -18,6 +18,7 @@ import {
   IconButton,
   Divider,
   Chip,
+  Fab,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -31,8 +32,10 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import Grid from '@mui/material/Grid';
 import { Row } from 'reactstrap';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { Add } from '@mui/icons-material';
 
 export const GeneralRegister = () => {
+  const navigate = useNavigate();
   const [registerForm, setRegisterForm] = useState({
     decision: {
       value: '',
@@ -163,8 +166,11 @@ export const GeneralRegister = () => {
             <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
               Home
             </Link>
-            <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              RNC
+            <Link to={'/rnc/general'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+              Relatório de Não conformidade
+            </Link>
+            <Link to={'/rnc/general'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
+              Geral
             </Link>
           </Breadcrumbs>
         </Row>
@@ -191,7 +197,7 @@ export const GeneralRegister = () => {
                   <AddCircleIcon fontSize="large" />
                 </IconButton>
               </div>
-              <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px' }}>
+              <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
                 <Chip label="Software" onClick={() => {}} onDelete={() => {}} />
                 <Chip label="Documents" onClick={() => {}} onDelete={() => {}} />
                 {/* <textarea 
@@ -205,8 +211,7 @@ export const GeneralRegister = () => {
               </div>
             </CardContent>
           </Card>
-          <Divider light />
-          <Card sx={{ minWidth: 275 }}>
+          <Card sx={{ minWidth: 275 }} className="mt-3">
             <CardContent>
               <Typography variant="h5" component="div">
                 Ação Imediata / Disposição para conter a NC
@@ -249,21 +254,62 @@ export const GeneralRegister = () => {
                 <IconButton aria-label="Remover">
                   <DeleteIcon fontSize="medium" />
                 </IconButton>
-                <IconButton color="secondary" aria-label="Adicionar">
+                {/* <IconButton color="secondary" aria-label="Adicionar">
                   <AddIcon fontSize="large" />
+                </IconButton> */}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+                <TextField
+                  label="Descrição da ação"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
+                  onChange={e =>
+                    handleChange({ ...registerForm, descricaoAcao: { value: e.target.value, error: registerForm.descricaoAcao.error } })
+                  }
+                />
+                <TextField
+                  label="Prazo"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
+                  onChange={e => handleChange({ ...registerForm, prazo: { value: e.target.value, error: registerForm.prazo.error } })}
+                />
+                <TextField
+                  label="Responsável"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
+                  onChange={e =>
+                    handleChange({ ...registerForm, responsavel: { value: e.target.value, error: registerForm.responsavel.error } })
+                  }
+                />
+                <TextField
+                  label="Status"
+                  className="m-2"
+                  sx={{ width: '20% !important' }}
+                  onChange={e => handleChange({ ...registerForm, status: { value: e.target.value, error: registerForm.status.error } })}
+                />
+
+                <IconButton aria-label="Editar">
+                  <EditIcon fontSize="medium" />
                 </IconButton>
+                <IconButton aria-label="Remover">
+                  <DeleteIcon fontSize="medium" />
+                </IconButton>
+                <Fab color="primary" aria-label="add" size="medium" className="ms-3 btn-add-fab">
+                  <Add />
+                </Fab>
               </div>
             </CardContent>
           </Card>
           <Divider light />
-          <Card sx={{ minWidth: 275 }}>
+          <Card sx={{ minWidth: 275 }} className="mt-3">
             <CardContent>
               <Typography variant="h5" component="div">
                 Decisão sobre Matéria-Prima/Insumo ou Decisão sobre Produto Acabado
               </Typography>
               <br />
-              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <FormControl className="mb-2 rnc-form-field me-2">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className="mt-2 mb-2">
+                <FormControl className="mb-2 rnc-form-field me-2" sx={{ display: 'flex', maxWidth: '40%' }}>
+                  <InputLabel>Retrabalho</InputLabel>
                   <Select
                     label="Decisão"
                     name="decision"
@@ -279,9 +325,14 @@ export const GeneralRegister = () => {
                     <MenuItem value="5">Decisão 5</MenuItem>
                   </Select>
                 </FormControl>
-                <div>
-                  <TextField label="Descrição" name="descriptionDecision" className="ms-2" />
-                </div>
+                <TextField
+                  sx={{ height: '60px', maxWidth: '50% !important' }}
+                  label="Descrição da decisão"
+                  name="number"
+                  id="rnc-text-field"
+                  // value={firstForm.number.value}
+                  className="rnc-form-field me-2 mb-2"
+                />
 
                 <FormControl className="mb-2 rnc-form-field me-2">
                   <DatePicker
@@ -299,6 +350,36 @@ export const GeneralRegister = () => {
               </div>
               <br />
               <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+                <Card className="mt-3 p-2" sx={{ display: 'flex', flexDirection: 'column', width: '30%' }}>
+                  <h3 style={{ fontSize: '1rem' }}>Responsável</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <TextField
+                      sx={{ height: '60px', maxWidth: '70% !important' }}
+                      // label="Descrição da decisão"
+                      name="number"
+                      id="rnc-text-field"
+                      // value={firstForm.number.value}
+                      className="rnc-form-field me-2 mb-2"
+                    />
+                    <IconButton aria-label="Remover" className="me-2">
+                      <DeleteIcon fontSize="medium" />
+                    </IconButton>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <TextField
+                      sx={{ height: '60px', maxWidth: '70% !important' }}
+                      // label="Descrição da decisão"
+                      name="number"
+                      id="rnc-text-field"
+                      // value={firstForm.number.value}
+                      className="rnc-form-field me-2 mb-2"
+                    />
+                    <Fab color="primary" aria-label="add" size="medium" className="btn-add-fab me-2">
+                      <Add />
+                    </Fab>
+                  </div>
+                </Card>
+
                 <TextField
                   label="Responsável"
                   className="m-2"
@@ -525,6 +606,28 @@ export const GeneralRegister = () => {
               </div>
             </CardContent>
           </Card>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
+            <Button
+              variant="contained"
+              className="me-3"
+              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+              onClick={() => navigate('/rnc/new')}
+            >
+              Voltar
+            </Button>
+            <Button variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}>
+              Salvar
+            </Button>
+            <Button
+              className="ms-3"
+              variant="contained"
+              color="primary"
+              style={{ background: '#e6b200', color: '#4e4d4d' }}
+              onClick={() => navigate('/rnc/general/implementacao')}
+            >
+              Avançar
+            </Button>
+          </div>
         </div>
       </div>
     </>

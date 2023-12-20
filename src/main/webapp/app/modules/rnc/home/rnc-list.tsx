@@ -19,6 +19,9 @@ import {
   TextField,
   Typography,
   Select,
+  Box,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import React, { useState } from 'react';
@@ -28,10 +31,44 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from '@mui/icons-material';
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
 const RncList = () => {
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [value, setValue] = useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    console.log(newValue);
+
+    setValue(newValue);
+  };
 
   const columns = [
     'Número',
@@ -174,8 +211,36 @@ const RncList = () => {
             />
           </FormControl>
         </div>
-        <Divider sx={{ borderColor: '#7d7d7d' }}></Divider>
-        {renderTable()}
+        <Box sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+              <Tab label="Todos" {...a11yProps(0)} />
+              <Tab label="Auditoria" {...a11yProps(1)} />
+              <Tab label="Reclamação" {...a11yProps(2)} />
+              <Tab label="Material" {...a11yProps(3)} />
+              <Tab label="Produto" {...a11yProps(4)} />
+              <Tab label="Procedimento" {...a11yProps(5)} />
+            </Tabs>
+          </Box>
+          <CustomTabPanel value={value} index={0}>
+            {renderTable()}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={1}>
+            {renderTable()}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={2}>
+            {renderTable()}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={3}>
+            {renderTable()}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={4}>
+            {renderTable()}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={5}>
+            {renderTable()}
+          </CustomTabPanel>
+        </Box>
       </div>
     </div>
   );

@@ -33,3 +33,13 @@
 .react-datepicker__tab-loop {
   position: absolute !important;
 }
+
+.btn-add-fab {
+  background: #e0e0e0 !important;
+  color: #464646de !important;
+}
+
+.btn-add-fab:hover {
+  background: #888888 !important;
+  color: #464646de !important;
+}
