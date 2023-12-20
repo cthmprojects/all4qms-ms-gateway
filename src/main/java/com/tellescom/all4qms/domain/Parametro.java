@@ -1,18 +1,11 @@
 package com.tellescom.all4qms.domain;
 
-<<<<<<< HEAD
-=======
 import java.io.Serializable;
 import java.time.Instant;
 import javax.validation.constraints.NotNull;
->>>>>>> 60170c5 (Ajustes Parametros)
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-
-import javax.validation.constraints.NotNull;
-import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * A Parametro.
