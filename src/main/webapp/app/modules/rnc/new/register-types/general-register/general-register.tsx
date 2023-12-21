@@ -349,8 +349,11 @@ export const GeneralRegister = () => {
                 </FormControl>
               </div>
               <br />
-              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <Card className="mt-3 p-2" sx={{ display: 'flex', flexDirection: 'column', width: '30%' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '196px' }}
+                className="mt-2 mb-2"
+              >
+                <Card className="p-3" sx={{ display: 'flex', flexDirection: 'column', width: '30%' }}>
                   <h3 style={{ fontSize: '1rem' }}>Responsável</h3>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <TextField
@@ -380,71 +383,111 @@ export const GeneralRegister = () => {
                   </div>
                 </Card>
 
-                <TextField
-                  label="Responsável"
-                  className="m-2"
-                  sx={{ width: '20% !important' }}
-                  onChange={event =>
-                    setRegisterForm({
-                      ...registerForm,
-                      decisaoResponsavel: { value: event.target.value, error: registerForm.decisaoResponsavel.error },
-                    })
-                  }
-                />
-                <TextField
-                  label="Quantidade selecionada"
-                  className="m-2"
-                  sx={{ width: '20% !important' }}
-                  onChange={event =>
-                    setRegisterForm({
-                      ...registerForm,
-                      decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
-                    })
-                  }
-                />
-                <TextField
-                  label="Quantidade aprovada"
-                  className="m-2"
-                  sx={{ width: '20% !important' }}
-                  onChange={event =>
-                    setRegisterForm({
-                      ...registerForm,
-                      decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
-                    })
-                  }
-                />
-                <TextField
-                  label="Quantidade reprovada"
-                  className="m-2"
-                  sx={{ width: '20% !important' }}
-                  onChange={event =>
-                    setRegisterForm({
-                      ...registerForm,
-                      decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
-                    })
-                  }
-                />
-                <TextField
-                  label="% Rejeição"
-                  className="m-2"
-                  sx={{ width: '20% !important' }}
-                  onChange={event =>
-                    setRegisterForm({
-                      ...registerForm,
-                      decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
-                    })
-                  }
-                />
+                <div
+                  style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', height: '100%' }}
+                  className="ms-3"
+                >
+                  <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <TextField
+                      label="Quantidade selecionada"
+                      className="m-2"
+                      sx={{ width: '20% !important' }}
+                      onChange={event =>
+                        setRegisterForm({
+                          ...registerForm,
+                          decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Quantidade aprovada"
+                      className="m-2"
+                      sx={{ width: '20% !important' }}
+                      onChange={event =>
+                        setRegisterForm({
+                          ...registerForm,
+                          decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Quantidade reprovada"
+                      className="m-2"
+                      sx={{ width: '20% !important' }}
+                      onChange={event =>
+                        setRegisterForm({
+                          ...registerForm,
+                          decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
+                        })
+                      }
+                    />
+                    <TextField
+                      label="% Rejeição"
+                      className="m-2"
+                      sx={{ width: '20% !important' }}
+                      onChange={event =>
+                        setRegisterForm({
+                          ...registerForm,
+                          decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
+                        })
+                      }
+                    />
+                  </Card>
+                  <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <TextField
+                      label="Quantidade selecionada"
+                      className="m-2"
+                      sx={{ width: '20% !important' }}
+                      onChange={event =>
+                        setRegisterForm({
+                          ...registerForm,
+                          decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Quantidade aprovada"
+                      className="m-2"
+                      sx={{ width: '20% !important' }}
+                      onChange={event =>
+                        setRegisterForm({
+                          ...registerForm,
+                          decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Quantidade reprovada"
+                      className="m-2"
+                      sx={{ width: '20% !important' }}
+                      onChange={event =>
+                        setRegisterForm({
+                          ...registerForm,
+                          decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
+                        })
+                      }
+                    />
+                    <TextField
+                      label="% Rejeição"
+                      className="m-2"
+                      sx={{ width: '20% !important' }}
+                      onChange={event =>
+                        setRegisterForm({
+                          ...registerForm,
+                          decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
+                        })
+                      }
+                    />
+                  </Card>
+                </div>
               </div>
               <br />
             </CardContent>
           </Card>
           <Divider light />
-          <Card sx={{ minWidth: 275 }}>
+          <Card sx={{ minWidth: 275 }} className="mt-3">
             <CardContent>
-              <Typography variant="h5" component="div">
-                Investigação de Causas
-              </Typography>
+              <h3 style={{ fontSize: '1rem' }}>Investigação de causas</h3>
               <br />
               <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
                 <FormControlLabel control={<Checkbox />} onChange={handleCheckIshikawaChange} label="ISHIKAWA" />
