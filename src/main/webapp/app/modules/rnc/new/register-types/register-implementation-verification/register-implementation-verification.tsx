@@ -1,11 +1,22 @@
 import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 
-export const RegisterImplementationVerification = () => {
+export const RegisterImplementationVerification = ({ handleTela, handlePrazoVerificacao }) => {
   const navigate = useNavigate();
+
+  const [firstForm, setFirstForm] = useState({
+    date: { value: new Date(), error: false },
+    emitter: { value: '', error: false },
+  });
+
+  const handleChangeDate = (value: any) => {
+    setFirstForm({ ...firstForm, date: { value: value, error: firstForm.date.error } });
+    handlePrazoVerificacao(value);
+  };
+
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
       <Row className="justify-content-center mt-5 me-5">
@@ -37,12 +48,7 @@ export const RegisterImplementationVerification = () => {
             </div>
           </div>
           <FormControl className="mb-2 rnc-form-field me-5 mt-5">
-            <DatePicker
-              // selected={firstForm.date.value}
-              // disabled={secondForm}
-              // onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
-              className="date-picker"
-            />
+            <DatePicker selected={firstForm.date.value} onChange={date => handleChangeDate(date)} className="date-picker" />
             <label htmlFor="" className="rnc-date-label">
               Data
             </label>
@@ -71,11 +77,16 @@ export const RegisterImplementationVerification = () => {
             variant="contained"
             className="me-3"
             style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-            onClick={() => navigate('/rnc/general/implementacao')}
+            onClick={() => handleTela('implementacao')}
           >
             Voltar
           </Button>
-          <Button variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}
+            onClick={() => handleTela('fechamento')}
+          >
             Salvar
           </Button>
           <Button
@@ -83,7 +94,7 @@ export const RegisterImplementationVerification = () => {
             variant="contained"
             color="primary"
             style={{ background: '#e6b200', color: '#4e4d4d' }}
-            onClick={() => navigate('/rnc/general/implementacao/fechamento')}
+            onClick={() => handleTela('fechamento')}
           >
             Avançar
           </Button>

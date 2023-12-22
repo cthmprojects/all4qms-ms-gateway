@@ -34,7 +34,7 @@ import { Row } from 'reactstrap';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Add } from '@mui/icons-material';
 
-export const GeneralRegister = () => {
+export const GeneralRegister = ({ handleTela, handleAcao }) => {
   const navigate = useNavigate();
   const [registerForm, setRegisterForm] = useState({
     decision: {
@@ -143,6 +143,11 @@ export const GeneralRegister = () => {
     },
   });
 
+  const setAcao = (e: any) => {
+    handleChange({ ...registerForm, descricaoAcao: { value: e.target.value, error: registerForm.descricaoAcao.error } });
+    handleAcao(e.target.value);
+  };
+
   const handleChange = (value: any) => {
     setRegisterForm(value);
     // onRegisterChange(registerForm);
@@ -219,14 +224,7 @@ export const GeneralRegister = () => {
 
               <br />
               <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <TextField
-                  label="Descrição da ação"
-                  className="m-2"
-                  sx={{ width: '20% !important' }}
-                  onChange={e =>
-                    handleChange({ ...registerForm, descricaoAcao: { value: e.target.value, error: registerForm.descricaoAcao.error } })
-                  }
-                />
+                <TextField label="Descrição da ação" className="m-2" sx={{ width: '20% !important' }} onChange={e => setAcao(e)} />
                 <TextField
                   label="Prazo"
                   className="m-2"
@@ -654,11 +652,16 @@ export const GeneralRegister = () => {
               variant="contained"
               className="me-3"
               style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => navigate('/rnc/new')}
+              onClick={() => handleTela('cadastro')}
             >
               Voltar
             </Button>
-            <Button variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}
+              onClick={() => handleTela('implementacao')}
+            >
               Salvar
             </Button>
             <Button
@@ -666,7 +669,7 @@ export const GeneralRegister = () => {
               variant="contained"
               color="primary"
               style={{ background: '#e6b200', color: '#4e4d4d' }}
-              onClick={() => navigate('/rnc/general/implementacao')}
+              onClick={() => handleTela('implementacao')}
             >
               Avançar
             </Button>

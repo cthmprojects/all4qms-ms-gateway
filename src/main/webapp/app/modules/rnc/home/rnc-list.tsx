@@ -24,12 +24,13 @@ import {
   Tab,
 } from '@mui/material';
 import DatePicker from 'react-datepicker';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Row } from 'reactstrap';
 import './rnc.css';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from '@mui/icons-material';
+import rncStore, { RNC } from '../rnc-store';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -64,11 +65,19 @@ const RncList = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(newValue);
+  const rncs = rncStore(state => state.rncs);
 
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+
+  useEffect(() => {
+    if (rncs?.length > 0) {
+      localStorage.setItem('rnc', rncs.length.toString());
+    } else {
+      localStorage.setItem('rnc', '0');
+    }
+  }, []);
 
   const columns = [
     'Número',
@@ -90,8 +99,16 @@ const RncList = () => {
     [0, 'Teste', 'Vitão', 'For Test', 'Admin', '30/09/2023', '', 'Vitão', '', '', 'Done'],
   ];
 
+  const formatDateToString = (date: Date) => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString();
+
+    return `${day}/${month}/${year}`;
+  };
+
   const renderTable = () => {
-    if (columns.length > 0 && rows.length > 0) {
+    if (rncs?.length > 0) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -104,7 +121,28 @@ const RncList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map(row => (
+                {rncs?.map((rnc: RNC) => (
+                  <TableRow key={rnc.numero}>
+                    <TableCell>{rnc.numero}</TableCell>
+                    <TableCell>{formatDateToString(rnc.emissao)}</TableCell>
+                    <TableCell>{rnc.emissor}</TableCell>
+                    <TableCell>{rnc.descricao}</TableCell>
+                    <TableCell>{rnc.responsavel}</TableCell>
+                    <TableCell>{formatDateToString(rnc.prazo)}</TableCell>
+                    <TableCell>{rnc.acoes}</TableCell>
+                    <TableCell>{formatDateToString(rnc.verificacao)}</TableCell>
+                    <TableCell>{formatDateToString(rnc.eficacia)}</TableCell>
+                    <TableCell>{formatDateToString(rnc.fechamento)}</TableCell>
+                    <TableCell>{rnc.status}</TableCell>
+                    <TableCell>
+                      <IconButton color="primary" aria-label="add to shopping cart">
+                        <EditIcon sx={{ color: '#e6b200' }} />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+                {/* {rows.map(row => (
                   <TableRow>
                     {row.map(item => (
                       <TableCell>{item}</TableCell>
@@ -115,7 +153,7 @@ const RncList = () => {
                       </IconButton>
                     </TableCell>
                   </TableRow>
-                ))}
+                ))} */}
               </TableBody>
             </Table>
           </TableContainer>

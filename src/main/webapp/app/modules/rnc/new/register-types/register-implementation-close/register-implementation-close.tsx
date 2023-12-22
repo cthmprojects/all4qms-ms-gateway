@@ -1,11 +1,20 @@
 import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 
-export const RegisterImplementationClose = () => {
-  const navigate = useNavigate();
+export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFechamento }) => {
+  const [firstForm, setFirstForm] = useState({
+    date: { value: new Date(), error: false },
+    emitter: { value: '', error: false },
+  });
+
+  const handleChangeDate = (value: any) => {
+    setFirstForm({ ...firstForm, date: { value: value, error: firstForm.date.error } });
+    handlePrazoFechamento(value);
+  };
+
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
       <Row className="justify-content-center mt-5 me-5">
@@ -32,12 +41,7 @@ export const RegisterImplementationClose = () => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '170px' }} className="me-2">
             <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Fechamento</h2>
             <FormControl className="mb-2 rnc-form-field mt-3">
-              <DatePicker
-                // selected={firstForm.date.value}
-                // disabled={secondForm}
-                // onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
-                className="date-picker"
-              />
+              <DatePicker selected={firstForm.date.value} onChange={date => handleChangeDate(date)} className="date-picker" />
               <label htmlFor="" className="rnc-date-label">
                 Data
               </label>
@@ -83,14 +87,25 @@ export const RegisterImplementationClose = () => {
             variant="contained"
             className="me-3"
             style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-            onClick={() => navigate('/rnc/general/implementacao/validacao')}
+            onClick={() => handleTela('validacao')}
           >
             Voltar
           </Button>
-          <Button variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}
+            onClick={() => save()}
+          >
             Salvar
           </Button>
-          <Button className="ms-3" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+          <Button
+            className="ms-3"
+            variant="contained"
+            color="primary"
+            style={{ background: '#e6b200', color: '#4e4d4d' }}
+            onClick={() => save()}
+          >
             Avançar
           </Button>
         </div>

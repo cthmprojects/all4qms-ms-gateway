@@ -1,11 +1,21 @@
 import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import './register-implementation.css';
 
-export const RegisterImplementation = () => {
+export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao }) => {
+  const [firstForm, setFirstForm] = useState({
+    date: { value: new Date(), error: false },
+    emitter: { value: '', error: false },
+  });
+
+  const handleChangeDate = (value: any) => {
+    setFirstForm({ ...firstForm, date: { value: value, error: firstForm.date.error } });
+    handlePrazoImplementacao(value);
+  };
+
   const navigate = useNavigate();
 
   return (
@@ -36,12 +46,7 @@ export const RegisterImplementation = () => {
             </div>
           </div>
           <FormControl className="mb-2 rnc-form-field me-5 mt-5">
-            <DatePicker
-              // selected={firstForm.date.value}
-              // disabled={secondForm}
-              // onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
-              className="date-picker"
-            />
+            <DatePicker selected={firstForm.date.value} onChange={date => handleChangeDate(date)} className="date-picker" />
             <label htmlFor="" className="rnc-date-label">
               Data
             </label>
@@ -63,11 +68,16 @@ export const RegisterImplementation = () => {
             variant="contained"
             className="me-3"
             style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-            onClick={() => navigate('/rnc/general')}
+            onClick={() => handleTela('geral')}
           >
             Voltar
           </Button>
-          <Button variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}
+            onClick={() => handleTela('validacao')}
+          >
             Salvar
           </Button>
           <Button
@@ -75,7 +85,7 @@ export const RegisterImplementation = () => {
             variant="contained"
             color="primary"
             style={{ background: '#e6b200', color: '#4e4d4d' }}
-            onClick={() => navigate('/rnc/general/implementacao/validacao')}
+            onClick={() => handleTela('validacao')}
           >
             Avançar
           </Button>
