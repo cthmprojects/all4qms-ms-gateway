@@ -41,6 +41,8 @@ Navbar styles
 ========================================================================== */
 .navbar-brand {
   overflow: hidden;
+  height: 50%; // Diminuir a altura em 50%
+  width: 50%; // Diminuir a largura em 50%
 }
 
 .jh-navbar .navbar-nav .nav-link {
@@ -49,9 +51,9 @@ Navbar styles
 }
 
 .navbar-version {
-  font-size: 10px;
+  font-size: 4px; // Diminuir a fonte em 50%
   color: $header-color-secondary;
-  padding: 0 0 0 10px;
+  padding: 0 0 0 4px; // Ajustar o padding em 50%
 }
 
 .brand-logo {
@@ -59,17 +61,17 @@ Navbar styles
     text-decoration: none;
   }
   .brand-icon {
-    height: 35px;
+    height: 17.5px; // Diminuir a altura em 50%
     width: auto;
     display: inline-block;
     img {
-      height: 45px;
+      height: 150%;
     }
   }
 }
 
 .brand-title {
-  font-size: 24px;
+  font-size: 12px; // Diminuir a fonte em 50%
   color: $header-color;
   &:hover {
     color: $header-color-hover;
@@ -78,7 +80,7 @@ Navbar styles
 }
 
 .loading-bar {
-  height: 3px;
+  height: 1.2px; // Diminuir a altura em 50%
   background-color: #009cd8;
   position: absolute;
   top: 0px;
@@ -87,7 +89,7 @@ Navbar styles
 
 .bg-primary {
   background: var(--background-paper-elevation-0, #fff) !important;
-  height: 8%;
+  height: 3em !important;
 }
 
 .remove-margin-top-icon span {

@@ -353,7 +353,7 @@ export const GeneralRegister = () => {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '196px' }}
                 className="mt-2 mb-2"
               >
-                <Card className="p-3" sx={{ display: 'flex', flexDirection: 'column', width: '30%' }}>
+                <Card className="p-3" sx={{ display: 'flex', flexDirection: 'column', width: '40%' }}>
                   <h3 style={{ fontSize: '1rem' }}>Responsável</h3>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <TextField
@@ -384,14 +384,14 @@ export const GeneralRegister = () => {
                 </Card>
 
                 <div
-                  style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', height: '100%' }}
+                  style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%', height: '100%' }}
                   className="ms-3"
                 >
                   <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <TextField
                       label="Quantidade selecionada"
                       className="m-2"
-                      sx={{ width: '20% !important' }}
+                      sx={{ width: '25% !important' }}
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -402,7 +402,7 @@ export const GeneralRegister = () => {
                     <TextField
                       label="Quantidade aprovada"
                       className="m-2"
-                      sx={{ width: '20% !important' }}
+                      sx={{ width: '25% !important' }}
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -413,7 +413,7 @@ export const GeneralRegister = () => {
                     <TextField
                       label="Quantidade reprovada"
                       className="m-2"
-                      sx={{ width: '20% !important' }}
+                      sx={{ width: '25% !important' }}
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -424,7 +424,7 @@ export const GeneralRegister = () => {
                     <TextField
                       label="% Rejeição"
                       className="m-2"
-                      sx={{ width: '20% !important' }}
+                      sx={{ width: '25% !important' }}
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -437,7 +437,7 @@ export const GeneralRegister = () => {
                     <TextField
                       label="Quantidade selecionada"
                       className="m-2"
-                      sx={{ width: '20% !important' }}
+                      sx={{ width: '25% !important' }}
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -448,7 +448,7 @@ export const GeneralRegister = () => {
                     <TextField
                       label="Quantidade aprovada"
                       className="m-2"
-                      sx={{ width: '20% !important' }}
+                      sx={{ width: '25% !important' }}
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -459,7 +459,7 @@ export const GeneralRegister = () => {
                     <TextField
                       label="Quantidade reprovada"
                       className="m-2"
-                      sx={{ width: '20% !important' }}
+                      sx={{ width: '25% !important' }}
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -470,7 +470,7 @@ export const GeneralRegister = () => {
                     <TextField
                       label="% Rejeição"
                       className="m-2"
-                      sx={{ width: '20% !important' }}
+                      sx={{ width: '25% !important' }}
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
