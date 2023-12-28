@@ -43,3 +43,27 @@
   background: #888888 !important;
   color: #464646de !important;
 }
+
+.textarea-ishikawa {
+  border-radius: 5px;
+  border: 1px solid #c6c6c6;
+  resize: none;
+}
+
+.textarea-ishikawa:focus-visible {
+  outline: none;
+}
+
+.textarea-ishikawa:focus {
+  border-bottom: 1px solid #5a5a5a;
+  box-shadow: none;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex {
+  display: flex;
+}

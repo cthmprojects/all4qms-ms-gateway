@@ -34,7 +34,7 @@ import { Row } from 'reactstrap';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Add } from '@mui/icons-material';
 
-export const GeneralRegister = () => {
+export const GeneralRegister = ({ handleTela, handleAcao }) => {
   const navigate = useNavigate();
   const [registerForm, setRegisterForm] = useState({
     decision: {
@@ -143,6 +143,11 @@ export const GeneralRegister = () => {
     },
   });
 
+  const setAcao = (e: any) => {
+    handleChange({ ...registerForm, descricaoAcao: { value: e.target.value, error: registerForm.descricaoAcao.error } });
+    handleAcao(e.target.value);
+  };
+
   const handleChange = (value: any) => {
     setRegisterForm(value);
     // onRegisterChange(registerForm);
@@ -219,14 +224,7 @@ export const GeneralRegister = () => {
 
               <br />
               <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <TextField
-                  label="Descrição da ação"
-                  className="m-2"
-                  sx={{ width: '20% !important' }}
-                  onChange={e =>
-                    handleChange({ ...registerForm, descricaoAcao: { value: e.target.value, error: registerForm.descricaoAcao.error } })
-                  }
-                />
+                <TextField label="Descrição da ação" className="m-2" sx={{ width: '20% !important' }} onChange={e => setAcao(e)} />
                 <TextField
                   label="Prazo"
                   className="m-2"
@@ -487,13 +485,21 @@ export const GeneralRegister = () => {
           <Divider light />
           <Card sx={{ minWidth: 275 }} className="mt-3">
             <CardContent>
-              <h3 style={{ fontSize: '1rem' }}>Investigação de causas</h3>
-              <br />
-              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+              <Typography variant="h5" component="div">
+                Investigação de causas
+              </Typography>
+              <div className="mt-2" style={{ display: 'flex' }}>
                 <FormControlLabel control={<Checkbox />} onChange={handleCheckIshikawaChange} label="ISHIKAWA" />
-                <textarea id="ncIshikawaTextAreaId" name="ncArea" rows={5} cols={30} />
-                <div>
-                  <div>
+                <FormControlLabel control={<Checkbox />} onChange={handleCheckIshikawaChange} label="Resposta dos 5 porquês" />
+              </div>
+
+              <Card className="mt-2">
+                <div className="flex p-2" style={{ justifyContent: 'space-between' }}>
+                  <div className="flex-col">
+                    <h3 style={{ fontSize: '1rem' }}>ISHIKAWA</h3>
+                    <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} />
+                  </div>
+                  <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
                     <TextField
                       label="Meio Ambiente"
                       className="m-2"
@@ -506,39 +512,42 @@ export const GeneralRegister = () => {
                     />
                     <TextField
                       label="Máquina"
-                      className="m-2"
+                      style={{ marginTop: '4px' }}
+                      className="ms-2 mb-2 me-2"
                       onChange={e =>
                         handleChange({ ...registerForm, causaMaquina: { value: e.target.value, error: registerForm.causaMaquina.error } })
                       }
                     />
                   </div>
-                  <div>
+                  <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
                     <TextField
                       label="Mão de obra"
-                      className="m-2"
+                      className="m-2 ms-0"
                       onChange={e =>
                         handleChange({ ...registerForm, causaMaoObra: { value: e.target.value, error: registerForm.causaMaoObra.error } })
                       }
                     />
                     <TextField
                       label="Medição"
-                      className="m-2"
+                      style={{ marginTop: '4px' }}
+                      className="mb-2 me-2"
                       onChange={e =>
                         handleChange({ ...registerForm, causaMedicao: { value: e.target.value, error: registerForm.causaMedicao.error } })
                       }
                     />
                   </div>
-                  <div>
+                  <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
                     <TextField
                       label="Método"
-                      className="m-2"
+                      className="m-2 ms-0"
                       onChange={e =>
                         handleChange({ ...registerForm, causaMedicao: { value: e.target.value, error: registerForm.causaMedicao.error } })
                       }
                     />
                     <TextField
                       label="Matéria-prima"
-                      className="m-2"
+                      style={{ marginTop: '4px' }}
+                      className="mb-2 me-2"
                       onChange={e =>
                         handleChange({
                           ...registerForm,
@@ -548,39 +557,30 @@ export const GeneralRegister = () => {
                     />
                   </div>
                 </div>
-              </div>
-              <Divider light />
-              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <FormControlLabel control={<Checkbox />} onChange={handleCheckFiveWhy} label="Resposta dos 5 porquês" />
-                <div>
-                  <textarea id="ncPorqueTextAreaId" rows={5} cols={30} />
-                </div>
-                <div>
-                  <div>
-                    <TextField label="Porquê" className="m-2" />
+              </Card>
+              <Card className="mt-2">
+                <div className="flex p-2">
+                  <div className="flex-col">
+                    <h3 style={{ fontSize: '1rem' }}>5 Porquês</h3>
+                    <textarea className="textarea-ishikawa mb-2" style={{ height: '100%' }} name="ncArea" rows={5} cols={30} />
                   </div>
-                  <div>
-                    <TextField label="Porquê" className="m-2" />
+                  <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
+                    <TextField label="Porquê?" className="m-2" />
+                    <TextField label="Porquê?" className="m-2" />
+                    <TextField label="Porquê?" className="m-2" />
+                    <TextField label="Porquê?" className="m-2" />
+                    <TextField label="Porquê?" className="m-2" />
                   </div>
-                  <div>
-                    <TextField label="Porquê" className="m-2" />
-                  </div>
-                  <div>
-                    <TextField label="Porquê" className="m-2" />
-                  </div>
-                  <div>
-                    <TextField label="Porquê" className="m-2" />
+                  <div className="flex-col">
+                    <h3 style={{ fontSize: '1rem' }}>Causa</h3>
+                    <textarea className="textarea-ishikawa mb-2" style={{ height: '100%' }} name="ncArea" rows={5} cols={30} />
                   </div>
                 </div>
-                <div>
-                  <textarea id="causaPorqueTextAreaId" rows={5} cols={30} />
-                </div>
-              </div>
+              </Card>
             </CardContent>
           </Card>
 
-          <Divider light />
-          <Card sx={{ minWidth: 275 }}>
+          <Card sx={{ minWidth: 275 }} className="mt-2">
             <CardContent>
               <Typography variant="h5" component="div">
                 Plano de Ação Corretiva
@@ -589,6 +589,8 @@ export const GeneralRegister = () => {
               <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
                 <TextField
                   label="Descrição da ação"
+                  id="rnc-text-field"
+                  className="rnc-form-field mb-2"
                   onChange={e =>
                     handleChange({
                       ...registerForm,
@@ -596,56 +598,93 @@ export const GeneralRegister = () => {
                     })
                   }
                 />
-                <TextField
-                  label="Prazo"
-                  onChange={e =>
-                    handleChange({ ...registerForm, planoAcaoPrazo: { value: e.target.value, error: registerForm.planoAcaoPrazo.error } })
-                  }
-                />
-                <TextField
-                  label="Responsável"
-                  onChange={e =>
-                    handleChange({
-                      ...registerForm,
-                      planoAcaoResponsavel: { value: e.target.value, error: registerForm.planoAcaoResponsavel.error },
-                    })
-                  }
-                />
+                <FormControl className="m-2 mt-0 rnc-form-field">
+                  <InputLabel>Prazo</InputLabel>
+                  <Select
+                    label="Encaminhado para:"
+                    name="forwarded"
+                    // disabled={secondForm}
+                    // value={firstForm.forwarded.value}
+                    // error={firstForm.forwarded.error}
+                    // onChange={event =>
+                    //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+                    // }
+                  ></Select>
+                </FormControl>
+                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+                  <InputLabel>Responsável</InputLabel>
+                  <Select
+                    label="Encaminhado para:"
+                    name="forwarded"
+                    // disabled={secondForm}
+                    // value={firstForm.forwarded.value}
+                    // error={firstForm.forwarded.error}
+                    // onChange={event =>
+                    //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+                    // }
+                  >
+                    <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+                    <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+                    <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+                  </Select>
+                </FormControl>
 
-                <TextField
-                  label="Status"
-                  onChange={e =>
-                    handleChange({ ...registerForm, planoAcaoStatus: { value: e.target.value, error: registerForm.planoAcaoStatus.error } })
-                  }
-                />
-                <TextField
-                  label="Verificação"
-                  onChange={e =>
-                    handleChange({
-                      ...registerForm,
-                      planoAcaoVerificacao: { value: e.target.value, error: registerForm.planoAcaoVerificacao.error },
-                    })
-                  }
-                />
-                <TextField
-                  label="Responsável Verificação"
-                  onChange={e =>
-                    handleChange({
-                      ...registerForm,
-                      planoAcaoResponsavelVerificacao: { value: e.target.value, error: registerForm.planoAcaoResponsavelVerificacao.error },
-                    })
-                  }
-                />
+                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    label="Encaminhado para:"
+                    name="forwarded"
+                    // disabled={secondForm}
+                    // value={firstForm.forwarded.value}
+                    // error={firstForm.forwarded.error}
+                    // onChange={event =>
+                    //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+                    // }
+                  ></Select>
+                </FormControl>
 
-                <IconButton aria-label="Editar">
-                  <EditIcon fontSize="medium" />
-                </IconButton>
-                <IconButton aria-label="Remover">
-                  <DeleteIcon fontSize="medium" />
-                </IconButton>
-                <IconButton color="secondary" aria-label="Adicionar">
-                  <AddIcon fontSize="large" />
-                </IconButton>
+                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+                  <InputLabel>Verificação</InputLabel>
+                  <Select
+                    label="Encaminhado para:"
+                    name="forwarded"
+                    // disabled={secondForm}
+                    // value={firstForm.forwarded.value}
+                    // error={firstForm.forwarded.error}
+                    // onChange={event =>
+                    //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+                    // }
+                  ></Select>
+                </FormControl>
+
+                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+                  <InputLabel>Resp. verificação</InputLabel>
+                  <Select
+                    label="Encaminhado para:"
+                    name="forwarded"
+                    // disabled={secondForm}
+                    // value={firstForm.forwarded.value}
+                    // error={firstForm.forwarded.error}
+                    // onChange={event =>
+                    //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+                    // }
+                  >
+                    <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+                    <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+                    <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+                  </Select>
+                </FormControl>
+                <div style={{ marginLeft: 'auto' }}>
+                  <IconButton aria-label="Editar">
+                    <EditIcon fontSize="medium" />
+                  </IconButton>
+                  <IconButton aria-label="Remover" className="me-2">
+                    <DeleteIcon fontSize="medium" />
+                  </IconButton>
+                  <Fab color="primary" aria-label="add" size="medium" className="btn-add-fab me-2">
+                    <Add />
+                  </Fab>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -654,11 +693,16 @@ export const GeneralRegister = () => {
               variant="contained"
               className="me-3"
               style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => navigate('/rnc/new')}
+              onClick={() => handleTela('cadastro')}
             >
               Voltar
             </Button>
-            <Button variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}
+              onClick={() => handleTela('implementacao')}
+            >
               Salvar
             </Button>
             <Button
@@ -666,7 +710,7 @@ export const GeneralRegister = () => {
               variant="contained"
               color="primary"
               style={{ background: '#e6b200', color: '#4e4d4d' }}
-              onClick={() => navigate('/rnc/general/implementacao')}
+              onClick={() => handleTela('implementacao')}
             >
               Avançar
             </Button>
