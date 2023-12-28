@@ -31,17 +31,17 @@ export const Login = () => {
 
   const handleUsernameChange = event => {
     setUsername(event.target.value);
-    event.target.value == '' ? setUsernameError(true) : setUsernameError(false);
+    event.target.value === '' ? setUsernameError(true) : setUsernameError(false);
   };
 
   const handlePasswordChange = event => {
     setPassword(event.target.value);
-    event.target.value == '' ? setPasswordError(true) : setPasswordError(false);
+    event.target.value === '' ? setPasswordError(true) : setPasswordError(false);
   };
 
   const handleLoginFormSubmit = event => {
-    password == '' ? setPasswordError(true) : setPasswordError(false);
-    username == '' ? setUsernameError(true) : setUsernameError(false);
+    password === '' ? setPasswordError(true) : setPasswordError(false);
+    username === '' ? setUsernameError(true) : setUsernameError(false);
 
     event.preventDefault();
     dispatch(login(username, password));
@@ -60,10 +60,11 @@ export const Login = () => {
             <TextField
               id="outlined-required"
               label="Usuário"
-              value={username}
+              //value={username}
               onChange={handleUsernameChange}
               className="textField"
               error={usernameError}
+              //autoFocus
             />
           </Row>
           <Row>
@@ -71,8 +72,8 @@ export const Login = () => {
               id="outlined-password-input"
               label="Senha"
               type="password"
-              autoComplete="current-password"
-              value={password}
+              // autoComplete="current-password"
+              //value={password}
               onChange={handlePasswordChange}
               className="textField"
               error={passwordError}
