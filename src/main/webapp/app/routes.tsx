@@ -15,6 +15,7 @@ import PageNotFound from 'app/shared/error/page-not-found';
 import { AUTHORITIES } from 'app/config/constants';
 import { Home } from './modules/home/home';
 import RncRoutes from './modules/rnc';
+import InfodocRoutes from './modules/infodoc';
 
 const loading = <div>loading ...</div>;
 
@@ -47,6 +48,7 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="login" element={<Login />} />
         <Route path="logout" element={<Logout />} />
         <Route path="rnc/*" element={<RncRoutes />} />
+        <Route path="infodoc/*" element={<InfodocRoutes />} />
         <Route path="account">
           <Route
             path="*"
