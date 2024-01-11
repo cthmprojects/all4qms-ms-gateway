@@ -1,12 +1,19 @@
 package com.tellescom.all4qms.service;
 
+import com.tellescom.all4qms.domain.User;
 import com.tellescom.all4qms.domain.Usuario;
+import com.tellescom.all4qms.domain.request.UsuarioRequest;
 import com.tellescom.all4qms.repository.UsuarioRepository;
+import com.tellescom.all4qms.service.dto.AdminUserDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.UsuarioMapper;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.HashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -25,9 +32,20 @@ public class UsuarioService {
 
     private final UsuarioMapper usuarioMapper;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper) {
+    private final PasswordEncoder passwordEncoder;
+
+    private final UserService userService;
+
+    public UsuarioService(
+        UsuarioRepository usuarioRepository,
+        UsuarioMapper usuarioMapper,
+        PasswordEncoder passwordEncoder,
+        UserService userService
+    ) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     /**
@@ -95,8 +113,8 @@ public class UsuarioService {
 
     /**
      * Returns the number of usuarios available.
-     * @return the number of entities in the database.
      *
+     * @return the number of entities in the database.
      */
     public Mono<Long> countAll() {
         return usuarioRepository.count();
@@ -123,5 +141,40 @@ public class UsuarioService {
     public Mono<Void> delete(Long id) {
         log.debug("Request to delete Usuario : {}", id);
         return usuarioRepository.deleteById(id);
+    }
+
+    public Mono<UsuarioDTO> saveRequest(UsuarioRequest request) {
+        //criar user
+        User userJh = new User();
+        userJh.setActivated(true);
+        userJh.setEmail(request.getEmail());
+        String[] nome = request.getNome().split(" ");
+        if (nome.length > 1) {
+            userJh.setFirstName(nome[0]);
+            userJh.setLastName(nome[1]);
+        }
+        userJh.setFirstName(nome[0]);
+        userJh.setLogin(request.getLogin());
+        userJh.setCreatedDate(Instant.now());
+        userJh.setCreatedBy("System");
+        userJh.setLangKey("pt-br");
+        userJh.setAuthorities(request.getPerfil());
+        userJh.setPassword(passwordEncoder.encode("all4qms" + LocalDate.now().getYear()));
+
+        User userSaved = userService.saveUser(userJh).block();
+
+        //criar usuario
+        Usuario usuario = new Usuario();
+        usuario.setCriadoPorId(request.getIdUsrCreator());
+        usuario.setNome(request.getNome());
+        usuario.setCriadoEm(Instant.now());
+        usuario.setEmail(request.getEmail());
+        usuario.setIsGestor(request.isGestor());
+        usuario.setFuncaoId(request.getFuncao());
+        usuario.setSetorId(request.getSetor());
+        usuario.setProcessos(new HashSet<>());
+        usuario.setUserId(userSaved.getId());
+
+        return usuarioRepository.save(usuario).map(usuarioMapper::toDto);
     }
 }
