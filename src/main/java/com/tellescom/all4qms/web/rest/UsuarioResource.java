@@ -1,5 +1,6 @@
 package com.tellescom.all4qms.web.rest;
 
+import com.tellescom.all4qms.domain.request.UsuarioRequest;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.UsuarioService;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
@@ -231,5 +232,38 @@ public class UsuarioResource {
                         .build()
                 )
             );
+    }
+
+    /**
+     * {@code POST  /usuarios/create} : Create a new usuario.
+     *
+     * @param request the usuarioRequest to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new usuarioDTO, or with status {@code 400 (Bad Request)} if the usuario has already an ID.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PostMapping("/usuarios/create")
+    public Mono<ResponseEntity<UsuarioDTO>> criaUsuario(@RequestBody UsuarioRequest request) {
+        log.debug("REST request to create Usuario : {}", request);
+        if (request.getLogin() == null) {
+            throw new BadRequestAlertException("Login requerido", ENTITY_NAME, "loginnotfound");
+        }
+        if (request.getEmail() == null) {
+            throw new BadRequestAlertException("Email requerido", ENTITY_NAME, "emailnotfound");
+        }
+        if (request.getPerfil() == null) {
+            throw new BadRequestAlertException("Perfil requerido", ENTITY_NAME, "perfilnotfound");
+        }
+        return usuarioService
+            .saveRequest(request)
+            .map(result -> {
+                try {
+                    return ResponseEntity
+                        .created(new URI("/api/usuarios/" + result.getId()))
+                        .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
+                        .body(result);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
 }

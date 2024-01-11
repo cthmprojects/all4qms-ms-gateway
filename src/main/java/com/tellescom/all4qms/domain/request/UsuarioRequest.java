@@ -1,8 +1,20 @@
-package com.tellescom.all4qms.service.dto;
+package com.tellescom.all4qms.domain.request;
 
+import com.tellescom.all4qms.domain.Authority;
 import java.util.List;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class UsuarioRequest {
+
+    private long idUsrCreator;
 
     private String login; //User
 
@@ -10,7 +22,7 @@ public class UsuarioRequest {
 
     private String email; //Usuario-User
 
-    private List<String> perfil; //User
+    private Set<Authority> perfil; //User
 
     private Long funcao; //Usuario
 
