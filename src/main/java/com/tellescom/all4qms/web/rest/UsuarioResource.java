@@ -86,7 +86,7 @@ public class UsuarioResource {
     /**
      * {@code PUT  /usuarios/:id} : Updates an existing usuario.
      *
-     * @param id the id of the usuarioDTO to save.
+     * @param id         the id of the usuarioDTO to save.
      * @param usuarioDTO the usuarioDTO to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated usuarioDTO,
      * or with status {@code 400 (Bad Request)} if the usuarioDTO is not valid,
@@ -128,7 +128,7 @@ public class UsuarioResource {
     /**
      * {@code PATCH  /usuarios/:id} : Partial updates given fields of an existing usuario, field will ignore if it is null
      *
-     * @param id the id of the usuarioDTO to save.
+     * @param id         the id of the usuarioDTO to save.
      * @param usuarioDTO the usuarioDTO to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated usuarioDTO,
      * or with status {@code 400 (Bad Request)} if the usuarioDTO is not valid,
@@ -172,8 +172,8 @@ public class UsuarioResource {
     /**
      * {@code GET  /usuarios} : get all the usuarios.
      *
-     * @param pageable the pagination information.
-     * @param request a {@link ServerHttpRequest} request.
+     * @param pageable  the pagination information.
+     * @param request   a {@link ServerHttpRequest} request.
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of usuarios in body.
      */
@@ -251,6 +251,8 @@ public class UsuarioResource {
             throw new BadRequestAlertException("Email requerido", ENTITY_NAME, "emailnotfound");
         }
         if (request.getPerfil() == null) {
+            throw new BadRequestAlertException("Perfil requerido", ENTITY_NAME, "perfilnotfound");
+        } else if (request.getPerfil().isEmpty()) {
             throw new BadRequestAlertException("Perfil requerido", ENTITY_NAME, "perfilnotfound");
         }
         return usuarioService
