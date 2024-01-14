@@ -48,7 +48,12 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
             </div>
           </div>
           <FormControl className="mb-2 rnc-form-field me-5 mt-5">
-            <DatePicker selected={firstForm.date.value} onChange={date => handleChangeDate(date)} className="date-picker" />
+            <DatePicker
+              dateFormat={'dd/MM/yyyy'}
+              selected={firstForm.date.value}
+              onChange={date => handleChangeDate(date)}
+              className="date-picker"
+            />
             <label htmlFor="" className="rnc-date-label">
               Data
             </label>

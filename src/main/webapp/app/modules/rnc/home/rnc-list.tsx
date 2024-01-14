@@ -195,6 +195,7 @@ const RncList = () => {
               // locale='pt-BR'
               selected={startDate}
               onChange={date => setStartDate(date)}
+              dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
             />
             <label htmlFor="" className="rnc-list-date-label">
@@ -206,6 +207,7 @@ const RncList = () => {
               // locale='pt-BR'
               selected={endDate}
               onChange={date => setEndDate(date)}
+              dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
             />
             <label htmlFor="" className="rnc-list-date-label">

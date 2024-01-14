@@ -470,6 +470,7 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                       handleChange({ ...registerForm, implementationDate: { value: date, error: registerForm.implementationDate.error } })
                     }
                     className="date-picker"
+                    dateFormat={'dd/MM/yyyy'}
                     id="date-picker-general-register"
                   />
                   <label htmlFor="" className="rnc-date-label">

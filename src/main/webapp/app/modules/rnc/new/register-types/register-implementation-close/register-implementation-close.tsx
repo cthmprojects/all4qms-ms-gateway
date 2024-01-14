@@ -41,7 +41,12 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '170px' }} className="me-2">
             <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Fechamento</h2>
             <FormControl className="mb-2 rnc-form-field mt-3">
-              <DatePicker selected={firstForm.date.value} onChange={date => handleChangeDate(date)} className="date-picker" />
+              <DatePicker
+                dateFormat={'dd/MM/yyyy'}
+                selected={firstForm.date.value}
+                onChange={date => handleChangeDate(date)}
+                className="date-picker"
+              />
               <label htmlFor="" className="rnc-date-label">
                 Data
               </label>

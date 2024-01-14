@@ -239,6 +239,7 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
                 onChange={date => handleChange({ ...productForm, deliveryDate: { value: date, error: productForm.deliveryDate.error } })}
                 className="date-picker date-picker-rnc-client"
                 id="date-picker-rnc-client"
+                dateFormat={'dd/MM/yyyy'}
               />
               <label htmlFor="date-picker-rnc-client" className="date-label">
                 Data de entrega
@@ -259,6 +260,7 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
                 onChange={date => handleChange({ ...productForm, nfDate: { value: date, error: productForm.deliveryDate.error } })}
                 className="date-picker date-picker-rnc-client"
                 id="date-picker-rnc-client-nf"
+                dateFormat={'dd/MM/yyyy'}
               />
               <label htmlFor="date-picker-rnc-client-nf" className="date-label date-label-nf">
                 Data NF

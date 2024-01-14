@@ -357,6 +357,7 @@ export const RNCNew = () => {
                     disabled={secondForm}
                     onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
                     className="date-picker"
+                    dateFormat={'dd/MM/yyyy'}
                   />
                   <label htmlFor="" className="rnc-date-label">
                     Data
