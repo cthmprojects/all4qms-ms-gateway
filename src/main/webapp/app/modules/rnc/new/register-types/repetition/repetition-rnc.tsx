@@ -4,6 +4,7 @@ import { Add, DeleteOutlined, EditOutlined, UploadFileOutlined } from '@mui/icon
 
 export const RepetitionRnc = () => {
   const [listRepetitions, setListRepetitions] = useState([]);
+  const [selectFileDisable, setSelectFileDisable] = useState(true);
 
   const renderListRepetitions = () => {
     return listRepetitions.map((repetition, index) => {
@@ -12,7 +13,7 @@ export const RepetitionRnc = () => {
           <FormControlLabel control={<Checkbox />} label="Reincidência" />
           <FormControl className="form-field">
             <InputLabel>Documento anterior</InputLabel>
-            <Select label="Documento anterior">
+            <Select label="Documento anterior" disabled>
               <MenuItem value="1">...</MenuItem>
             </Select>
           </FormControl>
@@ -20,7 +21,7 @@ export const RepetitionRnc = () => {
           {/* <IconButton sx={{ width: '50px', height: '50px' }}>
             <EditOutlined></EditOutlined>
           </IconButton> */}
-          <IconButton sx={{ width: '50px', height: '50px' }}>
+          <IconButton sx={{ width: '50px', height: '50px' }} onClick={() => handleRemoveRepetition(index)}>
             <DeleteOutlined></DeleteOutlined>
           </IconButton>
         </div>
@@ -32,14 +33,20 @@ export const RepetitionRnc = () => {
     setListRepetitions([...listRepetitions, 1]);
   };
 
+  const handleRemoveRepetition = (index: number) => {
+    const updatedList = [...listRepetitions];
+    updatedList.splice(index, 1);
+    setListRepetitions(updatedList);
+  };
+
   return (
     <>
       <Card className="pt-3 pb-3" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex' }}>
-          <FormControlLabel control={<Checkbox />} label="Reincidência" />
+          <FormControlLabel control={<Checkbox onChange={() => setSelectFileDisable(!selectFileDisable)} />} label="Reincidência" />
           <FormControl className="form-field">
             <InputLabel>Documento anterior</InputLabel>
-            <Select label="Documento anterior">
+            <Select label="Documento anterior" disabled={selectFileDisable}>
               <MenuItem value="1">...</MenuItem>
             </Select>
           </FormControl>
