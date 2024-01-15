@@ -29,6 +29,7 @@ import GeneralRegister from './register-types/general-register/general-register'
 import RegisterImplementation from './register-types/register-implementation/register-implementation';
 import RegisterImplementationVerification from './register-types/register-implementation-verification/register-implementation-verification';
 import RegisterImplementationClose from './register-types/register-implementation-close/register-implementation-close';
+import { Storage } from 'react-jhipster';
 
 export const RNCNew = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export const RNCNew = () => {
       error: false,
     },
     emitter: {
-      value: 'Admin',
+      value: Storage.session.get('firstName'),
       error: false,
     },
     processOrigin: {

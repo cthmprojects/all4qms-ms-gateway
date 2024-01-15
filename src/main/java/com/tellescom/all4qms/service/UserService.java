@@ -10,6 +10,7 @@ import com.tellescom.all4qms.security.SecurityUtils;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
 import com.tellescom.all4qms.service.dto.UserDTO;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -165,7 +166,7 @@ public class UserService {
             .then(Mono.just(user))
             .publishOn(Schedulers.boundedElastic())
             .map(newUser -> {
-                String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
+                String encryptedPassword = passwordEncoder.encode("all4qms" + LocalDate.now().getYear());
                 newUser.setPassword(encryptedPassword);
                 newUser.setResetKey(RandomUtil.generateResetKey());
                 newUser.setResetDate(Instant.now());

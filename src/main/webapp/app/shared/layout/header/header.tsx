@@ -18,6 +18,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { logout } from 'app/shared/reducers/authentication';
 import MenuItem from '@mui/material/MenuItem';
 import { Build } from '@mui/icons-material';
+import { Storage } from 'react-jhipster';
 
 export interface IHeaderProps {
   isAuthenticated: boolean;
@@ -137,7 +138,7 @@ const Header = (props: IHeaderProps) => {
                 <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem>
               </Menu>
               <Button startIcon={<AccountCircleIcon />} className="remove-margin-top-icon">
-                Usuário
+                {Storage.session.get('firstName')}
               </Button>
               <IconButton onClick={() => navigate('/logout')}>
                 <LogoutIcon />
