@@ -85,8 +85,8 @@ const RncList = () => {
     'Emissor',
     'Descrição',
     'Responsável',
-    'Prazo',
-    'Ações',
+    'Prazo', //
+    'Ações', //
     'Verificação',
     'Eficácia',
     'Fechamento',
@@ -128,8 +128,6 @@ const RncList = () => {
                     <TableCell>{rnc.emissor}</TableCell>
                     <TableCell>{rnc.descricao}</TableCell>
                     <TableCell>{rnc.responsavel}</TableCell>
-                    <TableCell>{formatDateToString(rnc.prazo)}</TableCell>
-                    <TableCell>{rnc.acoes}</TableCell>
                     <TableCell>{formatDateToString(rnc.verificacao)}</TableCell>
                     <TableCell>{formatDateToString(rnc.eficacia)}</TableCell>
                     <TableCell>{formatDateToString(rnc.fechamento)}</TableCell>

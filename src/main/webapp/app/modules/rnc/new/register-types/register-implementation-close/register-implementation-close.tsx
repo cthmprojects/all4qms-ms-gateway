@@ -10,6 +10,8 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
     emitter: { value: '', error: false },
   });
 
+  const [risck, setRisck] = useState(false);
+
   const handleChangeDate = (value: any) => {
     setFirstForm({ ...firstForm, date: { value: value, error: firstForm.date.error } });
     handlePrazoFechamento(value);
@@ -52,18 +54,19 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
               </label>
             </FormControl>
           </div>
-          <TextField
-            label="Resp. Verificação"
-            name="emitter"
-            id="rnc-text-field-implementation"
-            // value={firstForm.emitter.value}
-            className="rnc-form-field-implementation me-5 mb-2 mt-5"
-          />
+          <FormControl className="mt-5 mb-2 rnc-form-field">
+            <InputLabel>Responsável</InputLabel>
+            <Select label="Responsável" name="forwarded">
+              <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+              <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+              <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+            </Select>
+          </FormControl>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
             <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Alterar Risco/Oportunidade</h2>
             <div className="mt-3" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-              <FormControlLabel label="Sim" control={<Checkbox />} />
-              <FormControlLabel label="Não" control={<Checkbox />} />
+              <FormControlLabel label="Sim" control={<Checkbox onChange={() => setRisck(true)} checked={risck} />} />
+              <FormControlLabel label="Não" control={<Checkbox onChange={() => setRisck(false)} checked={!risck} />} />
             </div>
           </div>
           <FormControl className="mb-2 rnc-form-field me-2 mt-5" style={{ maxWidth: '25%' }}>

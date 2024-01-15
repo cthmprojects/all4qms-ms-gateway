@@ -67,3 +67,7 @@
 .flex {
   display: flex;
 }
+
+.desc-width {
+  max-width: calc(62.5% - 0.5rem);
+}
