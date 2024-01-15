@@ -229,6 +229,7 @@ export const MPRegister = ({ onMPChange }) => {
                 onChange={date => handleChange({ ...mpForm, deliveryDate: { value: date, error: mpForm.deliveryDate.error } })}
                 className="date-picker date-picker-rnc-client"
                 id="date-picker-rnc-client"
+                dateFormat={'dd/MM/yyyy'}
               />
               <label htmlFor="date-picker-rnc-client" className="date-label">
                 Data de entrega
@@ -249,6 +250,7 @@ export const MPRegister = ({ onMPChange }) => {
                 onChange={date => handleChange({ ...mpForm, nfDate: { value: date, error: mpForm.deliveryDate.error } })}
                 className="date-picker date-picker-rnc-client"
                 id="date-picker-rnc-client-nf"
+                dateFormat={'dd/MM/yyyy'}
               />
               <label htmlFor="date-picker-rnc-client-nf" className="date-label date-label-nf">
                 Data NF

@@ -1,4 +1,4 @@
-import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material';
+import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
@@ -10,6 +10,8 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
     date: { value: new Date(), error: false },
     emitter: { value: '', error: false },
   });
+
+  const [implement, setImplement] = useState(false);
 
   const handleChangeDate = (value: any) => {
     setFirstForm({ ...firstForm, date: { value: value, error: firstForm.date.error } });
@@ -41,23 +43,29 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
             <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Implementação do plano</h2>
             <div className="mt-3" style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
-              <FormControlLabel label="Sim" control={<Checkbox />} />
-              <FormControlLabel label="Não" control={<Checkbox />} />
+              <FormControlLabel label="Sim" control={<Checkbox onChange={() => setImplement(true)} checked={implement} />} />
+              <FormControlLabel label="Não" control={<Checkbox onChange={() => setImplement(false)} checked={!implement} />} />
             </div>
           </div>
-          <FormControl className="mb-2 rnc-form-field me-5 mt-5">
-            <DatePicker selected={firstForm.date.value} onChange={date => handleChangeDate(date)} className="date-picker" />
+          <FormControl className=" rnc-form-field me-5 mt-5">
+            <DatePicker
+              dateFormat={'dd/MM/yyyy'}
+              selected={firstForm.date.value}
+              onChange={date => handleChangeDate(date)}
+              className="date-picker"
+            />
             <label htmlFor="" className="rnc-date-label">
               Data
             </label>
           </FormControl>
-          <TextField
-            label="Resp. Verificação:"
-            name="emitter"
-            id="rnc-text-field-implementation"
-            // value={firstForm.emitter.value}
-            className="rnc-form-field-implementation me-2 mb-2 mt-5"
-          />
+          <FormControl className="mt-5 mb-2 rnc-form-field">
+            <InputLabel>Responsável</InputLabel>
+            <Select label="Responsável" name="forwarded">
+              <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+              <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+              <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+            </Select>
+          </FormControl>
         </div>
         <div className="mt-4">
           <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Descrição da implementação</h2>

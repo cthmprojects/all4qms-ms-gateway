@@ -85,8 +85,8 @@ const RncList = () => {
     'Emissor',
     'Descrição',
     'Responsável',
-    'Prazo',
-    'Ações',
+    'Prazo', //
+    'Ações', //
     'Verificação',
     'Eficácia',
     'Fechamento',
@@ -128,8 +128,6 @@ const RncList = () => {
                     <TableCell>{rnc.emissor}</TableCell>
                     <TableCell>{rnc.descricao}</TableCell>
                     <TableCell>{rnc.responsavel}</TableCell>
-                    <TableCell>{formatDateToString(rnc.prazo)}</TableCell>
-                    <TableCell>{rnc.acoes}</TableCell>
                     <TableCell>{formatDateToString(rnc.verificacao)}</TableCell>
                     <TableCell>{formatDateToString(rnc.eficacia)}</TableCell>
                     <TableCell>{formatDateToString(rnc.fechamento)}</TableCell>
@@ -195,6 +193,7 @@ const RncList = () => {
               // locale='pt-BR'
               selected={startDate}
               onChange={date => setStartDate(date)}
+              dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
             />
             <label htmlFor="" className="rnc-list-date-label">
@@ -206,6 +205,7 @@ const RncList = () => {
               // locale='pt-BR'
               selected={endDate}
               onChange={date => setEndDate(date)}
+              dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
             />
             <label htmlFor="" className="rnc-list-date-label">

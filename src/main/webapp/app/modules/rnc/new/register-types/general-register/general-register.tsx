@@ -169,18 +169,50 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
     setDescStatus('');
   };
 
+  const handleRemoveItem = (index: number) => {
+    const updatedList = [...listDesc];
+    updatedList.splice(index, 1);
+    setListDesc(updatedList);
+  };
+
   const renderListDesc = () => {
     return (
       <>
         {listDesc.map((desc, index) => (
           <div key={index} className="m-2 ms-0 me-0">
-            <TextField label="Descrição da ação" className="m-2" sx={{ width: '20% !important' }} value={desc.descAction} />
-            <TextField label="Prazo" className="m-2" sx={{ width: '20% !important' }} value={desc.descPrazo} />
-            <TextField label="Responsável" className="m-2" sx={{ width: '20% !important' }} value={desc.descResponsavel} />
-            <TextField label="Status" className="m-2" sx={{ width: '20% !important' }} value={desc.descStatus} />
-            {/* <IconButton aria-label="Remover">
-              <DeleteIcon fontSize="medium" />
-            </IconButton> */}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <TextField
+                label="Descrição da ação"
+                id="rnc-text-field"
+                className="m-2 rnc-form-field"
+                sx={{ width: '20% !important' }}
+                value={desc.descAction}
+              />
+              <TextField
+                label="Prazo"
+                id="rnc-text-field"
+                className="m-2 rnc-form-field"
+                sx={{ width: '20% !important' }}
+                value={desc.descPrazo}
+              />
+              <TextField
+                label="Responsável"
+                id="rnc-text-field"
+                className="m-2 rnc-form-field"
+                sx={{ width: '20% !important' }}
+                value={desc.descResponsavel}
+              />
+              <TextField
+                label="Status"
+                id="rnc-text-field"
+                className="m-2 rnc-form-field"
+                sx={{ width: '20% !important' }}
+                value={desc.descStatus}
+              />
+              <IconButton aria-label="Remover" onClick={() => handleRemoveItem(index)}>
+                <DeleteIcon fontSize="medium" />
+              </IconButton>
+            </div>
           </div>
         ))}
       </>
@@ -223,98 +255,117 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
 
   const renderListaAcoesCorretivas = () => {
     return listaAcoesCorretivas.map((item, index) => (
-      <div key={index} style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-        <TextField label="Descrição da ação" id="rnc-text-field" className="rnc-form-field mb-2" />
-        <FormControl className="m-2 mt-0 rnc-form-field">
-          <InputLabel>Prazo</InputLabel>
-          <Select
-            label="Encaminhado para:"
-            name="forwarded"
-            // disabled={secondForm}
-            // value={firstForm.forwarded.value}
-            // error={firstForm.forwarded.error}
-            // onChange={event =>
-            //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-            // }
-          ></Select>
-        </FormControl>
-        <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-          <InputLabel>Responsável</InputLabel>
-          <Select
-            label="Encaminhado para:"
-            name="forwarded"
-            // disabled={secondForm}
-            // value={firstForm.forwarded.value}
-            // error={firstForm.forwarded.error}
-            // onChange={event =>
-            //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-            // }
-          >
-            <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-            <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-            <MenuItem value="Usuário 3">Usuário 3</MenuItem>
-          </Select>
-        </FormControl>
+      <>
+        <TextField
+          label="Descrição da ação"
+          id="rnc-text-field"
+          className="w-100 desc-width m-2"
+          onChange={e =>
+            handleChange({
+              ...registerForm,
+              planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
+            })
+          }
+        />
+        <div key={index} style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+          <FormControl className="m-2 mt-0 rnc-form-field">
+            <InputLabel>Prazo</InputLabel>
+            <Select
+              label="Encaminhado para:"
+              name="forwarded"
+              // disabled={secondForm}
+              // value={firstForm.forwarded.value}
+              // error={firstForm.forwarded.error}
+              // onChange={event =>
+              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+              // }
+            ></Select>
+          </FormControl>
+          <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+            <InputLabel>Responsável</InputLabel>
+            <Select
+              label="Encaminhado para:"
+              name="forwarded"
+              // disabled={secondForm}
+              // value={firstForm.forwarded.value}
+              // error={firstForm.forwarded.error}
+              // onChange={event =>
+              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+              // }
+            >
+              <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+              <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+              <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+            </Select>
+          </FormControl>
 
-        <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-          <InputLabel>Status</InputLabel>
-          <Select
-            label="Encaminhado para:"
-            name="forwarded"
-            // disabled={secondForm}
-            // value={firstForm.forwarded.value}
-            // error={firstForm.forwarded.error}
-            // onChange={event =>
-            //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-            // }
-          ></Select>
-        </FormControl>
+          <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+            <InputLabel>Status</InputLabel>
+            <Select
+              label="Encaminhado para:"
+              name="forwarded"
+              // disabled={secondForm}
+              // value={firstForm.forwarded.value}
+              // error={firstForm.forwarded.error}
+              // onChange={event =>
+              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+              // }
+            ></Select>
+          </FormControl>
 
-        <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-          <InputLabel>Verificação</InputLabel>
-          <Select
-            label="Encaminhado para:"
-            name="forwarded"
-            // disabled={secondForm}
-            // value={firstForm.forwarded.value}
-            // error={firstForm.forwarded.error}
-            // onChange={event =>
-            //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-            // }
-          ></Select>
-        </FormControl>
+          <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+            <InputLabel>Verificação</InputLabel>
+            <Select
+              label="Encaminhado para:"
+              name="forwarded"
+              // disabled={secondForm}
+              // value={firstForm.forwarded.value}
+              // error={firstForm.forwarded.error}
+              // onChange={event =>
+              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+              // }
+            ></Select>
+          </FormControl>
 
-        <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-          <InputLabel>Resp. verificação</InputLabel>
-          <Select
-            label="Encaminhado para:"
-            name="forwarded"
-            // disabled={secondForm}
-            // value={firstForm.forwarded.value}
-            // error={firstForm.forwarded.error}
-            // onChange={event =>
-            //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-            // }
-          >
-            <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-            <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-            <MenuItem value="Usuário 3">Usuário 3</MenuItem>
-          </Select>
-        </FormControl>
-      </div>
+          <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+            <InputLabel>Resp. verificação</InputLabel>
+            <Select
+              label="Encaminhado para:"
+              name="forwarded"
+              // disabled={secondForm}
+              // value={firstForm.forwarded.value}
+              // error={firstForm.forwarded.error}
+              // onChange={event =>
+              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
+              // }
+            >
+              <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+              <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+              <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+      </>
     ));
   };
 
   const renderResponsaveis = () => {
     return responsaveis.map((responsavel, index) => (
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <TextField
-          sx={{ height: '60px', maxWidth: '70% !important' }}
-          name="number"
-          id="rnc-text-field"
-          className="rnc-form-field me-2 mb-2"
-        />
-      </div>
+      <FormControl className="w-100">
+        <InputLabel>Responsável</InputLabel>
+        <Select
+          label="Responsável"
+          name="forwarded"
+          // disabled={false}
+          value={responsavel}
+          disabled
+          // onChange={e => setResponsaveis([...responsaveis, e.target.value])}
+        >
+          <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+          <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+          <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+        </Select>
+      </FormControl>
     ));
   };
 
@@ -389,28 +440,38 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
               <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
                 <TextField
                   label="Descrição da ação"
-                  className="m-2"
+                  className="m-2 rnc-form-field"
+                  id="rnc-text-field"
                   sx={{ width: '20% !important' }}
                   onChange={e => setDescAction(e.target.value)}
                   value={descAction}
                 />
                 <TextField
                   label="Prazo"
-                  className="m-2"
+                  className="m-2 rnc-form-field"
+                  id="rnc-text-field"
                   sx={{ width: '20% !important' }}
                   onChange={e => setDescPrazo(e.target.value)}
                   value={descPrazo}
                 />
-                <TextField
-                  label="Responsável"
-                  className="m-2"
-                  sx={{ width: '20% !important' }}
-                  onChange={e => setDescResponsavel(e.target.value)}
-                  value={descResponsavel}
-                />
+                <FormControl className="rnc-form-field m-2">
+                  <InputLabel>Responsável</InputLabel>
+                  <Select
+                    label="Responsável"
+                    name="forwarded"
+                    // disabled={false}
+                    value={descResponsavel}
+                    onChange={e => setDescResponsavel(e.target.value)}
+                  >
+                    <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+                    <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+                    <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+                  </Select>
+                </FormControl>
                 <TextField
                   label="Status"
-                  className="m-2"
+                  className="m-2 rnc-form-field"
+                  id="rnc-text-field"
                   sx={{ width: '20% !important' }}
                   onChange={e => setDescStatus(e.target.value)}
                   value={descStatus}
@@ -422,7 +483,14 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                 <IconButton aria-label="Remover">
                   <DeleteIcon fontSize="medium" />
                 </IconButton> */}
-                <Fab color="primary" aria-label="add" size="medium" className="ms-3 btn-add-fab" onClick={appendToListDesc}>
+                <Fab
+                  color="primary"
+                  aria-label="add"
+                  size="medium"
+                  className="ms-3"
+                  disabled={descAction === '' || descPrazo === '' || descResponsavel === '' || descStatus === ''}
+                  onClick={appendToListDesc}
+                >
                   <Add />
                 </Fab>
               </div>
@@ -470,6 +538,7 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                       handleChange({ ...registerForm, implementationDate: { value: date, error: registerForm.implementationDate.error } })
                     }
                     className="date-picker"
+                    dateFormat={'dd/MM/yyyy'}
                     id="date-picker-general-register"
                   />
                   <label htmlFor="" className="rnc-date-label">
@@ -482,25 +551,30 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '196px' }}
                 className="mt-2 mb-2"
               >
-                <Card className="p-3" sx={{ display: 'flex', flexDirection: 'column', width: '30%' }}>
-                  <h3 style={{ fontSize: '1rem' }}>Responsável</h3>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <TextField
-                      sx={{ height: '60px', maxWidth: '70% !important' }}
-                      name="number"
-                      id="rnc-text-field"
-                      className="rnc-form-field me-2 mb-2"
-                    />
-                    <Fab
-                      color="primary"
-                      aria-label="add"
-                      size="medium"
-                      className="btn-add-fab me-2"
-                      onClick={() => setResponsaveis([...responsaveis, 1])}
+                <Card
+                  className="p-3"
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: '30%',
+                    maxHeight: '194px !important',
+                    minHeight: '194px !important',
+                    overflowY: 'scroll',
+                  }}
+                >
+                  <FormControl className="w-100 m-2">
+                    <InputLabel>Responsável</InputLabel>
+                    <Select
+                      label="Responsável"
+                      name="forwarded"
+                      // disabled={false}
+                      onChange={e => setResponsaveis([...responsaveis, e.target.value])}
                     >
-                      +
-                    </Fab>
-                  </div>
+                      <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+                      <MenuItem value="Usuário 2">Usuário 2</MenuItem>
+                      <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+                    </Select>
+                  </FormControl>
                   {renderResponsaveis()}
                 </Card>
                 <div
@@ -511,7 +585,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     <TextField
                       label="Quantidade selecionada"
                       className="m-2"
-                      sx={{ width: '25% !important' }}
+                      sx={{ width: '20% !important' }}
+                      type="number"
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -522,7 +597,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     <TextField
                       label="Quantidade aprovada"
                       className="m-2"
-                      sx={{ width: '25% !important' }}
+                      sx={{ width: '20% !important' }}
+                      type="number"
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -533,7 +609,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     <TextField
                       label="Quantidade reprovada"
                       className="m-2"
-                      sx={{ width: '25% !important' }}
+                      sx={{ width: '20% !important' }}
+                      type="number"
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -544,7 +621,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     <TextField
                       label="% Rejeição"
                       className="m-2"
-                      sx={{ width: '25% !important' }}
+                      sx={{ width: '20% !important' }}
+                      type="number"
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -557,7 +635,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     <TextField
                       label="Quantidade selecionada"
                       className="m-2"
-                      sx={{ width: '25% !important' }}
+                      sx={{ width: '20% !important' }}
+                      type="number"
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -568,7 +647,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     <TextField
                       label="Quantidade aprovada"
                       className="m-2"
-                      sx={{ width: '25% !important' }}
+                      sx={{ width: '20% !important' }}
+                      type="number"
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -579,7 +659,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     <TextField
                       label="Quantidade reprovada"
                       className="m-2"
-                      sx={{ width: '25% !important' }}
+                      sx={{ width: '20% !important' }}
+                      type="number"
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -590,7 +671,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     <TextField
                       label="% Rejeição"
                       className="m-2"
-                      sx={{ width: '25% !important' }}
+                      sx={{ width: '20% !important' }}
+                      type="number"
                       onChange={event =>
                         setRegisterForm({
                           ...registerForm,
@@ -712,18 +794,18 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                 Plano de Ação Corretiva
               </Typography>
               <br />
+              <TextField
+                label="Descrição da ação"
+                id="rnc-text-field"
+                className="w-100 desc-width m-2"
+                onChange={e =>
+                  handleChange({
+                    ...registerForm,
+                    planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
+                  })
+                }
+              />
               <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <TextField
-                  label="Descrição da ação"
-                  id="rnc-text-field"
-                  className="rnc-form-field mb-2"
-                  onChange={e =>
-                    handleChange({
-                      ...registerForm,
-                      planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
-                    })
-                  }
-                />
                 <FormControl className="m-2 mt-0 rnc-form-field">
                   <InputLabel>Prazo</InputLabel>
                   <Select

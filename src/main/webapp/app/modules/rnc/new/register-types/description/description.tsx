@@ -72,7 +72,13 @@ export const DescriptionRnc = ({ handleDescricao }) => {
             <IconButton sx={{ width: '50px', height: '50px' }}>
               <DeleteOutlined></DeleteOutlined>
             </IconButton> */}
-            <Fab color="primary" aria-label="add" size="medium" onClick={addDescription}>
+            <Fab
+              disabled={!naoConformidade || !requisitoDescumprido || !evidenciaObjetiva}
+              color="primary"
+              aria-label="add"
+              size="medium"
+              onClick={addDescription}
+            >
               <Add />
             </Fab>
           </div>

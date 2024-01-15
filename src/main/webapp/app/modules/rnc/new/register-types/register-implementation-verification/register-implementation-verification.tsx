@@ -12,6 +12,8 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
     emitter: { value: '', error: false },
   });
 
+  const [verify, setVerify] = useState(false);
+
   const handleChangeDate = (value: any) => {
     setFirstForm({ ...firstForm, date: { value: value, error: firstForm.date.error } });
     handlePrazoVerificacao(value);
@@ -43,12 +45,17 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
             <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Verificação de Eficácia</h2>
             <div className="mt-3" style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
-              <FormControlLabel label="Sim" control={<Checkbox />} />
-              <FormControlLabel label="Não" control={<Checkbox />} />
+              <FormControlLabel label="Sim" control={<Checkbox onChange={() => setVerify(true)} checked={verify} />} />
+              <FormControlLabel label="Não" control={<Checkbox onChange={() => setVerify(false)} checked={!verify} />} />
             </div>
           </div>
           <FormControl className="mb-2 rnc-form-field me-5 mt-5">
-            <DatePicker selected={firstForm.date.value} onChange={date => handleChangeDate(date)} className="date-picker" />
+            <DatePicker
+              dateFormat={'dd/MM/yyyy'}
+              selected={firstForm.date.value}
+              onChange={date => handleChangeDate(date)}
+              className="date-picker"
+            />
             <label htmlFor="" className="rnc-date-label">
               Data
             </label>
@@ -60,13 +67,6 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
             // value={firstForm.emitter.value}
             className="rnc-form-field-implementation me-5 mb-2 mt-5"
           />
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
-            <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Iniciar novo Registro</h2>
-            <div className="mt-3" style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
-              <FormControlLabel label="Sim" control={<Checkbox />} />
-              <FormControlLabel label="Não" control={<Checkbox />} />
-            </div>
-          </div>
         </div>
         <div className="mt-4">
           <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Descrição da implementação</h2>

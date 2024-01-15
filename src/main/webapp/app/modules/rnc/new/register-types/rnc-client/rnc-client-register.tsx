@@ -160,6 +160,7 @@ export const ClientRegister = ({ onClientChange }) => {
                 onChange={date => handleChange({ ...clientForm, deliveryDate: { value: date, error: clientForm.deliveryDate.error } })}
                 className="date-picker date-picker-rnc-client"
                 id="date-picker-rnc-client"
+                dateFormat={'dd/MM/yyyy'}
               />
               <label htmlFor="date-picker-rnc-client" className="date-label">
                 Data de entrega
@@ -180,6 +181,7 @@ export const ClientRegister = ({ onClientChange }) => {
                 onChange={date => handleChange({ ...clientForm, nfDate: { value: date, error: clientForm.nfDate.error } })}
                 className="date-picker date-picker-rnc-client"
                 id="date-picker-rnc-client-nf"
+                dateFormat={'dd/MM/yyyy'}
               />
               <label htmlFor="date-picker-rnc-client-nf" className="date-label date-label-nf">
                 Data NF
