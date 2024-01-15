@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react';
 const ButtonList = () => {
   const buttons = [
     { icon: 'mdi:calendar-check-outline', link: '/pagina1', legenda: 'Objetivos e Metas' },
-    { icon: 'mdi:file-document-edit-outline', link: '/pagina2', legenda: 'Informações documentadas' },
+    { icon: 'mdi:file-document-edit-outline', link: '/infodoc', legenda: 'Informações documentadas' },
     { icon: 'mdi:crosshairs', link: '/pagina3', legenda: 'Riscos e Oportunidades' },
     { icon: 'mdi:file-document-check-outline', link: '/pagina3', legenda: 'Auditorias' },
     { icon: 'mdi:file-document-alert-outline', link: '/rnc', legenda: 'RNC / OM' },
@@ -16,6 +16,7 @@ const ButtonList = () => {
   return (
     <div className="button-list">
       {buttons.map((button, index) => (
+        // eslint-disable-next-line react/jsx-key
         <div className="container">
           <a key={index} className="button" href={button.link}>
             <Icon icon={button.icon} className="icon" />
