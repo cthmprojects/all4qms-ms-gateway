@@ -133,6 +133,15 @@ export const AuthenticationSlice = createSlice({
         errorMessage: action.error.message,
       }))
       .addCase(getAccount.fulfilled, (state, action) => {
+        const usuario = action.payload.data;
+        const idUsuario = action.payload.data.id;
+        // console.log('dados: ', action.payload.data);
+
+        Storage.session.set('ID_USUARIO', idUsuario);
+        Storage.session.set('firstName', usuario.firstName);
+        Storage.session.set('LOGIN', usuario.login);
+        Storage.local.set('ROLE', usuario.authorities);
+
         const isAuthenticated = action.payload && action.payload.data && action.payload.data.activated;
         return {
           ...state,
