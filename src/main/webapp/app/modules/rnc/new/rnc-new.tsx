@@ -30,8 +30,18 @@ import RegisterImplementation from './register-types/register-implementation/reg
 import RegisterImplementationVerification from './register-types/register-implementation-verification/register-implementation-verification';
 import RegisterImplementationClose from './register-types/register-implementation-close/register-implementation-close';
 import { Storage } from 'react-jhipster';
+import { toast } from 'react-toastify';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsersAsAdmin, getUsers } from '../../administration/user-management/user-management.reducer';
+import { validateFields } from './rnc-new-validates';
 
-export const RNCNew = () => {
+export const RNCNew = ({ handleRNC, RNCNumber }) => {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+  }, []);
+
   const navigate = useNavigate();
   const [firstForm, setFirstForm] = useState({
     number: {
@@ -93,103 +103,24 @@ export const RNCNew = () => {
   const handleDescricao = (descricao: string) => {
     setDescricao(descricao);
   };
+  const [RNCsecondForm, setRNCsecondForm] = useState({});
 
   const addRnc = rncStore(state => state.addRnc);
 
   useEffect(() => {
-    const numberOfRncs = parseInt(localStorage.getItem('rnc'));
-    setFirstForm({ ...firstForm, number: { value: String(numberOfRncs + 1), error: firstForm.processOrigin.error } });
+    setFirstForm({ ...firstForm, number: { value: String(RNCNumber), error: firstForm.processOrigin.error } });
   }, []);
-
-  const validateProcessOrigin = () => {
-    let valid = true;
-    if (firstForm.processOrigin.value == '') {
-      setFirstForm({ ...firstForm, processOrigin: { value: '', error: true } });
-      setFormError(true);
-      valid = false;
-    } else {
-      setFirstForm({ ...firstForm, processOrigin: { value: firstForm.processOrigin.value, error: false } });
-      setFormError(false);
-    }
-    return valid;
-  };
-
-  const validateForwarded = () => {
-    let valid = true;
-    if (firstForm.forwarded.value == '') {
-      setFirstForm({ ...firstForm, forwarded: { value: '', error: true } });
-      setFormError(true);
-      valid = false;
-    } else {
-      setFirstForm({ ...firstForm, forwarded: { value: firstForm.forwarded.value, error: false } });
-      setFormError(false);
-    }
-    return valid;
-  };
-
-  const validateProcessTarget = () => {
-    let valid = true;
-    if (firstForm.processTarget.value == '') {
-      setFirstForm({ ...firstForm, processTarget: { value: '', error: true } });
-      setFormError(true);
-      valid = false;
-    } else {
-      setFirstForm({ ...firstForm, processTarget: { value: firstForm.processTarget.value, error: false } });
-      setFormError(false);
-    }
-    return valid;
-  };
-
-  const validateType = () => {
-    let valid = true;
-    if (firstForm.type.value == '') {
-      setFirstForm({ ...firstForm, type: { value: '', error: true } });
-      setFormError(true);
-      valid = false;
-    } else {
-      setFirstForm({ ...firstForm, type: { value: firstForm.type.value, error: false } });
-      setFormError(false);
-    }
-    return valid;
-  };
-
-  const validateOrigin = () => {
-    let valid = true;
-    if (firstForm.origin.value == '') {
-      setFirstForm({ ...firstForm, origin: { value: '', error: true } });
-      setFormError(true);
-      valid = false;
-    } else {
-      setFirstForm({ ...firstForm, origin: { value: firstForm.origin.value, error: false } });
-      setFormError(false);
-    }
-    return valid;
-  };
 
   const handleSubmit = e => {
     e.preventDefault();
 
-    if (!validateProcessOrigin()) {
-      return;
-    }
+    if (validateFields(firstForm, setFirstForm, setFormError)) {
+      toast.success('RNC salva com sucesso!');
+      setSecondForm(true);
 
-    if (!validateForwarded()) {
-      return;
+      handleRNC(firstForm);
     }
-
-    if (!validateProcessTarget()) {
-      return;
-    }
-
-    if (!validateType()) {
-      return;
-    }
-
-    if (!validateOrigin()) {
-      return;
-    }
-
-    setSecondForm(true);
+    return;
   };
 
   const setClientRegister = data => {
@@ -211,7 +142,7 @@ export const RNCNew = () => {
   const renderComponents = () => {
     switch (firstForm.origin.value) {
       case 'externalAudit':
-        return <ExternalAuditRegister />;
+        return <ExternalAuditRegister RNCsecondForm={RNCsecondForm} setRNCsecondForm={setRNCsecondForm} />;
       case 'internalAudit':
         return <InternalAuditRegister />;
       case 'client':
@@ -231,24 +162,26 @@ export const RNCNew = () => {
   };
 
   const saveData = () => {
-    const newRnc: RNC = {
-      numero: firstForm.number.value,
-      emissao: firstForm.date.value,
-      emissor: 'Admin',
-      descricao: descricao,
-      responsavel: firstForm.forwarded.value,
-      prazo: prazoImplementacao,
-      acoes: acoes,
-      verificacao: prazoVerificacao,
-      eficacia: prazoVerificacao,
-      fechamento: prazoFechamento,
-      status: 'Implementação',
-    };
+    // const newRnc: RNC = {
+    //   numero: firstForm.number.value,
+    //   emissao: firstForm.date.value,
+    //   emissor: 'Admin',
+    //   descricao: descricao,
+    //   responsavel: firstForm.forwarded.value,
+    //   prazo: prazoImplementacao,
+    //   acoes: acoes,
+    //   verificacao: prazoVerificacao,
+    //   eficacia: prazoVerificacao,
+    //   fechamento: prazoFechamento,
+    //   status: 'Implementação',
+    // };
 
-    addRnc(newRnc);
+    // addRnc(newRnc);
 
     navigate('/rnc');
   };
+
+  const users = useAppSelector(state => state.userManagement.users);
 
   if (tela == 'cadastro') {
     return (
@@ -326,9 +259,14 @@ export const RNCNew = () => {
                       setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
                     }
                   >
-                    <MenuItem value="Usuário 1">Usuário 1</MenuItem>
+                    {users.map((user, i) => (
+                      <MenuItem value={user.login} key={`user-${i}`}>
+                        {user.login}
+                      </MenuItem>
+                    ))}
+                    {/* <MenuItem value="Usuário 1">Usuário 1</MenuItem>
                     <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-                    <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+                    <MenuItem value="Usuário 3">Usuário 3</MenuItem> */}
                   </Select>
                 </FormControl>
 
@@ -409,17 +347,8 @@ export const RNCNew = () => {
                   >
                     Voltar
                   </Button>
-                  <Button type="submit" variant="outlined" color="primary" style={{ color: '#384150', border: '1px solid #384150' }}>
+                  <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
                     Salvar
-                  </Button>
-                  <Button
-                    className="ms-3"
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    style={{ background: '#e6b200', color: '#4e4d4d' }}
-                  >
-                    Avançar
                   </Button>
                 </div>
               )}
