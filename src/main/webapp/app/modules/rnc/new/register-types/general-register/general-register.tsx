@@ -34,6 +34,7 @@ import { Row } from 'reactstrap';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Add } from '@mui/icons-material';
 import 'react-datepicker/dist/react-datepicker.css';
+import { MultiSelect } from 'react-multi-select-component';
 
 export const GeneralRegister = ({ handleTela, handleAcao }) => {
   const navigate = useNavigate();
@@ -401,6 +402,16 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
     ));
   };
 
+  const optionsResponsavelMateriaPrima = [
+    { label: 'Responsavel 1', value: 'Responsavel 1' },
+    { label: 'Responsavel 2', value: 'Responsavel 2' },
+    { label: 'Responsavel 3', value: 'Responsavel 3' },
+    { label: 'Responsavel 4', value: 'Responsavel 4' },
+    { label: 'Responsavel 5', value: 'Responsavel 5' },
+  ];
+
+  const [selectedResponsavelMateriaPrima, setSelectedResponsavelMateriaPrima] = useState([]);
+
   return (
     <>
       <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
@@ -598,17 +609,12 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                   }}
                 >
                   <FormControl className="w-100 m-2">
-                    <InputLabel>Responsável</InputLabel>
-                    <Select
-                      label="Responsável"
-                      name="forwarded"
-                      // disabled={false}
-                      onChange={e => setResponsaveis([...responsaveis, e.target.value])}
-                    >
-                      <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-                      <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-                      <MenuItem value="Usuário 3">Usuário 3</MenuItem>
-                    </Select>
+                    <MultiSelect
+                      options={optionsResponsavelMateriaPrima}
+                      value={selectedResponsavelMateriaPrima}
+                      onChange={setSelectedResponsavelMateriaPrima}
+                      labelledBy="Responsável"
+                    />
                   </FormControl>
                   {renderResponsaveis()}
                 </Card>
