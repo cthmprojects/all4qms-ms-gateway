@@ -412,6 +412,15 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
 
   const [selectedResponsavelMateriaPrima, setSelectedResponsavelMateriaPrima] = useState([]);
 
+  const temCausaPreenchida =
+    registerForm.causaMeioAmbiente.value !== '' ||
+    registerForm.causaMaoObra.value !== '' ||
+    registerForm.causaMetodo.value !== '' ||
+    registerForm.causaMaquina.value !== '' ||
+    registerForm.causaMedicao.value !== '' ||
+    registerForm.causaMateriaPrima.value !== '';
+  const buttonAvancarDisabled = !temCausaPreenchida;
+
   return (
     <>
       <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
@@ -741,8 +750,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                 <Card className="mt-2">
                   <div className="flex p-2" style={{ justifyContent: 'space-between' }}>
                     <div className="flex-col">
-                      <h3 style={{ fontSize: '1rem' }}>ISHIKAWA</h3>
-                      <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} />
+                      <br />
+                      <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} placeholder="ISHIKAWA" />
                     </div>
                     <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
                       <TextField
@@ -809,8 +818,15 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                 <Card className="mt-2">
                   <div className="flex p-2">
                     <div className="flex-col">
-                      <h3 style={{ fontSize: '1rem' }}>5 Porquês</h3>
-                      <textarea className="textarea-ishikawa mb-2" style={{ height: '100%' }} name="ncArea" rows={5} cols={30} />
+                      <br />
+                      <textarea
+                        className="textarea-ishikawa mb-2"
+                        style={{ height: '100%' }}
+                        placeholder="5 Porquês"
+                        name="ncArea"
+                        rows={5}
+                        cols={30}
+                      />
                     </div>
                     <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
                       <TextField label="Porquê?" className="m-2" />
@@ -820,8 +836,15 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                       <TextField label="Porquê?" className="m-2" />
                     </div>
                     <div className="flex-col">
-                      <h3 style={{ fontSize: '1rem' }}>Causa</h3>
-                      <textarea className="textarea-ishikawa mb-2" style={{ height: '100%' }} name="ncArea" rows={5} cols={30} />
+                      <br />
+                      <textarea
+                        className="textarea-ishikawa mb-2"
+                        style={{ height: '100%' }}
+                        placeholder="Causa"
+                        name="ncArea"
+                        rows={5}
+                        cols={30}
+                      />
                     </div>
                   </div>
                 </Card>
@@ -973,6 +996,7 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
               color="primary"
               style={{ background: '#e6b200', color: '#4e4d4d' }}
               onClick={() => handleTela('implementacao')}
+              disabled={buttonAvancarDisabled}
             >
               Avançar
             </Button>
