@@ -33,6 +33,8 @@ import Grid from '@mui/material/Grid';
 import { Row } from 'reactstrap';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Add } from '@mui/icons-material';
+import 'react-datepicker/dist/react-datepicker.css';
+import { MultiSelect } from 'react-multi-select-component';
 
 export const GeneralRegister = ({ handleTela, handleAcao }) => {
   const navigate = useNavigate();
@@ -146,14 +148,14 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
   const [k, setK] = useState('');
 
   const [descAction, setDescAction] = useState('');
-  const [descPrazo, setDescPrazo] = useState('');
+  const [descPrazo, setDescPrazo] = useState(new Date());
   const [descResponsavel, setDescResponsavel] = useState('');
   const [descStatus, setDescStatus] = useState('');
 
   const [listDesc, setListDesc] = useState([]);
 
   const appendToListDesc = () => {
-    if (descAction === '' || descPrazo === '' || descResponsavel === '' || descStatus === '') return;
+    if (descAction === '' || descPrazo === null || descResponsavel === '' || descStatus === '') return;
 
     const newItem = {
       descAction: descAction,
@@ -164,9 +166,28 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
 
     setListDesc([...listDesc, newItem]);
     setDescAction('');
-    setDescPrazo('');
+    setDescPrazo(new Date());
     setDescResponsavel('');
     setDescStatus('');
+  };
+
+  const [descPlanoAcao, setDescPlanoAcao] = useState('');
+  const [responsalvePlanoAcao, setResponsalvePlanoAcao] = useState('');
+  const [prazoPlanoAcao, setPrazoPlanoAcao] = useState(new Date());
+  const [listPlanoAcao, setListPlanoAcao] = useState([]);
+  const appendToListPlanoAcao = () => {
+    if (responsalvePlanoAcao === '' || prazoPlanoAcao === null || descPlanoAcao === '') return;
+
+    const newItem = {
+      descPlanoAcao: descPlanoAcao,
+      responsalvePlanoAcao: responsalvePlanoAcao,
+      prazoPlanoAcao: prazoPlanoAcao,
+    };
+
+    setListPlanoAcao([...listPlanoAcao, newItem]);
+    setPrazoPlanoAcao(new Date());
+    setDescPlanoAcao('');
+    setResponsalvePlanoAcao('');
   };
 
   const handleRemoveItem = (index: number) => {
@@ -188,13 +209,19 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                 sx={{ width: '20% !important' }}
                 value={desc.descAction}
               />
-              <TextField
-                label="Prazo"
-                id="rnc-text-field"
-                className="m-2 rnc-form-field"
-                sx={{ width: '20% !important' }}
-                value={desc.descPrazo}
-              />
+
+              <FormControl className="m-2 mb-2">
+                <DatePicker
+                  // locale='pt-BR'
+                  label="Prazo"
+                  selected={descPrazo}
+                  onChange={date => setDescPrazo(date)}
+                  className="date-picker"
+                  dateFormat={'dd/MM/yyyy'}
+                  id="date-picker-rnc-acao-prazo"
+                />
+              </FormControl>
+
               <TextField
                 label="Responsável"
                 id="rnc-text-field"
@@ -269,17 +296,15 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
         />
         <div key={index} style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
           <FormControl className="m-2 mt-0 rnc-form-field">
-            <InputLabel>Prazo</InputLabel>
-            <Select
-              label="Encaminhado para:"
-              name="forwarded"
-              // disabled={secondForm}
-              // value={firstForm.forwarded.value}
-              // error={firstForm.forwarded.error}
-              // onChange={event =>
-              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-              // }
-            ></Select>
+            <DatePicker
+              // locale='pt-BR'
+              label="Prazo"
+              selected={prazoPlanoAcao}
+              onChange={date => setPrazoPlanoAcao(date)}
+              className="date-picker"
+              dateFormat={'dd/MM/yyyy'}
+              id="date-picker-rnc-plano-acao-prazo"
+            />
           </FormControl>
           <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
             <InputLabel>Responsável</InputLabel>
@@ -310,7 +335,11 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
               // onChange={event =>
               //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
               // }
-            ></Select>
+            >
+              <MenuItem value="Status 1">Status 1</MenuItem>
+              <MenuItem value="Status 2">Status 2</MenuItem>
+              <MenuItem value="Status 3">Status 3</MenuItem>
+            </Select>
           </FormControl>
 
           <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
@@ -324,7 +353,11 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
               // onChange={event =>
               //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
               // }
-            ></Select>
+            >
+              <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
+              <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
+              <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
+            </Select>
           </FormControl>
 
           <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
@@ -368,6 +401,25 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
       </FormControl>
     ));
   };
+
+  const optionsResponsavelMateriaPrima = [
+    { label: 'Responsavel 1', value: 'Responsavel 1' },
+    { label: 'Responsavel 2', value: 'Responsavel 2' },
+    { label: 'Responsavel 3', value: 'Responsavel 3' },
+    { label: 'Responsavel 4', value: 'Responsavel 4' },
+    { label: 'Responsavel 5', value: 'Responsavel 5' },
+  ];
+
+  const [selectedResponsavelMateriaPrima, setSelectedResponsavelMateriaPrima] = useState([]);
+
+  const temCausaPreenchida =
+    registerForm.causaMeioAmbiente.value !== '' ||
+    registerForm.causaMaoObra.value !== '' ||
+    registerForm.causaMetodo.value !== '' ||
+    registerForm.causaMaquina.value !== '' ||
+    registerForm.causaMedicao.value !== '' ||
+    registerForm.causaMateriaPrima.value !== '';
+  const buttonAvancarDisabled = !temCausaPreenchida;
 
   return (
     <>
@@ -446,14 +498,17 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                   onChange={e => setDescAction(e.target.value)}
                   value={descAction}
                 />
-                <TextField
-                  label="Prazo"
-                  className="m-2 rnc-form-field"
-                  id="rnc-text-field"
-                  sx={{ width: '20% !important' }}
-                  onChange={e => setDescPrazo(e.target.value)}
-                  value={descPrazo}
-                />
+                <FormControl className="m-2 mb-2">
+                  <DatePicker
+                    // locale='pt-BR'
+                    label="Prazo"
+                    selected={descPrazo}
+                    onChange={date => setDescPrazo(date)}
+                    className="date-picker"
+                    dateFormat={'dd/MM/yyyy'}
+                    id="date-picker-rnc-acao-prazo"
+                  />
+                </FormControl>
                 <FormControl className="rnc-form-field m-2">
                   <InputLabel>Responsável</InputLabel>
                   <Select
@@ -488,7 +543,7 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                   aria-label="add"
                   size="medium"
                   className="ms-3"
-                  disabled={descAction === '' || descPrazo === '' || descResponsavel === '' || descStatus === ''}
+                  disabled={descAction === '' || descResponsavel === '' || descStatus === ''}
                   onClick={appendToListDesc}
                 >
                   <Add />
@@ -563,17 +618,12 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                   }}
                 >
                   <FormControl className="w-100 m-2">
-                    <InputLabel>Responsável</InputLabel>
-                    <Select
-                      label="Responsável"
-                      name="forwarded"
-                      // disabled={false}
-                      onChange={e => setResponsaveis([...responsaveis, e.target.value])}
-                    >
-                      <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-                      <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-                      <MenuItem value="Usuário 3">Usuário 3</MenuItem>
-                    </Select>
+                    <MultiSelect
+                      options={optionsResponsavelMateriaPrima}
+                      value={selectedResponsavelMateriaPrima}
+                      onChange={setSelectedResponsavelMateriaPrima}
+                      labelledBy="Responsável"
+                    />
                   </FormControl>
                   {renderResponsaveis()}
                 </Card>
@@ -700,8 +750,8 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                 <Card className="mt-2">
                   <div className="flex p-2" style={{ justifyContent: 'space-between' }}>
                     <div className="flex-col">
-                      <h3 style={{ fontSize: '1rem' }}>ISHIKAWA</h3>
-                      <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} />
+                      <br />
+                      <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} placeholder="ISHIKAWA" />
                     </div>
                     <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
                       <TextField
@@ -768,8 +818,15 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                 <Card className="mt-2">
                   <div className="flex p-2">
                     <div className="flex-col">
-                      <h3 style={{ fontSize: '1rem' }}>5 Porquês</h3>
-                      <textarea className="textarea-ishikawa mb-2" style={{ height: '100%' }} name="ncArea" rows={5} cols={30} />
+                      <br />
+                      <textarea
+                        className="textarea-ishikawa mb-2"
+                        style={{ height: '100%' }}
+                        placeholder="5 Porquês"
+                        name="ncArea"
+                        rows={5}
+                        cols={30}
+                      />
                     </div>
                     <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
                       <TextField label="Porquê?" className="m-2" />
@@ -779,8 +836,15 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                       <TextField label="Porquê?" className="m-2" />
                     </div>
                     <div className="flex-col">
-                      <h3 style={{ fontSize: '1rem' }}>Causa</h3>
-                      <textarea className="textarea-ishikawa mb-2" style={{ height: '100%' }} name="ncArea" rows={5} cols={30} />
+                      <br />
+                      <textarea
+                        className="textarea-ishikawa mb-2"
+                        style={{ height: '100%' }}
+                        placeholder="Causa"
+                        name="ncArea"
+                        rows={5}
+                        cols={30}
+                      />
                     </div>
                   </div>
                 </Card>
@@ -807,17 +871,15 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
               />
               <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
                 <FormControl className="m-2 mt-0 rnc-form-field">
-                  <InputLabel>Prazo</InputLabel>
-                  <Select
-                    label="Encaminhado para:"
-                    name="forwarded"
-                    // disabled={secondForm}
-                    // value={firstForm.forwarded.value}
-                    // error={firstForm.forwarded.error}
-                    // onChange={event =>
-                    //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-                    // }
-                  ></Select>
+                  <DatePicker
+                    // locale='pt-BR'
+                    label="Prazo"
+                    selected={prazoPlanoAcao}
+                    onChange={date => setPrazoPlanoAcao(date)}
+                    className="date-picker"
+                    dateFormat={'dd/MM/yyyy'}
+                    id="date-picker-rnc-plano-acao-prazo"
+                  />
                 </FormControl>
                 <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
                   <InputLabel>Responsável</InputLabel>
@@ -848,7 +910,11 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     // onChange={event =>
                     //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
                     // }
-                  ></Select>
+                  >
+                    <MenuItem value="Status 1">Status 1</MenuItem>
+                    <MenuItem value="Status 2">Status 2</MenuItem>
+                    <MenuItem value="Status 3">Status 3</MenuItem>
+                  </Select>
                 </FormControl>
 
                 <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
@@ -862,7 +928,11 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
                     // onChange={event =>
                     //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
                     // }
-                  ></Select>
+                  >
+                    <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
+                    <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
+                    <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
+                  </Select>
                 </FormControl>
 
                 <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
@@ -926,6 +996,7 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
               color="primary"
               style={{ background: '#e6b200', color: '#4e4d4d' }}
               onClick={() => handleTela('implementacao')}
+              disabled={buttonAvancarDisabled}
             >
               Avançar
             </Button>
