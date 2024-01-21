@@ -1,8 +1,26 @@
 import React from 'react';
-import { Card, Divider, TextField } from '@mui/material';
+import { Button, Card, Divider, TextField } from '@mui/material';
 import './external-audit.css';
+import { toast } from 'react-toastify';
 
-export const ExternalAuditRegister = ({ RNCsecondForm, setRNCsecondForm }) => {
+export const ExternalAuditRegister = ({ setExternalAuditRegister }) => {
+  const [external, setExternal] = React.useState({
+    norma: '',
+    numberNC: '',
+    normaRequiremeents: '',
+    numberReport: '',
+  });
+
+  const handleChange = () => {
+    setExternalAuditRegister({
+      norma: external.norma,
+      numberNC: external.numberNC,
+      normaRequiremeents: external.normaRequiremeents,
+      numberReport: external.numberReport,
+    });
+    toast.success('Origem salva com sucesso!');
+  };
+
   return (
     <>
       <Card>
@@ -14,33 +32,44 @@ export const ExternalAuditRegister = ({ RNCsecondForm, setRNCsecondForm }) => {
             label="Norma"
             name="norma"
             className="form-field m-3"
-            value={RNCsecondForm.norma}
-            onChange={e => setRNCsecondForm({ ...RNCsecondForm, norma: e.target.value })}
+            value={external.norma}
+            onChange={e => setExternal({ ...external, norma: e.target.value })}
           />
           <TextField
             fullWidth
             label="Número NC"
             name="numeroNC"
             className="form-field m-3"
-            value={RNCsecondForm.numberNC}
-            onChange={e => setRNCsecondForm({ ...RNCsecondForm, numberNC: e.target.value })}
+            value={external.numberNC}
+            onChange={e => setExternal({ ...external, numberNC: e.target.value })}
           />
           <TextField
             fullWidth
             label="Requisito(s) da Norma"
             name="requisitosNorma"
             className="form-field m-3"
-            value={RNCsecondForm.normaRequiremeents}
-            onChange={e => setRNCsecondForm({ ...RNCsecondForm, normaRequiremeents: e.target.value })}
+            value={external.normaRequiremeents}
+            onChange={e => setExternal({ ...external, normaRequiremeents: e.target.value })}
           />
           <TextField
             fullWidth
             label="Número do Relatório"
             name="numeroRelatorio"
             className="form-field m-3"
-            value={RNCsecondForm.numberReport}
-            onChange={e => setRNCsecondForm({ ...RNCsecondForm, numberReport: e.target.value })}
+            value={external.numberReport}
+            onChange={e => setExternal({ ...external, numberReport: e.target.value })}
           />
+        </div>
+        <div className="m-2" style={{ display: 'flex', width: '100%', justifyContent: 'end' }}>
+          <Button
+            className="me-4 mb-3"
+            variant="contained"
+            color="primary"
+            style={{ background: '#e6b200', color: '#4e4d4d' }}
+            onClick={() => handleChange()}
+          >
+            Salvar
+          </Button>
         </div>
       </Card>
     </>

@@ -14,13 +14,9 @@ const handleTela = (tela: string) => {
 };
 
 const RncRoutes = () => {
-  // const [RNCList, setRNCList] = useState<IRNC[]>([]);
-
   const [RNCs, setRNCs] = useState([]);
 
   const handleRNCNewFirstForm = rnc => {
-    // const numRNC = RNCs.length + 1;
-
     const newRNC = {
       id: rnc.number.value,
       emitter: rnc.emitter.value,
@@ -35,12 +31,29 @@ const RncRoutes = () => {
     setRNCs([...RNCs, newRNC]);
   };
 
+  const handleUpdateRNC = obj => {
+    const updatedRNCs = RNCs.map(item => {
+      if (item.id === obj.id) {
+        console.log({ ...item, ...obj });
+        return { ...item, ...obj };
+      }
+      return item;
+    });
+
+    setRNCs(updatedRNCs);
+  };
+
   return (
     <div>
       <ErrorBoundaryRoutes>
-        <Route path="" element={<RncList />} />
-        <Route path="new" element={<RNCNew handleRNC={handleRNCNewFirstForm} RNCNumber={RNCs.length + 1} />} />
-        <Route path="general" element={<GeneralRegister handleTela={handleTela} handleAcao={handleTela} />}></Route>
+        <Route path="" element={<RncList RNCs={RNCs} />} />
+        <Route
+          path="new"
+          element={
+            <RNCNew handleRNC={handleRNCNewFirstForm} RNCNumber={RNCs.length + 1} RNCList={RNCs} handleUpdateRNC={handleUpdateRNC} />
+          }
+        />
+        <Route path="general" element={<GeneralRegister handleTela={handleTela} />}></Route>
         <Route
           path="general/implementacao"
           element={<RegisterImplementation handleTela={handleTela} handlePrazoImplementacao={handleTela} />}

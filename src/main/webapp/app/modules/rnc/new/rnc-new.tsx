@@ -35,7 +35,7 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsersAsAdmin, getUsers } from '../../administration/user-management/user-management.reducer';
 import { validateFields } from './rnc-new-validates';
 
-export const RNCNew = ({ handleRNC, RNCNumber }) => {
+export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -107,6 +107,8 @@ export const RNCNew = ({ handleRNC, RNCNumber }) => {
 
   const addRnc = rncStore(state => state.addRnc);
 
+  const [repetition, setRepetition] = useState([]);
+
   useEffect(() => {
     setFirstForm({ ...firstForm, number: { value: String(RNCNumber), error: firstForm.processOrigin.error } });
   }, []);
@@ -123,8 +125,16 @@ export const RNCNew = ({ handleRNC, RNCNumber }) => {
     return;
   };
 
+  const setExternalAuditRegister = data => {
+    handleUpdateRNC({ ...data, id: firstForm.number.value });
+  };
+
   const setClientRegister = data => {
-    console.log(data);
+    handleUpdateRNC({ ...data, id: firstForm.number.value });
+  };
+
+  const setInternalAuditRegister = data => {
+    handleUpdateRNC({ ...data, id: firstForm.number.value });
   };
 
   const setMPRegister = data => {
@@ -142,9 +152,9 @@ export const RNCNew = ({ handleRNC, RNCNumber }) => {
   const renderComponents = () => {
     switch (firstForm.origin.value) {
       case 'externalAudit':
-        return <ExternalAuditRegister RNCsecondForm={RNCsecondForm} setRNCsecondForm={setRNCsecondForm} />;
+        return <ExternalAuditRegister setExternalAuditRegister={setExternalAuditRegister} />;
       case 'internalAudit':
-        return <InternalAuditRegister />;
+        return <InternalAuditRegister setInternalAuditRegister={setInternalAuditRegister} />;
       case 'client':
         return <ClientRegister onClientChange={setClientRegister} />;
       case 'mp':
@@ -162,22 +172,6 @@ export const RNCNew = ({ handleRNC, RNCNumber }) => {
   };
 
   const saveData = () => {
-    // const newRnc: RNC = {
-    //   numero: firstForm.number.value,
-    //   emissao: firstForm.date.value,
-    //   emissor: 'Admin',
-    //   descricao: descricao,
-    //   responsavel: firstForm.forwarded.value,
-    //   prazo: prazoImplementacao,
-    //   acoes: acoes,
-    //   verificacao: prazoVerificacao,
-    //   eficacia: prazoVerificacao,
-    //   fechamento: prazoFechamento,
-    //   status: 'Implementação',
-    // };
-
-    // addRnc(newRnc);
-
     navigate('/rnc');
   };
 
@@ -264,9 +258,6 @@ export const RNCNew = ({ handleRNC, RNCNumber }) => {
                         {user.login}
                       </MenuItem>
                     ))}
-                    {/* <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-                    <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-                    <MenuItem value="Usuário 3">Usuário 3</MenuItem> */}
                   </Select>
                 </FormControl>
 
@@ -362,7 +353,7 @@ export const RNCNew = ({ handleRNC, RNCNumber }) => {
                 <DescriptionRnc handleDescricao={handleDescricao} />
               </Row>
               <Row className="ms-3 me-3 mt-3" fullWidth>
-                <RepetitionRnc />
+                <RepetitionRnc RNCID={firstForm.number.value} RNCList={RNCList} handleUpdateRNC={setRepetition} />
               </Row>
               <Row className="m-3">
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -377,19 +368,13 @@ export const RNCNew = ({ handleRNC, RNCNumber }) => {
                   <Button
                     variant="outlined"
                     color="primary"
-                    style={{ color: '#384150', border: '1px solid #384150' }}
-                    onClick={() => setTela('geral')}
+                    style={{ background: '#e6b200', color: '#4e4d4d' }}
+                    onClick={() => {
+                      handleUpdateRNC({ ...repetition, id: firstForm.number.value });
+                      navigate('/rnc');
+                    }}
                   >
                     Salvar
-                  </Button>
-                  <Button
-                    className="ms-3"
-                    variant="contained"
-                    color="primary"
-                    style={{ background: '#e6b200', color: '#4e4d4d' }}
-                    onClick={() => setTela('geral')}
-                  >
-                    Avançar
                   </Button>
                 </div>
               </Row>
@@ -399,7 +384,7 @@ export const RNCNew = ({ handleRNC, RNCNumber }) => {
       </>
     );
   } else if (tela == 'geral') {
-    return <GeneralRegister handleTela={handleTela} handleAcao={handleAcao}></GeneralRegister>;
+    return <GeneralRegister handleTela={handleTela}></GeneralRegister>;
   } else if (tela == 'implementacao') {
     return <RegisterImplementation handleTela={handleTela} handlePrazoImplementacao={handlePrazoImplementacao}></RegisterImplementation>;
   } else if (tela == 'validacao') {

@@ -36,7 +36,7 @@ import { Add } from '@mui/icons-material';
 import 'react-datepicker/dist/react-datepicker.css';
 import { MultiSelect } from 'react-multi-select-component';
 
-export const GeneralRegister = ({ handleTela, handleAcao }) => {
+export const GeneralRegister = ({ handleTela }) => {
   const navigate = useNavigate();
   const [registerForm, setRegisterForm] = useState({
     decision: {
@@ -252,7 +252,6 @@ export const GeneralRegister = ({ handleTela, handleAcao }) => {
 
   const setAcao = (e: any) => {
     handleChange({ ...registerForm, descricaoAcao: { value: e.target.value, error: registerForm.descricaoAcao.error } });
-    handleAcao(e.target.value);
   };
 
   const handleChange = (value: any) => {
