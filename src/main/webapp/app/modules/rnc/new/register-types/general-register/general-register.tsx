@@ -1,5 +1,5 @@
 import './general-register.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Breadcrumbs,
   Button,
@@ -19,12 +19,14 @@ import {
   Divider,
   Chip,
   Fab,
+  SelectChangeEvent,
+  ListItemText,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DatePicker from 'react-datepicker';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
@@ -35,9 +37,14 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Add } from '@mui/icons-material';
 import 'react-datepicker/dist/react-datepicker.css';
 import { MultiSelect } from 'react-multi-select-component';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
+import { toast } from 'react-toastify';
 
-export const GeneralRegister = ({ handleTela }) => {
+export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { id } = useParams();
   const [registerForm, setRegisterForm] = useState({
     decision: {
       value: '',
@@ -143,7 +150,28 @@ export const GeneralRegister = ({ handleTela }) => {
       value: '',
       error: false,
     },
+    fiveWhy_n1: {
+      value: '',
+    },
+    fiveWhy_n2: {
+      value: '',
+    },
+    fiveWhy_n3: {
+      value: '',
+    },
+    fiveWhy_n4: {
+      value: '',
+    },
+    fiveWhy_n5: {
+      value: '',
+    },
   });
+
+  const [_rnc, _setrnc] = useState(findRNCById(id));
+
+  useEffect(() => {
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+  }, []);
 
   const [k, setK] = useState('');
 
@@ -175,6 +203,17 @@ export const GeneralRegister = ({ handleTela }) => {
   const [responsalvePlanoAcao, setResponsalvePlanoAcao] = useState('');
   const [prazoPlanoAcao, setPrazoPlanoAcao] = useState(new Date());
   const [listPlanoAcao, setListPlanoAcao] = useState([]);
+  const [responsaveisMP, setResponsaveisMP] = useState([]);
+  const [responsaveisVerificacao, setResponsaveisVerificacao] = useState([]);
+  const [responsaveisPlanoAcao, setResponsaveisPlanoAcao] = useState([]);
+
+  const handleChangeResponsaveisMP = (event: SelectChangeEvent<typeof responsaveisMP>) => {
+    const {
+      target: { value },
+    } = event;
+    setResponsaveisMP(typeof value === 'string' ? value.split(',') : value);
+  };
+
   const appendToListPlanoAcao = () => {
     if (responsalvePlanoAcao === '' || prazoPlanoAcao === null || descPlanoAcao === '') return;
 
@@ -316,31 +355,19 @@ export const GeneralRegister = ({ handleTela }) => {
             <Select
               label="Encaminhado para:"
               name="forwarded"
-              // disabled={secondForm}
-              // value={firstForm.forwarded.value}
-              // error={firstForm.forwarded.error}
-              // onChange={event =>
-              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-              // }
+              onChange={e => setResponsaveisPlanoAcao([...responsaveisPlanoAcao, e.target.value])}
             >
-              <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-              <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-              <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+              {users.map((user, i) => (
+                <MenuItem value={user.login} key={`user-${i}`}>
+                  {user.login}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
             <InputLabel>Status</InputLabel>
-            <Select
-              label="Encaminhado para:"
-              name="forwarded"
-              // disabled={secondForm}
-              // value={firstForm.forwarded.value}
-              // error={firstForm.forwarded.error}
-              // onChange={event =>
-              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-              // }
-            >
+            <Select label="Encaminhado para:" name="forwarded">
               <MenuItem value="Status 1">Status 1</MenuItem>
               <MenuItem value="Status 2">Status 2</MenuItem>
               <MenuItem value="Status 3">Status 3</MenuItem>
@@ -349,16 +376,7 @@ export const GeneralRegister = ({ handleTela }) => {
 
           <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
             <InputLabel>Verificação</InputLabel>
-            <Select
-              label="Encaminhado para:"
-              name="forwarded"
-              // disabled={secondForm}
-              // value={firstForm.forwarded.value}
-              // error={firstForm.forwarded.error}
-              // onChange={event =>
-              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-              // }
-            >
+            <Select label="Encaminhado para:" name="forwarded">
               <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
               <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
               <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
@@ -370,16 +388,13 @@ export const GeneralRegister = ({ handleTela }) => {
             <Select
               label="Encaminhado para:"
               name="forwarded"
-              // disabled={secondForm}
-              // value={firstForm.forwarded.value}
-              // error={firstForm.forwarded.error}
-              // onChange={event =>
-              //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-              // }
+              onChange={e => setResponsaveisVerificacao([...responsaveisVerificacao, e.target.value])}
             >
-              <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-              <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-              <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+              {users.map((user, i) => (
+                <MenuItem value={user.login} key={`user-${i}`}>
+                  {user.login}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <IconButton aria-label="Remover" onClick={() => handleRemoveListaAcoesCorretivasItem(index)}>
@@ -402,9 +417,11 @@ export const GeneralRegister = ({ handleTela }) => {
           disabled
           // onChange={e => setResponsaveis([...responsaveis, e.target.value])}
         >
-          <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-          <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-          <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+          {users.map((user, i) => (
+            <MenuItem value={user.login} key={`user-${i}`}>
+              {user.login}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
     ));
@@ -420,16 +437,41 @@ export const GeneralRegister = ({ handleTela }) => {
 
   const [selectedResponsavelMateriaPrima, setSelectedResponsavelMateriaPrima] = useState([]);
 
-  const temCausaPreenchida =
-    registerForm.causaMeioAmbiente.value !== '' ||
-    registerForm.causaMaoObra.value !== '' ||
-    registerForm.causaMetodo.value !== '' ||
-    registerForm.causaMaquina.value !== '' ||
-    registerForm.causaMedicao.value !== '' ||
-    registerForm.causaMateriaPrima.value !== '';
-  const buttonAvancarDisabled = !temCausaPreenchida;
+  const validarInvestigacao = () => {
+    if (!checkedFiveWhy && !checkedIshikawa) return false;
+
+    if (checkedFiveWhy) {
+      let counter = 0;
+      counter = registerForm.fiveWhy_n1.value !== '' ? counter + 1 : counter;
+      counter = registerForm.fiveWhy_n2.value !== '' ? counter + 1 : counter;
+      counter = registerForm.fiveWhy_n3.value !== '' ? counter + 1 : counter;
+      counter = registerForm.fiveWhy_n4.value !== '' ? counter + 1 : counter;
+      counter = registerForm.fiveWhy_n5.value !== '' ? counter + 1 : counter;
+      if (counter < 3) {
+        return false;
+      }
+    }
+    if (checkedIshikawa) {
+      if (
+        registerForm.causaMeioAmbiente.value !== '' ||
+        registerForm.causaMaoObra.value !== '' ||
+        registerForm.causaMetodo.value !== '' ||
+        registerForm.causaMaquina.value !== '' ||
+        registerForm.causaMedicao.value !== '' ||
+        registerForm.causaMateriaPrima.value !== ''
+      ) {
+        return true;
+      }
+      return false;
+    }
+
+    return true;
+  };
+
+  const buttonAvancarDisabled = !validarInvestigacao();
 
   const [showPlanoAcaoCorretiva, setShowPlanoAcaoCorretiva] = useState(false);
+  const users = useAppSelector(state => state.userManagement.users);
 
   return (
     <>
@@ -439,11 +481,11 @@ export const GeneralRegister = ({ handleTela }) => {
             <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
               Home
             </Link>
-            <Link to={'/rnc/general'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-              Relatório de Não conformidade
+            <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+              RNC
             </Link>
             <Link to={'/rnc/general'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Geral
+              Relatório de Não conformidade
             </Link>
           </Breadcrumbs>
         </Row>
@@ -492,79 +534,80 @@ export const GeneralRegister = ({ handleTela }) => {
               </div>
             </CardContent>
           </Card>
-          <Card sx={{ minWidth: 275 }} className="mt-3">
-            <CardContent>
-              <Typography variant="h5" component="div">
-                Ação Imediata / Disposição para conter a NC
-              </Typography>
+          <div className="fake-card mt-3">
+            <Typography variant="h5" component="div">
+              Ação Imediata / Disposição para conter a NC
+            </Typography>
 
-              <br />
-              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <TextField
-                  label="Descrição da ação"
-                  className="m-2 rnc-form-field"
-                  id="rnc-text-field"
-                  sx={{ width: '20% !important' }}
-                  onChange={e => setDescAction(e.target.value)}
-                  value={descAction}
+            <br />
+            <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+              <TextField
+                label="Descrição da ação"
+                className="m-2 rnc-form-field"
+                id="rnc-text-field"
+                sx={{ width: '20% !important' }}
+                onChange={e => setDescAction(e.target.value)}
+                value={descAction}
+              />
+              <FormControl className="m-2 mb-2">
+                <DatePicker
+                  // locale='pt-BR'
+                  label="Prazo"
+                  selected={descPrazo}
+                  onChange={date => setDescPrazo(date)}
+                  className="date-picker"
+                  dateFormat={'dd/MM/yyyy'}
+                  id="date-picker-rnc-acao-prazo"
                 />
-                <FormControl className="m-2 mb-2">
-                  <DatePicker
-                    // locale='pt-BR'
-                    label="Prazo"
-                    selected={descPrazo}
-                    onChange={date => setDescPrazo(date)}
-                    className="date-picker"
-                    dateFormat={'dd/MM/yyyy'}
-                    id="date-picker-rnc-acao-prazo"
-                  />
-                </FormControl>
-                <FormControl className="rnc-form-field m-2">
-                  <InputLabel>Responsável</InputLabel>
-                  <Select
-                    label="Responsável"
-                    name="forwarded"
-                    // disabled={false}
-                    value={descResponsavel}
-                    onChange={e => setDescResponsavel(e.target.value)}
-                  >
-                    <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-                    <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-                    <MenuItem value="Usuário 3">Usuário 3</MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  label="Status"
-                  className="m-2 rnc-form-field"
-                  id="rnc-text-field"
-                  sx={{ width: '20% !important' }}
-                  onChange={e => setDescStatus(e.target.value)}
-                  value={descStatus}
-                />
+              </FormControl>
+              <FormControl className="rnc-form-field m-2">
+                <InputLabel>Responsável</InputLabel>
+                <Select
+                  label="Responsável"
+                  name="forwarded"
+                  // disabled={false}
+                  value={descResponsavel}
+                  onChange={e => setDescResponsavel(e.target.value)}
+                >
+                  {users.map((user, i) => (
+                    <MenuItem value={user.login} key={`user-${i}`}>
+                      {user.login}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                label="Status"
+                className="m-2 rnc-form-field"
+                id="rnc-text-field"
+                sx={{ width: '20% !important' }}
+                onChange={e => setDescStatus(e.target.value)}
+                value={descStatus}
+              />
 
-                {/* <IconButton aria-label="Editar">
+              {/* <IconButton aria-label="Editar">
                   <EditIcon fontSize="medium" />
                 </IconButton>
                 <IconButton aria-label="Remover">
                   <DeleteIcon fontSize="medium" />
                 </IconButton> */}
-                <Fab
-                  color="primary"
-                  aria-label="add"
-                  size="medium"
-                  className="ms-3"
-                  disabled={descAction === '' || descResponsavel === '' || descStatus === ''}
-                  onClick={appendToListDesc}
-                >
-                  <Add />
-                </Fab>
-              </div>
-              {renderListDesc()}
-            </CardContent>
-          </Card>
+              <Fab
+                color="primary"
+                aria-label="add"
+                size="medium"
+                className="ms-3"
+                disabled={descAction === '' || descResponsavel === '' || descStatus === ''}
+                onClick={appendToListDesc}
+              >
+                <Add />
+              </Fab>
+            </div>
+            {renderListDesc()}
+            {/* </CardContent> */}
+          </div>
           <Divider light />
-          <Card sx={{ minWidth: 275 }} className="mt-3">
-            <CardContent>
+          {(_rnc.origin === 'mp' || _rnc.origin === 'endProduct') && (
+            <div className="fake-card mt-3">
               <Typography variant="h5" component="div">
                 Decisão sobre Matéria-Prima/Insumo ou Decisão sobre Produto Acabado
               </Typography>
@@ -628,12 +671,22 @@ export const GeneralRegister = ({ handleTela }) => {
                   }}
                 >
                   <FormControl className="w-100 m-2">
-                    <MultiSelect
-                      options={optionsResponsavelMateriaPrima}
-                      value={selectedResponsavelMateriaPrima}
-                      onChange={setSelectedResponsavelMateriaPrima}
-                      labelledBy="Responsável"
-                    />
+                    <InputLabel>Responsável</InputLabel>
+                    <Select
+                      multiple
+                      value={responsaveisMP}
+                      onChange={handleChangeResponsaveisMP}
+                      input={<OutlinedInput label="Responsáveis" />}
+                      renderValue={selected => selected.join(', ')}
+                    >
+                      {users.map((user, i) => (
+                        <MenuItem value={user.login} key={`user-${i}`}>
+                          <Checkbox checked={responsaveisMP.indexOf(user.login) > -1} />
+                          <ListItemText primary={user.login} />
+                          {/* {user.login} */}
+                        </MenuItem>
+                      ))}
+                    </Select>
                   </FormControl>
                   {renderResponsaveis()}
                 </Card>
@@ -744,8 +797,8 @@ export const GeneralRegister = ({ handleTela }) => {
                 </div>
               </div>
               <br />
-            </CardContent>
-          </Card>
+            </div>
+          )}
           <Divider light />
           <Card sx={{ minWidth: 275 }} className="mt-3 mb-2">
             <CardContent>
@@ -839,11 +892,31 @@ export const GeneralRegister = ({ handleTela }) => {
                       />
                     </div>
                     <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
-                      <TextField label="Porquê?" className="m-2" />
-                      <TextField label="Porquê?" className="m-2" />
-                      <TextField label="Porquê?" className="m-2" />
-                      <TextField label="Porquê?" className="m-2" />
-                      <TextField label="Porquê?" className="m-2" />
+                      <TextField
+                        label="Porquê?"
+                        className="m-2"
+                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n1: { value: e.target.value } })}
+                      />
+                      <TextField
+                        label="Porquê?"
+                        className="m-2"
+                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n2: { value: e.target.value } })}
+                      />
+                      <TextField
+                        label="Porquê?"
+                        className="m-2"
+                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n3: { value: e.target.value } })}
+                      />
+                      <TextField
+                        label="Porquê?"
+                        className="m-2"
+                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n4: { value: e.target.value } })}
+                      />
+                      <TextField
+                        label="Porquê?"
+                        className="m-2"
+                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n5: { value: e.target.value } })}
+                      />
                     </div>
                     <div className="flex-col">
                       <br />
@@ -862,160 +935,126 @@ export const GeneralRegister = ({ handleTela }) => {
             </CardContent>
           </Card>
           {showPlanoAcaoCorretiva && (
-            <Card sx={{ minWidth: 275 }} className="mt-2">
-              <CardContent>
-                <Typography variant="h5" component="div">
-                  Plano de Ação Corretiva
-                </Typography>
-                <br />
-                <TextField
-                  label="Descrição da ação"
-                  id="rnc-text-field"
-                  className="w-100 desc-width m-2"
-                  onChange={e =>
-                    handleChange({
-                      ...registerForm,
-                      planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
-                    })
-                  }
-                />
-                <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                  <FormControl className="m-2 mt-0 rnc-form-field">
-                    <DatePicker
-                      // locale='pt-BR'
-                      label="Prazo"
-                      selected={prazoPlanoAcao}
-                      onChange={date => setPrazoPlanoAcao(date)}
-                      className="date-picker"
-                      dateFormat={'dd/MM/yyyy'}
-                      id="date-picker-rnc-plano-acao-prazo"
-                    />
-                  </FormControl>
-                  <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-                    <InputLabel>Responsável</InputLabel>
-                    <Select
-                      label="Encaminhado para:"
-                      name="forwarded"
-                      // disabled={secondForm}
-                      // value={firstForm.forwarded.value}
-                      // error={firstForm.forwarded.error}
-                      // onChange={event =>
-                      //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-                      // }
-                    >
-                      <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-                      <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-                      <MenuItem value="Usuário 3">Usuário 3</MenuItem>
-                    </Select>
-                  </FormControl>
+            <div className="fake-card mt-2">
+              <Typography variant="h5" component="div">
+                Plano de Ação Corretiva
+              </Typography>
+              <br />
+              <TextField
+                label="Descrição da ação"
+                id="rnc-text-field"
+                className="w-100 desc-width m-2"
+                onChange={e =>
+                  handleChange({
+                    ...registerForm,
+                    planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
+                  })
+                }
+              />
+              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+                <FormControl className="m-2 mt-0 rnc-form-field">
+                  <DatePicker
+                    // locale='pt-BR'
+                    label="Prazo"
+                    selected={prazoPlanoAcao}
+                    onChange={date => setPrazoPlanoAcao(date)}
+                    className="date-picker"
+                    dateFormat={'dd/MM/yyyy'}
+                    id="date-picker-rnc-plano-acao-prazo"
+                  />
+                </FormControl>
+                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+                  <InputLabel>Responsável</InputLabel>
+                  <Select
+                    label="Encaminhado para:"
+                    name="forwarded"
+                    onChange={e => setResponsaveisPlanoAcao([...responsaveisPlanoAcao, e.target.value])}
+                  >
+                    {users.map((user, i) => (
+                      <MenuItem value={user.login} key={`user-${i}`}>
+                        {user.login}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-                  <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      label="Encaminhado para:"
-                      name="forwarded"
-                      // disabled={secondForm}
-                      // value={firstForm.forwarded.value}
-                      // error={firstForm.forwarded.error}
-                      // onChange={event =>
-                      //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-                      // }
-                    >
-                      <MenuItem value="Status 1">Status 1</MenuItem>
-                      <MenuItem value="Status 2">Status 2</MenuItem>
-                      <MenuItem value="Status 3">Status 3</MenuItem>
-                    </Select>
-                  </FormControl>
+                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+                  <InputLabel>Status</InputLabel>
+                  <Select label="Encaminhado para:" name="forwarded">
+                    <MenuItem value="Status 1">Status 1</MenuItem>
+                    <MenuItem value="Status 2">Status 2</MenuItem>
+                    <MenuItem value="Status 3">Status 3</MenuItem>
+                  </Select>
+                </FormControl>
 
-                  <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-                    <InputLabel>Verificação</InputLabel>
-                    <Select
-                      label="Encaminhado para:"
-                      name="forwarded"
-                      // disabled={secondForm}
-                      // value={firstForm.forwarded.value}
-                      // error={firstForm.forwarded.error}
-                      // onChange={event =>
-                      //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-                      // }
-                    >
-                      <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
-                      <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
-                      <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
-                    </Select>
-                  </FormControl>
+                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+                  <InputLabel>Verificação</InputLabel>
+                  <Select label="Encaminhado para:" name="forwarded">
+                    <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
+                    <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
+                    <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
+                  </Select>
+                </FormControl>
 
-                  <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-                    <InputLabel>Resp. verificação</InputLabel>
-                    <Select
-                      label="Encaminhado para:"
-                      name="forwarded"
-                      // disabled={secondForm}
-                      // value={firstForm.forwarded.value}
-                      // error={firstForm.forwarded.error}
-                      // onChange={event =>
-                      //   setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
-                      // }
-                    >
-                      <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-                      <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-                      <MenuItem value="Usuário 3">Usuário 3</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <div style={{ marginLeft: 'auto' }}>
-                    {/* <IconButton aria-label="Editar">
-                    <EditIcon fontSize="medium" />
-                  </IconButton>
-                  <IconButton aria-label="Remover" className="me-2">
-                    <DeleteIcon fontSize="medium" />
-                  </IconButton> */}
-                    <Fab
-                      color="primary"
-                      aria-label="add"
-                      size="medium"
-                      className="btn-add-fab me-2"
-                      onClick={() => setListaAcoesCorretivas([...listaAcoesCorretivas, 1])}
-                    >
-                      <Add />
-                    </Fab>
-                  </div>
+                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+                  <InputLabel>Resp. verificação</InputLabel>
+                  <Select
+                    label="Encaminhado para:"
+                    name="forwarded"
+                    onChange={e => setResponsaveisVerificacao([...responsaveisVerificacao, e.target.value])}
+                  >
+                    {users.map((user, i) => (
+                      <MenuItem value={user.login} key={`user-${i}`}>
+                        {user.login}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <div style={{ marginLeft: 'auto' }}>
+                  <Fab
+                    color="primary"
+                    aria-label="add"
+                    size="medium"
+                    className="btn-add-fab me-2"
+                    onClick={() => setListaAcoesCorretivas([...listaAcoesCorretivas, 1])}
+                  >
+                    <Add />
+                  </Fab>
                 </div>
-                {renderListaAcoesCorretivas()}
-              </CardContent>
-            </Card>
+              </div>
+              {renderListaAcoesCorretivas()}
+            </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button
               variant="contained"
               className="me-3"
               style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => handleTela('cadastro')}
+              onClick={() => navigate('/rnc')}
             >
               Voltar
             </Button>
-            <Button
-              variant="outlined"
-              color="primary"
-              style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}
-              onClick={() => {
-                handleTela('implementacao');
-                setShowPlanoAcaoCorretiva(true);
-              }}
-            >
-              Salvar
-            </Button>
+
             <Button
               className="ms-3"
               variant="contained"
               color="primary"
               style={{ background: '#e6b200', color: '#4e4d4d' }}
               onClick={() => {
-                handleTela('implementacao');
-                setShowPlanoAcaoCorretiva(true);
+                if (!showPlanoAcaoCorretiva) {
+                  setShowPlanoAcaoCorretiva(true);
+                  return;
+                }
+
+                if (showPlanoAcaoCorretiva) {
+                  handleUpdateRNC({ id: id, planoacao: responsaveisPlanoAcao, verificacao: responsaveisVerificacao });
+                  navigate('/rnc');
+                  toast.success('RNC atualizada com sucesso!');
+                }
               }}
               disabled={buttonAvancarDisabled}
             >
-              Avançar
+              Salvar
             </Button>
           </div>
         </div>

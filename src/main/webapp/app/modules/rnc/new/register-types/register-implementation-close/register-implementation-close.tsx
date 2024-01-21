@@ -1,10 +1,19 @@
 import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import DatePicker from 'react-datepicker';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 
 export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFechamento }) => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+  }, []);
+
   const [firstForm, setFirstForm] = useState({
     date: { value: new Date(), error: false },
     emitter: { value: '', error: false },
@@ -17,6 +26,8 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
     handlePrazoFechamento(value);
   };
 
+  const users = useAppSelector(state => state.userManagement.users);
+
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
       <Row className="justify-content-center mt-5 me-5">
@@ -26,12 +37,6 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           </Link>
           <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             RNC
-          </Link>
-          <Link to={'/rnc/general'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-            Geral
-          </Link>
-          <Link to={'/rnc/general/implementacao'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-            Implementação
           </Link>
           <Link to={'/rnc/general/implementacao/validacao'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
             Eficácia
@@ -57,9 +62,11 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           <FormControl className="mt-5 mb-2 rnc-form-field">
             <InputLabel>Responsável</InputLabel>
             <Select label="Responsável" name="forwarded">
-              <MenuItem value="Usuário 1">Usuário 1</MenuItem>
-              <MenuItem value="Usuário 2">Usuário 2</MenuItem>
-              <MenuItem value="Usuário 3">Usuário 3</MenuItem>
+              {users.map((user, i) => (
+                <MenuItem value={user.login} key={`user-${i}`}>
+                  {user.login}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
@@ -71,16 +78,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           </div>
           <FormControl className="mb-2 rnc-form-field me-2 mt-5" style={{ maxWidth: '25%' }}>
             <InputLabel>Risco / Oportunidade alterada</InputLabel>
-            <Select
-              label="Risco / Oportunidade alterada"
-              name="processOrigin"
-              // disabled={secondForm}
-              // value={firstForm.processOrigin.value}
-              // error={firstForm.processOrigin.error}
-              // onChange={event =>
-              // setFirstForm({ ...firstForm, processOrigin: { value: event.target.value, error: firstForm.processOrigin.error } })
-              // }
-            >
+            <Select label="Risco / Oportunidade alterada" name="processOrigin">
               <MenuItem value="1">Risco</MenuItem>
               <MenuItem value="2">Oportunidade</MenuItem>
             </Select>
@@ -100,21 +98,13 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
             Voltar
           </Button>
           <Button
-            variant="outlined"
-            color="primary"
-            style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}
-            onClick={() => save()}
-          >
-            Salvar
-          </Button>
-          <Button
             className="ms-3"
             variant="contained"
             color="primary"
             style={{ background: '#e6b200', color: '#4e4d4d' }}
-            onClick={() => save()}
+            onClick={() => navigate('/rnc')}
           >
-            Avançar
+            Salvar
           </Button>
         </div>
       </div>

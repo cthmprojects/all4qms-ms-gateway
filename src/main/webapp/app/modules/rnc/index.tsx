@@ -43,6 +43,10 @@ const RncRoutes = () => {
     setRNCs(updatedRNCs);
   };
 
+  const findRNCById = id => {
+    return RNCs.find(item => item.id === id);
+  };
+
   return (
     <div>
       <ErrorBoundaryRoutes>
@@ -53,9 +57,12 @@ const RncRoutes = () => {
             <RNCNew handleRNC={handleRNCNewFirstForm} RNCNumber={RNCs.length + 1} RNCList={RNCs} handleUpdateRNC={handleUpdateRNC} />
           }
         />
-        <Route path="general" element={<GeneralRegister handleTela={handleTela} />}></Route>
         <Route
-          path="general/implementacao"
+          path="general/:id"
+          element={<GeneralRegister handleTela={handleTela} handleUpdateRNC={handleUpdateRNC} findRNCById={findRNCById} />}
+        ></Route>
+        <Route
+          path="general/implementacao/"
           element={<RegisterImplementation handleTela={handleTela} handlePrazoImplementacao={handleTela} />}
         />
         <Route

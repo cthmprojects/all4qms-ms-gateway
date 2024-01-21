@@ -2,8 +2,11 @@ import React from 'react';
 import './ButtonList.scss';
 import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useNavigate } from 'react-router-dom';
 
 const ButtonList = () => {
+  const navigate = useNavigate();
+
   const buttons = [
     { icon: <FontAwesomeIcon icon="calendar-check" />, link: '', legenda: 'Objetivos e Metas', disabled: true },
     { icon: <FontAwesomeIcon icon="file-lines" />, link: '', legenda: 'Informações documentadas', disabled: true },
@@ -19,7 +22,7 @@ const ButtonList = () => {
       {buttons.map((button, index) => (
         // eslint-disable-next-line react/jsx-key
         <div className="container">
-          <a key={index} className={button.disabled ? 'button-disabled' : 'button'} href={button.link} aria-disabled>
+          <a key={index} className={button.disabled ? 'button-disabled' : 'button'} onClick={() => navigate(button.link)} aria-disabled>
             {button.icon}
           </a>
           <span>{button.legenda}</span>

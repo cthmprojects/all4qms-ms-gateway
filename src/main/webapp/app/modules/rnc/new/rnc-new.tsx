@@ -383,25 +383,6 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
         </div>
       </>
     );
-  } else if (tela == 'geral') {
-    return <GeneralRegister handleTela={handleTela}></GeneralRegister>;
-  } else if (tela == 'implementacao') {
-    return <RegisterImplementation handleTela={handleTela} handlePrazoImplementacao={handlePrazoImplementacao}></RegisterImplementation>;
-  } else if (tela == 'validacao') {
-    return (
-      <RegisterImplementationVerification
-        handleTela={handleTela}
-        handlePrazoVerificacao={handlePrazoVerificacao}
-      ></RegisterImplementationVerification>
-    );
-  } else if (tela == 'fechamento') {
-    return (
-      <RegisterImplementationClose
-        handleTela={handleTela}
-        save={saveData}
-        handlePrazoFechamento={handlePrazoFechamento}
-      ></RegisterImplementationClose>
-    );
   }
 };
 

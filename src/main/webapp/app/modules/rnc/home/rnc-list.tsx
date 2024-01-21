@@ -151,13 +151,19 @@ const RncList = ({ RNCs }) => {
                           'aria-labelledby': 'basic-button',
                         }}
                       >
-                        <MenuItem disabled={userLogin !== rnc.forwarded} onClick={() => goToPage('/rnc/general')}>
+                        <MenuItem disabled={userLogin !== rnc.forwarded} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
                           Registrar NC
                         </MenuItem>
-                        <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao')}>
+                        <MenuItem
+                          disabled={rnc.planoacao?.find(user => user == userLogin) != undefined ? false : true}
+                          onClick={() => goToPage('/rnc/general/implementacao')}
+                        >
                           Plano de ação
                         </MenuItem>
-                        <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/validacao')}>
+                        <MenuItem
+                          disabled={rnc.verificacao?.find(user => user == userLogin) != undefined ? false : true}
+                          onClick={() => goToPage('/rnc/general/validacao')}
+                        >
                           Validação Plano de ação
                         </MenuItem>
                         <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/fechamento')}>
@@ -171,19 +177,6 @@ const RncList = ({ RNCs }) => {
                     </TableCell>
                   </TableRow>
                 ))}
-
-                {/* {rows.map(row => (
-                  <TableRow>
-                    {row.map(item => (
-                      <TableCell>{item}</TableCell>
-                    ))}
-                    <TableCell>
-                      <IconButton color="primary" aria-label="add to shopping cart">
-                        <EditIcon sx={{ color: '#e6b200' }} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))} */}
               </TableBody>
             </Table>
           </TableContainer>
