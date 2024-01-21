@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Button, Card, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import './mp-register.css';
 import { EditOutlined, UploadFileOutlined } from '@mui/icons-material';
 import DatePicker from 'react-datepicker';
@@ -81,12 +81,6 @@ export const MPRegister = ({ onMPChange }) => {
       error: false,
     },
   });
-
-  // useEffect(() => {
-  //   if (clientData) {
-  //     setClientForm(clientData);
-  //   }
-  // }, [clientData]);
 
   const handleChange = (value: any) => {
     setMPForm(value);

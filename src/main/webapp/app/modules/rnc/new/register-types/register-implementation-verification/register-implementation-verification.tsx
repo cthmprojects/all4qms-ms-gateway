@@ -1,11 +1,18 @@
-import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material';
-import React, { useState } from 'react';
+import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import DatePicker from 'react-datepicker';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 
 export const RegisterImplementationVerification = ({ handleTela, handlePrazoVerificacao }) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+  }, []);
 
   const [firstForm, setFirstForm] = useState({
     date: { value: new Date(), error: false },
@@ -19,6 +26,7 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
     handlePrazoVerificacao(value);
   };
 
+  const users = useAppSelector(state => state.userManagement.users);
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
       <Row className="justify-content-center mt-5 me-5">
@@ -28,12 +36,6 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
           </Link>
           <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             RNC
-          </Link>
-          <Link to={'/rnc/general'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-            Geral
-          </Link>
-          <Link to={'/rnc/general/implementacao'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-            Implementação
           </Link>
           <Link to={'/rnc/general/implementacao/validacao'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
             Eficácia
@@ -60,13 +62,16 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
               Data
             </label>
           </FormControl>
-          <TextField
-            label="Resp. Verificação"
-            name="emitter"
-            id="rnc-text-field-implementation"
-            // value={firstForm.emitter.value}
-            className="rnc-form-field-implementation me-5 mb-2 mt-5"
-          />
+          <FormControl className="mt-5 mb-2 rnc-form-field">
+            <InputLabel>Responsável</InputLabel>
+            <Select label="Responsável" name="forwarded">
+              {users.map((user, i) => (
+                <MenuItem value={user.login} key={`user-${i}`}>
+                  {user.login}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
         <div className="mt-4">
           <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Descrição da implementação</h2>
@@ -82,21 +87,13 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
             Voltar
           </Button>
           <Button
-            variant="outlined"
-            color="primary"
-            style={{ color: '#384150', border: '1px solid #384150', background: '#fff' }}
-            onClick={() => handleTela('fechamento')}
-          >
-            Salvar
-          </Button>
-          <Button
             className="ms-3"
             variant="contained"
             color="primary"
             style={{ background: '#e6b200', color: '#4e4d4d' }}
-            onClick={() => handleTela('fechamento')}
+            onClick={() => navigate('/rnc')}
           >
-            Avançar
+            Salvar
           </Button>
         </div>
       </div>

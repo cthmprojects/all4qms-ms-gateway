@@ -33,7 +33,7 @@ import { faUsersCog } from '@fortawesome/free-solid-svg-icons/faUsersCog';
 import { faWrench } from '@fortawesome/free-solid-svg-icons/faWrench';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCalendarCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarCheck, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
 import { faFileLines } from '@fortawesome/free-solid-svg-icons';
 import { faCrosshairs } from '@fortawesome/free-solid-svg-icons';
 import { faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
@@ -84,6 +84,8 @@ export const loadIcons = () => {
     faFileCircleCheck,
     faFileCircleExclamation,
     faChartLine,
-    faFileSignature
+    faFileSignature,
+    faTrash,
+    faEllipsisVertical
   );
 };

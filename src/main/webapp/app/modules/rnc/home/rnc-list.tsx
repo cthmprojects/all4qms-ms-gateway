@@ -22,6 +22,7 @@ import {
   Box,
   Tabs,
   Tab,
+  Menu,
 } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import React, { useEffect, useState } from 'react';
@@ -31,6 +32,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from '@mui/icons-material';
 import rncStore, { RNC } from '../rnc-store';
+import { Storage } from 'react-jhipster';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -59,11 +62,22 @@ function a11yProps(index: number) {
   };
 }
 
-const RncList = () => {
+const RncList = ({ RNCs }) => {
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
+  const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
+  const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
+  const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const openOptions = Boolean(anchorEl);
+  const handleClickOptions = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseOptions = () => {
+    setAnchorEl(null);
+  };
 
   const rncs = rncStore(state => state.rncs);
 
@@ -79,20 +93,7 @@ const RncList = () => {
     }
   }, []);
 
-  const columns = [
-    'Número',
-    'Emissão',
-    'Emissor',
-    'Descrição',
-    'Responsável',
-    'Prazo', //
-    'Ações', //
-    'Verificação',
-    'Eficácia',
-    'Fechamento',
-    'Status',
-    'Ações',
-  ];
+  const columns = ['Número', 'Emissão', 'Emissor', 'Descrição', 'Responsável', 'Verificação', 'Eficácia', 'Fechamento', 'Status', 'Ações'];
 
   const rows = [
     [0, 'Teste', 'Admin', 'For Test', 'Admin', '30/09/2023', '', 'Test', '', '', 'Done'],
@@ -107,8 +108,13 @@ const RncList = () => {
     return `${day}/${month}/${year}`;
   };
 
+  const goToPage = (route: string) => {
+    handleCloseOptions();
+    navigate(route);
+  };
+
   const renderTable = () => {
-    if (rncs?.length > 0) {
+    if (RNCs?.length > 0) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -121,42 +127,61 @@ const RncList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rncs?.map((rnc: RNC) => (
-                  <TableRow key={rnc.numero}>
-                    <TableCell>{rnc.numero}</TableCell>
-                    <TableCell>{formatDateToString(rnc.emissao)}</TableCell>
-                    <TableCell>{rnc.emissor}</TableCell>
-                    <TableCell>{rnc.descricao}</TableCell>
-                    <TableCell>{rnc.responsavel}</TableCell>
-                    <TableCell>{formatDateToString(rnc.verificacao)}</TableCell>
-                    <TableCell>{formatDateToString(rnc.eficacia)}</TableCell>
-                    <TableCell>{formatDateToString(rnc.fechamento)}</TableCell>
-                    <TableCell>{rnc.status}</TableCell>
+                {RNCs?.map(rnc => (
+                  <TableRow key={rnc.id}>
+                    <TableCell>{rnc.id}</TableCell>
+                    <TableCell>{formatDateToString(rnc.date)}</TableCell>
+                    <TableCell>{rnc.emitter}</TableCell>
+                    <TableCell> - </TableCell>
+                    <TableCell>{rnc.forwarded}</TableCell>
+                    <TableCell> - </TableCell>
+                    <TableCell> - </TableCell>
+                    <TableCell> - </TableCell>
+                    <TableCell> - </TableCell>
                     <TableCell>
-                      <IconButton color="primary" aria-label="add to shopping cart">
-                        <EditIcon sx={{ color: '#e6b200' }} />
+                      <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
+                        <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
                       </IconButton>
+                      <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl}
+                        open={openOptions}
+                        onClose={handleCloseOptions}
+                        MenuListProps={{
+                          'aria-labelledby': 'basic-button',
+                        }}
+                      >
+                        <MenuItem disabled={userLogin !== rnc.forwarded} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
+                          Registrar NC
+                        </MenuItem>
+                        <MenuItem
+                          disabled={rnc.planoacao?.find(user => user == userLogin) != undefined ? false : true}
+                          onClick={() => goToPage('/rnc/general/implementacao')}
+                        >
+                          Plano de ação
+                        </MenuItem>
+                        <MenuItem
+                          disabled={rnc.verificacao?.find(user => user == userLogin) != undefined ? false : true}
+                          onClick={() => goToPage('/rnc/general/validacao')}
+                        >
+                          Validação Plano de ação
+                        </MenuItem>
+                        <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/fechamento')}>
+                          Eficácia Plano de Ação
+                        </MenuItem>
+                        <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          Remover NC
+                          <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
+                        </MenuItem>
+                      </Menu>
                     </TableCell>
                   </TableRow>
                 ))}
-
-                {/* {rows.map(row => (
-                  <TableRow>
-                    {row.map(item => (
-                      <TableCell>{item}</TableCell>
-                    ))}
-                    <TableCell>
-                      <IconButton color="primary" aria-label="add to shopping cart">
-                        <EditIcon sx={{ color: '#e6b200' }} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))} */}
               </TableBody>
             </Table>
           </TableContainer>
           <Row className="justify-content-center mt-5">
-            <Pagination count={10} style={{ width: '370px' }} />
+            <Pagination count={Math.floor(RNCs.length / 20) + (RNCs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
           </Row>
         </>
       );
