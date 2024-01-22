@@ -814,7 +814,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                   <div className="flex p-2" style={{ justifyContent: 'space-between' }}>
                     <div className="flex-col">
                       <br />
-                      <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} placeholder="ISHIKAWA" />
+                      <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} placeholder="NC" />
                     </div>
                     <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
                       <TextField
@@ -885,7 +885,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                       <textarea
                         className="textarea-ishikawa mb-2"
                         style={{ height: '100%' }}
-                        placeholder="5 Porquês"
+                        placeholder="NC"
                         name="ncArea"
                         rows={5}
                         cols={30}
