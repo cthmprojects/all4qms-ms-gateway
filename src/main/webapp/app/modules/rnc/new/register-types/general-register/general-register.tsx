@@ -895,16 +895,19 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                       <TextField
                         label="Porquê?"
                         className="m-2"
+                        required
                         onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n1: { value: e.target.value } })}
                       />
                       <TextField
                         label="Porquê?"
                         className="m-2"
+                        required
                         onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n2: { value: e.target.value } })}
                       />
                       <TextField
                         label="Porquê?"
                         className="m-2"
+                        required
                         onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n3: { value: e.target.value } })}
                       />
                       <TextField
