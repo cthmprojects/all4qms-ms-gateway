@@ -162,11 +162,11 @@ const RncList = ({ RNCs }) => {
                         </MenuItem>
                         <MenuItem
                           disabled={rnc.verificacao?.find(user => user == userLogin) != undefined ? false : true}
-                          onClick={() => goToPage('/rnc/general/validacao')}
+                          onClick={() => goToPage('/rnc/general/implementacao/validacao')}
                         >
                           Validação Plano de ação
                         </MenuItem>
-                        <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/fechamento')}>
+                        <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
                           Eficácia Plano de Ação
                         </MenuItem>
                         <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
