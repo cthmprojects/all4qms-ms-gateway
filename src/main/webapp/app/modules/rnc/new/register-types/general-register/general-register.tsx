@@ -606,7 +606,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
             {/* </CardContent> */}
           </div>
           <Divider light />
-          {(_rnc.origin === 'mp' || _rnc.origin === 'endProduct') && (
+          {(_rnc?.origin === 'mp' || _rnc?.origin === 'endProduct') && (
             <div className="fake-card mt-3">
               <Typography variant="h5" component="div">
                 Decisão sobre Matéria-Prima/Insumo ou Decisão sobre Produto Acabado
