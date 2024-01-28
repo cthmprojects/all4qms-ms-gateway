@@ -32,7 +32,6 @@ export const InternalAuditRegister = ({ setInternalAuditRegister }) => {
             onChange={e => setInternal({ ...internal, norma: e.target.value })}
             label="Norma"
             name="norma"
-            disabled
             className="form-field m-3"
           />
           <TextField
