@@ -430,6 +430,13 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     ));
   };
 
+  const setTitleMPOrigin = () => {
+    if (_rnc?.origin === 'mp') {
+      return 'Decisão sobre Matéria-Prima/Insumo';
+    } else if (_rnc?.origin === 'endProduct') {
+      return 'Decisão sobre Produto Acabado';
+    }
+  };
   const optionsResponsavelMateriaPrima = [
     { label: 'Responsavel 1', value: 'Responsavel 1' },
     { label: 'Responsavel 2', value: 'Responsavel 2' },
@@ -607,15 +614,15 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
             {renderListDesc()}
           </div>
           <Divider light />
-          {true && (
+          {(_rnc?.origin === 'mp' || _rnc?.origin === 'endProduct') && (
             <div className="fake-card mt-3">
               <Typography variant="h5" component="div">
-                Decisão sobre Matéria-Prima/Insumo ou Decisão sobre Produto Acabado
+                {setTitleMPOrigin()}
               </Typography>
               <br />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className="mt-2 mb-2">
                 <FormControl className="mb-2 rnc-form-field me-2" sx={{ display: 'flex', maxWidth: '40%' }}>
-                  <InputLabel>Retrabalho</InputLabel>
+                  <InputLabel>Decisão</InputLabel>
                   <Select
                     label="Decisão"
                     name="decision"
@@ -624,11 +631,8 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                       setRegisterForm({ ...registerForm, decision: { value: event.target.value, error: registerForm.decision.error } })
                     }
                   >
-                    <MenuItem value="1">Decisão 1</MenuItem>
-                    <MenuItem value="2">Decisão 2</MenuItem>
-                    <MenuItem value="3">Decisão 3</MenuItem>
-                    <MenuItem value="4">Decisão 4</MenuItem>
-                    <MenuItem value="5">Decisão 5</MenuItem>
+                    <MenuItem value="retrabalho">Retrabalho</MenuItem>
+                    <MenuItem value="seleção">Seleção</MenuItem>
                   </Select>
                 </FormControl>
                 <TextField
@@ -695,106 +699,109 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                   style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%', height: '100%' }}
                   className="ms-3"
                 >
-                  <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <TextField
-                      label="Quantidade selecionada"
-                      className="m-2"
-                      sx={{ width: '20% !important' }}
-                      type="number"
-                      onChange={event =>
-                        setRegisterForm({
-                          ...registerForm,
-                          decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
-                        })
-                      }
-                    />
-                    <TextField
-                      label="Quantidade aprovada"
-                      className="m-2"
-                      sx={{ width: '20% !important' }}
-                      type="number"
-                      onChange={event =>
-                        setRegisterForm({
-                          ...registerForm,
-                          decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
-                        })
-                      }
-                    />
-                    <TextField
-                      label="Quantidade reprovada"
-                      className="m-2"
-                      sx={{ width: '20% !important' }}
-                      type="number"
-                      onChange={event =>
-                        setRegisterForm({
-                          ...registerForm,
-                          decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
-                        })
-                      }
-                    />
-                    <TextField
-                      label="% Rejeição"
-                      className="m-2"
-                      sx={{ width: '20% !important' }}
-                      type="number"
-                      onChange={event =>
-                        setRegisterForm({
-                          ...registerForm,
-                          decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
-                        })
-                      }
-                    />
-                  </Card>
-                  <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <TextField
-                      label="Quantidade selecionada"
-                      className="m-2"
-                      sx={{ width: '20% !important' }}
-                      type="number"
-                      onChange={event =>
-                        setRegisterForm({
-                          ...registerForm,
-                          decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
-                        })
-                      }
-                    />
-                    <TextField
-                      label="Quantidade aprovada"
-                      className="m-2"
-                      sx={{ width: '20% !important' }}
-                      type="number"
-                      onChange={event =>
-                        setRegisterForm({
-                          ...registerForm,
-                          decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
-                        })
-                      }
-                    />
-                    <TextField
-                      label="Quantidade reprovada"
-                      className="m-2"
-                      sx={{ width: '20% !important' }}
-                      type="number"
-                      onChange={event =>
-                        setRegisterForm({
-                          ...registerForm,
-                          decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
-                        })
-                      }
-                    />
-                    <TextField
-                      label="% Rejeição"
-                      className="m-2"
-                      sx={{ width: '20% !important' }}
-                      type="number"
-                      onChange={event =>
-                        setRegisterForm({
-                          ...registerForm,
-                          decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
-                        })
-                      }
-                    />
-                  </Card>
+                  {registerForm.decision.value == 'retrabalho' ? (
+                    <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <TextField
+                        label="Quantidade retrabalhada"
+                        className="m-2"
+                        sx={{ width: '20% !important' }}
+                        type="number"
+                        onChange={event =>
+                          setRegisterForm({
+                            ...registerForm,
+                            decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
+                          })
+                        }
+                      />
+                      <TextField
+                        label="Quantidade aprovada"
+                        className="m-2"
+                        sx={{ width: '20% !important' }}
+                        type="number"
+                        onChange={event =>
+                          setRegisterForm({
+                            ...registerForm,
+                            decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
+                          })
+                        }
+                      />
+                      <TextField
+                        label="Quantidade reprovada"
+                        className="m-2"
+                        sx={{ width: '20% !important' }}
+                        type="number"
+                        onChange={event =>
+                          setRegisterForm({
+                            ...registerForm,
+                            decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
+                          })
+                        }
+                      />
+                      <TextField
+                        label="% Rejeição"
+                        className="m-2"
+                        sx={{ width: '20% !important' }}
+                        type="number"
+                        onChange={event =>
+                          setRegisterForm({
+                            ...registerForm,
+                            decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
+                          })
+                        }
+                      />
+                    </Card>
+                  ) : (
+                    <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <TextField
+                        label="Quantidade selecionada"
+                        className="m-2"
+                        sx={{ width: '20% !important' }}
+                        type="number"
+                        onChange={event =>
+                          setRegisterForm({
+                            ...registerForm,
+                            decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
+                          })
+                        }
+                      />
+                      <TextField
+                        label="Quantidade aprovada"
+                        className="m-2"
+                        sx={{ width: '20% !important' }}
+                        type="number"
+                        onChange={event =>
+                          setRegisterForm({
+                            ...registerForm,
+                            decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
+                          })
+                        }
+                      />
+                      <TextField
+                        label="Quantidade reprovada"
+                        className="m-2"
+                        sx={{ width: '20% !important' }}
+                        type="number"
+                        onChange={event =>
+                          setRegisterForm({
+                            ...registerForm,
+                            decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
+                          })
+                        }
+                      />
+                      <TextField
+                        label="% Rejeição"
+                        className="m-2"
+                        sx={{ width: '20% !important' }}
+                        type="number"
+                        onChange={event =>
+                          setRegisterForm({
+                            ...registerForm,
+                            decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
+                          })
+                        }
+                      />
+                    </Card>
+                  )}
                 </div>
               </div>
               <br />
