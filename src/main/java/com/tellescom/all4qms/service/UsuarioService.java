@@ -10,6 +10,8 @@ import com.tellescom.all4qms.service.mapper.UsuarioMapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -161,20 +163,22 @@ public class UsuarioService {
         userJh.setAuthorities(request.getPerfil());
         userJh.setPassword(passwordEncoder.encode("all4qms" + LocalDate.now().getYear()));
 
-        User userSaved = userService.saveUser(userJh).block();
+        AdminUserDTO adminUserDTO = new AdminUserDTO(userJh);
 
-        //criar usuario
-        Usuario usuario = new Usuario();
-        usuario.setCriadoPorId(request.getIdUsrCreator());
-        usuario.setNome(request.getNome());
-        usuario.setCriadoEm(Instant.now());
-        usuario.setEmail(request.getEmail());
-        usuario.setIsGestor(request.isGestor());
-        usuario.setFuncaoId(request.getFuncao());
-        usuario.setSetorId(request.getSetor());
-        usuario.setProcessos(new HashSet<>());
-        usuario.setUserId(userSaved.getId());
-
-        return usuarioRepository.save(usuario).map(usuarioMapper::toDto);
+        return userService
+            .createUser(adminUserDTO)
+            .flatMap(user -> {
+                Usuario usuario = new Usuario();
+                usuario.setCriadoPorId(request.getIdUsrCreator());
+                usuario.setNome(request.getNome());
+                usuario.setCriadoEm(Instant.now());
+                usuario.setEmail(request.getEmail());
+                usuario.setIsGestor(request.isGestor());
+                usuario.setFuncaoId(request.getFuncao());
+                usuario.setSetorId(request.getSetor());
+                usuario.setProcessos(new HashSet<>());
+                usuario.setUserId(user.getId());
+                return usuarioRepository.save(usuario).map(usuarioMapper::toDto);
+            });
     }
 }

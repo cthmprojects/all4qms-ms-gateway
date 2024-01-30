@@ -253,7 +253,7 @@ public class UsuarioResource {
         if (request.getPerfil() == null) {
             throw new BadRequestAlertException("Perfil requerido", ENTITY_NAME, "perfilnotfound");
         } else if (request.getPerfil().isEmpty()) {
-            throw new BadRequestAlertException("Perfil requerido", ENTITY_NAME, "perfilnotfound");
+            throw new BadRequestAlertException("Perfil não pode ser vazio", ENTITY_NAME, "perfilinvalid");
         }
         return usuarioService
             .saveRequest(request)
