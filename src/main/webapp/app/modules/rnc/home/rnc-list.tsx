@@ -132,7 +132,7 @@ const RncList = ({ RNCs }) => {
                     <TableCell>{rnc.id}</TableCell>
                     <TableCell>{formatDateToString(rnc.date)}</TableCell>
                     <TableCell>{rnc.emitter}</TableCell>
-                    <TableCell> - </TableCell>
+                    <TableCell> {rnc.descricaoNC} </TableCell>
                     <TableCell>{rnc.forwarded}</TableCell>
                     <TableCell> - </TableCell>
                     <TableCell> - </TableCell>
@@ -201,7 +201,7 @@ const RncList = ({ RNCs }) => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Typography className="link">RNC</Typography>
+          <Typography className="link">RNC / OM</Typography>
         </Breadcrumbs>
         <h1 className="title">Lista RNC</h1>
         <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
@@ -211,7 +211,7 @@ const RncList = ({ RNCs }) => {
             style={{ marginRight: '10px', height: '58px' }}
             onClick={() => navigate('/rnc/new')}
           >
-            NOVO REGISTRO
+            CADASTRAR RNC / OM
           </Button>
           <FormControl className="me-2">
             <DatePicker

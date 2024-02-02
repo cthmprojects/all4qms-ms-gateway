@@ -40,6 +40,7 @@ export const ExternalAuditRegister = ({ setExternalAuditRegister }) => {
             label="Número NC"
             name="numeroNC"
             className="form-field m-3"
+            type="number"
             value={external.numberNC}
             onChange={e => setExternal({ ...external, numberNC: e.target.value })}
           />
@@ -55,6 +56,7 @@ export const ExternalAuditRegister = ({ setExternalAuditRegister }) => {
             fullWidth
             label="Número do Relatório"
             name="numeroRelatorio"
+            type="number"
             className="form-field m-3"
             value={external.numberReport}
             onChange={e => setExternal({ ...external, numberReport: e.target.value })}
