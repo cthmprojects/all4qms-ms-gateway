@@ -132,7 +132,7 @@ const RncList = ({ RNCs }) => {
                     <TableCell>{rnc.id}</TableCell>
                     <TableCell>{formatDateToString(rnc.date)}</TableCell>
                     <TableCell>{rnc.emitter}</TableCell>
-                    <TableCell> - </TableCell>
+                    <TableCell> {rnc.descricaoNC} </TableCell>
                     <TableCell>{rnc.forwarded}</TableCell>
                     <TableCell> - </TableCell>
                     <TableCell> - </TableCell>

@@ -44,7 +44,6 @@ import { toast } from 'react-toastify';
 const StyledTextarea = styled(TextareaAutosize)({
   resize: 'none',
   border: 'none', // remove the native textarea border
-  height: '100em',
   minWidth: 0, // remove the native textarea width
   outline: 0, // remove the native textarea outline
   padding: 0, // remove the native textarea padding
@@ -85,12 +84,22 @@ const StyledLabel = styled('label')(({ theme }) => ({
   transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
 }));
 
-const InnerTextarea = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
+const InnerTextareaNC = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
   const id = React.useId();
   return (
     <React.Fragment>
-      <StyledTextarea rows={5} cols={30} {...props} ref={ref} id={id} />
+      <StyledTextarea minRows={5} cols={30} {...props} ref={ref} id={id} />
       <StyledLabel htmlFor={id}>NC</StyledLabel>
+    </React.Fragment>
+  );
+});
+
+const InnerTextareaCausa = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
+  const id = React.useId();
+  return (
+    <React.Fragment>
+      <StyledTextarea minRows={5} cols={30} {...props} ref={ref} id={id} />
+      <StyledLabel htmlFor={id}>Causa</StyledLabel>
     </React.Fragment>
   );
 });
@@ -878,7 +887,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                     <div className="flex-col">
                       <br />
                       <Textarea
-                        slots={{ textarea: InnerTextarea }}
+                        slots={{ textarea: InnerTextareaNC }}
                         slotProps={{ textarea: { placeholder: 'NC' } }}
                         sx={{ borderRadius: '6px' }}
                         name="ncArea"
@@ -1066,7 +1075,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                     <div className="flex-col">
                       <br />
                       <Textarea
-                        slots={{ textarea: InnerTextarea }}
+                        slots={{ textarea: InnerTextareaNC }}
                         slotProps={{ textarea: { placeholder: 'NC' } }}
                         sx={{ borderRadius: '6px' }}
                         name="ncArea"
@@ -1117,14 +1126,22 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                     </div>
                     <div className="flex-col">
                       <br />
-                      <textarea
+                      <Textarea
+                        slots={{ textarea: InnerTextareaCausa }}
+                        slotProps={{ textarea: { placeholder: 'Causa', label: 'Causa' } }}
+                        sx={{ borderRadius: '6px' }}
+                        name="ncArea"
+                        value={_rnc?.descricaoNC || ''}
+                        readOnly
+                      />
+                      {/* <textarea
                         className="textarea-ishikawa mb-2"
                         style={{ height: '100%' }}
                         placeholder="Causa"
                         name="ncArea"
                         rows={5}
                         cols={30}
-                      />
+                      /> */}
                     </div>
                   </div>
                 </Card>
