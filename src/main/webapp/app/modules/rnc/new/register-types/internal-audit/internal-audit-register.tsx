@@ -37,6 +37,7 @@ export const InternalAuditRegister = ({ setInternalAuditRegister }) => {
           <TextField
             fullWidth
             onChange={e => setInternal({ ...internal, numberNC: e.target.value })}
+            type="number"
             label="Número NC"
             name="numeroNC"
             className="form-field m-3"
@@ -51,6 +52,7 @@ export const InternalAuditRegister = ({ setInternalAuditRegister }) => {
           <TextField
             fullWidth
             onChange={e => setInternal({ ...internal, numberReport: e.target.value })}
+            type="number"
             label="Número do Relatório"
             name="numeroRelatorio"
             className="form-field m-3"

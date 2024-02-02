@@ -96,7 +96,7 @@ export const MPRegister = ({ onMPChange }) => {
           <div style={{ display: 'flex', width: '100%' }} className="mt-3">
             <TextField
               value={mpForm.mpCode.value}
-              onChange={e => handleChange({ ...mpForm, name: { value: e.target.value, error: mpForm.mpCode.error } })}
+              onChange={e => handleChange({ ...mpForm, mpCode: { value: e.target.value, error: mpForm.mpCode.error } })}
               label="Código MP/Insumo"
               name="mp-code"
               className="ms-3 m-2"
@@ -168,7 +168,7 @@ export const MPRegister = ({ onMPChange }) => {
               className="ms-3 m-2"
               sx={{ width: '20% !important' }}
             />
-            <TextField label="Quantidade do Lote" name="lot-quantity" className="m-2" sx={{ width: '20% !important' }} />
+            <TextField label="Quantidade do Lote" name="lot-quantity" className="m-2" sx={{ width: '20% !important' }} type="number" />
             <FormControl className="m-2 select-mp select-mp-inspection">
               <InputLabel>Regime de inspeção</InputLabel>
               <Select
@@ -194,6 +194,7 @@ export const MPRegister = ({ onMPChange }) => {
               value={mpForm.sampleQuantity.value}
               onChange={e => handleChange({ ...mpForm, sampleQuantity: { value: e.target.value, error: mpForm.sampleQuantity.error } })}
               label="Número de amostras"
+              type="number"
               name="number-samples"
               className="m-2"
               sx={{ width: '10% !important' }}
@@ -203,6 +204,7 @@ export const MPRegister = ({ onMPChange }) => {
               onChange={e => handleChange({ ...mpForm, defectQuantity: { value: e.target.value, error: mpForm.defectQuantity.error } })}
               label="Número de defeitos"
               name="number-defects"
+              type="number"
               className="m-2"
               sx={{ width: '10% !important' }}
             />
@@ -211,6 +213,7 @@ export const MPRegister = ({ onMPChange }) => {
               onChange={e => handleChange({ ...mpForm, defectRate: { value: e.target.value, error: mpForm.defectRate.error } })}
               label="% Rejeição"
               name="rejection-rate"
+              type="number"
               className="m-2"
               sx={{ width: '10% !important' }}
             />
@@ -254,6 +257,7 @@ export const MPRegister = ({ onMPChange }) => {
               value={mpForm.requestNumber.value}
               onChange={e => handleChange({ ...mpForm, requestNumber: { value: e.target.value, error: mpForm.requestNumber.error } })}
               label="Número do pedido"
+              type="number"
               name="request-number"
               className="m-2"
               sx={{ width: '25% !important' }}
@@ -262,6 +266,7 @@ export const MPRegister = ({ onMPChange }) => {
               value={mpForm.opNumber.value}
               onChange={e => handleChange({ ...mpForm, opNumber: { value: e.target.value, error: mpForm.opNumber.error } })}
               label="Número OP"
+              type="number"
               name="op-number"
               className="m-2"
               sx={{ width: '25% !important' }}

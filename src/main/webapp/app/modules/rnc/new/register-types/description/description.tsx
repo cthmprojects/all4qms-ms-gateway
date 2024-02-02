@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import './description.css';
-import { Card, Divider, Fab, IconButton, TextField } from '@mui/material';
+import { Button, Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
 import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
 
 export const DescriptionRnc = ({ handleDescricao }) => {
@@ -52,28 +52,32 @@ export const DescriptionRnc = ({ handleDescricao }) => {
 
   return (
     <>
-      <Card>
+      <Card className="pb-2">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 className="m-3">Descrição</h3>
           <div className="mb-3 mt-3">
             <input type="file" multiple style={{ display: 'none' }} onChange={handleFileChange} ref={fileInputRef} />
-            <IconButton
-              sx={{ width: '50px', height: '50px' }}
-              onClick={() => {
-                if (fileInputRef.current) fileInputRef.current.click();
-              }}
-            >
-              <UploadFileOutlined />
-            </IconButton>
-            <Fab
-              disabled={!naoConformidade || !requisitoDescumprido || !evidenciasObjetivas[0]}
-              color="primary"
-              aria-label="add"
-              size="medium"
-              onClick={addEvidenciaObjetiva}
-            >
-              <Add />
-            </Fab>
+            <Tooltip title="Enviar arquivo de evidência">
+              <IconButton
+                sx={{ width: '50px', height: '50px' }}
+                onClick={() => {
+                  if (fileInputRef.current) fileInputRef.current.click();
+                }}
+              >
+                <UploadFileOutlined />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Adicione uma nova evidência">
+              <Fab
+                disabled={!naoConformidade || !requisitoDescumprido || !evidenciasObjetivas[0]}
+                color="primary"
+                aria-label="add"
+                size="medium"
+                onClick={addEvidenciaObjetiva}
+              >
+                <Add />
+              </Fab>
+            </Tooltip>
           </div>
         </div>
         <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />

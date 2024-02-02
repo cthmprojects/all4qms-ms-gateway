@@ -176,11 +176,12 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
               value={productForm.lot.value}
               onChange={e => handleChange({ ...productForm, lot: { value: e.target.value, error: productForm.lot.error } })}
               label="Lote"
+              type="number"
               name="lot"
               className="ms-3 m-2"
               sx={{ width: '20% !important' }}
             />
-            <TextField label="Quantidade do Lote" name="lot-quantity" className="m-2" sx={{ width: '20% !important' }} />
+            <TextField type="number" label="Quantidade do Lote" name="lot-quantity" className="m-2" sx={{ width: '20% !important' }} />
             <FormControl className="m-2 select-mp select-mp-inspection">
               <InputLabel>Regime de inspeção</InputLabel>
               <Select
@@ -208,6 +209,7 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
                 handleChange({ ...productForm, sampleQuantity: { value: e.target.value, error: productForm.sampleQuantity.error } })
               }
               label="Número de amostras"
+              type="number"
               name="number-samples"
               className="m-2"
               sx={{ width: '10% !important' }}
@@ -218,6 +220,7 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
                 handleChange({ ...productForm, defectQuantity: { value: e.target.value, error: productForm.defectQuantity.error } })
               }
               label="Número de defeitos"
+              type="number"
               name="number-defects"
               className="m-2"
               sx={{ width: '10% !important' }}
@@ -226,6 +229,7 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
               value={productForm.defectRate.value}
               onChange={e => handleChange({ ...productForm, defectRate: { value: e.target.value, error: productForm.defectRate.error } })}
               label="% Rejeição"
+              type="number"
               name="rejection-rate"
               className="m-2"
               sx={{ width: '10% !important' }}
@@ -272,6 +276,7 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
                 handleChange({ ...productForm, requestNumber: { value: e.target.value, error: productForm.requestNumber.error } })
               }
               label="Número do pedido"
+              type="number"
               name="request-number"
               className="m-2"
               sx={{ width: '25% !important' }}
@@ -280,6 +285,7 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
               value={productForm.opNumber.value}
               onChange={e => handleChange({ ...productForm, opNumber: { value: e.target.value, error: productForm.opNumber.error } })}
               label="Número OP"
+              type="number"
               name="op-number"
               className="m-2"
               sx={{ width: '25% !important' }}
