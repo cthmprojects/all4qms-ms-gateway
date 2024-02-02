@@ -102,6 +102,7 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   const [descricao, setDescricao] = useState('');
   const handleDescricao = (descricao: string) => {
     setDescricao(descricao);
+    handleUpdateRNC({ descricaoNC: descricao, id: firstForm.number.value });
   };
   const [RNCsecondForm, setRNCsecondForm] = useState({});
 

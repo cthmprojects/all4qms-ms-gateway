@@ -882,7 +882,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                         slotProps={{ textarea: { placeholder: 'NC' } }}
                         sx={{ borderRadius: '6px' }}
                         name="ncArea"
-                        value={_rnc}
+                        value={_rnc?.descricaoNC || ''}
                         readOnly
                       />
                       {/*                       <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} placeholder="NC" value={id} readOnly/>
@@ -1070,7 +1070,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                         slotProps={{ textarea: { placeholder: 'NC' } }}
                         sx={{ borderRadius: '6px' }}
                         name="ncArea"
-                        value={_rnc}
+                        value={_rnc?.descricaoNC || ''}
                         readOnly
                       />
 
