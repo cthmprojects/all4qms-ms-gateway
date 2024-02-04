@@ -1,12 +1,14 @@
 import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import React, { useEffect, useState } from 'react';
+import React, { MouseEventHandler, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { getUsers } from '../../../administration/user-management/user-management.reducer';
+import { Rnc } from '../../models';
+import { list, save, saveDescription } from '../../reducers/rnc.reducer';
 import rncStore from '../../rnc-store';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
@@ -18,13 +20,13 @@ import RepetitionRnc from './register-types/repetition/repetition-rnc';
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
-import { save } from '../../reducers/rnc.reducer';
 
 export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(list({}));
   }, []);
 
   const navigate = useNavigate();
@@ -93,7 +95,38 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
 
   const addRnc = rncStore(state => state.addRnc);
 
-  const [repetition, setRepetition] = useState([]);
+  /*
+   NC Description
+   */
+  const [description, setDescription] = useState<string>('');
+  const [evidences, setEvidences] = useState<Array<string>>(['']);
+  const [requirement, setRequirements] = useState<string>('');
+
+  const onDescriptionChanged = (value: string) => {
+    setDescription(value);
+  };
+
+  const onEvidencesChanged = (values: Array<string>) => {
+    setEvidences(values);
+  };
+
+  const onRequirementChanged = (value: string) => {
+    setRequirements(value);
+  };
+
+  /*
+   NC Repetition
+   */
+  const [repetition, setRepetition] = useState<boolean>();
+  const [selectedRncIds, setSelectedRncIds] = useState<Array<number>>([]);
+
+  const onRepetitionChanged = (value: boolean) => {
+    setRepetition(value);
+  };
+
+  const onSelectedRncIdsChanged = (values: Array<number>) => {
+    setSelectedRncIds(values);
+  };
 
   useEffect(() => {
     setFirstForm({ ...firstForm, number: { value: String(RNCNumber), error: firstForm.processOrigin.error } });
@@ -164,17 +197,17 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
 
   const renderComponents = () => {
     switch (firstForm.origin.value) {
-      case 'externalAudit':
+      case 'AUDITORIA_EXTERNA':
         return <ExternalAuditRegister setExternalAuditRegister={setExternalAuditRegister} />;
-      case 'internalAudit':
+      case 'AUDITORIA_INTERNA':
         return <InternalAuditRegister setInternalAuditRegister={setInternalAuditRegister} />;
-      case 'client':
+      case 'CLIENTE':
         return <ClientRegister onClientChange={setClientRegister} />;
-      case 'mp':
+      case 'MATERIA_PRIMA_INSUMO':
         return <MPRegister onMPChange={setMPRegister} />;
-      case 'endProduct':
+      case 'PRODUTO_ACABADO':
         return <ProductRegister onProductRegisterChange={setProductRegister} />;
-      case 'others':
+      case 'PROCEDIMENTO_OUTROS':
         return <OthersRegister onOthersRegisterChange={setOthersRegister} />;
     }
   };
@@ -189,6 +222,17 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   };
 
   const users = useAppSelector(state => state.userManagement.users);
+  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
+  const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
+  // const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
+
+  const onSaveRncDescription = () => {
+    for (let i = 0; i < evidences.length; i++) {
+      const evidence = evidences[i];
+
+      dispatch(saveDescription({ details: description, evidence: evidence, requirement: requirement, rncId: rnc.id }));
+    }
+  };
 
   const filterUser = (login: string) => {
     if (!users || users.length <= 0) {
@@ -370,10 +414,23 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
             <>
               <Row className="ms-3 me-3 mt-3">{renderComponents()}</Row>
               <Row className="ms-3 me-3 mt-3">
-                <DescriptionRnc handleDescricao={handleDescricao} />
+                <DescriptionRnc
+                  description={description}
+                  evidences={evidences}
+                  onDescriptionChanged={onDescriptionChanged}
+                  onEvidencesChanged={onEvidencesChanged}
+                  onRequirementChanged={onRequirementChanged}
+                  requirement={requirement}
+                />
               </Row>
               <Row className="ms-3 me-3 mt-3" fullWidth>
-                <RepetitionRnc RNCID={firstForm.number.value} RNCList={RNCList} handleUpdateRNC={setRepetition} />
+                <RepetitionRnc
+                  onRepetitionChanged={onRepetitionChanged}
+                  onSelectedRncIdsChanged={onSelectedRncIdsChanged}
+                  repetition={repetition}
+                  rncs={rncs}
+                  selectedRncIds={selectedRncIds}
+                />
               </Row>
               <Row className="m-3">
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -389,10 +446,7 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     variant="outlined"
                     color="primary"
                     style={{ background: '#e6b200', color: '#4e4d4d' }}
-                    onClick={() => {
-                      handleUpdateRNC({ ...repetition, id: firstForm.number.value });
-                      navigate('/rnc');
-                    }}
+                    onClick={onSaveRncDescription}
                   >
                     Salvar
                   </Button>

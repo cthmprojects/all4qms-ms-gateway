@@ -23,21 +23,6 @@ export type Rnc = {
   vinculoProduto?: number;
 };
 
-/*
-  {
-  "statusAtual": "PREENCHIMENTO",
-  "idUsuarioAtual": 0, // usuário
-  "dtNC": "2024-01-29T23:09:53.942Z",
-  "tipoNC": "NC",
-  "origemNC": "AUDITORIA_INTERNA",
-  "possuiReincidencia": true,
-  "idEmissorNC": 0, // usuário
-  "processoNC": 0, // id do processo (pra onde vai)
-  "idReceptorNC": 0, //
-  "processoEmissor": 0, // id do processo (de onde veio)
-  }
-*/
-
 export type RNC = {
   numero: string;
   emissao: Date;

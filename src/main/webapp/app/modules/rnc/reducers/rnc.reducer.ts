@@ -1,10 +1,11 @@
 import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
 import { EntityState, IQueryParams, createEntitySlice, serializeAxiosError } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
-import { RNC, Rnc } from '../models';
+import { RNC, Rnc, RncDescription } from '../models';
 
 // Constants
 const apiUrl = 'services/all4qmsmsrnc/api/nao-conformidades';
+const descriptionApiUrl = 'services/all4qmsmsrnc/api/descricao-nao-conformidades';
 
 // Initial State
 const initialState: EntityState<Rnc> = {
@@ -54,6 +55,16 @@ export const save = createAsyncThunk('rnc/save', async (rnc: Rnc) => {
 
 export const update = createAsyncThunk('rnc/update', async ({ page, query, size, sort }: IQueryParams) => {});
 
+export const saveDescription = createAsyncThunk('rnc/description/save', async (description: RncDescription) => {
+  const response = await axios.post(descriptionApiUrl, {
+    detalhesNaoConformidade: description.details,
+    requisitoDescumprido: description.requirement,
+    evidenciaObjetiva: description.evidence,
+    idNaoConformidade: description.rncId,
+  });
+  return response;
+});
+
 // Slices
 
 const RncSlice = createEntitySlice({
@@ -78,6 +89,11 @@ const RncSlice = createEntitySlice({
         state.loading = false;
         state.updateSuccess = true;
         state.entity = data;
+      })
+      .addMatcher(isFulfilled(saveDescription), (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
       });
   },
 });

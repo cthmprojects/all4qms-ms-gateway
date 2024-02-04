@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
 import {
   Card,
   Checkbox,
-  Fab,
   FormControl,
   FormControlLabel,
   InputLabel,
@@ -12,43 +10,54 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
-import { toast } from 'react-toastify';
+import { Rnc } from 'app/modules/rnc/models';
+import React from 'react';
 
-export const RepetitionRnc = ({ RNCList, handleUpdateRNC, RNCID }) => {
-  const [listRepetitions, setListRepetitions] = useState([]);
-  const [selectFileDisable, setSelectFileDisable] = useState(true);
+type RncRepetitionProps = {
+  onRepetitionChanged: (value: boolean) => void;
+  onSelectedRncIdsChanged: (values: Array<number>) => void;
+  repetition: boolean;
+  rncs: Array<Rnc>;
+  selectedRncIds: Array<number>;
+};
 
-  const handleChange = (event: SelectChangeEvent<typeof listRepetitions>) => {
-    const {
-      target: { value },
-    } = event;
-    handleUpdateRNC(typeof value === 'string' ? value.split(',') : value);
+export const RepetitionRnc = ({ onRepetitionChanged, onSelectedRncIdsChanged, repetition, rncs, selectedRncIds }: RncRepetitionProps) => {
+  const onChanged = (event: SelectChangeEvent<Array<number>>) => {
+    const { value } = event.target;
 
-    setListRepetitions(typeof value === 'string' ? value.split(',') : value);
+    if (typeof value !== 'string') {
+      onSelectedRncIdsChanged(value);
+    } else {
+      const splitted = value.split(',');
+      onSelectedRncIdsChanged(splitted.map(s => parseInt(s)));
+    }
   };
 
   return (
     <>
       <Card className="pt-3 pb-3" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex' }}>
-          <FormControlLabel control={<Checkbox onChange={() => setSelectFileDisable(!selectFileDisable)} />} label="Reincidência" />
+          <FormControlLabel control={<Checkbox onChange={(_, checked) => onRepetitionChanged(checked)} />} label="Reincidência" />
           <FormControl className="form-field">
             <InputLabel>Documento anterior</InputLabel>
             <Select
               multiple
-              disabled={selectFileDisable}
-              value={listRepetitions}
-              onChange={handleChange}
+              disabled={!repetition}
+              value={selectedRncIds}
+              onChange={onChanged}
               input={<OutlinedInput label="Tag" />}
               renderValue={selected => selected.join(', ')}
             >
-              {RNCList.map(rnc => (
-                <MenuItem key={rnc.id} value={rnc.id}>
-                  <Checkbox checked={listRepetitions.indexOf(rnc.id) > -1} />
-                  <ListItemText primary={rnc.id} />
-                </MenuItem>
-              ))}
+              {rncs.map(rnc => {
+                const set = new Set<number>(selectedRncIds);
+
+                return (
+                  <MenuItem key={rnc.id} value={rnc.id}>
+                    <Checkbox checked={set.has(rnc.id)} />
+                    <ListItemText primary={rnc.id} />
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
         </div>
