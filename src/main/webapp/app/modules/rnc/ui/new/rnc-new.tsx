@@ -1,6 +1,6 @@
 import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import React, { MouseEventHandler, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { getUsers } from '../../../administration/user-management/user-management.reducer';
 import { Rnc } from '../../models';
-import { list, save, saveDescription } from '../../reducers/rnc.reducer';
+import { list, save, saveAudit, saveClient, saveDescription, saveProduct } from '../../reducers/rnc.reducer';
 import rncStore from '../../rnc-store';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
@@ -172,27 +172,85 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   };
 
   const setExternalAuditRegister = data => {
-    handleUpdateRNC({ ...data, id: firstForm.number.value });
+    dispatch(
+      saveAudit({
+        norm: data.norma,
+        occurrence: data.numberNC,
+        process: data.numberReport,
+        requirement: data.normaRequiremeents,
+        rncId: rnc?.id,
+        sequence: 1,
+      })
+    );
   };
 
   const setClientRegister = data => {
-    handleUpdateRNC({ ...data, id: firstForm.number.value });
+    dispatch(
+      saveClient({
+        batch: data.lot,
+        batchAmount: data.lotQuantity,
+        code: data.productCode,
+        defects: data.defectRate,
+        description: data.productDescription,
+        name: data.name,
+        opNumber: data.opNumber,
+        order: data.requestNumber,
+        rejected: data.rejectedQuantity,
+        samples: data.batchAmount,
+        supplier: data.productCode2,
+        traceability: {
+          date: data.nfDate,
+          deliveredAt: data.deliveryDate,
+          identifier: data.receipt,
+          rncId: rnc.id,
+        },
+      })
+    );
   };
 
   const setInternalAuditRegister = data => {
-    handleUpdateRNC({ ...data, id: firstForm.number.value });
+    dispatch(
+      saveAudit({
+        norm: data.norma,
+        occurrence: data.numberNC,
+        process: data.numberReport,
+        requirement: data.normaRequiremeents,
+        rncId: rnc?.id,
+        sequence: 1,
+      })
+    );
   };
 
   const setMPRegister = data => {
-    console.log(data);
+    console.log('[mp] data', data);
   };
 
   const setProductRegister = data => {
-    console.log(data);
+    dispatch(
+      saveProduct({
+        batch: data.lot,
+        batchAmount: data.lotQuantity,
+        code: data.productCode,
+        defects: data.defectRate,
+        description: data.productDescription,
+        name: data.name,
+        opNumber: data.opNumber,
+        order: data.requestNumber,
+        rejected: data.rejectedQuantity,
+        samples: data.batchAmount,
+        supplier: data.productCode2,
+        traceability: {
+          date: data.nfDate,
+          deliveredAt: data.deliveryDate,
+          identifier: data.receipt,
+          rncId: rnc.id,
+        },
+      })
+    );
   };
 
   const setOthersRegister = data => {
-    console.log(data);
+    console.log('[others] data', data);
   };
 
   const renderComponents = () => {

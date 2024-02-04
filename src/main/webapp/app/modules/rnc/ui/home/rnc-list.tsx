@@ -195,7 +195,7 @@ const RncList = ({}) => {
                             'aria-labelledby': 'basic-button',
                           }}
                         >
-                          <MenuItem disabled={userLogin !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
+                          <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
                             Registrar NC
                           </MenuItem>
                           <MenuItem disabled={rnc.statusAtual !== 'EXECUCAO'} onClick={() => goToPage('/rnc/general/implementacao')}>
