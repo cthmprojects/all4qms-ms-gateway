@@ -1,39 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Breadcrumbs,
-  Button,
-  FormControl,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { Row } from 'reactstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
-import './rnc-new.css';
-import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
-import DescriptionRnc from './register-types/description/description';
-import RepetitionRnc from './register-types/repetition/repetition-rnc';
-import Input from '../../../shared/components-form/input/input';
-import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
-import ClientRegister from './register-types/rnc-client/rnc-client-register';
-import MPRegister from './register-types/mp-register/mp-register';
-import ProductRegister from './register-types/product-register/product-register';
-import OthersRegister from './register-types/others-register/others-register';
-import rncStore, { RNC } from '../rnc-store';
-import GeneralRegister from './register-types/general-register/general-register';
-import RegisterImplementation from './register-types/register-implementation/register-implementation';
-import RegisterImplementationVerification from './register-types/register-implementation-verification/register-implementation-verification';
-import RegisterImplementationClose from './register-types/register-implementation-close/register-implementation-close';
-import { Storage } from 'react-jhipster';
-import { toast } from 'react-toastify';
+import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsersAsAdmin, getUsers } from '../../administration/user-management/user-management.reducer';
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import { Storage } from 'react-jhipster';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Row } from 'reactstrap';
+import { getUsers } from '../../../administration/user-management/user-management.reducer';
+import rncStore from '../../rnc-store';
+import DescriptionRnc from './register-types/description/description';
+import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
+import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
+import MPRegister from './register-types/mp-register/mp-register';
+import OthersRegister from './register-types/others-register/others-register';
+import ProductRegister from './register-types/product-register/product-register';
+import RepetitionRnc from './register-types/repetition/repetition-rnc';
+import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
+import './rnc-new.css';
+import { save } from '../../reducers/rnc.reducer';
 
 export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   const dispatch = useAppDispatch();
@@ -119,6 +104,33 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
 
     if (validateFields(firstForm, setFirstForm, setFormError)) {
       toast.success('RNC salva com sucesso!');
+
+      const receptorNC = filterUser(firstForm.forwarded.value);
+      const dtNC = new Date();
+      const idEmissorNC = parseInt(Storage.session.get('ID_USUARIO'));
+      const idReceptorNC = receptorNC ? parseInt(receptorNC.id) : null;
+      const idUsuarioAtual = parseInt(Storage.session.get('ID_USUARIO'));
+      const origemNC = firstForm.origin.value;
+      const processoEmissor = parseInt(firstForm.processOrigin.value);
+      const processoNC = parseInt(firstForm.processTarget.value);
+      const statusAtual = 'PREENCHIMENTO';
+      const tipoNC = firstForm.type.value;
+
+      dispatch(
+        save({
+          statusAtual: statusAtual,
+          idUsuarioAtual: idUsuarioAtual,
+          dtNC: dtNC,
+          tipoNC: tipoNC,
+          origemNC: origemNC,
+          possuiReincidencia: true,
+          idEmissorNC: idEmissorNC,
+          processoNC: processoNC,
+          idReceptorNC: idReceptorNC,
+          processoEmissor: processoEmissor,
+        })
+      );
+
       setSecondForm(true);
 
       handleRNC(firstForm);
@@ -177,6 +189,14 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   };
 
   const users = useAppSelector(state => state.userManagement.users);
+
+  const filterUser = (login: string) => {
+    if (!users || users.length <= 0) {
+      return null;
+    }
+
+    return users.find(user => user.login === login);
+  };
 
   if (tela == 'cadastro') {
     return (
@@ -305,11 +325,10 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     value={firstForm.type.value}
                     onChange={event => setFirstForm({ ...firstForm, type: { value: event.target.value, error: firstForm.type.error } })}
                   >
-                    <MenuItem value="1">NC</MenuItem>
-                    <MenuItem value="2">OM</MenuItem>
+                    <MenuItem value="NC">NC</MenuItem>
+                    <MenuItem value="OM">OM</MenuItem>
                   </Select>
                 </FormControl>
-
                 <FormControl className="mb-2 rnc-form-field me-2">
                   <InputLabel>Origem</InputLabel>
                   <Select
@@ -320,12 +339,12 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     error={firstForm.origin.error}
                     onChange={event => setFirstForm({ ...firstForm, origin: { value: event.target.value, error: firstForm.origin.error } })}
                   >
-                    <MenuItem value="externalAudit">Auditoria externa</MenuItem>
-                    <MenuItem value="internalAudit">Auditoria interna</MenuItem>
-                    <MenuItem value="client">Cliente</MenuItem>
-                    <MenuItem value="mp">Matéria prima</MenuItem>
-                    <MenuItem value="endProduct">Produto acabado</MenuItem>
-                    <MenuItem value="others">Outros</MenuItem>
+                    <MenuItem value="AUDITORIA_EXTERNA">Auditoria externa</MenuItem>
+                    <MenuItem value="AUDITORIA_INTERNA">Auditoria interna</MenuItem>
+                    <MenuItem value="CLIENTE">Cliente</MenuItem>
+                    <MenuItem value="MATERIA_PRIMA_INSUMO">Matéria prima</MenuItem>
+                    <MenuItem value="PRODUTO_ACABADO">Produto acabado</MenuItem>
+                    <MenuItem value="PROCEDIMENTO_OUTROS">Outros</MenuItem>
                   </Select>
                 </FormControl>
               </div>

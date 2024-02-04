@@ -1,18 +1,5 @@
 import create from 'zustand';
-
-export type RNC = {
-  numero: string;
-  emissao: Date;
-  emissor: string;
-  descricao: string;
-  responsavel: string;
-  prazo: Date;
-  acoes: string;
-  verificacao: Date;
-  eficacia: Date;
-  fechamento: Date;
-  status: string;
-};
+import { RNC } from './models';
 
 type State = {
   rncs: RNC[];
