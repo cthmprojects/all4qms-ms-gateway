@@ -1,13 +1,17 @@
+import getStore from 'app/config/store';
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import React, { useState } from 'react';
 import { Route } from 'react-router-dom';
-import RncList from './home/rnc-list';
-import RNCNew from './new/rnc-new';
-import GeneralRegister from './new/register-types/general-register/general-register';
-import RegisterImplementation from './new/register-types/register-implementation/register-implementation';
-import RegisterImplementationVerification from './new/register-types/register-implementation-verification/register-implementation-verification';
-import RegisterImplementationClose from './new/register-types/register-implementation-close/register-implementation-close';
-import { IRNC } from './new/rnc.interface';
+import { ReducersMapObject, combineReducers } from 'redux';
+import rncReducers from './reducers';
+import { list } from './reducers/rnc.reducer';
+import RncList from './ui/home/rnc-list';
+import GeneralRegister from './ui/new/register-types/general-register/general-register';
+import RegisterImplementationClose from './ui/new/register-types/register-implementation-close/register-implementation-close';
+import RegisterImplementationVerification from './ui/new/register-types/register-implementation-verification/register-implementation-verification';
+import RegisterImplementation from './ui/new/register-types/register-implementation/register-implementation';
+import RNCNew from './ui/new/rnc-new';
+import entitiesReducers from 'app/entities/reducers';
 
 const handleTela = (tela: string) => {
   console.log(tela);
@@ -47,10 +51,13 @@ const RncRoutes = () => {
     return RNCs.find(item => item.id === id);
   };
 
+  const store = getStore();
+  store.injectReducer('all4qmsmsgateway', combineReducers(rncReducers as ReducersMapObject));
+
   return (
     <div>
       <ErrorBoundaryRoutes>
-        <Route path="" element={<RncList RNCs={RNCs} />} />
+        <Route path="" element={<RncList />} />
         <Route
           path="new"
           element={

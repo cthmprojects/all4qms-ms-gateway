@@ -55,6 +55,7 @@
         <!-- The liquibase version should match the one managed by
         https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/${spring-boot.version} -->
         <liquibase.version>4.15.0</liquibase.version>
+        <liquibase-hibernate5.version>4.15.0</liquibase-hibernate5.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <blockhound-junit-platform.version>1.0.6.RELEASE</blockhound-junit-platform.version>
@@ -170,6 +171,18 @@
             <version>${liquibase.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.liquibase.ext</groupId>
+            <artifactId>liquibase-hibernate5</artifactId>
+            <version>4.25.1</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
@@ -196,6 +209,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>r2dbc-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -354,6 +375,12 @@
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.17.3</version>
+            <scope>test</scope>
         </dependency>
         <!-- jhipster-needle-maven-add-dependency -->
     </dependencies>
@@ -1057,7 +1084,6 @@
                                 <dependency>
                                     <groupId>org.liquibase.ext</groupId>
                                     <artifactId>liquibase-hibernate5</artifactId>
-                                    <version>${liquibase-hibernate5.version}</version>
                                 </dependency>
                                 <dependency>
                                     <groupId>org.springframework.boot</groupId>
@@ -1162,7 +1188,6 @@
                                 <dependency>
                                     <groupId>org.liquibase.ext</groupId>
                                     <artifactId>liquibase-hibernate5</artifactId>
-                                    <version>${liquibase-hibernate5.version}</version>
                                 </dependency>
                                 <dependency>
                                     <groupId>org.springframework.boot</groupId>

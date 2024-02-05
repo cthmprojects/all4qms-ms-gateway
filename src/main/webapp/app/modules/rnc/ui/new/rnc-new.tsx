@@ -1,45 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Breadcrumbs,
-  Button,
-  FormControl,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { Row } from 'reactstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
-import './rnc-new.css';
-import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
-import DescriptionRnc from './register-types/description/description';
-import RepetitionRnc from './register-types/repetition/repetition-rnc';
-import Input from '../../../shared/components-form/input/input';
-import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
-import ClientRegister from './register-types/rnc-client/rnc-client-register';
-import MPRegister from './register-types/mp-register/mp-register';
-import ProductRegister from './register-types/product-register/product-register';
-import OthersRegister from './register-types/others-register/others-register';
-import rncStore, { RNC } from '../rnc-store';
-import GeneralRegister from './register-types/general-register/general-register';
-import RegisterImplementation from './register-types/register-implementation/register-implementation';
-import RegisterImplementationVerification from './register-types/register-implementation-verification/register-implementation-verification';
-import RegisterImplementationClose from './register-types/register-implementation-close/register-implementation-close';
-import { Storage } from 'react-jhipster';
-import { toast } from 'react-toastify';
+import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsersAsAdmin, getUsers } from '../../administration/user-management/user-management.reducer';
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import { Storage } from 'react-jhipster';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Row } from 'reactstrap';
+import { getUsers } from '../../../administration/user-management/user-management.reducer';
+import { Rnc } from '../../models';
+import { list, save, saveAudit, saveClient, saveDescription, saveProduct } from '../../reducers/rnc.reducer';
+import rncStore from '../../rnc-store';
+import DescriptionRnc from './register-types/description/description';
+import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
+import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
+import MPRegister from './register-types/mp-register/mp-register';
+import OthersRegister from './register-types/others-register/others-register';
+import ProductRegister from './register-types/product-register/product-register';
+import RepetitionRnc from './register-types/repetition/repetition-rnc';
+import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
+import './rnc-new.css';
 
 export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(list({}));
   }, []);
 
   const navigate = useNavigate();
@@ -108,7 +95,38 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
 
   const addRnc = rncStore(state => state.addRnc);
 
-  const [repetition, setRepetition] = useState([]);
+  /*
+   NC Description
+   */
+  const [description, setDescription] = useState<string>('');
+  const [evidences, setEvidences] = useState<Array<string>>(['']);
+  const [requirement, setRequirements] = useState<string>('');
+
+  const onDescriptionChanged = (value: string) => {
+    setDescription(value);
+  };
+
+  const onEvidencesChanged = (values: Array<string>) => {
+    setEvidences(values);
+  };
+
+  const onRequirementChanged = (value: string) => {
+    setRequirements(value);
+  };
+
+  /*
+   NC Repetition
+   */
+  const [repetition, setRepetition] = useState<boolean>();
+  const [selectedRncIds, setSelectedRncIds] = useState<Array<number>>([]);
+
+  const onRepetitionChanged = (value: boolean) => {
+    setRepetition(value);
+  };
+
+  const onSelectedRncIdsChanged = (values: Array<number>) => {
+    setSelectedRncIds(values);
+  };
 
   useEffect(() => {
     setFirstForm({ ...firstForm, number: { value: String(RNCNumber), error: firstForm.processOrigin.error } });
@@ -119,6 +137,33 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
 
     if (validateFields(firstForm, setFirstForm, setFormError)) {
       toast.success('RNC salva com sucesso!');
+
+      const receptorNC = filterUser(firstForm.forwarded.value);
+      const dtNC = new Date();
+      const idEmissorNC = parseInt(Storage.session.get('ID_USUARIO'));
+      const idReceptorNC = receptorNC ? parseInt(receptorNC.id) : null;
+      const idUsuarioAtual = parseInt(Storage.session.get('ID_USUARIO'));
+      const origemNC = firstForm.origin.value;
+      const processoEmissor = parseInt(firstForm.processOrigin.value);
+      const processoNC = parseInt(firstForm.processTarget.value);
+      const statusAtual = 'PREENCHIMENTO';
+      const tipoNC = firstForm.type.value;
+
+      dispatch(
+        save({
+          statusAtual: statusAtual,
+          idUsuarioAtual: idUsuarioAtual,
+          dtNC: dtNC,
+          tipoNC: tipoNC,
+          origemNC: origemNC,
+          possuiReincidencia: true,
+          idEmissorNC: idEmissorNC,
+          processoNC: processoNC,
+          idReceptorNC: idReceptorNC,
+          processoEmissor: processoEmissor,
+        })
+      );
+
       setSecondForm(true);
 
       handleRNC(firstForm);
@@ -127,42 +172,100 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   };
 
   const setExternalAuditRegister = data => {
-    handleUpdateRNC({ ...data, id: firstForm.number.value });
+    dispatch(
+      saveAudit({
+        norm: data.norma,
+        occurrence: data.numberNC,
+        process: data.numberReport,
+        requirement: data.normaRequiremeents,
+        rncId: rnc?.id,
+        sequence: 1,
+      })
+    );
   };
 
   const setClientRegister = data => {
-    handleUpdateRNC({ ...data, id: firstForm.number.value });
+    dispatch(
+      saveClient({
+        batch: data.lot,
+        batchAmount: data.lotQuantity,
+        code: data.productCode,
+        defects: data.defectRate,
+        description: data.productDescription,
+        name: data.name,
+        opNumber: data.opNumber,
+        order: data.requestNumber,
+        rejected: data.rejectedQuantity,
+        samples: data.batchAmount,
+        supplier: data.productCode2,
+        traceability: {
+          date: data.nfDate,
+          deliveredAt: data.deliveryDate,
+          identifier: data.receipt,
+          rncId: rnc.id,
+        },
+      })
+    );
   };
 
   const setInternalAuditRegister = data => {
-    handleUpdateRNC({ ...data, id: firstForm.number.value });
+    dispatch(
+      saveAudit({
+        norm: data.norma,
+        occurrence: data.numberNC,
+        process: data.numberReport,
+        requirement: data.normaRequiremeents,
+        rncId: rnc?.id,
+        sequence: 1,
+      })
+    );
   };
 
   const setMPRegister = data => {
-    console.log(data);
+    console.log('[mp] data', data);
   };
 
   const setProductRegister = data => {
-    console.log(data);
+    dispatch(
+      saveProduct({
+        batch: data.lot,
+        batchAmount: data.lotQuantity,
+        code: data.productCode,
+        defects: data.defectRate,
+        description: data.productDescription,
+        name: data.name,
+        opNumber: data.opNumber,
+        order: data.requestNumber,
+        rejected: data.rejectedQuantity,
+        samples: data.batchAmount,
+        supplier: data.productCode2,
+        traceability: {
+          date: data.nfDate,
+          deliveredAt: data.deliveryDate,
+          identifier: data.receipt,
+          rncId: rnc.id,
+        },
+      })
+    );
   };
 
   const setOthersRegister = data => {
-    console.log(data);
+    console.log('[others] data', data);
   };
 
   const renderComponents = () => {
     switch (firstForm.origin.value) {
-      case 'externalAudit':
+      case 'AUDITORIA_EXTERNA':
         return <ExternalAuditRegister setExternalAuditRegister={setExternalAuditRegister} />;
-      case 'internalAudit':
+      case 'AUDITORIA_INTERNA':
         return <InternalAuditRegister setInternalAuditRegister={setInternalAuditRegister} />;
-      case 'client':
+      case 'CLIENTE':
         return <ClientRegister onClientChange={setClientRegister} />;
-      case 'mp':
+      case 'MATERIA_PRIMA_INSUMO':
         return <MPRegister onMPChange={setMPRegister} />;
-      case 'endProduct':
+      case 'PRODUTO_ACABADO':
         return <ProductRegister onProductRegisterChange={setProductRegister} />;
-      case 'others':
+      case 'PROCEDIMENTO_OUTROS':
         return <OthersRegister onOthersRegisterChange={setOthersRegister} />;
     }
   };
@@ -177,6 +280,25 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   };
 
   const users = useAppSelector(state => state.userManagement.users);
+  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
+  const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
+  // const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
+
+  const onSaveRncDescription = () => {
+    for (let i = 0; i < evidences.length; i++) {
+      const evidence = evidences[i];
+
+      dispatch(saveDescription({ details: description, evidence: evidence, requirement: requirement, rncId: rnc.id }));
+    }
+  };
+
+  const filterUser = (login: string) => {
+    if (!users || users.length <= 0) {
+      return null;
+    }
+
+    return users.find(user => user.login === login);
+  };
 
   if (tela == 'cadastro') {
     return (
@@ -305,11 +427,10 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     value={firstForm.type.value}
                     onChange={event => setFirstForm({ ...firstForm, type: { value: event.target.value, error: firstForm.type.error } })}
                   >
-                    <MenuItem value="1">NC</MenuItem>
-                    <MenuItem value="2">OM</MenuItem>
+                    <MenuItem value="NC">NC</MenuItem>
+                    <MenuItem value="OM">OM</MenuItem>
                   </Select>
                 </FormControl>
-
                 <FormControl className="mb-2 rnc-form-field me-2">
                   <InputLabel>Origem</InputLabel>
                   <Select
@@ -320,12 +441,12 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     error={firstForm.origin.error}
                     onChange={event => setFirstForm({ ...firstForm, origin: { value: event.target.value, error: firstForm.origin.error } })}
                   >
-                    <MenuItem value="externalAudit">Auditoria externa</MenuItem>
-                    <MenuItem value="internalAudit">Auditoria interna</MenuItem>
-                    <MenuItem value="client">Cliente</MenuItem>
-                    <MenuItem value="mp">Matéria prima</MenuItem>
-                    <MenuItem value="endProduct">Produto acabado</MenuItem>
-                    <MenuItem value="others">Outros</MenuItem>
+                    <MenuItem value="AUDITORIA_EXTERNA">Auditoria externa</MenuItem>
+                    <MenuItem value="AUDITORIA_INTERNA">Auditoria interna</MenuItem>
+                    <MenuItem value="CLIENTE">Cliente</MenuItem>
+                    <MenuItem value="MATERIA_PRIMA_INSUMO">Matéria prima</MenuItem>
+                    <MenuItem value="PRODUTO_ACABADO">Produto acabado</MenuItem>
+                    <MenuItem value="PROCEDIMENTO_OUTROS">Outros</MenuItem>
                   </Select>
                 </FormControl>
               </div>
@@ -351,10 +472,23 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
             <>
               <Row className="ms-3 me-3 mt-3">{renderComponents()}</Row>
               <Row className="ms-3 me-3 mt-3">
-                <DescriptionRnc handleDescricao={handleDescricao} />
+                <DescriptionRnc
+                  description={description}
+                  evidences={evidences}
+                  onDescriptionChanged={onDescriptionChanged}
+                  onEvidencesChanged={onEvidencesChanged}
+                  onRequirementChanged={onRequirementChanged}
+                  requirement={requirement}
+                />
               </Row>
               <Row className="ms-3 me-3 mt-3" fullWidth>
-                <RepetitionRnc RNCID={firstForm.number.value} RNCList={RNCList} handleUpdateRNC={setRepetition} />
+                <RepetitionRnc
+                  onRepetitionChanged={onRepetitionChanged}
+                  onSelectedRncIdsChanged={onSelectedRncIdsChanged}
+                  repetition={repetition}
+                  rncs={rncs}
+                  selectedRncIds={selectedRncIds}
+                />
               </Row>
               <Row className="m-3">
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -370,10 +504,7 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     variant="outlined"
                     color="primary"
                     style={{ background: '#e6b200', color: '#4e4d4d' }}
-                    onClick={() => {
-                      handleUpdateRNC({ ...repetition, id: firstForm.number.value });
-                      navigate('/rnc');
-                    }}
+                    onClick={onSaveRncDescription}
                   >
                     Salvar
                   </Button>

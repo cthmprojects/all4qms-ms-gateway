@@ -1,45 +1,43 @@
-import './general-register.css';
-import React, { useEffect, useState } from 'react';
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
-import { styled } from '@mui/joy/styles';
+import { Add } from '@mui/icons-material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import Textarea from '@mui/joy/Textarea';
+import { styled } from '@mui/joy/styles';
 import {
+  Autocomplete,
   Breadcrumbs,
   Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Fab,
   FormControl,
-  InputAdornment,
+  IconButton,
   InputLabel,
+  ListItemText,
   MenuItem,
   OutlinedInput,
   Select,
+  SelectChangeEvent,
   TextField,
   Typography,
-  Box,
-  Card,
-  CardActions,
-  CardContent,
-  IconButton,
-  Divider,
-  Chip,
-  Fab,
-  SelectChangeEvent,
-  ListItemText,
-  Autocomplete,
 } from '@mui/material';
-import BaseTextareaAutosize from '@mui/material/TextareaAutosize';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DatePicker from 'react-datepicker';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import { Row } from 'reactstrap';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { Add } from '@mui/icons-material';
-import 'react-datepicker/dist/react-datepicker.css';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
+import { Rnc } from 'app/modules/rnc/models';
+import { list, saveEffectCause, saveImmediateAction, savePlannedAction, saveRange, saveReason } from 'app/modules/rnc/reducers/rnc.reducer';
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Row } from 'reactstrap';
+import './general-register.css';
 
 const StyledTextarea = styled(TextareaAutosize)({
   resize: 'none',
@@ -230,10 +228,13 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     },
   });
 
+  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
+
   const [_rnc, _setrnc] = useState(findRNCById(id));
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(list({}));
   }, []);
 
   const [k, setK] = useState('');
@@ -546,6 +547,22 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
 
   const [showPlanoAcaoCorretiva, setShowPlanoAcaoCorretiva] = useState(false);
   const users = useAppSelector(state => state.userManagement.users);
+
+  const filterUser = (login: string) => {
+    if (!users || users.length <= 0) {
+      return null;
+    }
+
+    return users.find(user => user.login === login);
+  };
+
+  const filterRnc = () => {
+    if (!rncs || rncs.length <= 0) {
+      return null;
+    }
+
+    return rncs.find(rnc => rnc.id === parseInt(id));
+  };
 
   return (
     <>
@@ -1261,7 +1278,60 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                 }
 
                 if (showPlanoAcaoCorretiva) {
-                  handleUpdateRNC({ id: id, planoacao: responsaveisPlanoAcao, verificacao: responsaveisVerificacao });
+                  const rnc = filterRnc();
+
+                  dispatch(saveRange({ description: registerForm.keywords.value.join(','), rncId: rnc.id }));
+                  dispatch(
+                    saveImmediateAction({
+                      deadline: descPrazo,
+                      description: '',
+                      problem: '',
+                      responsibleId: filterUser(descResponsavel)?.id,
+                      rncId: rnc.id,
+                      status: 'A',
+                      validated: false,
+                      verifierId: filterUser(descResponsavel)?.id,
+                    })
+                  );
+                  dispatch(
+                    saveEffectCause({
+                      description: '',
+                      environment: registerForm.causaMeioAmbiente.value.toString(),
+                      machine: registerForm.causaMaquina.value.toString(),
+                      measurement: registerForm.causaMedicao.value.toString(),
+                      method: registerForm.causaMetodo.value.toString(),
+                      rawMaterial: registerForm.causaMateriaPrima.value.toString(),
+                      workforce: registerForm.causaMaoObra.value.toString(),
+                    })
+                  );
+                  dispatch(
+                    saveReason({
+                      cause: '',
+                      fifth: registerForm.fiveWhy_n5.value.toString(),
+                      first: registerForm.fiveWhy_n1.value.toString(),
+                      forth: registerForm.fiveWhy_n4.value.toString(),
+                      problem: '',
+                      second: registerForm.fiveWhy_n2.value.toString(),
+                      third: registerForm.fiveWhy_n3.value.toString(),
+                    })
+                  );
+                  dispatch(
+                    savePlannedAction({
+                      date: new Date(registerForm.planoAcaoPrazo.value),
+                      deadline: new Date(registerForm.planoAcaoPrazo.value),
+                      description: registerForm.planoAcaoDescricao.value.toString(),
+                      plan: {
+                        description: '',
+                        deadline: new Date(registerForm.planoAcaoPrazo.value),
+                        responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                        rncId: rnc.id,
+                        status: 'A',
+                      },
+                      responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                      status: registerForm.planoAcaoStatus.value,
+                    })
+                  );
+
                   navigate('/rnc');
                   toast.success('RNC atualizada com sucesso!');
                 }

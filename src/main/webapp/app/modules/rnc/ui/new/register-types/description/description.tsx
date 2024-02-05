@@ -1,43 +1,51 @@
-import React, { useState, useRef } from 'react';
-import './description.css';
-import { Button, Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
 import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
+import { Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
+import React, { useRef, useState } from 'react';
+import './description.css';
 
-export const DescriptionRnc = ({ handleDescricao }) => {
-  const [naoConformidade, setNaoConformidade] = useState('');
-  const [requisitoDescumprido, setRequisitoDescumprido] = useState('');
-  const [evidenciasObjetivas, setEvidenciasObjetivas] = useState(['']);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+type RncDescriptionProps = {
+  description: string;
+  evidences: Array<string>;
+  requirement: string;
+  onDescriptionChanged: (value: string) => void;
+  onEvidencesChanged: (values: Array<string>) => void;
+  onRequirementChanged: (value: string) => void;
+};
+
+export const DescriptionRnc = ({
+  description,
+  evidences,
+  onDescriptionChanged,
+  onEvidencesChanged,
+  onRequirementChanged,
+  requirement,
+}: RncDescriptionProps) => {
+  const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
 
-  const handleDesc = value => {
-    setNaoConformidade(value);
-    handleDescricao(value);
+  const onAddEvidence = () => {
+    if (!description || !requirement || !evidences || !evidences[0]) return;
+
+    onEvidencesChanged([...evidences, '']);
   };
 
-  const addEvidenciaObjetiva = () => {
-    if (!naoConformidade || !requisitoDescumprido || !evidenciasObjetivas[0]) return;
+  const onRemoveEvidence = (index: number) => {
+    if (index === 0 || evidences.length === 1) return;
 
-    setEvidenciasObjetivas([...evidenciasObjetivas, '']);
+    const newEvidences = [...evidences];
+    newEvidences.splice(index, 1);
+    onEvidencesChanged(newEvidences);
   };
 
-  const removeEvidenciaObjetiva = index => {
-    if (index === 0 || evidenciasObjetivas.length === 1) return;
-
-    const updatedEvidencias = [...evidenciasObjetivas];
-    updatedEvidencias.splice(index, 1);
-    setEvidenciasObjetivas(updatedEvidencias);
-  };
-
-  const handleFileChange = event => {
+  const onFileChanged = event => {
     const files = event.target.files;
-    setSelectedFiles([...selectedFiles, ...files]);
+    setFiles([...files, ...files]);
   };
 
-  const removeSelectedFile = index => {
-    const updatedFiles = [...selectedFiles];
-    updatedFiles.splice(index, 1);
-    setSelectedFiles(updatedFiles);
+  const removeSelectedFile = (index: number) => {
+    const newFiles = [...files];
+    newFiles.splice(index, 1);
+    setFiles(newFiles);
   };
 
   const downloadFile = file => {
@@ -56,7 +64,7 @@ export const DescriptionRnc = ({ handleDescricao }) => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 className="m-3">Descrição</h3>
           <div className="mb-3 mt-3">
-            <input type="file" multiple style={{ display: 'none' }} onChange={handleFileChange} ref={fileInputRef} />
+            <input type="file" multiple style={{ display: 'none' }} onChange={onFileChanged} ref={fileInputRef} />
             <Tooltip title="Enviar arquivo de evidência">
               <IconButton
                 sx={{ width: '50px', height: '50px' }}
@@ -69,11 +77,11 @@ export const DescriptionRnc = ({ handleDescricao }) => {
             </Tooltip>
             <Tooltip title="Adicione uma nova evidência">
               <Fab
-                disabled={!naoConformidade || !requisitoDescumprido || !evidenciasObjetivas[0]}
+                disabled={!description || !requirement || !evidences}
                 color="primary"
                 aria-label="add"
                 size="medium"
-                onClick={addEvidenciaObjetiva}
+                onClick={onAddEvidence}
               >
                 <Add />
               </Fab>
@@ -86,19 +94,19 @@ export const DescriptionRnc = ({ handleDescricao }) => {
           placeholder="Escreva aqui"
           fullWidth
           sx={{ mt: 2 }}
-          value={naoConformidade}
-          onChange={event => handleDesc(event.target.value)}
+          value={description}
+          onChange={event => onDescriptionChanged(event.target.value)}
         />
         <TextField
           label="Requisito descumprido"
           placeholder="Escreva aqui"
           fullWidth
           sx={{ mt: 2 }}
-          value={requisitoDescumprido}
-          onChange={event => setRequisitoDescumprido(event.target.value)}
+          value={requirement}
+          onChange={event => onRequirementChanged(event.target.value)}
         />
 
-        {evidenciasObjetivas.map((evidencia, index) => (
+        {evidences.map((evidencia, index) => (
           <div key={index} className="mt-2 mb-2" style={{ position: 'relative' }}>
             <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -108,13 +116,13 @@ export const DescriptionRnc = ({ handleDescricao }) => {
                 sx={{ mt: 2 }}
                 value={evidencia}
                 onChange={event => {
-                  const updatedEvidencias = [...evidenciasObjetivas];
-                  updatedEvidencias[index] = event.target.value;
-                  setEvidenciasObjetivas(updatedEvidencias);
+                  const newEvidences = [...evidences];
+                  newEvidences[index] = event.target.value;
+                  onEvidencesChanged(newEvidences);
                 }}
               />
               {index > 0 && (
-                <IconButton sx={{ marginTop: '8px', marginLeft: '8px' }} onClick={() => removeEvidenciaObjetiva(index)}>
+                <IconButton sx={{ marginTop: '8px', marginLeft: '8px' }} onClick={() => onRemoveEvidence(index)}>
                   <DeleteOutlined />
                 </IconButton>
               )}
@@ -122,12 +130,12 @@ export const DescriptionRnc = ({ handleDescricao }) => {
           </div>
         ))}
 
-        {selectedFiles.length > 0 && (
+        {files.length > 0 && (
           <div className="mt-2 mb-2">
             <Divider variant="middle" sx={{ margin: ' 0.5rem 0px !important' }} />
             <div>
               <h5>Arquivos Selecionados:</h5>
-              {selectedFiles.map((file, index) => (
+              {files.map((file, index) => (
                 <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
                   <a
                     href="#"

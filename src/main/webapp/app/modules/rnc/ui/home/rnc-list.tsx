@@ -1,39 +1,39 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Search } from '@mui/icons-material';
 import {
+  Box,
   Breadcrumbs,
   Button,
-  Divider,
   FormControl,
   IconButton,
   InputAdornment,
   InputLabel,
+  Menu,
   MenuItem,
   OutlinedInput,
   Pagination,
   Paper,
+  Select,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Typography,
-  Select,
-  Box,
   Tabs,
-  Tab,
-  Menu,
+  Typography,
 } from '@mui/material';
-import DatePicker from 'react-datepicker';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import React, { useEffect, useState } from 'react';
-import { Card, Row } from 'reactstrap';
-import './rnc.css';
-import EditIcon from '@mui/icons-material/Edit';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search } from '@mui/icons-material';
-import rncStore, { RNC } from '../rnc-store';
+import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Link, useNavigate } from 'react-router-dom';
+import { Row } from 'reactstrap';
+import { Rnc } from '../../models';
+import { list } from '../../reducers/rnc.reducer';
+import './rnc.css';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -62,7 +62,7 @@ function a11yProps(index: number) {
   };
 }
 
-const RncList = ({ RNCs }) => {
+const RncList = ({}) => {
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -79,7 +79,14 @@ const RncList = ({ RNCs }) => {
     setAnchorEl(null);
   };
 
-  const rncs = rncStore(state => state.rncs);
+  const dispatch = useAppDispatch();
+  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
+  const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
+
+  useEffect(() => {
+    dispatch(list({ page: 0, size: 20 }));
+    dispatch(getUsers({}));
+  }, []);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -95,12 +102,11 @@ const RncList = ({ RNCs }) => {
 
   const columns = ['Número', 'Emissão', 'Emissor', 'Descrição', 'Responsável', 'Verificação', 'Eficácia', 'Fechamento', 'Status', 'Ações'];
 
-  const rows = [
-    [0, 'Teste', 'Admin', 'For Test', 'Admin', '30/09/2023', '', 'Test', '', '', 'Done'],
-    [0, 'Teste', 'Vitão', 'For Test', 'Admin', '30/09/2023', '', 'Vitão', '', '', 'Done'],
-  ];
+  const formatDateToString = (date: Date | null | undefined) => {
+    if (!date) {
+      return '';
+    }
 
-  const formatDateToString = (date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear().toString();
@@ -113,8 +119,16 @@ const RncList = ({ RNCs }) => {
     navigate(route);
   };
 
+  const filterUser = (id: number) => {
+    if (!users || users.length <= 0) {
+      return null;
+    }
+
+    return users.find(user => user.id === id);
+  };
+
   const renderTable = () => {
-    if (RNCs?.length > 0) {
+    if (rncs?.length > 0) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -127,61 +141,89 @@ const RncList = ({ RNCs }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {RNCs?.map(rnc => (
-                  <TableRow key={rnc.id}>
-                    <TableCell>{rnc.id}</TableCell>
-                    <TableCell>{formatDateToString(rnc.date)}</TableCell>
-                    <TableCell>{rnc.emitter}</TableCell>
-                    <TableCell> {rnc.descricaoNC} </TableCell>
-                    <TableCell>{rnc.forwarded}</TableCell>
-                    <TableCell> - </TableCell>
-                    <TableCell> - </TableCell>
-                    <TableCell> - </TableCell>
-                    <TableCell> - </TableCell>
-                    <TableCell>
-                      <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
-                        <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
-                      </IconButton>
-                      <Menu
-                        id="basic-menu"
-                        anchorEl={anchorEl}
-                        open={openOptions}
-                        onClose={handleCloseOptions}
-                        MenuListProps={{
-                          'aria-labelledby': 'basic-button',
-                        }}
-                      >
-                        <MenuItem disabled={userLogin !== rnc.forwarded} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
-                          Registrar NC
-                        </MenuItem>
-                        <MenuItem
-                          disabled={rnc.planoacao?.find(user => user == userLogin) != undefined ? false : true}
-                          onClick={() => goToPage('/rnc/general/implementacao')}
+                {rncs?.map(rnc => {
+                  const {
+                    acoesImediatas,
+                    aprovacaoNC,
+                    atualizadoEm,
+                    criadoEm,
+                    decisaoNC,
+                    dtNC,
+                    id,
+                    idEmissorNC,
+                    idReceptorNC,
+                    idUsuarioAtual,
+                    ncOutros,
+                    numNC,
+                    origemNC,
+                    possuiReincidencia,
+                    processoEmissor,
+                    processoNC,
+                    statusAtual,
+                    tipoNC,
+                    vinculoAuditoria,
+                    vinculoCliente,
+                    vinculoDocAnterior,
+                    vinculoProduto,
+                  } = rnc;
+
+                  const emissor = filterUser(idEmissorNC);
+                  const receptor = filterUser(idReceptorNC);
+                  const usuarioAtual = filterUser(idUsuarioAtual);
+
+                  return (
+                    <TableRow key={id}>
+                      <TableCell>{id}</TableCell>
+                      <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
+                      <TableCell>{emissor?.login ?? '-'}</TableCell>
+                      <TableCell> {'descrição'} </TableCell>
+                      <TableCell>{usuarioAtual?.login ?? '-'}</TableCell>
+                      <TableCell> - </TableCell>
+                      <TableCell> - </TableCell>
+                      <TableCell> - </TableCell>
+                      <TableCell> - </TableCell>
+                      <TableCell>
+                        <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
+                          <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
+                        </IconButton>
+                        <Menu
+                          id="basic-menu"
+                          anchorEl={anchorEl}
+                          open={openOptions}
+                          onClose={handleCloseOptions}
+                          MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                          }}
                         >
-                          Plano de ação
-                        </MenuItem>
-                        <MenuItem
-                          disabled={rnc.verificacao?.find(user => user == userLogin) != undefined ? false : true}
-                          onClick={() => goToPage('/rnc/general/implementacao/validacao')}
-                        >
-                          Validação Plano de ação
-                        </MenuItem>
-                        <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
-                          Eficácia Plano de Ação
-                        </MenuItem>
-                        <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          Remover NC
-                          <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
-                        </MenuItem>
-                      </Menu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
+                            Registrar NC
+                          </MenuItem>
+                          <MenuItem disabled={rnc.statusAtual !== 'EXECUCAO'} onClick={() => goToPage('/rnc/general/implementacao')}>
+                            Plano de ação
+                          </MenuItem>
+                          <MenuItem
+                            disabled={rnc.statusAtual !== 'VERIFICACAO'}
+                            onClick={() => goToPage('/rnc/general/implementacao/validacao')}
+                          >
+                            Validação Plano de ação
+                          </MenuItem>
+                          <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
+                            Eficácia Plano de Ação
+                          </MenuItem>
+                          <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            Remover NC
+                            <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
+                          </MenuItem>
+                        </Menu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
           <Row className="justify-content-center mt-5">
-            <Pagination count={Math.floor(RNCs.length / 20) + (RNCs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
+            <Pagination count={Math.floor(rncs.length / 20) + (rncs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
           </Row>
         </>
       );
