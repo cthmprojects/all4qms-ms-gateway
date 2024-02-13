@@ -43,6 +43,49 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   }, []);
 
   const navigate = useNavigate();
+
+  const [typeBreadcrumbLabel, setTypeBreadcrumbLabel] = useState('');
+  const [originBreadcrumbLabel, setOriginBreadcrumbLabel] = useState('');
+
+  const handleTypeChange = event => {
+    const { value } = event.target;
+    // eslint-disable-next-line default-case
+    switch (value) {
+      case '1':
+        setTypeBreadcrumbLabel('Registro de Não Conformidade');
+        break;
+      case '2':
+        setTypeBreadcrumbLabel('Oportunidade de Melhoria');
+        break;
+    }
+  };
+
+  const handleOriginChange = event => {
+    const { value } = event.target;
+    switch (value) {
+      case 'externalAudit':
+        setOriginBreadcrumbLabel('Auditoria Externa');
+        break;
+      case 'internalAudit':
+        setOriginBreadcrumbLabel('Auditoria Interna');
+        break;
+      case 'client':
+        setOriginBreadcrumbLabel('Cliente');
+        break;
+      case 'mp':
+        setOriginBreadcrumbLabel('Matéria Prima');
+        break;
+      case 'endProduct':
+        setOriginBreadcrumbLabel('Produto Acabado');
+        break;
+      case 'others':
+        setOriginBreadcrumbLabel('Outros');
+        break;
+      default:
+        setOriginBreadcrumbLabel('');
+    }
+  };
+
   const [firstForm, setFirstForm] = useState({
     number: {
       value: '1',
@@ -151,6 +194,7 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   };
 
   const renderComponents = () => {
+    // eslint-disable-next-line default-case
     switch (firstForm.origin.value) {
       case 'externalAudit':
         return <ExternalAuditRegister setExternalAuditRegister={setExternalAuditRegister} />;
@@ -187,10 +231,9 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
               <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
                 Home
               </Link>
-              <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-                RNC
-              </Link>
               <Typography style={{ color: '#606060' }}>Cadastro de RNC</Typography>
+              {typeBreadcrumbLabel && <Typography style={{ color: '#606060' }}>{typeBreadcrumbLabel}</Typography>}
+              {originBreadcrumbLabel && <Typography style={{ color: '#606060' }}>{originBreadcrumbLabel}</Typography>}
             </Breadcrumbs>
             <h2 id="all4QmsMsGatewayApp.usuario.home.createOrEditLabel" data-cy="UsuarioCreateUpdateHeading" className="ms-5 mt-5">
               Cadastrar RNC
@@ -303,7 +346,13 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     disabled={secondForm}
                     error={firstForm.type.error}
                     value={firstForm.type.value}
-                    onChange={event => setFirstForm({ ...firstForm, type: { value: event.target.value, error: firstForm.type.error } })}
+                    onChange={event => {
+                      setFirstForm(prevState => ({
+                        ...prevState,
+                        type: { value: event.target.value, error: prevState.type.error },
+                      }));
+                      handleTypeChange(event);
+                    }}
                   >
                     <MenuItem value="1">NC</MenuItem>
                     <MenuItem value="2">OM</MenuItem>
@@ -318,7 +367,13 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     disabled={secondForm}
                     value={firstForm.origin.value}
                     error={firstForm.origin.error}
-                    onChange={event => setFirstForm({ ...firstForm, origin: { value: event.target.value, error: firstForm.origin.error } })}
+                    onChange={event => {
+                      setFirstForm(prevState => ({
+                        ...prevState,
+                        origin: { value: event.target.value, error: prevState.origin.error },
+                      }));
+                      handleOriginChange(event);
+                    }}
                   >
                     <MenuItem value="externalAudit">Auditoria externa</MenuItem>
                     <MenuItem value="internalAudit">Auditoria interna</MenuItem>
