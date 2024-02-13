@@ -128,7 +128,11 @@ const RncList = ({}) => {
   };
 
   const renderTable = () => {
-    if (rncs?.length > 0) {
+    // eslint-disable-next-line no-console
+    console.log('RNC SIZE: ' + rncs?.length);
+    //if (rncs?.length > 0) {
+    // eslint-disable-next-line no-constant-condition
+    if (true) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -173,15 +177,16 @@ const RncList = ({}) => {
 
                   return (
                     <TableRow key={id}>
-                      <TableCell>{id}</TableCell>
+                      <TableCell>{numNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
                       <TableCell>{emissor?.login ?? '-'}</TableCell>
                       <TableCell> {'descrição'} </TableCell>
-                      <TableCell>{usuarioAtual?.login ?? '-'}</TableCell>
+                      <TableCell>{usuarioAtual?.login ?? receptor}</TableCell>
                       <TableCell> - </TableCell>
                       <TableCell> - </TableCell>
-                      <TableCell> - </TableCell>
-                      <TableCell> - </TableCell>
+                      <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
+                      <TableCell> {statusAtual} </TableCell>
+                      <TableCell> {acoesImediatas} </TableCell>
                       <TableCell>
                         <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
                           <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
