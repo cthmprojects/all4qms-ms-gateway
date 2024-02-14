@@ -1,3 +1,4 @@
+export * from './approval';
 export * from './audit';
 export * from './client';
 export * from './description';

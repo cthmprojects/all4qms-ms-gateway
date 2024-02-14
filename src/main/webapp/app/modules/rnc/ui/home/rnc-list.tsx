@@ -32,6 +32,7 @@ import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
 import { Rnc } from '../../models';
+import { listApprovals } from '../../reducers/approval.reducer';
 import { list } from '../../reducers/rnc.reducer';
 import './rnc.css';
 
@@ -80,12 +81,14 @@ const RncList = ({}) => {
   };
 
   const dispatch = useAppDispatch();
+  const approvals: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.approval.entities);
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
   const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
 
   useEffect(() => {
     dispatch(list({ page: 0, size: 20 }));
     dispatch(getUsers({}));
+    dispatch(listApprovals({}));
   }, []);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
