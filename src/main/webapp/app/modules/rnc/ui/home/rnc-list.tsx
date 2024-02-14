@@ -128,11 +128,7 @@ const RncList = ({}) => {
   };
 
   const renderTable = () => {
-    // eslint-disable-next-line no-console
-    console.log('RNC SIZE: ' + rncs?.length);
-    //if (rncs?.length > 0) {
-    // eslint-disable-next-line no-constant-condition
-    if (true) {
+    if (rncs?.length > 0) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
