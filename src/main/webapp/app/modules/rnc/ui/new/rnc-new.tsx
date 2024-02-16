@@ -1,3 +1,8 @@
+/* eslint-disable default-case */
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable radix */
+/* eslint-disable object-shorthand */
 import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import React, { useEffect, useState } from 'react';
@@ -64,6 +69,48 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
       error: false,
     },
   });
+
+  const [typeBreadcrumbLabel, setTypeBreadcrumbLabel] = useState('');
+  const [originBreadcrumbLabel, setOriginBreadcrumbLabel] = useState('');
+
+  const handleTypeChange = event => {
+    const { value } = event.target;
+    // eslint-disable-next-line default-case
+    switch (value) {
+      case '1':
+        setTypeBreadcrumbLabel('Registro de Não Conformidade');
+        break;
+      case '2':
+        setTypeBreadcrumbLabel('Oportunidade de Melhoria');
+        break;
+    }
+  };
+
+  const handleOriginChange = event => {
+    const { value } = event.target;
+    switch (value) {
+      case 'externalAudit':
+        setOriginBreadcrumbLabel('Auditoria Externa');
+        break;
+      case 'internalAudit':
+        setOriginBreadcrumbLabel('Auditoria Interna');
+        break;
+      case 'client':
+        setOriginBreadcrumbLabel('Cliente');
+        break;
+      case 'mp':
+        setOriginBreadcrumbLabel('Matéria Prima');
+        break;
+      case 'endProduct':
+        setOriginBreadcrumbLabel('Produto Acabado');
+        break;
+      case 'others':
+        setOriginBreadcrumbLabel('Outros');
+        break;
+      default:
+        setOriginBreadcrumbLabel('');
+    }
+  };
 
   const [secondForm, setSecondForm] = useState(false);
   const [formError, setFormError] = useState(false);
@@ -300,7 +347,7 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
     return users.find(user => user.login === login);
   };
 
-  if (tela == 'cadastro') {
+  if (tela === 'cadastro') {
     return (
       <>
         <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
@@ -313,6 +360,8 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                 RNC
               </Link>
               <Typography style={{ color: '#606060' }}>Cadastro de RNC</Typography>
+              {typeBreadcrumbLabel && <Typography style={{ color: '#606060' }}>{typeBreadcrumbLabel}</Typography>}
+              {originBreadcrumbLabel && <Typography style={{ color: '#606060' }}>{originBreadcrumbLabel}</Typography>}
             </Breadcrumbs>
             <h2 id="all4QmsMsGatewayApp.usuario.home.createOrEditLabel" data-cy="UsuarioCreateUpdateHeading" className="ms-5 mt-5">
               Cadastrar RNC
@@ -425,7 +474,13 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     disabled={secondForm}
                     error={firstForm.type.error}
                     value={firstForm.type.value}
-                    onChange={event => setFirstForm({ ...firstForm, type: { value: event.target.value, error: firstForm.type.error } })}
+                    onChange={event => {
+                      setFirstForm(prevState => ({
+                        ...prevState,
+                        type: { value: event.target.value, error: prevState.type.error },
+                      }));
+                      handleTypeChange(event);
+                    }}
                   >
                     <MenuItem value="NC">NC</MenuItem>
                     <MenuItem value="OM">OM</MenuItem>
@@ -439,7 +494,13 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     disabled={secondForm}
                     value={firstForm.origin.value}
                     error={firstForm.origin.error}
-                    onChange={event => setFirstForm({ ...firstForm, origin: { value: event.target.value, error: firstForm.origin.error } })}
+                    onChange={event => {
+                      setFirstForm(prevState => ({
+                        ...prevState,
+                        origin: { value: event.target.value, error: prevState.origin.error },
+                      }));
+                      handleOriginChange(event);
+                    }}
                   >
                     <MenuItem value="AUDITORIA_EXTERNA">Auditoria externa</MenuItem>
                     <MenuItem value="AUDITORIA_INTERNA">Auditoria interna</MenuItem>
