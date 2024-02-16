@@ -12,11 +12,17 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { IUsuario } from 'app/shared/model/usuario.model';
 import { getEntities } from './usuario.reducer';
 import GeneralList from 'app/shared/layout/list/general-list';
+import { deleteUser as deleteJhipsterUser } from 'app/modules/administration/user-management/user-management.reducer';
+import { deleteEntity as deleteRNCUser } from './usuario.reducer';
+
 import {
   Box,
   Breadcrumbs,
   CircularProgress,
   Divider,
+  IconButton,
+  Menu,
+  MenuItem,
   Pagination,
   Paper,
   TableBody,
@@ -33,6 +39,15 @@ export const Usuario = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const openOptions = Boolean(anchorEl);
+  const handleClickOptions = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseOptions = () => {
+    setAnchorEl(null);
+  };
 
   const [paginationState, setPaginationState] = useState(
     overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
@@ -97,7 +112,15 @@ export const Usuario = () => {
     sortEntities();
   };
 
-  const columns = ['Nome', 'E-mail', 'Função', 'Gestor', 'Setor'];
+  const handleDeleteUser = (loginJhUser: any, idRncUser: any) => {
+    dispatch(deleteRNCUser(idRncUser.toString())).then(() => {
+      dispatch(deleteJhipsterUser(loginJhUser.toString())).then(() => {
+        sortEntities();
+      });
+    });
+  };
+
+  const columns = ['Nome', 'E-mail', 'Função', 'Gestor', 'Setor', 'Ações'];
 
   const renderTable = () => {
     if (columns.length > 0 && usuarioList.length > 0) {
@@ -120,6 +143,26 @@ export const Usuario = () => {
                     <TableCell>{usuario.funcao.nome}</TableCell>
                     <TableCell>{usuario.gestor.nome}</TableCell>
                     <TableCell>{usuario.setor.nome}</TableCell>
+                    <TableCell>
+                      <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
+                        <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
+                      </IconButton>
+                      <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl}
+                        open={openOptions}
+                        onClose={handleCloseOptions}
+                        MenuListProps={{
+                          'aria-labelledby': 'basic-button',
+                        }}
+                      >
+                        <MenuItem onClick={() => navigate(`${usuario.id}/edit`)}>Editar usuário</MenuItem>
+                        <MenuItem onClick={() => handleDeleteUser(usuario.user.login, usuario.id)}>
+                          Deletar usuário
+                          <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
+                        </MenuItem>
+                      </Menu>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

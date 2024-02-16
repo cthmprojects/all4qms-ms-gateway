@@ -14,11 +14,15 @@ import { getEntities as getUsuarios } from 'app/entities/usuario/usuario.reducer
 import { ISetor } from 'app/shared/model/setor.model';
 import { getEntities as getSetors } from 'app/entities/setor/setor.reducer';
 import { IUser } from 'app/shared/model/user.model';
-import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
+import { createUser, getUsers, getUser } from 'app/modules/administration/user-management/user-management.reducer';
 import { IProcesso } from 'app/shared/model/processo.model';
 import { getEntities as getProcessos } from 'app/entities/processo/processo.reducer';
 import { IUsuario } from 'app/shared/model/usuario.model';
-import { getEntity, updateEntity, createEntity, reset } from './usuario.reducer';
+import { getEntity, updateEntity, createEntity, reset, partialUpdateEntity } from './usuario.reducer';
+import { getRoles } from 'app/modules/administration/user-management/user-management.reducer';
+import { Storage } from 'react-jhipster';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import {
   Breadcrumbs,
   Button,
@@ -27,7 +31,9 @@ import {
   FormControlLabel,
   Grid,
   InputLabel,
+  ListItemText,
   MenuItem,
+  OutlinedInput,
   Select,
   TextField,
   Typography,
@@ -50,9 +56,12 @@ export const UsuarioUpdate = () => {
   const loading = useAppSelector(state => state.all4qmsmsgateway.usuario.loading);
   const updating = useAppSelector(state => state.all4qmsmsgateway.usuario.updating);
   const updateSuccess = useAppSelector(state => state.all4qmsmsgateway.usuario.updateSuccess);
+  const authorities = useAppSelector(state => state.userManagement.authorities);
+
   const [formData, setFormData] = useState({
     email: '',
-    fullName: '',
+    firstName: '',
+    lastName: '',
     profile: '',
     login: '',
     manager: false,
@@ -61,6 +70,17 @@ export const UsuarioUpdate = () => {
     role: '',
     processes: '',
   });
+  const [processes, setProcesses] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [jhUserId, setJhUserId] = useState();
+
+  const handleChangeProcesses = event => {
+    const {
+      target: { value },
+    } = event;
+
+    setProcesses(typeof value === 'string' ? value.split(',') : value);
+  };
 
   const handleClose = () => {
     navigate('/usuario' + location.search);
@@ -70,7 +90,23 @@ export const UsuarioUpdate = () => {
     if (isNew) {
       dispatch(reset());
     } else {
-      dispatch(getEntity(id));
+      dispatch(getEntity(id)).then((r: any) => {
+        dispatch(getUser(r.payload.data.user.login.toString())).then((k: any) => {
+          setFormData({
+            email: r.payload.data.email,
+            manager: r.payload.data.isGestor,
+            managerProfile: r.payload.data.gestor.id,
+            sector: r.payload.data.setor.id,
+            role: r.payload.data.funcao.id,
+            processes: r.payload.data.processos.map(p => p.nome),
+            login: r.payload.data.user.login,
+            profile: k.payload.data.authorities[0].toString(),
+            firstName: k.payload.data.firstName,
+            lastName: k.payload.data.lastName,
+          });
+          setJhUserId(r.payload.data.user.id);
+        });
+      });
     }
 
     dispatch(getFuncaos({}));
@@ -78,6 +114,7 @@ export const UsuarioUpdate = () => {
     dispatch(getSetors({}));
     dispatch(getUsers({}));
     dispatch(getProcessos({}));
+    dispatch(getRoles());
   }, []);
 
   useEffect(() => {
@@ -106,6 +143,76 @@ export const UsuarioUpdate = () => {
       dispatch(createEntity(entity));
     } else {
       dispatch(updateEntity(entity));
+    }
+  };
+
+  const saveUser = () => {
+    if (isNew) {
+      const jhipsterUser: IUser = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        activated: true,
+        authorities: [formData.profile],
+        langKey: '',
+        createdBy: Storage.session.get('firstName'),
+        login: formData.login,
+      };
+      setIsLoading(true);
+      dispatch(createUser(jhipsterUser)).then((r: any) => {
+        setIsLoading(false);
+        const jhipsterUserId = r.payload.data.id;
+        const funcao = funcaos.find(it => it.id.toString() === formData.role.toString());
+        const gestor = usuarios.find(it => it.id.toString() === formData.managerProfile.toString());
+        const setor = setors.find(it => it.id.toString() === formData.sector.toString());
+        let process = [];
+
+        processes.map(p => {
+          process.push(processos.find(it => it.nome.toString() === p.toString()));
+        });
+
+        const entity = {
+          nome: formData.firstName + ' ' + formData.lastName,
+          email: formData.email,
+          isGestor: formData.manager,
+          processos: process,
+          funcao: funcao,
+          gestor: gestor,
+          setor: setor,
+          user: {
+            login: formData.login,
+            id: jhipsterUserId,
+          },
+        };
+
+        dispatch(createEntity(entity));
+      });
+    } else {
+      const funcao = funcaos.find(it => it.id.toString() === formData.role.toString());
+      const gestor = usuarios.find(it => it.id.toString() === formData.managerProfile.toString());
+      const setor = setors.find(it => it.id.toString() === formData.sector.toString());
+      let process = [];
+
+      processes.map(p => {
+        process.push(processos.find(it => it.nome.toString() === p.toString()));
+      });
+
+      const entity = {
+        id: Number(id),
+        nome: formData.firstName + ' ' + formData.lastName,
+        email: formData.email,
+        isGestor: formData.manager,
+        processos: process,
+        funcao: funcao,
+        gestor: gestor,
+        setor: setor,
+        user: {
+          login: formData.login,
+          id: jhUserId,
+        },
+      };
+
+      dispatch(partialUpdateEntity(entity));
     }
   };
 
@@ -150,276 +257,153 @@ export const UsuarioUpdate = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
             Gerenciamento
           </Link>
-          <Typography style={{ color: '#606060' }}>Criação e edição de usuário</Typography>
+          <Typography style={{ color: '#606060' }}>{isNew ? 'Criar Usuário' : 'Editar Usuário'}</Typography>
         </Breadcrumbs>
         <h2 id="all4QmsMsGatewayApp.usuario.home.createOrEditLabel" data-cy="UsuarioCreateUpdateHeading" className="ms-5 mt-5">
-          Criar ou editar Usuario
+          {isNew ? 'Criar Usuário' : 'Editar Usuário'}
         </h2>
       </Row>
-      <Row className="ms-3 me-3 mt-3">
-        <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity}>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <ValidatedField
-                label="Email"
-                id="usuario-email"
-                name="email"
-                data-cy="email"
-                type="text"
-                validate={{
-                  required: { value: true, message: 'O campo é obrigatório.' },
-                }}
-              />
-            </Grid>
-            <Grid item xs={8}>
-              <ValidatedField
-                label="Nome"
-                id="usuario-nome"
-                name="nome"
-                data-cy="nome"
-                type="text"
-                validate={{
-                  required: { value: true, message: 'O campo é obrigatório.' },
-                }}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <ValidatedField id="usuario-funcao" name="funcao" data-cy="funcao" label="Funcao" type="select">
-                <option value="" key="0" />
-                {funcaos
-                  ? funcaos.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              {/* <FormControl fullWidth>
-                  <InputLabel>Perfil</InputLabel>
-                  <Select label="Perfil" name="profile" value={formData.profile} onChange={handleChange}>
-                    <MenuItem value="admin">Admin</MenuItem>
-                    <MenuItem value="user">Usuário</MenuItem>
-                  </Select>
-                </FormControl> */}
-            </Grid>
-            <Grid item xs={4}>
-              <FormControl fullWidth>
-                <TextField label="Login" name="login" value={formData.login} onChange={handleChange} fullWidth />
-              </FormControl>
-            </Grid>
-            <Grid item xs={1}>
-              <FormControlLabel control={<Checkbox name="manager" checked={formData.manager} onChange={handleChange} />} label="Gestor" />
-            </Grid>
-            <Grid item xs={3}>
-              <ValidatedField id="usuario-gestor" name="gestor" data-cy="gestor" label="Gestor" type="select">
-                <option value="" key="0" />
-                {usuarios
-                  ? usuarios.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              {/* <FormControl fullWidth>
-                  <InputLabel>Gestor</InputLabel>
-                  <Select name="Gestor" label="Gestor" value={formData.managerProfile} onChange={handleChange}>
-                    <MenuItem value="1">Admin</MenuItem>
-                    <MenuItem value="2">Usuário</MenuItem>
-                  </Select>
-                </FormControl> */}
-            </Grid>
-            <Grid item xs={4}>
-              <ValidatedField id="usuario-setor" name="setor" data-cy="setor" label="Setor" type="select">
-                <option value="" key="0" />
-                {setors
-                  ? setors.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              {/* <FormControl fullWidth>
-                  <InputLabel>Setor</InputLabel>
-                  <Select name="setor" label="Setor" value={formData.sector}>
-                    {
-                      setors.map(setor => (
-                        <MenuItem value={setor.id}>{setor.nome}</MenuItem>
-                      ))
-                    }
-                  </Select>
-                </FormControl> */}
-            </Grid>
-            <Grid item xs={4}>
-              <ValidatedField id="usuario-funcao" name="funcao" data-cy="funcao" label="Funcao" type="select">
-                <option value="" key="0" />
-                {funcaos
-                  ? funcaos.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-            </Grid>
-            <Grid item xs={4}>
-              <ValidatedField label="Processos" id="usuario-processos" data-cy="processos" type="select" multiple name="processos">
-                <option value="" key="0" />
-                {processos
-                  ? processos.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              {/* <FormControl fullWidth>
-                  <InputLabel>Processos</InputLabel>
-                  <Select name="processes" label="Processos" value={formData.processes} onChange={handleChange}>
-                    {processos
-                      ? processos.map(otherEntity => (
-                          <MenuItem value={otherEntity.id} key={otherEntity.id}>
-                            {otherEntity.nome}
-                          </MenuItem>
-                        ))
-                      : null}
-                  </Select>
-                </FormControl> */}
-            </Grid>
-            <Grid item xs={12} className="">
-              <Button
-                variant="contained"
-                className="me-3"
-                style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-                onClick={() => navigate('/usuario')}
-              >
-                Voltar
-              </Button>
-              <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-                Salvar
-              </Button>
-            </Grid>
-          </Grid>
-        </ValidatedForm>
-        {/* <Col md="8">
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity}>
-              {!isNew ? <ValidatedField name="id" required readOnly id="usuario-id" label="Código" validate={{ required: true }} /> : null}
-              <ValidatedField
-                label="Nome"
-                id="usuario-nome"
-                name="nome"
-                data-cy="nome"
-                type="text"
-                validate={{
-                  required: { value: true, message: 'O campo é obrigatório.' },
-                }}
-              />
-              <ValidatedField label="Email" id="usuario-email" name="email" data-cy="email" type="text" />
-              <ValidatedField label="Is Gestor" id="usuario-isGestor" name="isGestor" data-cy="isGestor" check type="checkbox" />
-              <ValidatedField
-                label="Criado Em"
-                id="usuario-criadoEm"
-                name="criadoEm"
-                data-cy="criadoEm"
-                type="datetime-local"
-                placeholder="YYYY-MM-DD HH:mm"
-              />
-              <ValidatedField
-                label="Atualizado Em"
-                id="usuario-atualizadoEm"
-                name="atualizadoEm"
-                data-cy="atualizadoEm"
-                type="datetime-local"
-                placeholder="YYYY-MM-DD HH:mm"
-              />
-              <ValidatedField id="usuario-funcao" name="funcao" data-cy="funcao" label="Funcao" type="select">
-                <option value="" key="0" />
-                {funcaos
-                  ? funcaos.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <ValidatedField id="usuario-gestor" name="gestor" data-cy="gestor" label="Gestor" type="select">
-                <option value="" key="0" />
-                {usuarios
-                  ? usuarios.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <ValidatedField id="usuario-setor" name="setor" data-cy="setor" label="Setor" type="select">
-                <option value="" key="0" />
-                {setors
-                  ? setors.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <ValidatedField id="usuario-user" name="user" data-cy="user" label="User" type="select">
-                <option value="" key="0" />
-                {users
-                  ? users.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.login}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <ValidatedField id="usuario-criadoPor" name="criadoPor" data-cy="criadoPor" label="Criado Por" type="select">
-                <option value="" key="0" />
-                {usuarios
-                  ? usuarios.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <ValidatedField id="usuario-atualizadoPor" name="atualizadoPor" data-cy="atualizadoPor" label="Atualizado Por" type="select">
-                <option value="" key="0" />
-                {usuarios
-                  ? usuarios.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <ValidatedField label="Processos" id="usuario-processos" data-cy="processos" type="select" multiple name="processos">
-                <option value="" key="0" />
-                {processos
-                  ? processos.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/usuario" replace color="info">
-                <FontAwesomeIcon icon="arrow-left" />
-                &nbsp;
-                <span className="d-none d-md-inline">Voltar</span>
-              </Button>
-              &nbsp;
-              <Button color="primary" id="save-entity" data-cy="entityCreateSaveButton" type="submit" disabled={updating}>
-                <FontAwesomeIcon icon="save" />
-                &nbsp; Salvar
-              </Button>
-            </ValidatedForm>
-          )}
-        </Col> */}
-      </Row>
+      {isLoading ? <CircularProgress></CircularProgress> : null}
+      <div style={{ display: 'flex', justifyContent: 'space-between' }} className="ms-3 me-3 mt-3">
+        <TextField
+          fullWidth
+          label="Nome"
+          name="nome"
+          value={formData.firstName}
+          onChange={e => setFormData({ ...formData, firstName: e.target.value })}
+        />
+        <TextField
+          fullWidth
+          label="Sobrenome"
+          className="ms-3"
+          name="nome"
+          value={formData.lastName}
+          onChange={e => setFormData({ ...formData, lastName: e.target.value })}
+        />
+        <TextField
+          fullWidth
+          label="Email"
+          name="email"
+          className="ms-3"
+          type="emaila"
+          value={formData.email}
+          onChange={e => setFormData({ ...formData, email: e.target.value })}
+        />
+        <TextField
+          fullWidth
+          label="Login"
+          name="login"
+          className="ms-3"
+          value={formData.login}
+          onChange={e => setFormData({ ...formData, login: e.target.value })}
+        />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }} className="ms-3 me-3 mt-3">
+        <FormControl fullWidth>
+          <InputLabel>Perfil</InputLabel>
+          <Select
+            label="Perfil"
+            name="perfil"
+            value={formData.profile}
+            onChange={e => setFormData({ ...formData, profile: e.target.value })}
+          >
+            {authorities
+              ? authorities.map(role => (
+                  <MenuItem value={role} key={role}>
+                    {role}
+                  </MenuItem>
+                ))
+              : null}
+          </Select>
+        </FormControl>
+        <FormControlLabel
+          className="ms-3"
+          control={<Checkbox checked={formData.manager} onClick={() => setFormData({ ...formData, manager: !formData.manager })} />}
+          label="Gestor"
+        />
+        <FormControl fullWidth className="ms-3">
+          <InputLabel>Gestor</InputLabel>
+          <Select
+            label="Gestor"
+            name="gestor"
+            value={formData.managerProfile}
+            onChange={e => setFormData({ ...formData, managerProfile: e.target.value })}
+          >
+            <MenuItem> - </MenuItem>
+            {usuarios
+              ? usuarios
+                  .filter(usuario => usuario.isGestor)
+                  .map(gestor => (
+                    <MenuItem value={gestor.id} key={gestor.id}>
+                      {gestor.nome}
+                    </MenuItem>
+                  ))
+              : null}
+          </Select>
+        </FormControl>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }} className="ms-3 me-3 mt-3">
+        <FormControl fullWidth>
+          <InputLabel>Setor</InputLabel>
+          <Select label="Setor" name="setor" value={formData.sector} onChange={e => setFormData({ ...formData, sector: e.target.value })}>
+            <MenuItem>-</MenuItem>
+            {setors
+              ? setors.map(setor => (
+                  <MenuItem value={setor.id} key={setor.id}>
+                    {setor.nome}
+                  </MenuItem>
+                ))
+              : null}
+          </Select>
+        </FormControl>
+        <FormControl fullWidth className="ms-3">
+          <InputLabel>Função</InputLabel>
+          <Select label="Função" name="funcao" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+            <MenuItem>-</MenuItem>
+            {funcaos
+              ? funcaos.map(funcao => (
+                  <MenuItem value={funcao.id} key={funcao.id}>
+                    {funcao.nome}
+                  </MenuItem>
+                ))
+              : null}
+          </Select>
+        </FormControl>
+        <FormControl fullWidth className="ms-3">
+          <InputLabel>Processos</InputLabel>
+          <Select
+            multiple
+            value={processes}
+            label="Processos"
+            name="processos"
+            onChange={handleChangeProcesses}
+            input={<OutlinedInput label="Processos" />}
+            renderValue={selected => selected.join(', ')}
+          >
+            {processos
+              ? processos.map(otherEntity => (
+                  <MenuItem value={otherEntity.nome} key={otherEntity.id}>
+                    <Checkbox checked={processes.indexOf(otherEntity.nome) > -1} />
+                    <ListItemText primary={otherEntity.nome}></ListItemText>
+                  </MenuItem>
+                ))
+              : null}
+          </Select>
+        </FormControl>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'end' }} className="ms-3 me-3 mt-3">
+        <Button
+          variant="contained"
+          className="me-3"
+          style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+          onClick={() => navigate('/usuario')}
+        >
+          Voltar
+        </Button>
+        <Button variant="contained" onClick={saveUser} color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+          Salvar
+        </Button>
+      </div>
     </div>
   );
 };
