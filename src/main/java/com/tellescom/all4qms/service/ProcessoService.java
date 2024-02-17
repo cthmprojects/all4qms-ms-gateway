@@ -5,6 +5,7 @@ import com.tellescom.all4qms.repository.ProcessoRepository;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.mapper.ProcessoMapper;
 import java.time.Instant;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -112,6 +113,18 @@ public class ProcessoService {
      * @return the entity.
      */
     @Transactional(readOnly = true)
+    public Mono<Processo> findOneNotDTO(Long id) {
+        log.debug("Request to get Processo : {}", id);
+        return processoRepository.findOneWithEagerRelationships(id);
+    }
+
+    /**
+     * Get one processo by id.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
+    @Transactional(readOnly = true)
     public Mono<ProcessoDTO> findOne(Long id) {
         log.debug("Request to get Processo : {}", id);
         return processoRepository.findOneWithEagerRelationships(id).map(processoMapper::toDto);
@@ -126,5 +139,10 @@ public class ProcessoService {
     public Mono<Void> delete(Long id) {
         log.debug("Request to delete Processo : {}", id);
         return processoRepository.deleteById(id);
+    }
+
+    public Flux<Processo> buscarProcessosPorIds(List<Long> processoIds) {
+        log.debug("Request to findAll Processos by idList : {}", processoIds);
+        return processoRepository.buscarProcessosPorIds(processoIds);
     }
 }

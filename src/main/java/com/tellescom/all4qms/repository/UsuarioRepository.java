@@ -67,6 +67,9 @@ public interface UsuarioRepository extends ReactiveCrudRepository<Usuario, Long>
     )
     Flux<Usuario> findByProcessos(Long id);
 
+    @Query("SELECT * FROM usuario entity WHERE entity.is_gestor is TRUE")
+    Flux<Usuario> findAllIsGestor();
+
     @Override
     <S extends Usuario> Mono<S> save(S entity);
 
