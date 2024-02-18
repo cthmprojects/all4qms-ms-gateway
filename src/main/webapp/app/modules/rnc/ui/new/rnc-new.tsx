@@ -77,38 +77,40 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
     const { value } = event.target;
     // eslint-disable-next-line default-case
     switch (value) {
-      case '1':
+      case 'NC':
         setTypeBreadcrumbLabel('Registro de Não Conformidade');
         break;
-      case '2':
+      case 'OM':
         setTypeBreadcrumbLabel('Oportunidade de Melhoria');
         break;
+      default:
+        setOriginBreadcrumbLabel(value);
     }
   };
 
   const handleOriginChange = event => {
     const { value } = event.target;
     switch (value) {
-      case 'externalAudit':
+      case 'AUDITORIA_EXTERNA':
         setOriginBreadcrumbLabel('Auditoria Externa');
         break;
-      case 'internalAudit':
+      case 'AUDITORIA_INTERNA':
         setOriginBreadcrumbLabel('Auditoria Interna');
         break;
-      case 'client':
+      case 'CLIENTE':
         setOriginBreadcrumbLabel('Cliente');
         break;
-      case 'mp':
+      case 'MATERIA_PRIMA_INSUMO':
         setOriginBreadcrumbLabel('Matéria Prima');
         break;
-      case 'endProduct':
+      case 'PRODUTO_ACABADO':
         setOriginBreadcrumbLabel('Produto Acabado');
         break;
-      case 'others':
+      case 'PROCEDIMENTO_OUTROS':
         setOriginBreadcrumbLabel('Outros');
         break;
       default:
-        setOriginBreadcrumbLabel('');
+        setOriginBreadcrumbLabel(value);
     }
   };
 
