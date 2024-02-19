@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+/* eslint-disable no-empty-pattern */
+/* eslint-disable react/jsx-key */
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Search } from '@mui/icons-material';
 import {
@@ -64,8 +67,17 @@ function a11yProps(index: number) {
 
 const RncList = ({}) => {
   const navigate = useNavigate();
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [filters, setFilters] = useState({
+    startDate: new Date(),
+    endDate: new Date(),
+    status: '',
+    processo: '',
+    tipo: '',
+  });
+  const handleApplyFilters = () => {
+    setFilters(filters);
+  };
+
   const [value, setValue] = useState(0);
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
@@ -128,113 +140,132 @@ const RncList = ({}) => {
   };
 
   const renderTable = () => {
-    if (rncs?.length > 0) {
-      return (
-        <>
-          <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
-            <Table sx={{ width: '100%' }}>
-              <TableHead>
-                <TableRow>
-                  {columns.map(col => (
-                    <TableCell align="left">{col}</TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rncs?.map(rnc => {
-                  const {
-                    acoesImediatas,
-                    aprovacaoNC,
-                    atualizadoEm,
-                    criadoEm,
-                    decisaoNC,
-                    dtNC,
-                    id,
-                    idEmissorNC,
-                    idReceptorNC,
-                    idUsuarioAtual,
-                    ncOutros,
-                    numNC,
-                    origemNC,
-                    possuiReincidencia,
-                    processoEmissor,
-                    processoNC,
-                    statusAtual,
-                    tipoNC,
-                    vinculoAuditoria,
-                    vinculoCliente,
-                    vinculoDocAnterior,
-                    vinculoProduto,
-                  } = rnc;
-
-                  const emissor = filterUser(idEmissorNC);
-                  const receptor = filterUser(idReceptorNC);
-                  const usuarioAtual = filterUser(idUsuarioAtual);
-
-                  return (
-                    <TableRow key={id}>
-                      <TableCell>{numNC}</TableCell>
-                      <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
-                      <TableCell>{emissor?.login ?? '-'}</TableCell>
-                      <TableCell> {'descrição'} </TableCell>
-                      <TableCell>{usuarioAtual?.login ?? receptor}</TableCell>
-                      <TableCell> - </TableCell>
-                      <TableCell> - </TableCell>
-                      <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
-                      <TableCell> {statusAtual} </TableCell>
-                      <TableCell> {acoesImediatas} </TableCell>
-                      <TableCell>
-                        <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
-                          <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
-                        </IconButton>
-                        <Menu
-                          id="basic-menu"
-                          anchorEl={anchorEl}
-                          open={openOptions}
-                          onClose={handleCloseOptions}
-                          MenuListProps={{
-                            'aria-labelledby': 'basic-button',
-                          }}
-                        >
-                          <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
-                            Registrar NC
-                          </MenuItem>
-                          <MenuItem disabled={rnc.statusAtual !== 'EXECUCAO'} onClick={() => goToPage('/rnc/general/implementacao')}>
-                            Plano de ação
-                          </MenuItem>
-                          <MenuItem
-                            disabled={rnc.statusAtual !== 'VERIFICACAO'}
-                            onClick={() => goToPage('/rnc/general/implementacao/validacao')}
-                          >
-                            Validação Plano de ação
-                          </MenuItem>
-                          <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
-                            Eficácia Plano de Ação
-                          </MenuItem>
-                          <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            Remover NC
-                            <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
-                          </MenuItem>
-                        </Menu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Row className="justify-content-center mt-5">
-            <Pagination count={Math.floor(rncs.length / 20) + (rncs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
-          </Row>
-        </>
-      );
-    } else {
+    if (!rncs || rncs.length === 0) {
       return (
         <Row className="justify-content-center mt-5">
           <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
         </Row>
       );
     }
+
+    const filteredRncs = rncs.filter(rnc => {
+      if (filters.status && rnc.statusAtual !== filters.status) {
+        return false;
+      }
+      if (filters.tipo && rnc.tipoNC !== filters.tipo) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (filteredRncs.length === 0) {
+      return (
+        <Row className="justify-content-center mt-5">
+          <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado após aplicar os filtros.</span>
+        </Row>
+      );
+    }
+
+    return (
+      <>
+        <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
+          <Table sx={{ width: '100%' }}>
+            <TableHead>
+              <TableRow>
+                {columns.map(col => (
+                  <TableCell align="left">{col}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredRncs.map(rnc => {
+                const {
+                  acoesImediatas,
+                  aprovacaoNC,
+                  atualizadoEm,
+                  criadoEm,
+                  decisaoNC,
+                  dtNC,
+                  id,
+                  idEmissorNC,
+                  idReceptorNC,
+                  idUsuarioAtual,
+                  ncOutros,
+                  numNC,
+                  origemNC,
+                  possuiReincidencia,
+                  processoEmissor,
+                  processoNC,
+                  statusAtual,
+                  tipoNC,
+                  vinculoAuditoria,
+                  vinculoCliente,
+                  vinculoDocAnterior,
+                  vinculoProduto,
+                } = rnc;
+
+                const emissor = filterUser(idEmissorNC);
+                const receptor = filterUser(idReceptorNC);
+                const usuarioAtual = filterUser(idUsuarioAtual);
+
+                return (
+                  <TableRow key={id}>
+                    <TableCell>{numNC}</TableCell>
+                    <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
+                    <TableCell>{emissor?.login ?? '-'}</TableCell>
+                    <TableCell> {'descrição'} </TableCell>
+                    <TableCell>{usuarioAtual?.login ?? receptor}</TableCell>
+                    <TableCell> - </TableCell>
+                    <TableCell> - </TableCell>
+                    <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
+                    <TableCell> {statusAtual} </TableCell>
+                    <TableCell> {acoesImediatas} </TableCell>
+                    <TableCell>
+                      <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
+                        <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
+                      </IconButton>
+                      <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl}
+                        open={openOptions}
+                        onClose={handleCloseOptions}
+                        MenuListProps={{
+                          'aria-labelledby': 'basic-button',
+                        }}
+                      >
+                        <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
+                          Registrar NC
+                        </MenuItem>
+                        <MenuItem disabled={rnc.statusAtual !== 'EXECUCAO'} onClick={() => goToPage('/rnc/general/implementacao')}>
+                          Plano de ação
+                        </MenuItem>
+                        <MenuItem
+                          disabled={rnc.statusAtual !== 'VERIFICACAO'}
+                          onClick={() => goToPage('/rnc/general/implementacao/validacao')}
+                        >
+                          Validação Plano de ação
+                        </MenuItem>
+                        <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
+                          Eficácia Plano de Ação
+                        </MenuItem>
+                        <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          Remover NC
+                          <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
+                        </MenuItem>
+                      </Menu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Row className="justify-content-center mt-5">
+          <Pagination count={Math.floor(filteredRncs.length / 20) + (filteredRncs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
+        </Row>
+      </>
+    );
   };
 
   return (
@@ -244,35 +275,36 @@ const RncList = ({}) => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Typography className="link">RNC / OM</Typography>
+          <Typography className="link">RNC-OM</Typography>
         </Breadcrumbs>
-        <h1 className="title">Lista RNC</h1>
+        <h1 className="title">Lista RNC-OM</h1>
+
         <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
           <Button
             variant="contained"
             className="primary-button me-2 rnc-list-form-field"
-            style={{ marginRight: '10px', height: '58px' }}
+            style={{ height: '49px' }}
             onClick={() => navigate('/rnc/new')}
           >
-            CADASTRAR RNC / OM
+            Novo Registro
           </Button>
           <FormControl className="me-2">
             <DatePicker
-              // locale='pt-BR'
-              selected={startDate}
-              onChange={date => setStartDate(date)}
-              dateFormat={'dd/MM/yyyy'}
+              selected={filters.startDate}
+              onChange={date => setFilters({ ...filters, startDate: date })}
+              dateFormat="dd/MM/yyyy"
               className="rnc-list-date-picker mt-4"
+              locale="pt-BR"
+              id="start-date-picker"
             />
-            <label htmlFor="" className="rnc-list-date-label">
-              Ínicio
+            <label htmlFor="start-date-picker" className="rnc-list-date-label">
+              Início
             </label>
           </FormControl>
           <FormControl className="me-2">
             <DatePicker
-              // locale='pt-BR'
-              selected={endDate}
-              onChange={date => setEndDate(date)}
+              selected={filters.endDate}
+              onChange={date => setFilters({ ...filters, endDate: date })}
               dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
             />
@@ -282,25 +314,43 @@ const RncList = ({}) => {
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Status</InputLabel>
-            <Select label="Selecione" name="">
+            <Select
+              label="Selecione"
+              name=""
+              value={filters.status}
+              onChange={event => setFilters({ ...filters, status: event.target.value })}
+            >
               <MenuItem value="1">Finalizado</MenuItem>
               <MenuItem value="2">Outro</MenuItem>
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Processo</InputLabel>
-            <Select label="Selecione" name="">
+            <Select
+              label="Selecione"
+              name=""
+              value={filters.processo}
+              onChange={event => setFilters({ ...filters, processo: event.target.value })}
+            >
               <MenuItem value="1">Produção</MenuItem>
               <MenuItem value="2">Outro</MenuItem>
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Tipo</InputLabel>
-            <Select label="Selecione" name="">
+            <Select label="Selecione" name="" value={filters.tipo} onChange={event => setFilters({ ...filters, tipo: event.target.value })}>
               <MenuItem value="1">NC</MenuItem>
               <MenuItem value="2">OM</MenuItem>
             </Select>
           </FormControl>
+          <Button
+            variant="contained"
+            className="primary-button me-2 rnc-list-form-field"
+            style={{ height: '49px' }}
+            onClick={handleApplyFilters}
+          >
+            Aplicar Filtros
+          </Button>
           <FormControl id="search-filter">
             <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
               Pesquisar
@@ -317,6 +367,7 @@ const RncList = ({}) => {
             />
           </FormControl>
         </div>
+
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">

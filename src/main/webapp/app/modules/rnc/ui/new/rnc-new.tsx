@@ -358,15 +358,15 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
               <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
                 Home
               </Link>
-              <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-                RNC
+              <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+                RNC-OM
               </Link>
-              <Typography style={{ color: '#606060' }}>Cadastro de RNC</Typography>
+              <Typography style={{ color: '#606060' }}>Novo registro</Typography>
               {typeBreadcrumbLabel && <Typography style={{ color: '#606060' }}>{typeBreadcrumbLabel}</Typography>}
               {originBreadcrumbLabel && <Typography style={{ color: '#606060' }}>{originBreadcrumbLabel}</Typography>}
             </Breadcrumbs>
             <h2 id="all4QmsMsGatewayApp.usuario.home.createOrEditLabel" data-cy="UsuarioCreateUpdateHeading" className="ms-5 mt-5">
-              Cadastrar RNC
+              Novo registro
             </h2>
           </Row>
           <div className="container-style">
