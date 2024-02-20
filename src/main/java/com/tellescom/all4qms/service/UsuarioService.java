@@ -199,6 +199,12 @@ public class UsuarioService {
     }
 
     public Mono<List<GestorResponse>> findAllManagers() {
+        log.debug("Busca somente por gestores");
         return usuarioRepository.findAllIsGestor().map(usuarioMapper::toGestorResponse).collectList();
+    }
+
+    public Flux<UsuarioDTO> findByProcessos(Long id) {
+        log.debug("Busca somente por usuarios do processo");
+        return usuarioRepository.findByProcessos(id).map(usuarioMapper::toDto);
     }
 }
