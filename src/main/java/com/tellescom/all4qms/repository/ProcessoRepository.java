@@ -1,6 +1,7 @@
 package com.tellescom.all4qms.repository;
 
 import com.tellescom.all4qms.domain.Processo;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.relational.core.query.Criteria;
@@ -49,6 +50,9 @@ public interface ProcessoRepository extends ReactiveCrudRepository<Processo, Lon
 
     @Override
     Mono<Void> deleteById(Long id);
+
+    @Query("SELECT * FROM processo entity WHERE entity.id IN (:processoIds)")
+    Flux<Processo> buscarProcessosPorIds(List<Long> processoIds);
 }
 
 interface ProcessoRepositoryInternal {

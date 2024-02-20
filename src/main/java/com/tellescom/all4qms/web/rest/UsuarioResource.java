@@ -1,6 +1,7 @@
 package com.tellescom.all4qms.web.rest;
 
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
+import com.tellescom.all4qms.domain.response.GestorResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.UsuarioService;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
@@ -15,6 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -179,7 +181,7 @@ public class UsuarioResource {
      */
     @GetMapping("/usuarios")
     public Mono<ResponseEntity<List<UsuarioDTO>>> getAllUsuarios(
-        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+        @ParameterObject Pageable pageable,
         ServerHttpRequest request,
         @RequestParam(required = false, defaultValue = "false") boolean eagerload
     ) {
@@ -267,5 +269,11 @@ public class UsuarioResource {
                     throw new RuntimeException(e);
                 }
             });
+    }
+
+    @GetMapping("/usuarios/gestores")
+    public Mono<List<GestorResponse>> buscarTodosGestores() {
+        log.info("Retorna todos os Gestores");
+        return usuarioService.findAllManagers();
     }
 }

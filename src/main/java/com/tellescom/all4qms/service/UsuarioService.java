@@ -1,20 +1,25 @@
 package com.tellescom.all4qms.service;
 
+import com.tellescom.all4qms.domain.Processo;
 import com.tellescom.all4qms.domain.User;
 import com.tellescom.all4qms.domain.Usuario;
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
+import com.tellescom.all4qms.domain.response.GestorResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
+import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.UsuarioMapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,16 +43,20 @@ public class UsuarioService {
 
     private final UserService userService;
 
+    private final ProcessoService processoService;
+
     public UsuarioService(
         UsuarioRepository usuarioRepository,
         UsuarioMapper usuarioMapper,
         PasswordEncoder passwordEncoder,
-        UserService userService
+        UserService userService,
+        ProcessoService processoService
     ) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
+        this.processoService = processoService;
     }
 
     /**
@@ -176,9 +185,20 @@ public class UsuarioService {
                 usuario.setIsGestor(request.isGestor());
                 usuario.setFuncaoId(request.getFuncao());
                 usuario.setSetorId(request.getSetor());
-                usuario.setProcessos(new HashSet<>());
-                usuario.setUserId(user.getId());
-                return usuarioRepository.save(usuario).map(usuarioMapper::toDto);
+                // Busca os ProcessoDTOs por IDs
+                List<Long> processoIds = request.getProcessos();
+                return processoService
+                    .buscarProcessosPorIds(processoIds)
+                    .collectList()
+                    .flatMap(processos -> {
+                        usuario.setProcessos(new HashSet<>(processos));
+                        usuario.setUserId(user.getId());
+                        return usuarioRepository.save(usuario).map(usuarioMapper::toDto);
+                    });
             });
+    }
+
+    public Mono<List<GestorResponse>> findAllManagers() {
+        return usuarioRepository.findAllIsGestor().map(usuarioMapper::toGestorResponse).collectList();
     }
 }
