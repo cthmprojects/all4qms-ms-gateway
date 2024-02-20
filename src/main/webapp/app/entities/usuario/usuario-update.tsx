@@ -70,6 +70,20 @@ export const UsuarioUpdate = () => {
     role: '',
     processes: '',
   });
+
+  const [formError, setFormError] = useState({
+    email: false,
+    firstName: false,
+    lastName: false,
+    profile: false,
+    login: false,
+    manager: false,
+    managerProfile: false,
+    sector: false,
+    role: false,
+    processes: false,
+  });
+
   const [processes, setProcesses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [jhUserId, setJhUserId] = useState();
@@ -146,7 +160,65 @@ export const UsuarioUpdate = () => {
     }
   };
 
+  const validFields = () => {
+    if (formData.firstName === '') {
+      setFormError(prevError => ({ ...prevError, firstName: true }));
+      return false;
+    }
+    if (formData.lastName === '') {
+      setFormError(prevError => ({ ...prevError, lastName: true }));
+      return false;
+    }
+    if (formData.email === '') {
+      setFormError(prevError => ({ ...prevError, email: true }));
+      return false;
+    }
+    if (formData.login === '') {
+      setFormError(prevError => ({ ...prevError, login: true }));
+      return false;
+    }
+    if (formData.profile === '') {
+      setFormError(prevError => ({ ...prevError, profile: true }));
+      return false;
+    }
+    if (formData.managerProfile === '') {
+      setFormError(prevError => ({ ...prevError, managerProfile: true }));
+      return false;
+    }
+    if (formData.sector === '') {
+      setFormError(prevError => ({ ...prevError, sector: true }));
+      return false;
+    }
+    if (formData.role === '') {
+      setFormError(prevError => ({ ...prevError, role: true }));
+      return false;
+    }
+    if (processes.length === 0) {
+      setFormError(prevError => ({ ...prevError, processes: true }));
+      return false;
+    }
+
+    setFormError({
+      email: false,
+      firstName: false,
+      lastName: false,
+      profile: false,
+      login: false,
+      manager: false,
+      managerProfile: false,
+      sector: false,
+      role: false,
+      processes: false,
+    });
+
+    return true;
+  };
+
   const saveUser = () => {
+    if (!validFields()) {
+      return;
+    }
+
     if (isNew) {
       const jhipsterUser: IUser = {
         firstName: formData.firstName,
@@ -269,6 +341,7 @@ export const UsuarioUpdate = () => {
           fullWidth
           label="Nome"
           name="nome"
+          error={formError.firstName}
           value={formData.firstName}
           onChange={e => setFormData({ ...formData, firstName: e.target.value })}
         />
@@ -277,6 +350,7 @@ export const UsuarioUpdate = () => {
           label="Sobrenome"
           className="ms-3"
           name="nome"
+          error={formError.lastName}
           value={formData.lastName}
           onChange={e => setFormData({ ...formData, lastName: e.target.value })}
         />
@@ -286,6 +360,7 @@ export const UsuarioUpdate = () => {
           name="email"
           className="ms-3"
           type="emaila"
+          error={formError.email}
           value={formData.email}
           onChange={e => setFormData({ ...formData, email: e.target.value })}
         />
@@ -294,6 +369,7 @@ export const UsuarioUpdate = () => {
           label="Login"
           name="login"
           className="ms-3"
+          error={formError.login}
           value={formData.login}
           onChange={e => setFormData({ ...formData, login: e.target.value })}
         />
@@ -304,6 +380,7 @@ export const UsuarioUpdate = () => {
           <Select
             label="Perfil"
             name="perfil"
+            error={formError.profile}
             value={formData.profile}
             onChange={e => setFormData({ ...formData, profile: e.target.value })}
           >
@@ -326,6 +403,7 @@ export const UsuarioUpdate = () => {
           <Select
             label="Gestor"
             name="gestor"
+            error={formError.managerProfile}
             value={formData.managerProfile}
             onChange={e => setFormData({ ...formData, managerProfile: e.target.value })}
           >
@@ -345,7 +423,13 @@ export const UsuarioUpdate = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between' }} className="ms-3 me-3 mt-3">
         <FormControl fullWidth>
           <InputLabel>Setor</InputLabel>
-          <Select label="Setor" name="setor" value={formData.sector} onChange={e => setFormData({ ...formData, sector: e.target.value })}>
+          <Select
+            label="Setor"
+            name="setor"
+            value={formData.sector}
+            error={formError.sector}
+            onChange={e => setFormData({ ...formData, sector: e.target.value })}
+          >
             <MenuItem>-</MenuItem>
             {setors
               ? setors.map(setor => (
@@ -358,7 +442,13 @@ export const UsuarioUpdate = () => {
         </FormControl>
         <FormControl fullWidth className="ms-3">
           <InputLabel>Função</InputLabel>
-          <Select label="Função" name="funcao" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+          <Select
+            label="Função"
+            name="funcao"
+            value={formData.role}
+            error={formError.role}
+            onChange={e => setFormData({ ...formData, role: e.target.value })}
+          >
             <MenuItem>-</MenuItem>
             {funcaos
               ? funcaos.map(funcao => (
@@ -379,6 +469,7 @@ export const UsuarioUpdate = () => {
             onChange={handleChangeProcesses}
             input={<OutlinedInput label="Processos" />}
             renderValue={selected => selected.join(', ')}
+            error={formError.processes}
           >
             {processos
               ? processos.map(otherEntity => (
