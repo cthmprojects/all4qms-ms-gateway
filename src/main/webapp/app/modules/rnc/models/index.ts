@@ -2,6 +2,7 @@ export * from './audit';
 export * from './aprovacao-nc';
 export * from './client';
 export * from './description';
+export * from './enums';
 export * from './effect-cause';
 export * from './immediate-action';
 export * from './plan';

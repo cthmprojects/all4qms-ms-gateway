@@ -76,7 +76,10 @@ export const save = createAsyncThunk('rnc/save', async (rnc: Rnc) => {
   return response;
 });
 
-export const update = createAsyncThunk('rnc/update', async ({ page, query, size, sort }: IQueryParams) => {});
+export const update = createAsyncThunk('rnc/update', async (rnc: Rnc) => {
+  const response = await axios.patch(`${apiUrl}/${rnc.id}`, rnc);
+  return response;
+});
 
 export const saveAudit = createAsyncThunk('rnc/audit/save', async (audit: RncAudit) => {
   const response = await axios.post(auditApiUrl, {
@@ -278,6 +281,14 @@ const RncSlice = createEntitySlice({
         };
       })
       .addMatcher(isFulfilled(save), (state, action) => {
+        const { data } = action.payload;
+
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
+        state.entity = data;
+      })
+      .addMatcher(isFulfilled(update), (state, action) => {
         const { data } = action.payload;
 
         state.updating = false;

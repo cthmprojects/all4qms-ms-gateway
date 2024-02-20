@@ -25,15 +25,15 @@ import {
   Typography,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
-import { Rnc } from '../../models';
-import { AprovacaoNC } from '../../models';
-import { list, getAprovacaoNC } from '../../reducers/rnc.reducer';
+import { Enums, Rnc } from '../../models';
+import { listEnums } from '../../reducers/enums.reducer';
+import { getAprovacaoNC, list } from '../../reducers/rnc.reducer';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -82,11 +82,13 @@ const RncList = ({}) => {
 
   const dispatch = useAppDispatch();
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
-  const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
+  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
 
   useEffect(() => {
-    dispatch(list({ page: 0, size: 20 }));
+    dispatch(list({ page: 0, size: 100 }));
     dispatch(getUsers({}));
+    dispatch(listEnums());
   }, []);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -307,8 +309,11 @@ const RncList = ({}) => {
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Tipo</InputLabel>
             <Select label="Selecione" name="">
-              <MenuItem value="1">NC</MenuItem>
-              <MenuItem value="2">OM</MenuItem>
+              {enums?.nonConformityTypes.map((type, index) => (
+                <MenuItem key={index} value={type.name}>
+                  {type.value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <FormControl id="search-filter">

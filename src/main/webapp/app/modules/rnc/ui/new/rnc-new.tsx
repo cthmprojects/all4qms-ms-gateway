@@ -5,15 +5,16 @@
 /* eslint-disable object-shorthand */
 import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { getUsers } from '../../../administration/user-management/user-management.reducer';
-import { Rnc } from '../../models';
-import { list, save, saveAudit, saveClient, saveDescription, saveProduct } from '../../reducers/rnc.reducer';
+import { Enums, Rnc } from '../../models';
+import { listEnums } from '../../reducers/enums.reducer';
+import { list, save, saveAudit, saveClient, saveDescription, saveProduct, update } from '../../reducers/rnc.reducer';
 import rncStore from '../../rnc-store';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
@@ -32,6 +33,7 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(list({}));
+    dispatch(listEnums());
   }, []);
 
   const navigate = useNavigate();
@@ -326,9 +328,10 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
     navigate('/rnc');
   };
 
-  const users = useAppSelector(state => state.userManagement.users);
+  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   // const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
 
   const onSaveRncDescription = () => {
@@ -336,6 +339,7 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
       const evidence = evidences[i];
 
       dispatch(saveDescription({ details: description, evidence: evidence, requirement: requirement, rncId: rnc.id }));
+      dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO' }));
     }
   };
 
@@ -482,8 +486,11 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                       handleTypeChange(event);
                     }}
                   >
-                    <MenuItem value="NC">NC</MenuItem>
-                    <MenuItem value="OM">OM</MenuItem>
+                    {enums?.nonConformityTypes.map((type, index) => (
+                      <MenuItem key={index} value={type.name}>
+                        {type.value}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
                 <FormControl className="mb-2 rnc-form-field me-2">
@@ -502,12 +509,11 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                       handleOriginChange(event);
                     }}
                   >
-                    <MenuItem value="AUDITORIA_EXTERNA">Auditoria externa</MenuItem>
-                    <MenuItem value="AUDITORIA_INTERNA">Auditoria interna</MenuItem>
-                    <MenuItem value="CLIENTE">Cliente</MenuItem>
-                    <MenuItem value="MATERIA_PRIMA_INSUMO">Matéria prima</MenuItem>
-                    <MenuItem value="PRODUTO_ACABADO">Produto acabado</MenuItem>
-                    <MenuItem value="PROCEDIMENTO_OUTROS">Outros</MenuItem>
+                    {enums?.originTypes.map((type, index) => (
+                      <MenuItem key={index} value={type.name}>
+                        {type.value}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </div>
