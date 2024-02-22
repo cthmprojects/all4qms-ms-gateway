@@ -2,6 +2,7 @@ import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
 import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
 import {
+  AprovacaoNC,
   Rnc,
   RncAudit,
   RncClient,
@@ -17,6 +18,7 @@ import {
 
 // Constants
 const apiUrl = 'services/all4qmsmsrnc/api/nao-conformidades';
+const aprovacaoNCApiUrl = 'services/all4qmsmsrnc/api/aprovacao-ncs';
 const auditApiUrl = 'services/all4qmsmsrnc/api/auditorias';
 const descriptionApiUrl = 'services/all4qmsmsrnc/api/descricao-nao-conformidades';
 const effectCauseApiUrl = 'services/all4qmsmsrnc/api/causa-efeitos';
@@ -251,6 +253,11 @@ export const saveRange = createAsyncThunk('rnc/range/save', async (range: RncRan
     idNaoConformidade: range.rncId,
   });
   return response;
+});
+
+export const getAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async (id: number) => {
+  const url: string = aprovacaoNCApiUrl + '/' + id;
+  return axios.get<AprovacaoNC>(url, { data: {}, params: {} });
 });
 
 // Slices

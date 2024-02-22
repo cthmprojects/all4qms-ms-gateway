@@ -32,7 +32,8 @@ import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
 import { Rnc } from '../../models';
-import { list } from '../../reducers/rnc.reducer';
+import { AprovacaoNC } from '../../models';
+import { list, getAprovacaoNC } from '../../reducers/rnc.reducer';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -127,6 +128,15 @@ const RncList = ({}) => {
     return users.find(user => user.id === id);
   };
 
+  const findAprovacaoNC = (id: number) => {
+    if (!id || id === 0) return null;
+
+    const ap = () => {
+      dispatch(getAprovacaoNC(id));
+    };
+    return ap;
+  };
+
   const renderTable = () => {
     if (rncs?.length > 0) {
       return (
@@ -170,7 +180,7 @@ const RncList = ({}) => {
                   const emissor = filterUser(idEmissorNC);
                   const receptor = filterUser(idReceptorNC);
                   const usuarioAtual = filterUser(idUsuarioAtual);
-
+                  const aprovacao = findAprovacaoNC(aprovacaoNC);
                   return (
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>
@@ -178,8 +188,8 @@ const RncList = ({}) => {
                       <TableCell>{emissor?.login ?? '-'}</TableCell>
                       <TableCell> {'descrição'} </TableCell>
                       <TableCell>{usuarioAtual?.login ?? receptor}</TableCell>
-                      <TableCell> - </TableCell>
-                      <TableCell> - </TableCell>
+                      <TableCell> {'-'} </TableCell>
+                      <TableCell> {'-'} </TableCell>
                       <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
                       <TableCell> {statusAtual} </TableCell>
                       <TableCell> {acoesImediatas} </TableCell>
