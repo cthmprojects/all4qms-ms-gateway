@@ -2,6 +2,7 @@ import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
 import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
 import {
+  AprovacaoNC,
   Rnc,
   RncAudit,
   RncClient,
@@ -17,6 +18,7 @@ import {
 
 // Constants
 const apiUrl = 'services/all4qmsmsrnc/api/nao-conformidades';
+const aprovacaoNCApiUrl = 'services/all4qmsmsrnc/api/aprovacao-ncs';
 const auditApiUrl = 'services/all4qmsmsrnc/api/auditorias';
 const descriptionApiUrl = 'services/all4qmsmsrnc/api/descricao-nao-conformidades';
 const effectCauseApiUrl = 'services/all4qmsmsrnc/api/causa-efeitos';
@@ -45,7 +47,7 @@ export const remove = createAsyncThunk('rnc/delete', async ({ page, query, size,
 
 export const find = createAsyncThunk('rnc/find', async ({ page, query, size, sort }: IQueryParams) => {});
 
-export const list = createAsyncThunk('rnc/list', async ({ page, query, size, sort }: IQueryParams) => {
+export const list = createAsyncThunk('rnc/list', async ({ page, size, dtIni, dtFim, statusAtual, processoNC, tipoNC }: any) => {
   const params: Array<string> = [];
 
   if (page) {
@@ -56,8 +58,24 @@ export const list = createAsyncThunk('rnc/list', async ({ page, query, size, sor
     params.push(`size=${size}`);
   }
 
-  if (sort) {
-    params.push(`sort=${sort}`);
+  if (dtIni) {
+    params.push(`startDate=${dtIni}`);
+  }
+
+  if (dtFim) {
+    params.push(`endDate=${dtFim}`);
+  }
+
+  if (statusAtual) {
+    params.push(`status=${statusAtual}`);
+  }
+
+  if (processoNC) {
+    params.push(`processo=${processoNC}`);
+  }
+
+  if (tipoNC) {
+    params.push(`tipoNC=${tipoNC}`);
   }
 
   params.push(`cacheBuster=${new Date().getTime()}`);
@@ -251,6 +269,11 @@ export const saveRange = createAsyncThunk('rnc/range/save', async (range: RncRan
     idNaoConformidade: range.rncId,
   });
   return response;
+});
+
+export const getAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async (id: number) => {
+  const url: string = aprovacaoNCApiUrl + '/' + id;
+  return axios.get<AprovacaoNC>(url, { data: {}, params: {} });
 });
 
 // Slices

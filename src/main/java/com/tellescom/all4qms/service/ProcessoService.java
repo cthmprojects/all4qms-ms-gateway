@@ -4,6 +4,7 @@ import com.tellescom.all4qms.domain.Processo;
 import com.tellescom.all4qms.repository.ProcessoRepository;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.mapper.ProcessoMapper;
+import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
 import java.time.Instant;
 import java.util.List;
 import org.slf4j.Logger;
@@ -99,8 +100,8 @@ public class ProcessoService {
 
     /**
      * Returns the number of processos available.
-     * @return the number of entities in the database.
      *
+     * @return the number of entities in the database.
      */
     public Mono<Long> countAll() {
         return processoRepository.count();
@@ -138,7 +139,22 @@ public class ProcessoService {
      */
     public Mono<Void> delete(Long id) {
         log.debug("Request to delete Processo : {}", id);
-        return processoRepository.deleteById(id);
+        return processoRepository
+            .findByProcessos(id)
+            .collectList()
+            .flatMap(usuarios -> {
+                if (usuarios.isEmpty()) {
+                    return processoRepository.deleteById(id);
+                } else {
+                    return Mono.error(
+                        new BadRequestAlertException(
+                            "Processo não pode ser removido.\n Motivo: Sendo utilizado.",
+                            "ProcessosEntity",
+                            "idUsed"
+                        )
+                    );
+                }
+            });
     }
 
     public Flux<Processo> buscarProcessosPorIds(List<Long> processoIds) {

@@ -35,7 +35,8 @@ import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
 import { Rnc } from '../../models';
-import { list } from '../../reducers/rnc.reducer';
+import { AprovacaoNC } from '../../models';
+import { list, getAprovacaoNC } from '../../reducers/rnc.reducer';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -67,23 +68,37 @@ function a11yProps(index: number) {
 
 const RncList = ({}) => {
   const navigate = useNavigate();
-  const [filters, setFilters] = useState({
-    startDate: new Date(),
-    endDate: new Date(),
-    status: '',
-    processo: '',
-    tipo: '',
-  });
-  const handleApplyFilters = () => {
-    setFilters(filters);
-  };
-
+  const [dtIni, setdtIni] = useState(new Date());
+  const [dtFim, setdtFim] = useState(new Date());
   const [value, setValue] = useState(0);
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openOptions = Boolean(anchorEl);
+
+  const [filters, setFilters] = useState({
+    dtIni: new Date(),
+    dtFim: new Date(),
+    statusAtual: '',
+    processoNC: '',
+    tipoNC: '',
+  });
+  const handleApplyFilters = () => {
+    const { dtIni, dtFim, statusAtual, processoNC, tipoNC } = filters;
+    dispatch(
+      list({
+        page: 0,
+        size: 20,
+        dtIni: dtIni.toISOString(),
+        dtFim: dtFim.toISOString(),
+        statusAtual,
+        processoNC,
+        tipoNC,
+      })
+    );
+  };
+
   const handleClickOptions = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -112,7 +127,19 @@ const RncList = ({}) => {
     }
   }, []);
 
-  const columns = ['Número', 'Emissão', 'Emissor', 'Descrição', 'Responsável', 'Verificação', 'Eficácia', 'Fechamento', 'Status', 'Ações'];
+  const columns = [
+    'Número',
+    'Emissão',
+    'Emissor',
+    'Descrição',
+    'Responsável',
+    'Prazo',
+    'Ações',
+    'Verificação',
+    'Eficácia',
+    'Fechamento',
+    'Status',
+  ];
 
   const formatDateToString = (date: Date | null | undefined) => {
     if (!date) {
@@ -139,133 +166,124 @@ const RncList = ({}) => {
     return users.find(user => user.id === id);
   };
 
+  const findAprovacaoNC = (id: number) => {
+    if (!id || id === 0) return null;
+
+    const ap = () => {
+      dispatch(getAprovacaoNC(id));
+    };
+    return ap;
+  };
+
   const renderTable = () => {
-    if (!rncs || rncs.length === 0) {
+    if (rncs?.length > 0) {
+      return (
+        <>
+          <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
+            <Table sx={{ width: '100%' }}>
+              <TableHead>
+                <TableRow>
+                  {columns.map(col => (
+                    <TableCell align="left">{col}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rncs?.map(rnc => {
+                  const {
+                    acoesImediatas,
+                    aprovacaoNC,
+                    atualizadoEm,
+                    criadoEm,
+                    decisaoNC,
+                    dtNC,
+                    id,
+                    idEmissorNC,
+                    idReceptorNC,
+                    idUsuarioAtual,
+                    ncOutros,
+                    numNC,
+                    origemNC,
+                    possuiReincidencia,
+                    processoEmissor,
+                    processoNC,
+                    statusAtual,
+                    tipoNC,
+                    vinculoAuditoria,
+                    vinculoCliente,
+                    vinculoDocAnterior,
+                    vinculoProduto,
+                  } = rnc;
+
+                  const emissor = filterUser(idEmissorNC);
+                  const receptor = filterUser(idReceptorNC);
+                  const usuarioAtual = filterUser(idUsuarioAtual);
+                  const aprovacao = findAprovacaoNC(aprovacaoNC);
+                  return (
+                    <TableRow key={id}>
+                      <TableCell>{numNC}</TableCell> {/* Número */}
+                      <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell> {/* Emissão */}
+                      <TableCell>{emissor?.login ?? '-'}</TableCell> {/* Emissor */}
+                      <TableCell> {'descrição'} </TableCell> {/* Descrição */}
+                      <TableCell>{usuarioAtual?.login ?? receptor}</TableCell> {/* Responsável */}
+                      <TableCell> - </TableCell> {/* Prazo  */}
+                      <TableCell> {acoesImediatas} </TableCell> {/*  Ações */}
+                      <TableCell> {formatDateToString(new Date(dtNC))} </TableCell> {/* Verificação */}
+                      <TableCell> - </TableCell> {/* Eficácia */}
+                      <TableCell> - </TableCell> {/* Fechamento */}
+                      <TableCell> {statusAtual} </TableCell> {/* statusAtualAtual */}
+                      <TableCell>
+                        <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
+                          <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
+                        </IconButton>
+                        <Menu
+                          id="basic-menu"
+                          anchorEl={anchorEl}
+                          open={openOptions}
+                          onClose={handleCloseOptions}
+                          MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                          }}
+                        >
+                          <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
+                            Registrar NC
+                          </MenuItem>
+                          <MenuItem disabled={rnc.statusAtual !== 'EXECUCAO'} onClick={() => goToPage('/rnc/general/implementacao')}>
+                            Plano de ação
+                          </MenuItem>
+                          <MenuItem
+                            disabled={rnc.statusAtual !== 'VERIFICACAO'}
+                            onClick={() => goToPage('/rnc/general/implementacao/validacao')}
+                          >
+                            Validação Plano de ação
+                          </MenuItem>
+                          <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
+                            Eficácia Plano de Ação
+                          </MenuItem>
+                          <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            Remover NC
+                            <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
+                          </MenuItem>
+                        </Menu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Row className="justify-content-center mt-5">
+            <Pagination count={Math.floor(rncs.length / 20) + (rncs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
+          </Row>
+        </>
+      );
+    } else {
       return (
         <Row className="justify-content-center mt-5">
           <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
         </Row>
       );
     }
-
-    const filteredRncs = rncs.filter(rnc => {
-      if (filters.status && rnc.statusAtual !== filters.status) {
-        return false;
-      }
-      if (filters.tipo && rnc.tipoNC !== filters.tipo) {
-        return false;
-      }
-
-      return true;
-    });
-
-    if (filteredRncs.length === 0) {
-      return (
-        <Row className="justify-content-center mt-5">
-          <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado após aplicar os filtros.</span>
-        </Row>
-      );
-    }
-
-    return (
-      <>
-        <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
-          <Table sx={{ width: '100%' }}>
-            <TableHead>
-              <TableRow>
-                {columns.map(col => (
-                  <TableCell align="left">{col}</TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredRncs.map(rnc => {
-                const {
-                  acoesImediatas,
-                  aprovacaoNC,
-                  atualizadoEm,
-                  criadoEm,
-                  decisaoNC,
-                  dtNC,
-                  id,
-                  idEmissorNC,
-                  idReceptorNC,
-                  idUsuarioAtual,
-                  ncOutros,
-                  numNC,
-                  origemNC,
-                  possuiReincidencia,
-                  processoEmissor,
-                  processoNC,
-                  statusAtual,
-                  tipoNC,
-                  vinculoAuditoria,
-                  vinculoCliente,
-                  vinculoDocAnterior,
-                  vinculoProduto,
-                } = rnc;
-
-                const emissor = filterUser(idEmissorNC);
-                const receptor = filterUser(idReceptorNC);
-                const usuarioAtual = filterUser(idUsuarioAtual);
-
-                return (
-                  <TableRow key={id}>
-                    <TableCell>{numNC}</TableCell>
-                    <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
-                    <TableCell>{emissor?.login ?? '-'}</TableCell>
-                    <TableCell> {'descrição'} </TableCell>
-                    <TableCell>{usuarioAtual?.login ?? receptor}</TableCell>
-                    <TableCell> - </TableCell>
-                    <TableCell> - </TableCell>
-                    <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
-                    <TableCell> {statusAtual} </TableCell>
-                    <TableCell> {acoesImediatas} </TableCell>
-                    <TableCell>
-                      <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
-                        <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
-                      </IconButton>
-                      <Menu
-                        id="basic-menu"
-                        anchorEl={anchorEl}
-                        open={openOptions}
-                        onClose={handleCloseOptions}
-                        MenuListProps={{
-                          'aria-labelledby': 'basic-button',
-                        }}
-                      >
-                        <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
-                          Registrar NC
-                        </MenuItem>
-                        <MenuItem disabled={rnc.statusAtual !== 'EXECUCAO'} onClick={() => goToPage('/rnc/general/implementacao')}>
-                          Plano de ação
-                        </MenuItem>
-                        <MenuItem
-                          disabled={rnc.statusAtual !== 'VERIFICACAO'}
-                          onClick={() => goToPage('/rnc/general/implementacao/validacao')}
-                        >
-                          Validação Plano de ação
-                        </MenuItem>
-                        <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
-                          Eficácia Plano de Ação
-                        </MenuItem>
-                        <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          Remover NC
-                          <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
-                        </MenuItem>
-                      </Menu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Row className="justify-content-center mt-5">
-          <Pagination count={Math.floor(filteredRncs.length / 20) + (filteredRncs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
-        </Row>
-      </>
-    );
   };
 
   return (
@@ -278,7 +296,6 @@ const RncList = ({}) => {
           <Typography className="link">RNC-OM</Typography>
         </Breadcrumbs>
         <h1 className="title">Lista RNC-OM</h1>
-
         <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
           <Button
             variant="contained"
@@ -290,8 +307,8 @@ const RncList = ({}) => {
           </Button>
           <FormControl className="me-2">
             <DatePicker
-              selected={filters.startDate}
-              onChange={date => setFilters({ ...filters, startDate: date })}
+              selected={filters.dtIni}
+              onChange={date => setFilters({ ...filters, dtIni: date })}
               dateFormat="dd/MM/yyyy"
               className="rnc-list-date-picker mt-4"
               locale="pt-BR"
@@ -303,8 +320,8 @@ const RncList = ({}) => {
           </FormControl>
           <FormControl className="me-2">
             <DatePicker
-              selected={filters.endDate}
-              onChange={date => setFilters({ ...filters, endDate: date })}
+              selected={filters.dtFim}
+              onChange={date => setFilters({ ...filters, dtFim: date })}
               dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
             />
@@ -317,11 +334,12 @@ const RncList = ({}) => {
             <Select
               label="Selecione"
               name=""
-              value={filters.status}
-              onChange={event => setFilters({ ...filters, status: event.target.value })}
+              value={filters.statusAtual}
+              onChange={event => setFilters({ ...filters, statusAtual: event.target.value })}
             >
-              <MenuItem value="1">Finalizado</MenuItem>
-              <MenuItem value="2">Outro</MenuItem>
+              <MenuItem value="FINALIZADO">Finalizado</MenuItem>
+              <MenuItem value="PREENCHIMENTO">Preenhimento</MenuItem>
+              <MenuItem value="OUTRO">Outro</MenuItem>
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
@@ -329,8 +347,8 @@ const RncList = ({}) => {
             <Select
               label="Selecione"
               name=""
-              value={filters.processo}
-              onChange={event => setFilters({ ...filters, processo: event.target.value })}
+              value={filters.processoNC}
+              onChange={event => setFilters({ ...filters, processoNC: event.target.value })}
             >
               <MenuItem value="1">Produção</MenuItem>
               <MenuItem value="2">Outro</MenuItem>
@@ -338,9 +356,14 @@ const RncList = ({}) => {
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Tipo</InputLabel>
-            <Select label="Selecione" name="" value={filters.tipo} onChange={event => setFilters({ ...filters, tipo: event.target.value })}>
-              <MenuItem value="1">NC</MenuItem>
-              <MenuItem value="2">OM</MenuItem>
+            <Select
+              label="Selecione"
+              name=""
+              value={filters.tipoNC}
+              onChange={event => setFilters({ ...filters, tipoNC: event.target.value })}
+            >
+              <MenuItem value="NC">NC</MenuItem>
+              <MenuItem value="OM">OM</MenuItem>
             </Select>
           </FormControl>
           <Button
