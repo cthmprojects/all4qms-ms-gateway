@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
@@ -64,7 +64,7 @@ function a11yProps(index: number) {
 }
 
 const RncList = ({}) => {
-  const navigate = useNavigate();
+  // Local states
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
@@ -72,7 +72,11 @@ const RncList = ({}) => {
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [page, setPage] = useState<number>(1);
+
   const openOptions = Boolean(anchorEl);
+  const navigate = useNavigate();
+
   const handleClickOptions = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -80,28 +84,28 @@ const RncList = ({}) => {
     setAnchorEl(null);
   };
 
+  // Dispatcher
   const dispatch = useAppDispatch();
+
+  // Reducer states
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
+  const totalCount: number = useAppSelector(state => state.all4qmsmsgateway.rnc.totalItems);
+  const loading: boolean = useAppSelector(state => state.all4qmsmsgateway.rnc.loading);
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
 
   useEffect(() => {
-    dispatch(list({ page: 0, size: 100 }));
     dispatch(getUsers({}));
     dispatch(listEnums());
   }, []);
 
+  useEffect(() => {
+    dispatch(list({ page: page - 1, size: 20 }));
+  }, [page]);
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-
-  useEffect(() => {
-    if (rncs?.length > 0) {
-      localStorage.setItem('rnc', rncs.length.toString());
-    } else {
-      localStorage.setItem('rnc', '0');
-    }
-  }, []);
 
   const columns = ['Número', 'Emissão', 'Emissor', 'Descrição', 'Responsável', 'Verificação', 'Eficácia', 'Fechamento', 'Status', 'Ações'];
 
@@ -139,7 +143,19 @@ const RncList = ({}) => {
     return ap;
   };
 
+  const onPageChanged = (event: React.ChangeEvent<unknown>, page: number) => {
+    setPage(page);
+  };
+
   const renderTable = () => {
+    if (loading) {
+      return (
+        <Row className="justify-content-center mt-5">
+          <span style={{ color: '#7d7d7d' }}>Carregando...</span>
+        </Row>
+      );
+    }
+
     if (rncs?.length > 0) {
       return (
         <>
@@ -236,7 +252,12 @@ const RncList = ({}) => {
             </Table>
           </TableContainer>
           <Row className="justify-content-center mt-5">
-            <Pagination count={Math.floor(rncs.length / 20) + (rncs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
+            <Pagination
+              count={Math.floor(totalCount / 20) + (totalCount % 20 > 0 ? 1 : 0)}
+              onChange={onPageChanged}
+              page={page}
+              style={{ width: '370px' }}
+            />
           </Row>
         </>
       );

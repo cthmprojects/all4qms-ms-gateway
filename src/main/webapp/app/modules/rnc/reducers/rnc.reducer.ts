@@ -1,4 +1,4 @@
-import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
+import { createAsyncThunk, isFulfilled, isPending } from '@reduxjs/toolkit';
 import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
 import {
@@ -270,6 +270,9 @@ const RncSlice = createEntitySlice({
   initialState,
   extraReducers(builder) {
     builder
+      .addMatcher(isPending(list), (state, action) => {
+        state.loading = true;
+      })
       .addMatcher(isFulfilled(list), (state, action) => {
         const { data, headers } = action.payload;
 
