@@ -81,7 +81,7 @@ const RncList = ({}) => {
     dtIni: new Date(),
     dtFim: new Date(),
     statusAtual: '',
-    processoNC: '',
+    processoNC: 0,
     tipoNC: '',
   });
   const handleApplyFilters = () => {
@@ -111,7 +111,7 @@ const RncList = ({}) => {
   const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
 
   useEffect(() => {
-    dispatch(list({ page: 0, size: 20 }));
+    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
     dispatch(getUsers({}));
   }, []);
 
@@ -305,6 +305,7 @@ const RncList = ({}) => {
           >
             Novo Registro
           </Button>
+
           <FormControl className="me-2">
             <DatePicker
               selected={filters.dtIni}
@@ -335,7 +336,7 @@ const RncList = ({}) => {
               label="Selecione"
               name=""
               value={filters.statusAtual}
-              onChange={event => setFilters({ ...filters, statusAtual: event.target.value })}
+              onChange={event => setFilters({ ...filters, statusAtual: event.target.value as string })}
             >
               <MenuItem value="FINALIZADO">Finalizado</MenuItem>
               <MenuItem value="PREENCHIMENTO">Preenhimento</MenuItem>
@@ -348,10 +349,10 @@ const RncList = ({}) => {
               label="Selecione"
               name=""
               value={filters.processoNC}
-              onChange={event => setFilters({ ...filters, processoNC: event.target.value })}
+              onChange={event => setFilters({ ...filters, processoNC: parseInt(event.target.value as string, 10) })}
             >
-              <MenuItem value="1">Produção</MenuItem>
-              <MenuItem value="2">Outro</MenuItem>
+              <MenuItem value={1}>Produção</MenuItem>
+              <MenuItem value={2}>Outro</MenuItem>
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
@@ -366,6 +367,7 @@ const RncList = ({}) => {
               <MenuItem value="OM">OM</MenuItem>
             </Select>
           </FormControl>
+
           <Button
             variant="contained"
             className="primary-button me-2 rnc-list-form-field"

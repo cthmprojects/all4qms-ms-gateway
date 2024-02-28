@@ -47,44 +47,54 @@ export const remove = createAsyncThunk('rnc/delete', async ({ page, query, size,
 
 export const find = createAsyncThunk('rnc/find', async ({ page, query, size, sort }: IQueryParams) => {});
 
-export const list = createAsyncThunk('rnc/list', async ({ page, size, dtIni, dtFim, statusAtual, processoNC, tipoNC }: any) => {
-  const params: Array<string> = [];
+interface ListParams {
+  statusAtual?: string;
+  processoNC?: number;
+  tipoNC?: string;
+  dtIni?: string;
+  dtFim?: string;
+  page?: number;
+  size?: number;
+}
 
-  if (page) {
-    params.push(`page=${page}`);
-  }
-
-  if (size) {
-    params.push(`size=${size}`);
-  }
-
-  if (dtIni) {
-    params.push(`startDate=${dtIni}`);
-  }
-
-  if (dtFim) {
-    params.push(`endDate=${dtFim}`);
-  }
+export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
+  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size } = params;
+  const queryParams: string[] = [];
 
   if (statusAtual) {
-    params.push(`status=${statusAtual}`);
+    queryParams.push(`statusAtual=${statusAtual}`);
   }
 
   if (processoNC) {
-    params.push(`processo=${processoNC}`);
+    queryParams.push(`processoNC=${processoNC}`);
   }
 
   if (tipoNC) {
-    params.push(`tipoNC=${tipoNC}`);
+    queryParams.push(`tipoNC=${tipoNC}`);
   }
 
-  params.push(`cacheBuster=${new Date().getTime()}`);
+  if (dtIni) {
+    queryParams.push(`dtIni=${dtIni}`);
+  }
 
-  const queryParams: string = params.join('&');
+  if (dtFim) {
+    queryParams.push(`dtFim=${dtFim}`);
+  }
 
-  const url: string = `${apiUrl}${queryParams && queryParams.length > 0 ? `?${queryParams}` : ''}`;
+  if (page !== undefined) {
+    queryParams.push(`page=${page}`);
+  }
 
-  return axios.get<Array<Rnc>>(url, { data: {}, params: {} });
+  if (size !== undefined) {
+    queryParams.push(`size=${size}`);
+  }
+
+  queryParams.push(`cacheBuster=${new Date().getTime()}`);
+
+  const queryString = queryParams.join('&');
+  const url = `${apiUrl}${queryString ? `?${queryString}` : ''}`;
+
+  return axios.get<Array<Rnc>>(url);
 });
 
 export const save = createAsyncThunk('rnc/save', async (rnc: Rnc) => {
