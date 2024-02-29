@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+/* eslint-disable no-empty-pattern */
+/* eslint-disable react/jsx-key */
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Search } from '@mui/icons-material';
 import {
@@ -65,14 +68,37 @@ function a11yProps(index: number) {
 
 const RncList = ({}) => {
   const navigate = useNavigate();
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [dtIni, setdtIni] = useState(new Date());
+  const [dtFim, setdtFim] = useState(new Date());
   const [value, setValue] = useState(0);
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openOptions = Boolean(anchorEl);
+
+  const [filters, setFilters] = useState({
+    dtIni: new Date(),
+    dtFim: new Date(),
+    statusAtual: '',
+    processoNC: 0,
+    tipoNC: '',
+  });
+  const handleApplyFilters = () => {
+    const { dtIni, dtFim, statusAtual, processoNC, tipoNC } = filters;
+    dispatch(
+      list({
+        page: 0,
+        size: 20,
+        dtIni: dtIni.toISOString(),
+        dtFim: dtFim.toISOString(),
+        statusAtual,
+        processoNC,
+        tipoNC,
+      })
+    );
+  };
+
   const handleClickOptions = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -85,7 +111,7 @@ const RncList = ({}) => {
   const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
 
   useEffect(() => {
-    dispatch(list({ page: 0, size: 20 }));
+    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
     dispatch(getUsers({}));
   }, []);
 
@@ -105,7 +131,23 @@ const RncList = ({}) => {
     dispatch(listAprovacaoNC({}));
   }, [rncs]);
 
-  const columns = ['Número', 'Emissão', 'Emissor', 'Descrição', 'Responsável', 'Verificação', 'Eficácia', 'Fechamento', 'Status', 'Ações'];
+  useEffect(() => {
+    dispatch(listAprovacaoNC({}));
+  }, [rncs]);
+
+  const columns = [
+    'Número',
+    'Emissão',
+    'Emissor',
+    'Descrição',
+    'Responsável',
+    'Prazo',
+    'Ações',
+    'Verificação',
+    'Eficácia',
+    'Fechamento',
+    'Status',
+  ];
 
   const formatDateToString = (date: Date | null | undefined) => {
     if (!date) {
@@ -249,35 +291,36 @@ const RncList = ({}) => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Typography className="link">RNC / OM</Typography>
+          <Typography className="link">RNC-OM</Typography>
         </Breadcrumbs>
-        <h1 className="title">Lista RNC</h1>
+        <h1 className="title">Lista RNC-OM</h1>
         <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
           <Button
             variant="contained"
             className="primary-button me-2 rnc-list-form-field"
-            style={{ marginRight: '10px', height: '58px' }}
+            style={{ height: '49px' }}
             onClick={() => navigate('/rnc/new')}
           >
-            CADASTRAR RNC / OM
+            Novo Registro
           </Button>
+
           <FormControl className="me-2">
             <DatePicker
-              // locale='pt-BR'
-              selected={startDate}
-              onChange={date => setStartDate(date)}
-              dateFormat={'dd/MM/yyyy'}
+              selected={filters.dtIni}
+              onChange={date => setFilters({ ...filters, dtIni: date })}
+              dateFormat="dd/MM/yyyy"
               className="rnc-list-date-picker mt-4"
+              locale="pt-BR"
+              id="start-date-picker"
             />
-            <label htmlFor="" className="rnc-list-date-label">
-              Ínicio
+            <label htmlFor="start-date-picker" className="rnc-list-date-label">
+              Início
             </label>
           </FormControl>
           <FormControl className="me-2">
             <DatePicker
-              // locale='pt-BR'
-              selected={endDate}
-              onChange={date => setEndDate(date)}
+              selected={filters.dtFim}
+              onChange={date => setFilters({ ...filters, dtFim: date })}
               dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
             />
@@ -287,25 +330,50 @@ const RncList = ({}) => {
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Status</InputLabel>
-            <Select label="Selecione" name="">
-              <MenuItem value="1">Finalizado</MenuItem>
-              <MenuItem value="2">Outro</MenuItem>
+            <Select
+              label="Selecione"
+              name=""
+              value={filters.statusAtual}
+              onChange={event => setFilters({ ...filters, statusAtual: event.target.value as string })}
+            >
+              <MenuItem value="FINALIZADO">Finalizado</MenuItem>
+              <MenuItem value="PREENCHIMENTO">Preenhimento</MenuItem>
+              <MenuItem value="OUTRO">Outro</MenuItem>
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Processo</InputLabel>
-            <Select label="Selecione" name="">
-              <MenuItem value="1">Produção</MenuItem>
-              <MenuItem value="2">Outro</MenuItem>
+            <Select
+              label="Selecione"
+              name=""
+              value={filters.processoNC}
+              onChange={event => setFilters({ ...filters, processoNC: parseInt(event.target.value as string, 10) })}
+            >
+              <MenuItem value={1}>Produção</MenuItem>
+              <MenuItem value={2}>Outro</MenuItem>
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
             <InputLabel>Tipo</InputLabel>
-            <Select label="Selecione" name="">
-              <MenuItem value="1">NC</MenuItem>
-              <MenuItem value="2">OM</MenuItem>
+            <Select
+              label="Selecione"
+              name=""
+              value={filters.tipoNC}
+              onChange={event => setFilters({ ...filters, tipoNC: event.target.value })}
+            >
+              <MenuItem value="NC">NC</MenuItem>
+              <MenuItem value="OM">OM</MenuItem>
             </Select>
           </FormControl>
+
+          <Button
+            variant="contained"
+            className="primary-button me-2 rnc-list-form-field"
+            style={{ height: '49px' }}
+            onClick={handleApplyFilters}
+          >
+            Aplicar Filtros
+          </Button>
           <FormControl id="search-filter">
             <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
               Pesquisar
@@ -322,6 +390,7 @@ const RncList = ({}) => {
             />
           </FormControl>
         </div>
+
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">

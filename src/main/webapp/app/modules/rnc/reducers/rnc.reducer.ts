@@ -47,28 +47,54 @@ export const remove = createAsyncThunk('rnc/delete', async ({ page, query, size,
 
 export const find = createAsyncThunk('rnc/find', async ({ page, query, size, sort }: IQueryParams) => {});
 
-export const list = createAsyncThunk('rnc/list', async ({ page, query, size, sort }: IQueryParams) => {
-  const params: Array<string> = [];
+interface ListParams {
+  statusAtual?: string;
+  processoNC?: number;
+  tipoNC?: string;
+  dtIni?: string;
+  dtFim?: string;
+  page?: number;
+  size?: number;
+}
 
-  if (page) {
-    params.push(`page=${page}`);
+export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
+  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size } = params;
+  const queryParams: string[] = [];
+
+  if (statusAtual) {
+    queryParams.push(`statusAtual=${statusAtual}`);
   }
 
-  if (size) {
-    params.push(`size=${size}`);
+  if (processoNC) {
+    queryParams.push(`processoNC=${processoNC}`);
   }
 
-  if (sort) {
-    params.push(`sort=${sort}`);
+  if (tipoNC) {
+    queryParams.push(`tipoNC=${tipoNC}`);
   }
 
-  params.push(`cacheBuster=${new Date().getTime()}`);
+  if (dtIni) {
+    queryParams.push(`dtIni=${dtIni}`);
+  }
 
-  const queryParams: string = params.join('&');
+  if (dtFim) {
+    queryParams.push(`dtFim=${dtFim}`);
+  }
 
-  const url: string = `${apiUrl}${queryParams && queryParams.length > 0 ? `?${queryParams}` : ''}`;
+  if (page !== undefined) {
+    queryParams.push(`page=${page}`);
+  }
 
-  return axios.get<Array<Rnc>>(url, { data: {}, params: {} });
+  if (size !== undefined) {
+    queryParams.push(`size=${size}`);
+  }
+
+  queryParams.push(`cacheBuster=${new Date().getTime()}`);
+
+  const queryString = queryParams.join('&');
+  const url = `${apiUrl}${queryString ? `?${queryString}` : ''}`;
+
+  return axios.get<Array<Rnc>>(url);
 });
 
 export const listAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async ({ page, query, size, sort }: IQueryParams) => {
