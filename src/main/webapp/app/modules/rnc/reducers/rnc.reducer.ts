@@ -97,6 +97,30 @@ export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
   return axios.get<Array<Rnc>>(url);
 });
 
+export const listAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async ({ page, query, size, sort }: IQueryParams) => {
+  const params: Array<string> = [];
+
+  if (page) {
+    params.push(`page=${page}`);
+  }
+
+  if (size) {
+    params.push(`size=${size}`);
+  }
+
+  if (sort) {
+    params.push(`sort=${sort}`);
+  }
+
+  params.push(`cacheBuster=${new Date().getTime()}`);
+
+  const queryParams: string = params.join('&');
+
+  const url: string = `${apiUrl}${queryParams && queryParams.length > 0 ? `?${queryParams}` : ''}`;
+
+  return axios.get<Array<AprovacaoNC>>(url, { data: {}, params: {} });
+});
+
 export const save = createAsyncThunk('rnc/save', async (rnc: Rnc) => {
   const response = await axios.post(apiUrl, rnc);
   return response;
@@ -281,11 +305,6 @@ export const saveRange = createAsyncThunk('rnc/range/save', async (range: RncRan
   return response;
 });
 
-export const getAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async (id: number) => {
-  const url: string = aprovacaoNCApiUrl + '/' + id;
-  return axios.get<AprovacaoNC>(url, { data: {}, params: {} });
-});
-
 // Slices
 
 const RncSlice = createEntitySlice({
@@ -370,6 +389,19 @@ const RncSlice = createEntitySlice({
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
+      })
+      .addMatcher(isFulfilled(listAprovacaoNC), (state, action) => {
+        const { data } = action.payload;
+
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
+
+        for (let i = 0; i < state.entities.length; i++) {
+          const currentRNC = state.entities[i];
+          const aprovacoes = data.filter(a => a.id === currentRNC.aprovacaoNC);
+          currentRNC.aprovacao = aprovacoes.length > 0 ? aprovacoes[0] : null;
+        }
       });
   },
 });

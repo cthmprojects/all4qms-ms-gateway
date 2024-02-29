@@ -36,7 +36,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
 import { Rnc } from '../../models';
 import { AprovacaoNC } from '../../models';
-import { list, getAprovacaoNC } from '../../reducers/rnc.reducer';
+import { list, listAprovacaoNC } from '../../reducers/rnc.reducer';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -127,6 +127,14 @@ const RncList = ({}) => {
     }
   }, []);
 
+  useEffect(() => {
+    dispatch(listAprovacaoNC({}));
+  }, [rncs]);
+
+  useEffect(() => {
+    dispatch(listAprovacaoNC({}));
+  }, [rncs]);
+
   const columns = [
     'Número',
     'Emissão',
@@ -164,15 +172,6 @@ const RncList = ({}) => {
     }
 
     return users.find(user => user.id === id);
-  };
-
-  const findAprovacaoNC = (id: number) => {
-    if (!id || id === 0) return null;
-
-    const ap = () => {
-      dispatch(getAprovacaoNC(id));
-    };
-    return ap;
   };
 
   const renderTable = () => {
@@ -213,25 +212,24 @@ const RncList = ({}) => {
                     vinculoCliente,
                     vinculoDocAnterior,
                     vinculoProduto,
+                    aprovacao,
                   } = rnc;
 
                   const emissor = filterUser(idEmissorNC);
                   const receptor = filterUser(idReceptorNC);
                   const usuarioAtual = filterUser(idUsuarioAtual);
-                  const aprovacao = findAprovacaoNC(aprovacaoNC);
                   return (
                     <TableRow key={id}>
-                      <TableCell>{numNC}</TableCell> {/* Número */}
-                      <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell> {/* Emissão */}
-                      <TableCell>{emissor?.login ?? '-'}</TableCell> {/* Emissor */}
-                      <TableCell> {'descrição'} </TableCell> {/* Descrição */}
-                      <TableCell>{usuarioAtual?.login ?? receptor}</TableCell> {/* Responsável */}
-                      <TableCell> - </TableCell> {/* Prazo  */}
-                      <TableCell> {acoesImediatas} </TableCell> {/*  Ações */}
-                      <TableCell> {formatDateToString(new Date(dtNC))} </TableCell> {/* Verificação */}
-                      <TableCell> - </TableCell> {/* Eficácia */}
-                      <TableCell> - </TableCell> {/* Fechamento */}
-                      <TableCell> {statusAtual} </TableCell> {/* statusAtualAtual */}
+                      <TableCell>{numNC}</TableCell>
+                      <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
+                      <TableCell>{emissor?.login ?? '-'}</TableCell>
+                      <TableCell> {'descrição'} </TableCell>
+                      <TableCell>{usuarioAtual?.login ?? receptor}</TableCell>
+                      <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
+                      <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell>
+                      <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
+                      <TableCell> {statusAtual} </TableCell>
+                      <TableCell> {acoesImediatas} </TableCell>
                       <TableCell>
                         <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
                           <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
