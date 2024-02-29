@@ -59,6 +59,11 @@ public interface ProcessoRepository extends ReactiveCrudRepository<Processo, Lon
         "SELECT entity.* FROM usuario entity JOIN rel_usuario__processos joinTable ON entity.id = joinTable.processos_id WHERE joinTable.processos_id = :id"
     )
     Flux<Usuario> findByProcessos(Long id);
+
+    @Query(
+        "SELECT processo.* FROM processo JOIN rel_usuario__processos joinTable ON processo.id = joinTable.processos_id WHERE joinTable.usuario_id = :id"
+    )
+    Flux<Processo> findAllByUsuarioId(Long id);
 }
 
 interface ProcessoRepositoryInternal {

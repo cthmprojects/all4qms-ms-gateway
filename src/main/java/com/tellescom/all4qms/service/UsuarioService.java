@@ -140,7 +140,18 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public Mono<UsuarioDTO> findOne(Long id) {
         log.debug("Request to get Usuario : {}", id);
-        return usuarioRepository.findOneWithEagerRelationships(id).map(usuarioMapper::toDto);
+        return processoService
+            .buscarProcessosPorIdUsuario(id)
+            .collect(Collectors.toSet())
+            .flatMap(processos ->
+                usuarioRepository
+                    .findById(id)
+                    .map(usuario -> {
+                        UsuarioDTO usuarioDTO = usuarioMapper.toDto(usuario);
+                        usuarioDTO.setProcessos(processos);
+                        return usuarioDTO;
+                    })
+            );
     }
 
     /**
