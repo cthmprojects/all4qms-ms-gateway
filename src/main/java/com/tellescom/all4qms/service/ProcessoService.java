@@ -161,4 +161,9 @@ public class ProcessoService {
         log.debug("Request to findAll Processos by idList : {}", processoIds);
         return processoRepository.buscarProcessosPorIds(processoIds);
     }
+
+    public Flux<ProcessoDTO> buscarProcessosPorIdUsuario(Long id) {
+        log.debug("Request to findAll Processos by usuario id : {}", id);
+        return processoRepository.findAllByUsuarioId(id).map(processoMapper::toDto);
+    }
 }
