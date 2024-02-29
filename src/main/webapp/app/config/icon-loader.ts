@@ -41,6 +41,10 @@ import { faFileCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { faFileCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { faChartLine } from '@fortawesome/free-solid-svg-icons';
 import { faFileSignature } from '@fortawesome/free-solid-svg-icons';
+import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faFile } from '@fortawesome/free-solid-svg-icons';
 
 export const loadIcons = () => {
   library.add(
@@ -86,6 +90,10 @@ export const loadIcons = () => {
     faChartLine,
     faFileSignature,
     faTrash,
-    faEllipsisVertical
+    faEllipsisVertical,
+    faCloudArrowUp,
+    faFolderOpen,
+    faXmark,
+    faFile
   );
 };

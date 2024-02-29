@@ -32,7 +32,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search } from '@mui/icons-material';
 
 import './infodoc.css';
-import infodocStore, { INFODOC } from '../infodoc-store';
+import infodocStore, { INFODOC } from '../../infodoc-store';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -163,7 +163,8 @@ const InfodocList = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Typography className="link">Informações Documentais</Typography>
+          <Typography className="link">Informação Documentada</Typography>
+          <Typography className="link">Consultar Documentos</Typography>
         </Breadcrumbs>
         <h1 className="title">Lista Informações Documentais</h1>
         <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
@@ -171,7 +172,7 @@ const InfodocList = () => {
             variant="contained"
             className="primary-button me-2 infodoc-list-form-field"
             style={{ marginRight: '10px', height: '58px' }}
-            onClick={() => navigate('')}
+            onClick={() => navigate('/infodoc/upload-file')}
           >
             NOVO DOCUMENTO
           </Button>
