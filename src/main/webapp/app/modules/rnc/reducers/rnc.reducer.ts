@@ -47,7 +47,57 @@ export const remove = createAsyncThunk('rnc/delete', async ({ page, query, size,
 
 export const find = createAsyncThunk('rnc/find', async ({ page, query, size, sort }: IQueryParams) => {});
 
-export const list = createAsyncThunk('rnc/list', async ({ page, query, size, sort }: IQueryParams) => {
+interface ListParams {
+  statusAtual?: string;
+  processoNC?: number;
+  tipoNC?: string;
+  dtIni?: string;
+  dtFim?: string;
+  page?: number;
+  size?: number;
+}
+
+export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
+  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size } = params;
+  const queryParams: string[] = [];
+
+  if (statusAtual) {
+    queryParams.push(`statusAtual=${statusAtual}`);
+  }
+
+  if (processoNC) {
+    queryParams.push(`processoNC=${processoNC}`);
+  }
+
+  if (tipoNC) {
+    queryParams.push(`tipoNC=${tipoNC}`);
+  }
+
+  if (dtIni) {
+    queryParams.push(`dtIni=${dtIni}`);
+  }
+
+  if (dtFim) {
+    queryParams.push(`dtFim=${dtFim}`);
+  }
+
+  if (page !== undefined) {
+    queryParams.push(`page=${page}`);
+  }
+
+  if (size !== undefined) {
+    queryParams.push(`size=${size}`);
+  }
+
+  queryParams.push(`cacheBuster=${new Date().getTime()}`);
+
+  const queryString = queryParams.join('&');
+  const url = `${apiUrl}${queryString ? `?${queryString}` : ''}`;
+
+  return axios.get<Array<Rnc>>(url);
+});
+
+export const listAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async ({ page, query, size, sort }: IQueryParams) => {
   const params: Array<string> = [];
 
   if (page) {
@@ -68,7 +118,7 @@ export const list = createAsyncThunk('rnc/list', async ({ page, query, size, sor
 
   const url: string = `${apiUrl}${queryParams && queryParams.length > 0 ? `?${queryParams}` : ''}`;
 
-  return axios.get<Array<Rnc>>(url, { data: {}, params: {} });
+  return axios.get<Array<AprovacaoNC>>(url, { data: {}, params: {} });
 });
 
 export const save = createAsyncThunk('rnc/save', async (rnc: Rnc) => {
@@ -258,11 +308,6 @@ export const saveRange = createAsyncThunk('rnc/range/save', async (range: RncRan
   return response;
 });
 
-export const getAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async (id: number) => {
-  const url: string = aprovacaoNCApiUrl + '/' + id;
-  return axios.get<AprovacaoNC>(url, { data: {}, params: {} });
-});
-
 // Slices
 
 const RncSlice = createEntitySlice({
@@ -358,6 +403,19 @@ const RncSlice = createEntitySlice({
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
+      })
+      .addMatcher(isFulfilled(listAprovacaoNC), (state, action) => {
+        const { data } = action.payload;
+
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
+
+        for (let i = 0; i < state.entities.length; i++) {
+          const currentRNC = state.entities[i];
+          const aprovacoes = data.filter(a => a.id === currentRNC.aprovacaoNC);
+          currentRNC.aprovacao = aprovacoes.length > 0 ? aprovacoes[0] : null;
+        }
       });
   },
 });

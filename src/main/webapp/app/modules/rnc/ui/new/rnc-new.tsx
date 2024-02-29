@@ -79,38 +79,40 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
     const { value } = event.target;
     // eslint-disable-next-line default-case
     switch (value) {
-      case '1':
+      case 'NC':
         setTypeBreadcrumbLabel('Registro de Não Conformidade');
         break;
-      case '2':
+      case 'OM':
         setTypeBreadcrumbLabel('Oportunidade de Melhoria');
         break;
+      default:
+        setOriginBreadcrumbLabel(value);
     }
   };
 
   const handleOriginChange = event => {
     const { value } = event.target;
     switch (value) {
-      case 'externalAudit':
+      case 'AUDITORIA_EXTERNA':
         setOriginBreadcrumbLabel('Auditoria Externa');
         break;
-      case 'internalAudit':
+      case 'AUDITORIA_INTERNA':
         setOriginBreadcrumbLabel('Auditoria Interna');
         break;
-      case 'client':
+      case 'CLIENTE':
         setOriginBreadcrumbLabel('Cliente');
         break;
-      case 'mp':
+      case 'MATERIA_PRIMA_INSUMO':
         setOriginBreadcrumbLabel('Matéria Prima');
         break;
-      case 'endProduct':
+      case 'PRODUTO_ACABADO':
         setOriginBreadcrumbLabel('Produto Acabado');
         break;
-      case 'others':
+      case 'PROCEDIMENTO_OUTROS':
         setOriginBreadcrumbLabel('Outros');
         break;
       default:
-        setOriginBreadcrumbLabel('');
+        setOriginBreadcrumbLabel(value);
     }
   };
 
@@ -360,15 +362,15 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
               <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
                 Home
               </Link>
-              <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-                RNC
+              <Link to={'/rnc'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+                RNC-OM
               </Link>
-              <Typography style={{ color: '#606060' }}>Cadastro de RNC</Typography>
+              <Typography style={{ color: '#606060' }}>Novo registro</Typography>
               {typeBreadcrumbLabel && <Typography style={{ color: '#606060' }}>{typeBreadcrumbLabel}</Typography>}
               {originBreadcrumbLabel && <Typography style={{ color: '#606060' }}>{originBreadcrumbLabel}</Typography>}
             </Breadcrumbs>
             <h2 id="all4QmsMsGatewayApp.usuario.home.createOrEditLabel" data-cy="UsuarioCreateUpdateHeading" className="ms-5 mt-5">
-              Cadastrar RNC
+              Novo registro
             </h2>
           </Row>
           <div className="container-style">

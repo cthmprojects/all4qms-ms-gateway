@@ -1,3 +1,5 @@
+import { AprovacaoNC } from './aprovacao-nc';
+
 export type Rnc = {
   acoesImediatas?: string;
   aprovacaoNC?: number;
@@ -21,6 +23,7 @@ export type Rnc = {
   vinculoCliente?: number;
   vinculoDocAnterior?: number;
   vinculoProduto?: number;
+  aprovacao?: AprovacaoNC;
 };
 
 export type RNC = {
