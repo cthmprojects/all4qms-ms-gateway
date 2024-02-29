@@ -107,10 +107,26 @@ public class UsuarioService {
      * @param pageable the pagination information.
      * @return the list of entities.
      */
+    //    @Transactional(readOnly = true)
+    //    public Flux<UsuarioDTO> findAll(Pageable pageable) {
+    //        log.debug("Request to get all Usuarios");
+    //        return usuarioRepository.findAllBy(pageable).map(usuarioMapper::toDto);
+    //    }
     @Transactional(readOnly = true)
     public Flux<UsuarioDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Usuarios");
-        return usuarioRepository.findAllBy(pageable).map(usuarioMapper::toDto);
+        return usuarioRepository
+            .findAllBy(pageable)
+            .flatMap(usuario -> {
+                return processoService
+                    .buscarProcessosPorIdUsuario(usuario.getId())
+                    .collectList()
+                    .map(processos -> {
+                        UsuarioDTO usuarioDTO = usuarioMapper.toDto(usuario);
+                        usuarioDTO.setProcessos(new HashSet<>(processos));
+                        return usuarioDTO;
+                    });
+            });
     }
 
     /**
