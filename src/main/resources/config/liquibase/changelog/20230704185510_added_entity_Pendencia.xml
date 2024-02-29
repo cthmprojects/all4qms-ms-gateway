@@ -33,13 +33,13 @@
                 <constraints nullable="true" />
             </column>
             <column name="responsavel_id" type="bigint">
-                <constraints nullable="true" unique="true" uniqueConstraintName="ux_pendencia__responsavel_id" />
+                <constraints nullable="true" />
             </column>
             <column name="criado_por_id" type="bigint">
-                <constraints nullable="true" unique="true" uniqueConstraintName="ux_pendencia__criado_por_id" />
+                <constraints nullable="true" />
             </column>
             <column name="atualizado_por_id" type="bigint">
-                <constraints nullable="true" unique="true" uniqueConstraintName="ux_pendencia__atualizado_por_id" />
+                <constraints nullable="true"/>
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>

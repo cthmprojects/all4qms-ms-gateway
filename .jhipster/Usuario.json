@@ -40,7 +40,7 @@
       "ownerSide": true,
       "relationshipName": "funcao",
       "relationshipSide": "left",
-      "relationshipType": "one-to-one"
+      "relationshipType": "one-to-many"
     },
     {
       "otherEntityField": "nome",
@@ -48,7 +48,7 @@
       "ownerSide": true,
       "relationshipName": "gestor",
       "relationshipSide": "left",
-      "relationshipType": "one-to-one"
+      "relationshipType": "one-to-many"
     },
     {
       "otherEntityField": "nome",
@@ -56,7 +56,7 @@
       "ownerSide": true,
       "relationshipName": "setor",
       "relationshipSide": "left",
-      "relationshipType": "one-to-one"
+      "relationshipType": "one-to-many"
     },
     {
       "otherEntityField": "login",
@@ -72,7 +72,7 @@
       "ownerSide": true,
       "relationshipName": "criadoPor",
       "relationshipSide": "left",
-      "relationshipType": "one-to-one"
+      "relationshipType": "one-to-many"
     },
     {
       "otherEntityField": "nome",
@@ -80,7 +80,7 @@
       "ownerSide": true,
       "relationshipName": "atualizadoPor",
       "relationshipSide": "left",
-      "relationshipType": "one-to-one"
+      "relationshipType": "one-to-many"
     },
     {
       "otherEntityField": "nome",

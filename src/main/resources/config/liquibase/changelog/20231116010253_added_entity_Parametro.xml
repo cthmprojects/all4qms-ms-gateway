@@ -27,7 +27,7 @@
                 <constraints nullable="true" />
             </column>
             <column name="atualizado_por" type="bigint">
-                <constraints nullable="true" unique="true" uniqueConstraintName="ux_parametro__atualizado_por_id" />
+                <constraints nullable="true"/>
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>

@@ -52,7 +52,7 @@
       "ownerSide": true,
       "relationshipName": "criadoPor",
       "relationshipSide": "left",
-      "relationshipType": "one-to-one"
+      "relationshipType": "one-to-many"
     },
     {
       "otherEntityField": "nome",
@@ -60,7 +60,7 @@
       "ownerSide": true,
       "relationshipName": "atualizadoPor",
       "relationshipSide": "left",
-      "relationshipType": "one-to-one"
+      "relationshipType": "one-to-many"
     },
     {
       "otherEntityField": "nome",
