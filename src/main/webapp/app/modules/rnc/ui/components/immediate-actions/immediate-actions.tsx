@@ -168,7 +168,7 @@ const ImmediateActions = ({ actions, onAdded, onRemoved, users }: ImmediateActio
   };
 
   return (
-    <Card sx={{ minWidth: 275 }}>
+    <Card sx={{ minWidth: 275 }} className="mt-3">
       <CardContent>
         <Typography variant="h5" component="div">
           Ação Imediata / Disposição para conter a NC
