@@ -9,7 +9,7 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
@@ -28,6 +28,8 @@ import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
 
 export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
+  const id = useParams();
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -350,6 +352,10 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
 
     return users.find(user => user.login === login);
   };
+
+  useEffect(() => {
+    console.log('rnc', rnc);
+  }, [rnc]);
 
   if (tela === 'cadastro') {
     return (

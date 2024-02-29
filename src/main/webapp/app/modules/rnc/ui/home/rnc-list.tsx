@@ -199,6 +199,7 @@ const RncList = ({}) => {
                   const receptor = filterUser(idReceptorNC);
                   const usuarioAtual = filterUser(idUsuarioAtual);
                   const aprovacao = findAprovacaoNC(aprovacaoNC);
+
                   return (
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>

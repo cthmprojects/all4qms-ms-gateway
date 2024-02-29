@@ -45,7 +45,10 @@ const initialState: EntityState<Rnc> = {
 // Actions
 export const remove = createAsyncThunk('rnc/delete', async ({ page, query, size, sort }: IQueryParams) => {});
 
-export const find = createAsyncThunk('rnc/find', async ({ page, query, size, sort }: IQueryParams) => {});
+export const find = createAsyncThunk('rnc/find', async (id: number) => {
+  const url: string = `${apiUrl}/${id}`;
+  return axios.get<Rnc>(url);
+});
 
 export const list = createAsyncThunk('rnc/list', async ({ page, query, size, sort }: IQueryParams) => {
   const params: Array<string> = [];
@@ -358,6 +361,14 @@ const RncSlice = createEntitySlice({
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
+      })
+      .addMatcher(isFulfilled(find), (state, action) => {
+        const { data } = action.payload;
+
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
+        state.entity = data;
       });
   },
 });
