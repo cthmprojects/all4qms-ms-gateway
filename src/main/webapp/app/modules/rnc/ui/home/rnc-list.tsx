@@ -28,13 +28,14 @@ import {
   Typography,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
-import React, { useEffect, useState } from 'react';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
-import { Rnc } from '../../models';
+import { Enums, Rnc } from '../../models';
+import { listEnums } from '../../reducers/enums.reducer';
 import { AprovacaoNC } from '../../models';
 import { list, listAprovacaoNC } from '../../reducers/rnc.reducer';
 import './rnc.css';
@@ -75,6 +76,8 @@ const RncList = ({}) => {
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [page, setPage] = useState<number>(1);
+
   const openOptions = Boolean(anchorEl);
 
   const [filters, setFilters] = useState({
@@ -106,14 +109,25 @@ const RncList = ({}) => {
     setAnchorEl(null);
   };
 
+  // Dispatcher
   const dispatch = useAppDispatch();
+
+  // Reducer states
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
-  const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
+  const totalCount: number = useAppSelector(state => state.all4qmsmsgateway.rnc.totalItems);
+  const loading: boolean = useAppSelector(state => state.all4qmsmsgateway.rnc.loading);
+  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
 
   useEffect(() => {
     dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
     dispatch(getUsers({}));
+    dispatch(listEnums());
   }, []);
+
+  useEffect(() => {
+    dispatch(list({ page: page - 1, size: 20 }));
+  }, [page]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -174,7 +188,19 @@ const RncList = ({}) => {
     return users.find(user => user.id === id);
   };
 
+  const onPageChanged = (event: React.ChangeEvent<unknown>, page: number) => {
+    setPage(page);
+  };
+
   const renderTable = () => {
+    if (loading) {
+      return (
+        <Row className="justify-content-center mt-5">
+          <span style={{ color: '#7d7d7d' }}>Carregando...</span>
+        </Row>
+      );
+    }
+
     if (rncs?.length > 0) {
       return (
         <>
@@ -271,7 +297,12 @@ const RncList = ({}) => {
             </Table>
           </TableContainer>
           <Row className="justify-content-center mt-5">
-            <Pagination count={Math.floor(rncs.length / 20) + (rncs.length % 20 > 0 ? 1 : 0)} style={{ width: '370px' }} />
+            <Pagination
+              count={Math.floor(totalCount / 20) + (totalCount % 20 > 0 ? 1 : 0)}
+              onChange={onPageChanged}
+              page={page}
+              style={{ width: '370px' }}
+            />
           </Row>
         </>
       );
