@@ -192,6 +192,10 @@ const RncList = ({}) => {
     setPage(page);
   };
 
+  const canAccessFirstStep = (rnc: Rnc) => {
+    return (userId === rnc.idEmissorNC && rnc.statusAtual === 'PREENCHIMENTO') || userRole === 'ROLE_SGQ';
+  };
+
   const renderTable = () => {
     if (loading) {
       return (
@@ -269,6 +273,7 @@ const RncList = ({}) => {
                             'aria-labelledby': 'basic-button',
                           }}
                         >
+                          <MenuItem disabled={!canAccessFirstStep}>Preenchimento</MenuItem>
                           <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
                             Registrar NC
                           </MenuItem>

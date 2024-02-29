@@ -121,6 +121,11 @@ export const listAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async ({ page
   return axios.get<Array<AprovacaoNC>>(url, { data: {}, params: {} });
 });
 
+export const getById = createAsyncThunk('rnc/', async (id: number) => {
+  const response = await axios.get(`${apiUrl}/${id}`);
+  return response;
+});
+
 export const save = createAsyncThunk('rnc/save', async (rnc: Rnc) => {
   const response = await axios.post(apiUrl, rnc);
   return response;
