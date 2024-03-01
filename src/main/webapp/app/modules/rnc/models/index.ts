@@ -1,3 +1,4 @@
+export * from './action';
 export * from './audit';
 export * from './aprovacao-nc';
 export * from './client';
@@ -5,6 +6,7 @@ export * from './description';
 export * from './enums';
 export * from './effect-cause';
 export * from './immediate-action';
+export * from './investigation';
 export * from './plan';
 export * from './planned-action';
 export * from './product';

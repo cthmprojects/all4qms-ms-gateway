@@ -37,7 +37,7 @@ import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { AprovacaoNC } from '../../models';
-import { list, listAprovacaoNC } from '../../reducers/rnc.reducer';
+import { list, listAprovacaoNC, deleteRnc } from '../../reducers/rnc.reducer';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -129,6 +129,12 @@ const RncList = ({}) => {
     dispatch(list({ page: page - 1, size: 20 }));
   }, [page]);
 
+  const deleteRncById = (id: number) => {
+    dispatch(deleteRnc(id));
+
+    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
+  };
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -140,10 +146,6 @@ const RncList = ({}) => {
       localStorage.setItem('rnc', '0');
     }
   }, []);
-
-  useEffect(() => {
-    dispatch(listAprovacaoNC({}));
-  }, [rncs]);
 
   useEffect(() => {
     dispatch(listAprovacaoNC({}));
@@ -248,6 +250,7 @@ const RncList = ({}) => {
                   const emissor = filterUser(idEmissorNC);
                   const receptor = filterUser(idReceptorNC);
                   const usuarioAtual = filterUser(idUsuarioAtual);
+
                   return (
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>
@@ -289,7 +292,7 @@ const RncList = ({}) => {
                           <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
                             Eficácia Plano de Ação
                           </MenuItem>
-                          <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <MenuItem onClick={() => deleteRncById(rnc.id)} style={{ display: 'flex', justifyContent: 'space-between' }}>
                             Remover NC
                             <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
                           </MenuItem>

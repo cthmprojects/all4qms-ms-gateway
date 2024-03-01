@@ -318,6 +318,10 @@ export const RNCNew = () => {
     return users.find(user => user.login === login);
   };
 
+  useEffect(() => {
+    console.log('rnc', rnc);
+  }, [rnc]);
+
   if (tela === 'cadastro') {
     return (
       <>
