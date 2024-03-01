@@ -45,7 +45,10 @@ const initialState: EntityState<Rnc> = {
 // Actions
 export const remove = createAsyncThunk('rnc/delete', async ({ page, query, size, sort }: IQueryParams) => {});
 
-export const find = createAsyncThunk('rnc/find', async ({ page, query, size, sort }: IQueryParams) => {});
+export const find = createAsyncThunk('rnc/find', async (id: number) => {
+  const url: string = `${apiUrl}/${id}`;
+  return axios.get<Rnc>(url);
+});
 
 interface ListParams {
   statusAtual?: string;
@@ -119,6 +122,16 @@ export const listAprovacaoNC = createAsyncThunk(aprovacaoNCApiUrl, async ({ page
   const url: string = `${apiUrl}${queryParams && queryParams.length > 0 ? `?${queryParams}` : ''}`;
 
   return axios.get<Array<AprovacaoNC>>(url, { data: {}, params: {} });
+});
+
+export const getById = createAsyncThunk('rnc/', async (id: number) => {
+  const response = await axios.get(`${apiUrl}/${id}`);
+  return response;
+});
+
+export const deleteRnc = createAsyncThunk('rnc/delete', async (id: number) => {
+  const response = await axios.delete(`${apiUrl}/${id}`);
+  return response;
 });
 
 export const save = createAsyncThunk('rnc/save', async (rnc: Rnc) => {
@@ -214,11 +227,17 @@ export const saveTraceability = createAsyncThunk('rnc/traceability/save', async 
 });
 
 export const saveDescription = createAsyncThunk('rnc/description/save', async (description: RncDescription) => {
-  const response = await axios.post(descriptionApiUrl, {
-    detalhesNaoConformidade: description.details,
-    requisitoDescumprido: description.requirement,
-    evidenciaObjetiva: description.evidence,
-    idNaoConformidade: description.rncId,
+  const formData = new FormData();
+  formData.append('id', null);
+  formData.append('detalhesNaoConformidade', description.details);
+  formData.append('requisitoDescumprido', description.requirement);
+  formData.append('evidenciaObjetiva', description.evidence);
+  formData.append('idNaoConformidade', description.rncId.toString());
+
+  const response = await axios.post(descriptionApiUrl, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
   return response;
 });
@@ -404,18 +423,24 @@ const RncSlice = createEntitySlice({
         state.loading = false;
         state.updateSuccess = true;
       })
-      .addMatcher(isFulfilled(listAprovacaoNC), (state, action) => {
+      .addMatcher(isFulfilled(find), (state, action) => {
         const { data } = action.payload;
 
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
-
-        for (let i = 0; i < state.entities.length; i++) {
-          const currentRNC = state.entities[i];
-          const aprovacoes = data.filter(a => a.id === currentRNC.aprovacaoNC);
-          currentRNC.aprovacao = aprovacoes.length > 0 ? aprovacoes[0] : null;
-        }
+        state.entity = data;
+      })
+      .addMatcher(isFulfilled(getById), (state, action) => {
+        const { data } = action.payload;
+        state.updating = false;
+        state.loading = false;
+        state.entity = data;
+      })
+      .addMatcher(isFulfilled(deleteRnc), (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
       });
   },
 });

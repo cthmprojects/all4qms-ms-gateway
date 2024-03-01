@@ -9,12 +9,12 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
-import { list, save, saveAudit, saveClient, saveDescription, saveProduct, update } from '../../reducers/rnc.reducer';
+import { list, save, saveAudit, saveClient, saveDescription, saveProduct, update, getById } from '../../reducers/rnc.reducer';
 import rncStore from '../../rnc-store';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
@@ -27,13 +27,18 @@ import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
 
-export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
+export const RNCNew = () => {
   const dispatch = useAppDispatch();
+  const { id } = useParams();
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(list({}));
     dispatch(listEnums());
+
+    if (id) {
+      dispatch(getById(parseInt(id)));
+    }
   }, []);
 
   const navigate = useNavigate();
@@ -121,30 +126,6 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
 
   // provisorio
   const [tela, setTela] = useState('cadastro');
-  const [acoes, setAcoes] = useState('');
-  const handleAcao = (acao: string) => {
-    setAcoes(acao);
-  };
-  const [prazoImplementacao, setPrazoImplementacao] = useState(new Date());
-  const handlePrazoImplementacao = (prazo: Date) => {
-    setPrazoImplementacao(prazo);
-  };
-  const [prazoVerificacao, setPrazoVerificacao] = useState(new Date());
-  const handlePrazoVerificacao = (prazo: Date) => {
-    setPrazoVerificacao(prazo);
-  };
-  const [prazoFechamento, setPrazoFechamento] = useState(new Date());
-  const handlePrazoFechamento = (prazo: Date) => {
-    setPrazoFechamento(prazo);
-  };
-  const [descricao, setDescricao] = useState('');
-  const handleDescricao = (descricao: string) => {
-    setDescricao(descricao);
-    handleUpdateRNC({ descricaoNC: descricao, id: firstForm.number.value });
-  };
-  const [RNCsecondForm, setRNCsecondForm] = useState({});
-
-  const addRnc = rncStore(state => state.addRnc);
 
   /*
    NC Description
@@ -179,13 +160,39 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
     setSelectedRncIds(values);
   };
 
-  useEffect(() => {
-    setFirstForm({ ...firstForm, number: { value: String(RNCNumber), error: firstForm.processOrigin.error } });
-  }, []);
-
   const handleSubmit = e => {
     e.preventDefault();
+    if (rnc) {
+      const receptorNC = filterUser(firstForm.forwarded.value);
+      const dtNC = new Date();
+      const idEmissorNC = parseInt(Storage.session.get('ID_USUARIO'));
+      const idReceptorNC = receptorNC ? parseInt(receptorNC.id) : null;
+      const idUsuarioAtual = parseInt(Storage.session.get('ID_USUARIO'));
+      const origemNC = firstForm.origin.value;
+      const processoEmissor = parseInt(firstForm.processOrigin.value);
+      const processoNC = parseInt(firstForm.processTarget.value);
+      const statusAtual = 'PREENCHIMENTO';
+      const tipoNC = firstForm.type.value;
 
+      dispatch(
+        update({
+          id: rnc.id,
+          statusAtual: statusAtual,
+          idUsuarioAtual: idUsuarioAtual,
+          dtNC: dtNC,
+          tipoNC: tipoNC,
+          origemNC: origemNC,
+          possuiReincidencia: true,
+          idEmissorNC: idEmissorNC,
+          processoNC: processoNC,
+          idReceptorNC: idReceptorNC,
+          processoEmissor: processoEmissor,
+        })
+      );
+
+      setSecondForm(true);
+      return;
+    }
     if (validateFields(firstForm, setFirstForm, setFormError)) {
       toast.success('RNC salva com sucesso!');
 
@@ -216,8 +223,6 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
       );
 
       setSecondForm(true);
-
-      handleRNC(firstForm);
     }
     return;
   };
@@ -321,21 +326,6 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
     }
   };
 
-  // provisorio
-  const handleTela = (tela: string) => {
-    setTela(tela);
-  };
-
-  const saveData = () => {
-    navigate('/rnc');
-  };
-
-  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
-  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
-  const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
-  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
-  // const users = useAppSelector(state => state.all4qmsmsgateway.userManagement.users);
-
   const onSaveRncDescription = () => {
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
@@ -352,6 +342,26 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
 
     return users.find(user => user.login === login);
   };
+
+  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
+  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
+  const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
+
+  useEffect(() => {
+    if (rnc) {
+      setFirstForm({
+        number: { value: String(rnc.id), error: false },
+        emitter: { value: users.find(user => user.id === rnc.idEmissorNC)?.nome || '', error: false },
+        date: { value: new Date(rnc.dtNC), error: false },
+        processOrigin: { value: rnc.processoEmissor?.toString() || '', error: false },
+        forwarded: { value: users.find(user => user.id === rnc.idUsuarioAtual)?.nome || '', error: false },
+        processTarget: { value: rnc.processoNC?.toString() || '', error: false },
+        type: { value: rnc.tipoNC || '', error: false },
+        origin: { value: rnc.origemNC || '', error: false },
+      });
+    }
+  }, [users, rnc]);
 
   if (tela === 'cadastro') {
     return (
@@ -432,8 +442,8 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     }
                   >
                     {users.map((user, i) => (
-                      <MenuItem value={user.login} key={`user-${i}`}>
-                        {user.login}
+                      <MenuItem value={user.nome} key={`user-${i}`}>
+                        {user.nome}
                       </MenuItem>
                     ))}
                   </Select>
@@ -530,7 +540,7 @@ export const RNCNew = ({ handleRNC, RNCNumber, RNCList, handleUpdateRNC }) => {
                     Voltar
                   </Button>
                   <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-                    Salvar
+                    {rnc ? 'Atualizar' : 'Salvar'}
                   </Button>
                 </div>
               )}

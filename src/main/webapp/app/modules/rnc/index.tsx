@@ -58,12 +58,8 @@ const RncRoutes = () => {
     <div>
       <ErrorBoundaryRoutes>
         <Route path="" element={<RncList />} />
-        <Route
-          path="new"
-          element={
-            <RNCNew handleRNC={handleRNCNewFirstForm} RNCNumber={RNCs.length + 1} RNCList={RNCs} handleUpdateRNC={handleUpdateRNC} />
-          }
-        />
+        <Route path="new/" element={<RNCNew />} />
+        <Route path="new/:id" element={<RNCNew />} />
         <Route
           path="general/:id"
           element={<GeneralRegister handleTela={handleTela} handleUpdateRNC={handleUpdateRNC} findRNCById={findRNCById} />}

@@ -1,8 +1,6 @@
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import { Add } from '@mui/icons-material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import Textarea from '@mui/joy/Textarea';
 import { styled } from '@mui/joy/styles';
 import {
@@ -29,7 +27,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
-import { Rnc } from 'app/modules/rnc/models';
+import { Action, IshikawaInvestigation, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
 import { list, saveEffectCause, saveImmediateAction, savePlannedAction, saveRange, saveReason } from 'app/modules/rnc/reducers/rnc.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
@@ -37,6 +35,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
+import { CauseInvestigation, ImmediateActions, ScopeAnalysis } from '../../../components';
 import './general-register.css';
 
 const StyledTextarea = styled(TextareaAutosize)({
@@ -245,6 +244,40 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   const [descStatus, setDescStatus] = useState('');
 
   const [listDesc, setListDesc] = useState([]);
+
+  /*
+   * Immediate action
+   */
+  const [actions, setActions] = useState<Array<Action>>([]);
+
+  const onActionAdded = (action: Action): void => {
+    setActions([...actions, action]);
+  };
+
+  const onActionRemoved = (action: Action): void => {
+    const idx = actions.indexOf(action);
+
+    if (idx < 0) {
+      return;
+    }
+
+    const newActions = actions.filter((_, index) => index !== idx);
+    setActions([...newActions]);
+  };
+
+  /*
+   * Cause investigation
+   */
+  const [ishikawaInvestigation, setIshikawaInvestigation] = useState<IshikawaInvestigation>();
+  const [reasonsInvestigation, setReasonsInvestigation] = useState<ReasonsInvestigation>();
+
+  const onIshikawaInvestigationChanged = (investigation: IshikawaInvestigation): void => {
+    setIshikawaInvestigation(investigation);
+  };
+
+  const onReasonsInvestigationChanged = (investigation: ReasonsInvestigation): void => {
+    setReasonsInvestigation(investigation);
+  };
 
   const appendToListDesc = () => {
     if (descAction === '' || descPrazo === null || descResponsavel === '' || descStatus === '') return;
@@ -581,119 +614,21 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
           </Breadcrumbs>
         </Row>
         <div className="container-style">
-          <Card sx={{ minWidth: 275 }}>
-            <CardContent>
-              <Typography variant="h5" component="div">
-                Análise de Abrangência da NC
-              </Typography>
-              <br />
-              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <span className="me-2" style={{ fontWeight: '500', fontSize: '16px', marginTop: '0px', color: '#384150' }}>
-                  Palavra chave
-                </span>
-                <LocalOfferIcon sx={{ color: '#707070' }} />
-                <TextField
-                  className="ms-2"
-                  id="text-field-keyword"
-                  label="Escreva aqui..."
-                  style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
-                  onChange={e => {
-                    setK(e.target.value);
-                  }}
-                  value={k}
-                />
-                <IconButton
-                  aria-label="Adicionar palavra chave"
-                  onClick={() => {
-                    handleChange({
-                      ...registerForm,
-                      keywords: {
-                        value: [...registerForm.keywords.value, k],
-                        error: registerForm.keywords.error,
-                      },
-                    });
-                    setK('');
-                  }}
-                >
-                  <AddCircleIcon fontSize="large" />
-                </IconButton>
-              </div>
-              <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
-                {registerForm.keywords.value.map((keyword: any) => (
-                  <Chip label={keyword} onClick={() => {}} onDelete={() => handleRemoveKeyword(keyword)} className="me-2" />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          <div className="fake-card mt-3">
-            <Typography variant="h5" component="div">
-              Ação Imediata / Disposição para conter a NC
-            </Typography>
+          <ScopeAnalysis
+            keywords={registerForm.keywords.value}
+            onChanged={keywords =>
+              handleChange({
+                ...registerForm,
+                keywords: {
+                  value: [...keywords],
+                  error: registerForm.keywords.error,
+                },
+              })
+            }
+          />
 
-            <br />
-            <div style={{ display: 'flex', alignItems: 'center' }} className="w-100">
-              <div style={{ display: 'flex', flexDirection: 'column' }} className="mt-2 w-100">
-                <textarea
-                  className="textarea-ishikawa"
-                  style={{ padding: '8px 12px' }}
-                  name="ncArea"
-                  rows={5}
-                  cols={30}
-                  placeholder="Descrição da ação"
-                  value={descAction}
-                  onChange={e => setDescAction(e.target.value)}
-                />
-                <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                  <FormControl className="m-2 ms-0 mb-2">
-                    <DatePicker
-                      // locale='pt-BR'
-                      label="Prazo"
-                      selected={descPrazo}
-                      onChange={date => setDescPrazo(date)}
-                      className="date-picker"
-                      dateFormat={'dd/MM/yyyy'}
-                      id="date-picker-rnc-acao-prazo"
-                    />
-                  </FormControl>
-                  <FormControl className="rnc-form-field m-2">
-                    <InputLabel>Responsável</InputLabel>
-                    <Select
-                      label="Responsável"
-                      name="forwarded"
-                      // disabled={false}
-                      value={descResponsavel}
-                      onChange={e => setDescResponsavel(e.target.value)}
-                    >
-                      {users.map((user, i) => (
-                        <MenuItem value={user.login} key={`user-${i}`}>
-                          {user.login}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <TextField
-                    label="Status"
-                    className="m-2 rnc-form-field"
-                    id="rnc-text-field"
-                    sx={{ width: '20% !important' }}
-                    onChange={e => setDescStatus(e.target.value)}
-                    value={descStatus}
-                  />
-                </div>
-              </div>
-              <Fab
-                color="primary"
-                aria-label="add"
-                size="medium"
-                className="ms-3"
-                disabled={descAction === '' || descResponsavel === '' || descStatus === ''}
-                onClick={appendToListDesc}
-              >
-                <Add />
-              </Fab>
-            </div>
-            {renderListDesc()}
-          </div>
+          <ImmediateActions actions={actions} onAdded={onActionAdded} onRemoved={onActionRemoved} users={users.map(u => u.login)} />
+
           <Divider light />
           {(_rnc?.origin === 'mp' || _rnc?.origin === 'endProduct') && (
             <div className="fake-card mt-3">
@@ -889,282 +824,13 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
             </div>
           )}
           <Divider light />
-          <Card sx={{ minWidth: 275 }} className="mt-3 mb-2">
-            <CardContent>
-              <Typography variant="h5" component="div">
-                Investigação de causas
-              </Typography>
-              <div className="mt-2" style={{ display: 'flex' }}>
-                <FormControlLabel control={<Checkbox />} onChange={handleCheckIshikawaChange} label="ISHIKAWA" />
-                <FormControlLabel control={<Checkbox />} onChange={handleCheckFiveWhy} label="Resposta dos 5 porquês" />
-              </div>
-              {checkedIshikawa && (
-                <Card className="mt-2">
-                  <div className="flex p-2" style={{ justifyContent: 'space-between' }}>
-                    <div className="flex-col">
-                      <br />
-                      <Textarea
-                        slots={{ textarea: InnerTextareaNC }}
-                        slotProps={{ textarea: { placeholder: 'NC' } }}
-                        sx={{ borderRadius: '6px' }}
-                        name="ncArea"
-                        value={_rnc?.descricaoNC || ''}
-                        readOnly
-                      />
-                      {/*                       <textarea className="textarea-ishikawa" name="ncArea" rows={5} cols={30} placeholder="NC" value={id} readOnly/>
-                       */}{' '}
-                    </div>
-                    <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
-                      <Autocomplete
-                        multiple
-                        className="m-2"
-                        id="tags-outlined"
-                        options={['']}
-                        defaultValue={[]}
-                        freeSolo
-                        renderTags={(value: readonly string[], getTagProps) =>
-                          value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
-                        }
-                        disableClearable
-                        renderInput={params => (
-                          <TextField
-                            {...params}
-                            label="Meio Ambiente"
-                            onChange={e => {
-                              handleChange({
-                                ...registerForm,
-                                causaMeioAmbiente: {
-                                  value: [...registerForm.causaMeioAmbiente.value, e.target.value],
-                                  error: registerForm.causaMeioAmbiente.error,
-                                },
-                              });
-                            }}
-                          />
-                        )}
-                      />
-                      <Autocomplete
-                        multiple
-                        className="m-2"
-                        id="tags-outlined"
-                        options={['']}
-                        defaultValue={[]}
-                        freeSolo
-                        renderTags={(value: readonly string[], getTagProps) =>
-                          value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
-                        }
-                        disableClearable
-                        renderInput={params => (
-                          <TextField
-                            {...params}
-                            label="Máquina"
-                            onChange={e => {
-                              handleChange({
-                                ...registerForm,
-                                causaMaquina: {
-                                  value: [...registerForm.causaMaquina.value, e.target.value],
-                                  error: registerForm.causaMaquina.error,
-                                },
-                              });
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
-                      <Autocomplete
-                        multiple
-                        className="m-2"
-                        id="tags-outlined"
-                        options={['']}
-                        defaultValue={[]}
-                        freeSolo
-                        renderTags={(value: readonly string[], getTagProps) =>
-                          value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
-                        }
-                        disableClearable
-                        renderInput={params => (
-                          <TextField
-                            {...params}
-                            label="Mão de obra"
-                            onChange={e => {
-                              handleChange({
-                                ...registerForm,
-                                causaMaoObra: {
-                                  value: [...registerForm.causaMaoObra.value, e.target.value],
-                                  error: registerForm.causaMaoObra.error,
-                                },
-                              });
-                            }}
-                          />
-                        )}
-                      />
-                      <Autocomplete
-                        multiple
-                        className="m-2"
-                        id="tags-outlined"
-                        options={['']}
-                        defaultValue={[]}
-                        freeSolo
-                        renderTags={(value: readonly string[], getTagProps) =>
-                          value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
-                        }
-                        disableClearable
-                        renderInput={params => (
-                          <TextField
-                            {...params}
-                            label="Medição"
-                            onChange={e => {
-                              handleChange({
-                                ...registerForm,
-                                causaMedicao: {
-                                  value: [...registerForm.causaMedicao.value, e.target.value],
-                                  error: registerForm.causaMedicao.error,
-                                },
-                              });
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
-                      <Autocomplete
-                        multiple
-                        className="m-2"
-                        id="tags-outlined"
-                        options={['']}
-                        defaultValue={[]}
-                        freeSolo
-                        renderTags={(value: readonly string[], getTagProps) =>
-                          value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
-                        }
-                        disableClearable
-                        renderInput={params => (
-                          <TextField
-                            {...params}
-                            label="Método"
-                            onChange={e => {
-                              handleChange({
-                                ...registerForm,
-                                causaMetodo: {
-                                  value: [...registerForm.causaMetodo.value, e.target.value],
-                                  error: registerForm.causaMetodo.error,
-                                },
-                              });
-                            }}
-                          />
-                        )}
-                      />
-                      <Autocomplete
-                        multiple
-                        className="m-2"
-                        id="tags-outlined"
-                        options={['']}
-                        defaultValue={[]}
-                        freeSolo
-                        renderTags={(value: readonly string[], getTagProps) =>
-                          value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
-                        }
-                        disableClearable
-                        renderInput={params => (
-                          <TextField
-                            {...params}
-                            label="Matéria-prima"
-                            onChange={e => {
-                              handleChange({
-                                ...registerForm,
-                                causaMateriaPrima: {
-                                  value: [...registerForm.causaMateriaPrima.value, e.target.value],
-                                  error: registerForm.causaMateriaPrima.error,
-                                },
-                              });
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-                  </div>
-                </Card>
-              )}
 
-              {checkedFiveWhy && (
-                <Card className="mt-2">
-                  <div className="flex p-2">
-                    <div className="flex-col">
-                      <br />
-                      <Textarea
-                        slots={{ textarea: InnerTextareaNC }}
-                        slotProps={{ textarea: { placeholder: 'NC' } }}
-                        sx={{ borderRadius: '6px' }}
-                        name="ncArea"
-                        value={_rnc?.descricaoNC || ''}
-                        readOnly
-                      />
+          <CauseInvestigation
+            description={_rnc?.descricao}
+            onIshikawaInvestigationChanged={onIshikawaInvestigationChanged}
+            onReasonsInvestigationChanged={onReasonsInvestigationChanged}
+          />
 
-                      {/*  <textarea
-                        className="textarea-ishikawa mb-2"
-                        style={{ height: '100%' }}
-                        placeholder="NC"
-                        name="ncArea"
-                        rows={5}
-                        cols={30}
-                        value={_rnc}
-                        readOnly
-                      />  */}
-                    </div>
-                    <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
-                      <TextField
-                        label="Porquê?"
-                        className="m-2"
-                        required
-                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n1: { value: e.target.value } })}
-                      />
-                      <TextField
-                        label="Porquê?"
-                        className="m-2"
-                        required
-                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n2: { value: e.target.value } })}
-                      />
-                      <TextField
-                        label="Porquê?"
-                        className="m-2"
-                        required
-                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n3: { value: e.target.value } })}
-                      />
-                      <TextField
-                        label="Porquê?"
-                        className="m-2"
-                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n4: { value: e.target.value } })}
-                      />
-                      <TextField
-                        label="Porquê?"
-                        className="m-2"
-                        onChange={e => setRegisterForm({ ...registerForm, fiveWhy_n5: { value: e.target.value } })}
-                      />
-                    </div>
-                    <div className="flex-col">
-                      <br />
-                      <Textarea
-                        slots={{ textarea: InnerTextareaCausa }}
-                        slotProps={{ textarea: { placeholder: 'Causa', label: 'Causa' } }}
-                        sx={{ borderRadius: '6px' }}
-                        name="ncArea"
-                        value={_rnc?.descricaoNC || ''}
-                        readOnly
-                      />
-                      {/* <textarea
-                        className="textarea-ishikawa mb-2"
-                        style={{ height: '100%' }}
-                        placeholder="Causa"
-                        name="ncArea"
-                        rows={5}
-                        cols={30}
-                      /> */}
-                    </div>
-                  </div>
-                </Card>
-              )}
-            </CardContent>
-          </Card>
           {showPlanoAcaoCorretiva && (
             <div className="fake-card mt-2">
               <Typography variant="h5" component="div">
@@ -1256,6 +922,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
               {renderListaAcoesCorretivas()}
             </div>
           )}
+
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button
               variant="contained"

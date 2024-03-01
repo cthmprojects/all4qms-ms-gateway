@@ -37,7 +37,7 @@ import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { AprovacaoNC } from '../../models';
-import { list, listAprovacaoNC } from '../../reducers/rnc.reducer';
+import { list, listAprovacaoNC, deleteRnc } from '../../reducers/rnc.reducer';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -129,6 +129,12 @@ const RncList = ({}) => {
     dispatch(list({ page: page - 1, size: 20 }));
   }, [page]);
 
+  const deleteRncById = (id: number) => {
+    dispatch(deleteRnc(id));
+
+    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
+  };
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -140,10 +146,6 @@ const RncList = ({}) => {
       localStorage.setItem('rnc', '0');
     }
   }, []);
-
-  useEffect(() => {
-    dispatch(listAprovacaoNC({}));
-  }, [rncs]);
 
   useEffect(() => {
     dispatch(listAprovacaoNC({}));
@@ -190,6 +192,10 @@ const RncList = ({}) => {
 
   const onPageChanged = (event: React.ChangeEvent<unknown>, page: number) => {
     setPage(page);
+  };
+
+  const canAccessFirstStep = (rnc: Rnc) => {
+    return (userId === rnc.idEmissorNC && rnc.statusAtual === 'PREENCHIMENTO') || userRole === 'ROLE_SGQ';
   };
 
   const renderTable = () => {
@@ -244,18 +250,19 @@ const RncList = ({}) => {
                   const emissor = filterUser(idEmissorNC);
                   const receptor = filterUser(idReceptorNC);
                   const usuarioAtual = filterUser(idUsuarioAtual);
+
                   return (
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
-                      <TableCell>{emissor?.login ?? '-'}</TableCell>
-                      <TableCell> {'descrição'} </TableCell>
-                      <TableCell>{usuarioAtual?.login ?? receptor}</TableCell>
+                      <TableCell>{users.find(user => user.id == rnc.idEmissorNC)?.nome || '-'}</TableCell>
+                      <TableCell> {'-'} </TableCell>
+                      <TableCell>{users.find(user => user.id == rnc.idUsuarioAtual)?.nome || '-'}</TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell>
                       <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
                       <TableCell> {statusAtual} </TableCell>
-                      <TableCell> {acoesImediatas} </TableCell>
+                      <TableCell> - </TableCell>
                       <TableCell>
                         <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
                           <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
@@ -269,6 +276,9 @@ const RncList = ({}) => {
                             'aria-labelledby': 'basic-button',
                           }}
                         >
+                          <MenuItem disabled={!canAccessFirstStep} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
+                            Preenchimento
+                          </MenuItem>
                           <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
                             Registrar NC
                           </MenuItem>
@@ -284,7 +294,7 @@ const RncList = ({}) => {
                           <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
                             Eficácia Plano de Ação
                           </MenuItem>
-                          <MenuItem onClick={handleCloseOptions} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <MenuItem onClick={() => deleteRncById(rnc.id)} style={{ display: 'flex', justifyContent: 'space-between' }}>
                             Remover NC
                             <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
                           </MenuItem>
