@@ -36,9 +36,9 @@ export const RNCNew = () => {
     dispatch(list({}));
     dispatch(listEnums());
 
-    // if(id) {
-    //   dispatch(getById(parseInt(id)));
-    // }
+    if (id) {
+      dispatch(getById(parseInt(id)));
+    }
   }, []);
 
   const navigate = useNavigate();
@@ -162,7 +162,37 @@ export const RNCNew = () => {
 
   const handleSubmit = e => {
     e.preventDefault();
+    if (rnc) {
+      const receptorNC = filterUser(firstForm.forwarded.value);
+      const dtNC = new Date();
+      const idEmissorNC = parseInt(Storage.session.get('ID_USUARIO'));
+      const idReceptorNC = receptorNC ? parseInt(receptorNC.id) : null;
+      const idUsuarioAtual = parseInt(Storage.session.get('ID_USUARIO'));
+      const origemNC = firstForm.origin.value;
+      const processoEmissor = parseInt(firstForm.processOrigin.value);
+      const processoNC = parseInt(firstForm.processTarget.value);
+      const statusAtual = 'PREENCHIMENTO';
+      const tipoNC = firstForm.type.value;
 
+      dispatch(
+        update({
+          id: rnc.id,
+          statusAtual: statusAtual,
+          idUsuarioAtual: idUsuarioAtual,
+          dtNC: dtNC,
+          tipoNC: tipoNC,
+          origemNC: origemNC,
+          possuiReincidencia: true,
+          idEmissorNC: idEmissorNC,
+          processoNC: processoNC,
+          idReceptorNC: idReceptorNC,
+          processoEmissor: processoEmissor,
+        })
+      );
+
+      setSecondForm(true);
+      return;
+    }
     if (validateFields(firstForm, setFirstForm, setFormError)) {
       toast.success('RNC salva com sucesso!');
 
@@ -296,11 +326,6 @@ export const RNCNew = () => {
     }
   };
 
-  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
-  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
-  const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
-  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
-
   const onSaveRncDescription = () => {
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
@@ -318,9 +343,25 @@ export const RNCNew = () => {
     return users.find(user => user.login === login);
   };
 
+  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
+  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
+  const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
+
   useEffect(() => {
-    console.log('rnc', rnc);
-  }, [rnc]);
+    if (rnc) {
+      setFirstForm({
+        number: { value: String(rnc.id), error: false },
+        emitter: { value: users.find(user => user.id === rnc.idEmissorNC)?.nome || '', error: false },
+        date: { value: new Date(rnc.dtNC), error: false },
+        processOrigin: { value: rnc.processoEmissor?.toString() || '', error: false },
+        forwarded: { value: users.find(user => user.id === rnc.idUsuarioAtual)?.nome || '', error: false },
+        processTarget: { value: rnc.processoNC?.toString() || '', error: false },
+        type: { value: rnc.tipoNC || '', error: false },
+        origin: { value: rnc.origemNC || '', error: false },
+      });
+    }
+  }, [users, rnc]);
 
   if (tela === 'cadastro') {
     return (
@@ -499,7 +540,7 @@ export const RNCNew = () => {
                     Voltar
                   </Button>
                   <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-                    Salvar
+                    {rnc ? 'Atualizar' : 'Salvar'}
                   </Button>
                 </div>
               )}

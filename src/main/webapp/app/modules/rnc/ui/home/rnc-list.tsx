@@ -255,14 +255,14 @@ const RncList = ({}) => {
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
-                      <TableCell>{emissor?.login ?? '-'}</TableCell>
-                      <TableCell> {'descrição'} </TableCell>
-                      <TableCell>{usuarioAtual?.login ?? receptor}</TableCell>
+                      <TableCell>{users.find(user => user.id == rnc.idEmissorNC)?.nome || '-'}</TableCell>
+                      <TableCell> {'-'} </TableCell>
+                      <TableCell>{users.find(user => user.id == rnc.idUsuarioAtual)?.nome || '-'}</TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell>
                       <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
                       <TableCell> {statusAtual} </TableCell>
-                      <TableCell> {acoesImediatas} </TableCell>
+                      <TableCell> - </TableCell>
                       <TableCell>
                         <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
                           <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
@@ -276,7 +276,9 @@ const RncList = ({}) => {
                             'aria-labelledby': 'basic-button',
                           }}
                         >
-                          <MenuItem disabled={!canAccessFirstStep}>Preenchimento</MenuItem>
+                          <MenuItem disabled={!canAccessFirstStep} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
+                            Preenchimento
+                          </MenuItem>
                           <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
                             Registrar NC
                           </MenuItem>

@@ -227,11 +227,17 @@ export const saveTraceability = createAsyncThunk('rnc/traceability/save', async 
 });
 
 export const saveDescription = createAsyncThunk('rnc/description/save', async (description: RncDescription) => {
-  const response = await axios.post(descriptionApiUrl, {
-    detalhesNaoConformidade: description.details,
-    requisitoDescumprido: description.requirement,
-    evidenciaObjetiva: description.evidence,
-    idNaoConformidade: description.rncId,
+  const formData = new FormData();
+  formData.append('id', null);
+  formData.append('detalhesNaoConformidade', description.details);
+  formData.append('requisitoDescumprido', description.requirement);
+  formData.append('evidenciaObjetiva', description.evidence);
+  formData.append('idNaoConformidade', description.rncId.toString());
+
+  const response = await axios.post(descriptionApiUrl, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
   return response;
 });
