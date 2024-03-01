@@ -10,6 +10,7 @@ type RncDescriptionProps = {
   onDescriptionChanged: (value: string) => void;
   onEvidencesChanged: (values: Array<string>) => void;
   onRequirementChanged: (value: string) => void;
+  onDescriptionsEvidencesChanged: (values: Array<File>) => void;
 };
 
 export const DescriptionRnc = ({
@@ -19,8 +20,9 @@ export const DescriptionRnc = ({
   onEvidencesChanged,
   onRequirementChanged,
   requirement,
+  onDescriptionsEvidencesChanged,
 }: RncDescriptionProps) => {
-  const [files, setFiles] = useState([]);
+  const [descFiles, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef(null);
 
   const onAddEvidence = () => {
@@ -38,14 +40,18 @@ export const DescriptionRnc = ({
   };
 
   const onFileChanged = event => {
+    console.log(event);
+
     const files = event.target.files;
-    setFiles([...files, ...files]);
+    setFiles([...descFiles, ...files]);
+    onDescriptionsEvidencesChanged([...descFiles, files]);
   };
 
   const removeSelectedFile = (index: number) => {
-    const newFiles = [...files];
+    const newFiles = [...descFiles];
     newFiles.splice(index, 1);
     setFiles(newFiles);
+    onDescriptionsEvidencesChanged(newFiles);
   };
 
   const downloadFile = file => {
@@ -130,12 +136,12 @@ export const DescriptionRnc = ({
           </div>
         ))}
 
-        {files.length > 0 && (
+        {descFiles.length > 0 && (
           <div className="mt-2 mb-2">
             <Divider variant="middle" sx={{ margin: ' 0.5rem 0px !important' }} />
             <div>
               <h5>Arquivos Selecionados:</h5>
-              {files.map((file, index) => (
+              {descFiles.map((file, index) => (
                 <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
                   <a
                     href="#"

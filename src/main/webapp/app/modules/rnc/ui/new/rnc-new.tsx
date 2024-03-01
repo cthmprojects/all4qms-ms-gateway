@@ -79,6 +79,11 @@ export const RNCNew = () => {
 
   const [typeBreadcrumbLabel, setTypeBreadcrumbLabel] = useState('');
   const [originBreadcrumbLabel, setOriginBreadcrumbLabel] = useState('');
+  const [descriptionEvidences, setDescriptionEvidences] = useState([]);
+
+  const onDescriptionEvidencesChanged = (values: Array<File>) => {
+    setDescriptionEvidences(values);
+  };
 
   const handleTypeChange = event => {
     const { value } = event.target;
@@ -330,7 +335,9 @@ export const RNCNew = () => {
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
 
-      dispatch(saveDescription({ details: description, evidence: evidence, requirement: requirement, rncId: rnc.id }));
+      dispatch(
+        saveDescription({ details: description, evidence: evidence, requirement: requirement, rncId: rnc.id, anexos: descriptionEvidences })
+      );
       dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO' }));
     }
   };
@@ -557,6 +564,7 @@ export const RNCNew = () => {
                   onDescriptionChanged={onDescriptionChanged}
                   onEvidencesChanged={onEvidencesChanged}
                   onRequirementChanged={onRequirementChanged}
+                  onDescriptionsEvidencesChanged={onDescriptionEvidencesChanged}
                   requirement={requirement}
                 />
               </Row>
