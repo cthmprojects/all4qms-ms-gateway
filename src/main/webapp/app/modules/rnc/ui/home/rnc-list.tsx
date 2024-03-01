@@ -198,6 +198,10 @@ const RncList = ({}) => {
     return (userId === rnc.idEmissorNC && rnc.statusAtual === 'PREENCHIMENTO') || userRole === 'ROLE_SGQ';
   };
 
+  const canAccessDetailingInfo = (rnc: Rnc) => {
+    return (userId === rnc.idEmissorNC && rnc.statusAtual === 'DETALHAMENTO') || userRole === 'ROLE_SGQ';
+  };
+
   const renderTable = () => {
     if (loading) {
       return (
@@ -278,6 +282,9 @@ const RncList = ({}) => {
                         >
                           <MenuItem disabled={!canAccessFirstStep} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
                             Preenchimento
+                          </MenuItem>
+                          <MenuItem disabled={!canAccessDetailingInfo} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
+                            Detalhamento
                           </MenuItem>
                           <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
                             Registrar NC

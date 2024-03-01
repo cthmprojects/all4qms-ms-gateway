@@ -367,6 +367,12 @@ export const RNCNew = () => {
         type: { value: rnc.tipoNC || '', error: false },
         origin: { value: rnc.origemNC || '', error: false },
       });
+
+      if (rnc.statusAtual === 'DETALHAMENTO') {
+        setSecondForm(true);
+        // TODO: fetch description and other data
+        // Update the state with the data
+      }
     }
   }, [users, rnc]);
 
