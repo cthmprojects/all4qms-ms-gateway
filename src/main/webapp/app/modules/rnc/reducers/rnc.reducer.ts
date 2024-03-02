@@ -347,6 +347,7 @@ const RncSlice = createEntitySlice({
           ...state,
           loading: false,
           entities: data,
+          entity: null,
           totalItems: parseInt(headers['x-total-count'], 10),
         };
       })

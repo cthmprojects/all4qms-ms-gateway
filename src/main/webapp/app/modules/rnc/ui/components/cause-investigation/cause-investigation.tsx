@@ -312,18 +312,28 @@ type CauseInvestigationProps = {
   description?: string;
   onIshikawaInvestigationChanged: (investigation: IshikawaInvestigation) => void;
   onReasonsInvestigationChanged: (investigation: ReasonsInvestigation) => void;
+  checkIshikawa: (check: boolean) => void;
+  checkReasons: (check: boolean) => void;
 };
 
-const CauseInvestigation = ({ description, onIshikawaInvestigationChanged, onReasonsInvestigationChanged }: CauseInvestigationProps) => {
+const CauseInvestigation = ({
+  description,
+  onIshikawaInvestigationChanged,
+  onReasonsInvestigationChanged,
+  checkIshikawa,
+  checkReasons,
+}: CauseInvestigationProps) => {
   const [ishikawaEnabled, setIshikawaEnabled] = useState<boolean>(false);
   const [reasonsEnabled, setReasonsEnabled] = useState<boolean>(false);
 
   const onIshikawaChanged = (event: React.SyntheticEvent<Element, Event>, checked: boolean): void => {
     setIshikawaEnabled(checked);
+    checkIshikawa(checked);
   };
 
   const onReasonsChanged = (event: React.SyntheticEvent<Element, Event>, checked: boolean): void => {
     setReasonsEnabled(checked);
+    checkReasons(checked);
   };
 
   return (

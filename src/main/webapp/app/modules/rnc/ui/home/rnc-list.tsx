@@ -31,10 +31,10 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
-import { Storage } from 'react-jhipster';
+import { Storage, log } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
-import { Enums, Rnc } from '../../models';
+import { Enums, RNC, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { AprovacaoNC } from '../../models';
 import { list, listAprovacaoNC, deleteRnc } from '../../reducers/rnc.reducer';
@@ -194,12 +194,51 @@ const RncList = ({}) => {
     setPage(page);
   };
 
-  const canAccessFirstStep = (rnc: Rnc) => {
-    return (userId === rnc.idEmissorNC && rnc.statusAtual === 'PREENCHIMENTO') || userRole === 'ROLE_SGQ';
+  const canAccessFirstStep = (statusAtual, idEmissorNC) => {
+    console.log(userId === idEmissorNC);
+    console.log(statusAtual === 'PREENCHIMENTO');
+    console.log(userRole === 'ROLE_SGQ');
+
+    console.log(userId, statusAtual, userRole);
+
+    return (userId === idEmissorNC && statusAtual === 'PREENCHIMENTO') || userRole === 'ROLE_SGQ';
   };
 
   const canAccessDetailingInfo = (rnc: Rnc) => {
     return (userId === rnc.idEmissorNC && rnc.statusAtual === 'DETALHAMENTO') || userRole === 'ROLE_SGQ';
+  };
+
+  const renderOptions = (rnc: Rnc) => {
+    console.log(rnc.statusAtual);
+
+    switch (rnc.statusAtual) {
+      case 'PREENCHIMENTO':
+        if (userId === rnc.idEmissorNC || userRole === 'ROLE_SGQ') {
+          return <MenuItem onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>Preenchimento</MenuItem>;
+        }
+        return <MenuItem disabled>Preenchimento</MenuItem>;
+
+      case 'DETALHAMENTO':
+        if (userId === rnc.idEmissorNC || userRole === 'ROLE_SGQ') {
+          return <MenuItem onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>Detalhamento</MenuItem>;
+        }
+        return <MenuItem disabled>Detalhamento</MenuItem>;
+
+      case 'INVESTIGACAO':
+        break;
+
+      case 'ELABORACAO':
+        break;
+
+      case 'EXECUCAO':
+        break;
+
+      case 'VERIFICACAO':
+        break;
+
+      case 'VALIDACAO':
+        break;
+    }
   };
 
   const renderTable = () => {
@@ -280,15 +319,24 @@ const RncList = ({}) => {
                             'aria-labelledby': 'basic-button',
                           }}
                         >
-                          <MenuItem disabled={!canAccessFirstStep} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
+                          {/* {renderOptions(rnc)} */}
+                          <MenuItem disabled={!canAccessFirstStep(statusAtual, idEmissorNC)} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
                             Preenchimento
                           </MenuItem>
-                          <MenuItem disabled={!canAccessDetailingInfo} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
+                          <MenuItem disabled={!canAccessDetailingInfo(rnc)} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
                             Detalhamento
                           </MenuItem>
+                          <MenuItem onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>Investigação</MenuItem>
+                          <MenuItem onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>Elaboração</MenuItem>
+                          <MenuItem onClick={() => goToPage(`/rnc/general/implementacao/${rnc.id}`)}>Execução</MenuItem>
+                          <MenuItem onClick={() => goToPage('/rnc/general/implementacao/validacao')}>Verificação</MenuItem>
+                          <MenuItem onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>Validação</MenuItem>
+
+                          {/*                           
                           <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
                             Registrar NC
                           </MenuItem>
+
                           <MenuItem disabled={rnc.statusAtual !== 'EXECUCAO'} onClick={() => goToPage('/rnc/general/implementacao')}>
                             Plano de ação
                           </MenuItem>
@@ -300,7 +348,7 @@ const RncList = ({}) => {
                           </MenuItem>
                           <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
                             Eficácia Plano de Ação
-                          </MenuItem>
+                          </MenuItem> */}
                           <MenuItem onClick={() => deleteRncById(rnc.id)} style={{ display: 'flex', justifyContent: 'space-between' }}>
                             Remover NC
                             <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />

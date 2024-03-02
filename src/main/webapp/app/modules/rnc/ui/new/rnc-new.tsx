@@ -15,7 +15,7 @@ import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { list, save, saveAudit, saveClient, saveDescription, saveProduct, update, getById } from '../../reducers/rnc.reducer';
-import rncStore from '../../rnc-store';
+import { getById as getDescriptionById } from '../../reducers/description.reducer';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
 import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
@@ -370,6 +370,8 @@ export const RNCNew = () => {
 
       if (rnc.statusAtual === 'DETALHAMENTO') {
         setSecondForm(true);
+
+        // getDescriptionById(rnc.id);
         // TODO: fetch description and other data
         // Update the state with the data
       }

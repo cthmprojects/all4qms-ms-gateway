@@ -65,7 +65,7 @@ const RncRoutes = () => {
           element={<GeneralRegister handleTela={handleTela} handleUpdateRNC={handleUpdateRNC} findRNCById={findRNCById} />}
         ></Route>
         <Route
-          path="general/implementacao/"
+          path="general/implementacao/:id"
           element={<RegisterImplementation handleTela={handleTela} handlePrazoImplementacao={handleTela} />}
         />
         <Route
