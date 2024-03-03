@@ -3,4 +3,5 @@ export type RncDescription = {
   evidence: string;
   requirement: string;
   rncId: number;
+  anexos: Array<File>;
 };

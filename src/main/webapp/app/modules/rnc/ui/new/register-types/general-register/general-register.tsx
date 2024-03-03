@@ -28,7 +28,16 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import { Action, IshikawaInvestigation, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
-import { list, saveEffectCause, saveImmediateAction, savePlannedAction, saveRange, saveReason } from 'app/modules/rnc/reducers/rnc.reducer';
+import {
+  list,
+  saveEffectCause,
+  saveImmediateAction,
+  savePlannedAction,
+  saveRange,
+  saveReason,
+  getById,
+  update,
+} from 'app/modules/rnc/reducers/rnc.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -227,13 +236,13 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     },
   });
 
-  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
-
-  const [_rnc, _setrnc] = useState(findRNCById(id));
-
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    dispatch(list({}));
+    // dispatch(list({}));
+
+    if (id) {
+      dispatch(getById(parseInt(id)));
+    }
   }, []);
 
   const [k, setK] = useState('');
@@ -330,6 +339,18 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     const updatedList = [...listDesc];
     updatedList.splice(index, 1);
     setListDesc(updatedList);
+  };
+
+  const updateInvestigation = () => {
+    if (_rnc) {
+      dispatch(update({ ..._rnc, statusAtual: 'LEVANTAMENTO' }));
+    }
+  };
+
+  const updateElaboration = () => {
+    if (_rnc) {
+      dispatch(update({ ..._rnc, statusAtual: 'ELABORACAO' }));
+    }
   };
 
   const renderListDesc = () => {
@@ -529,9 +550,9 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   };
 
   const setTitleMPOrigin = () => {
-    if (_rnc?.origin === 'mp') {
+    if (_rnc.origemNC === 'MATERIA_PRIMA_INSUMO') {
       return 'Decisão sobre Matéria-Prima/Insumo';
-    } else if (_rnc?.origin === 'endProduct') {
+    } else if (_rnc.origemNC === 'PRODUTO_ACABADO') {
       return 'Decisão sobre Produto Acabado';
     }
   };
@@ -546,37 +567,35 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   const [selectedResponsavelMateriaPrima, setSelectedResponsavelMateriaPrima] = useState([]);
 
   const validarInvestigacao = () => {
-    if (!checkedFiveWhy && !checkedIshikawa) return false;
-
     if (checkedFiveWhy) {
       let counter = 0;
-      counter = registerForm.fiveWhy_n1.value !== '' ? counter + 1 : counter;
-      counter = registerForm.fiveWhy_n2.value !== '' ? counter + 1 : counter;
-      counter = registerForm.fiveWhy_n3.value !== '' ? counter + 1 : counter;
-      counter = registerForm.fiveWhy_n4.value !== '' ? counter + 1 : counter;
-      counter = registerForm.fiveWhy_n5.value !== '' ? counter + 1 : counter;
+      counter = reasonsInvestigation?.first !== '' ? counter + 1 : counter;
+      counter = reasonsInvestigation?.second !== '' ? counter + 1 : counter;
+      counter = reasonsInvestigation?.third !== '' ? counter + 1 : counter;
+      counter = reasonsInvestigation?.fourth !== '' ? counter + 1 : counter;
+      counter = reasonsInvestigation?.fifth !== '' ? counter + 1 : counter;
+
+      console.log(counter);
+
       if (counter < 3) {
         return false;
       }
     }
-    if (checkedIshikawa) {
-      if (
-        registerForm.causaMeioAmbiente.value.length > 0 ||
-        registerForm.causaMaoObra.value.length > 0 ||
-        registerForm.causaMetodo.value.length > 0 ||
-        registerForm.causaMaquina.value.length > 0 ||
-        registerForm.causaMedicao.value.length > 0 ||
-        registerForm.causaMateriaPrima.value.length > 0
-      ) {
-        return true;
-      }
-      return false;
+    if (
+      (checkedIshikawa && ishikawaInvestigation?.environment?.length > 0) ||
+      ishikawaInvestigation?.manpower?.length > 0 ||
+      ishikawaInvestigation?.method?.length > 0 ||
+      ishikawaInvestigation?.machine?.length > 0 ||
+      ishikawaInvestigation?.measurement?.length > 0 ||
+      ishikawaInvestigation?.rawMaterial?.length > 0
+    ) {
+      return true;
     }
 
     return true;
   };
 
-  const buttonAvancarDisabled = !validarInvestigacao();
+  const [buttonAvancarDisabled, setButtonAvancarDisabled] = useState(true);
 
   const [showPlanoAcaoCorretiva, setShowPlanoAcaoCorretiva] = useState(false);
   const users = useAppSelector(state => state.userManagement.users);
@@ -596,6 +615,9 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
 
     return rncs.find(rnc => rnc.id === parseInt(id));
   };
+
+  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
+  const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
 
   return (
     <>
@@ -630,7 +652,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
           <ImmediateActions actions={actions} onAdded={onActionAdded} onRemoved={onActionRemoved} users={users.map(u => u.login)} />
 
           <Divider light />
-          {(_rnc?.origin === 'mp' || _rnc?.origin === 'endProduct') && (
+          {(_rnc?.origemNC == 'MATERIA_PRIMA_INSUMO' || _rnc?.origemNC == 'PRODUTO_ACABADO') && (
             <div className="fake-card mt-3">
               <Typography variant="h5" component="div">
                 {setTitleMPOrigin()}
@@ -826,9 +848,11 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
           <Divider light />
 
           <CauseInvestigation
-            description={_rnc?.descricao}
+            description={''}
             onIshikawaInvestigationChanged={onIshikawaInvestigationChanged}
             onReasonsInvestigationChanged={onReasonsInvestigationChanged}
+            checkIshikawa={setCheckedIshikawa}
+            checkReasons={setCheckedFiveWhy}
           />
 
           {showPlanoAcaoCorretiva && (
@@ -932,6 +956,91 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
             >
               Voltar
             </Button>
+            <Button
+              onClick={() => {
+                if (_rnc && !showPlanoAcaoCorretiva) {
+                  dispatch(saveRange({ description: registerForm.keywords.value.join(','), rncId: _rnc.id }));
+                  dispatch(
+                    saveImmediateAction({
+                      deadline: descPrazo,
+                      description: '',
+                      problem: '',
+                      responsibleId: filterUser(descResponsavel)?.id,
+                      rncId: _rnc.id,
+                      status: 'A',
+                      validated: false,
+                      verifierId: filterUser(descResponsavel)?.id,
+                    })
+                  );
+
+                  if (checkedIshikawa) {
+                    dispatch(
+                      saveEffectCause({
+                        description: '',
+                        environment: registerForm.causaMeioAmbiente.value.toString(),
+                        machine: registerForm.causaMaquina.value.toString(),
+                        measurement: registerForm.causaMedicao.value.toString(),
+                        method: registerForm.causaMetodo.value.toString(),
+                        rawMaterial: registerForm.causaMateriaPrima.value.toString(),
+                        workforce: registerForm.causaMaoObra.value.toString(),
+                      })
+                    );
+                  }
+                  if (checkedFiveWhy) {
+                    dispatch(
+                      saveReason({
+                        cause: '',
+                        fifth: registerForm.fiveWhy_n5.value.toString(),
+                        first: registerForm.fiveWhy_n1.value.toString(),
+                        forth: registerForm.fiveWhy_n4.value.toString(),
+                        problem: '',
+                        second: registerForm.fiveWhy_n2.value.toString(),
+                        third: registerForm.fiveWhy_n3.value.toString(),
+                      })
+                    );
+                  }
+                  // dispatch(
+                  //   savePlannedAction({
+                  //     date: new Date(registerForm.planoAcaoPrazo.value),
+                  //     deadline: new Date(registerForm.planoAcaoPrazo.value),
+                  //     description: registerForm.planoAcaoDescricao.value.toString(),
+                  //     plan: {
+                  //       description: '',
+                  //       deadline: new Date(registerForm.planoAcaoPrazo.value),
+                  //       responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                  //       rncId: _rnc.id,
+                  //       status: 'A',
+                  //     },
+                  //     responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                  //     status: registerForm.planoAcaoStatus.value,
+                  //   })
+                  // );
+                  toast.success('RNC atualizada com sucesso!');
+                  updateInvestigation();
+                } else if (_rnc && showPlanoAcaoCorretiva) {
+                  updateElaboration();
+                  dispatch(
+                    savePlannedAction({
+                      date: new Date(registerForm.planoAcaoPrazo.value),
+                      deadline: new Date(registerForm.planoAcaoPrazo.value),
+                      description: registerForm.planoAcaoDescricao.value.toString(),
+                      plan: {
+                        description: '',
+                        deadline: new Date(registerForm.planoAcaoPrazo.value),
+                        responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                        rncId: _rnc.id,
+                        // ENCERRADO, ELABORACAO, EXECUCAO
+                        status: 'ELABORACAO',
+                      },
+                      responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                      status: registerForm.planoAcaoStatus.value,
+                    })
+                  );
+                }
+              }}
+            >
+              Salvar
+            </Button>
 
             <Button
               className="ms-3"
@@ -943,69 +1052,9 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                   setShowPlanoAcaoCorretiva(true);
                   return;
                 }
-
-                if (showPlanoAcaoCorretiva) {
-                  const rnc = filterRnc();
-
-                  dispatch(saveRange({ description: registerForm.keywords.value.join(','), rncId: rnc.id }));
-                  dispatch(
-                    saveImmediateAction({
-                      deadline: descPrazo,
-                      description: '',
-                      problem: '',
-                      responsibleId: filterUser(descResponsavel)?.id,
-                      rncId: rnc.id,
-                      status: 'A',
-                      validated: false,
-                      verifierId: filterUser(descResponsavel)?.id,
-                    })
-                  );
-                  dispatch(
-                    saveEffectCause({
-                      description: '',
-                      environment: registerForm.causaMeioAmbiente.value.toString(),
-                      machine: registerForm.causaMaquina.value.toString(),
-                      measurement: registerForm.causaMedicao.value.toString(),
-                      method: registerForm.causaMetodo.value.toString(),
-                      rawMaterial: registerForm.causaMateriaPrima.value.toString(),
-                      workforce: registerForm.causaMaoObra.value.toString(),
-                    })
-                  );
-                  dispatch(
-                    saveReason({
-                      cause: '',
-                      fifth: registerForm.fiveWhy_n5.value.toString(),
-                      first: registerForm.fiveWhy_n1.value.toString(),
-                      forth: registerForm.fiveWhy_n4.value.toString(),
-                      problem: '',
-                      second: registerForm.fiveWhy_n2.value.toString(),
-                      third: registerForm.fiveWhy_n3.value.toString(),
-                    })
-                  );
-                  dispatch(
-                    savePlannedAction({
-                      date: new Date(registerForm.planoAcaoPrazo.value),
-                      deadline: new Date(registerForm.planoAcaoPrazo.value),
-                      description: registerForm.planoAcaoDescricao.value.toString(),
-                      plan: {
-                        description: '',
-                        deadline: new Date(registerForm.planoAcaoPrazo.value),
-                        responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                        rncId: rnc.id,
-                        status: 'A',
-                      },
-                      responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                      status: registerForm.planoAcaoStatus.value,
-                    })
-                  );
-
-                  navigate('/rnc');
-                  toast.success('RNC atualizada com sucesso!');
-                }
               }}
-              disabled={buttonAvancarDisabled}
             >
-              Salvar
+              Avançar
             </Button>
           </div>
         </div>

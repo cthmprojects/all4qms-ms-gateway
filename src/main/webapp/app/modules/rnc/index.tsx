@@ -65,15 +65,15 @@ const RncRoutes = () => {
           element={<GeneralRegister handleTela={handleTela} handleUpdateRNC={handleUpdateRNC} findRNCById={findRNCById} />}
         ></Route>
         <Route
-          path="general/implementacao/"
+          path="general/implementacao/:id"
           element={<RegisterImplementation handleTela={handleTela} handlePrazoImplementacao={handleTela} />}
         />
         <Route
-          path="general/implementacao/validacao"
+          path="general/implementacao/validacao/:id"
           element={<RegisterImplementationVerification handleTela={handleTela} handlePrazoVerificacao={handleTela} />}
         />
         <Route
-          path="general/implementacao/fechamento"
+          path="general/implementacao/fechamento/:id"
           element={<RegisterImplementationClose handleTela={handleTela} save={handleTela} handlePrazoFechamento={handleTela} />}
         />
       </ErrorBoundaryRoutes>

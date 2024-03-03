@@ -15,7 +15,7 @@ import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { list, save, saveAudit, saveClient, saveDescription, saveProduct, update, getById } from '../../reducers/rnc.reducer';
-import rncStore from '../../rnc-store';
+import { getById as getDescriptionById } from '../../reducers/description.reducer';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
 import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
@@ -79,6 +79,11 @@ export const RNCNew = () => {
 
   const [typeBreadcrumbLabel, setTypeBreadcrumbLabel] = useState('');
   const [originBreadcrumbLabel, setOriginBreadcrumbLabel] = useState('');
+  const [descriptionEvidences, setDescriptionEvidences] = useState([]);
+
+  const onDescriptionEvidencesChanged = (values: Array<File>) => {
+    setDescriptionEvidences(values);
+  };
 
   const handleTypeChange = event => {
     const { value } = event.target;
@@ -330,7 +335,9 @@ export const RNCNew = () => {
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
 
-      dispatch(saveDescription({ details: description, evidence: evidence, requirement: requirement, rncId: rnc.id }));
+      dispatch(
+        saveDescription({ details: description, evidence: evidence, requirement: requirement, rncId: rnc.id, anexos: descriptionEvidences })
+      );
       dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO' }));
     }
   };
@@ -360,6 +367,14 @@ export const RNCNew = () => {
         type: { value: rnc.tipoNC || '', error: false },
         origin: { value: rnc.origemNC || '', error: false },
       });
+
+      if (rnc.statusAtual === 'DETALHAMENTO') {
+        setSecondForm(true);
+
+        // getDescriptionById(rnc.id);
+        // TODO: fetch description and other data
+        // Update the state with the data
+      }
     }
   }, [users, rnc]);
 
@@ -557,6 +572,7 @@ export const RNCNew = () => {
                   onDescriptionChanged={onDescriptionChanged}
                   onEvidencesChanged={onEvidencesChanged}
                   onRequirementChanged={onRequirementChanged}
+                  onDescriptionsEvidencesChanged={onDescriptionEvidencesChanged}
                   requirement={requirement}
                 />
               </Row>
