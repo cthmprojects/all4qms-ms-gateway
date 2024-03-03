@@ -1,17 +1,24 @@
 import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
+import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
+import { Rnc } from 'app/modules/rnc/models';
 
 export const RegisterImplementationVerification = ({ handleTela, handlePrazoVerificacao }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { id } = useParams();
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+
+    if (id) {
+      dispatch(getById(parseInt(id)));
+    }
   }, []);
 
   const [firstForm, setFirstForm] = useState({
@@ -25,6 +32,16 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
     setFirstForm({ ...firstForm, date: { value: value, error: firstForm.date.error } });
     handlePrazoVerificacao(value);
   };
+
+  const updateStatus = () => {
+    if (_rnc) {
+      dispatch(update({ ..._rnc, statusAtual: 'VERIFICACAO' }));
+      setTimeout(() => {
+        navigate('/rnc');
+      }, 1000);
+    }
+  };
+  const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
 
   const users = useAppSelector(state => state.userManagement.users);
   return (
@@ -86,14 +103,15 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
           >
             Voltar
           </Button>
+          <Button onClick={() => navigate('/rnc')}>Salvar</Button>
           <Button
             className="ms-3"
             variant="contained"
             color="primary"
             style={{ background: '#e6b200', color: '#4e4d4d' }}
-            onClick={() => navigate('/rnc')}
+            onClick={() => updateStatus()}
           >
-            Salvar
+            Avançar
           </Button>
         </div>
       </div>
