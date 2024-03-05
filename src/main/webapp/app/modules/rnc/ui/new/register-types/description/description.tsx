@@ -1,12 +1,15 @@
-import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import { getDescriptionByRNCId } from '../../../../reducers/description.reducer';
+import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import React, { useEffect, useRef, useState } from 'react';
 import './description.css';
 
 type RncDescriptionProps = {
   description: string;
   evidences: Array<string>;
   requirement: string;
+  rncId?: string | number;
   onDescriptionChanged: (value: string) => void;
   onEvidencesChanged: (values: Array<string>) => void;
   onRequirementChanged: (value: string) => void;
@@ -16,14 +19,22 @@ type RncDescriptionProps = {
 export const DescriptionRnc = ({
   description,
   evidences,
+  requirement,
+  rncId,
   onDescriptionChanged,
   onEvidencesChanged,
   onRequirementChanged,
-  requirement,
   onDescriptionsEvidencesChanged,
 }: RncDescriptionProps) => {
+  const dispatch = useAppDispatch();
   const [descFiles, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (rncId) {
+      dispatch(getDescriptionByRNCId(rncId));
+    }
+  }, []);
 
   const onAddEvidence = () => {
     if (!description || !requirement || !evidences || !evidences[0]) return;
@@ -40,8 +51,6 @@ export const DescriptionRnc = ({
   };
 
   const onFileChanged = event => {
-    console.log(event);
-
     const files = event.target.files;
     setFiles([...descFiles, ...files]);
     onDescriptionsEvidencesChanged([...descFiles, files]);
@@ -63,6 +72,20 @@ export const DescriptionRnc = ({
     a.click();
     document.body.removeChild(a);
   };
+
+  const descriptionEntity = useAppSelector(state => state.all4qmsmsgateway.description.entity);
+
+  useEffect(() => {
+    onDescriptionChanged(descriptionEntity?.detalhesNaoConformidade);
+    onRequirementChanged(descriptionEntity?.requisitoDescumprido);
+    // onDescriptionsEvidencesChanged(descriptionEntity?.anexos)
+
+    if (descriptionEntity?.anexos) {
+      descriptionEntity.anexos.map(e => {
+        onEvidencesChanged([...evidences, e.nomeArquivoFisico]);
+      });
+    }
+  }, [descriptionEntity]);
 
   return (
     <>
