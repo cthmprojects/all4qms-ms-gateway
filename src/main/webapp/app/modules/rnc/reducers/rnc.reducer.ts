@@ -228,11 +228,14 @@ export const saveTraceability = createAsyncThunk('rnc/traceability/save', async 
 
 export const saveDescription = createAsyncThunk('rnc/description/save', async (description: RncDescription) => {
   const formData = new FormData();
-  formData.append('id', null);
   formData.append('detalhesNaoConformidade', description.details);
   formData.append('requisitoDescumprido', description.requirement);
   formData.append('evidenciaObjetiva', description.evidence);
-  formData.append('idNaoConformidade', description.rncId.toString());
+  formData.append('naoConformidade', description.rncId.toString());
+
+  // Convert the array of File objects to a Blob object
+  const blobAnexos = new Blob(description.anexos);
+  formData.append('anexos', blobAnexos);
 
   const response = await axios.post(descriptionApiUrl, formData, {
     headers: {
@@ -344,6 +347,7 @@ const RncSlice = createEntitySlice({
           ...state,
           loading: false,
           entities: data,
+          entity: null,
           totalItems: parseInt(headers['x-total-count'], 10),
         };
       })

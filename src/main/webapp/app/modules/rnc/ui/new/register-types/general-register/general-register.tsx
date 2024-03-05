@@ -1,15 +1,11 @@
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import { Add } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Textarea from '@mui/joy/Textarea';
 import { styled } from '@mui/joy/styles';
 import {
-  Autocomplete,
   Breadcrumbs,
   Button,
   Card,
-  CardContent,
-  Chip,
   Divider,
   Fab,
   FormControl,
@@ -24,11 +20,18 @@ import {
   Typography,
 } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import { Action, IshikawaInvestigation, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
-import { list, saveEffectCause, saveImmediateAction, savePlannedAction, saveRange, saveReason } from 'app/modules/rnc/reducers/rnc.reducer';
+import {
+  saveEffectCause,
+  saveImmediateAction,
+  savePlannedAction,
+  saveRange,
+  saveReason,
+  getById,
+  update,
+} from 'app/modules/rnc/reducers/rnc.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -37,69 +40,6 @@ import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { CauseInvestigation, ImmediateActions, ScopeAnalysis } from '../../../components';
 import './general-register.css';
-
-const StyledTextarea = styled(TextareaAutosize)({
-  resize: 'none',
-  border: 'none', // remove the native textarea border
-  minWidth: 0, // remove the native textarea width
-  outline: 0, // remove the native textarea outline
-  padding: 0, // remove the native textarea padding
-  paddingBlockStart: '1em',
-  paddingInlineEnd: `var(--Textarea-paddingInline)`,
-  flex: 'auto',
-  alignSelf: 'stretch',
-  color: 'inherit',
-  backgroundColor: 'transparent',
-  fontFamily: 'inherit',
-  fontSize: 'inherit',
-  fontStyle: 'inherit',
-  fontWeight: 'inherit',
-  lineHeight: 'inherit',
-  '&::placeholder': {
-    opacity: 0,
-    transition: '0.1s ease-out',
-  },
-  '&:focus::placeholder': {
-    opacity: 1,
-  },
-  // specific to TextareaAutosize, cannot use '&:focus ~ label'
-  '&:focus + textarea + label, &:not(:placeholder-shown) + textarea + label': {
-    top: '0.5rem',
-    fontSize: '0.75rem',
-  },
-  '&:focus + textarea + label': {
-    color: 'var(--Textarea-focusedHighlight)',
-  },
-});
-
-const StyledLabel = styled('label')(({ theme }) => ({
-  position: 'absolute',
-  lineHeight: 1,
-  top: 'calc((var(--Textarea-minHeight) - 1em) / 2)',
-  color: theme.vars.palette.text.tertiary,
-  fontWeight: theme.vars.fontWeight.md,
-  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-}));
-
-const InnerTextareaNC = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
-  const id = React.useId();
-  return (
-    <React.Fragment>
-      <StyledTextarea minRows={5} cols={30} {...props} ref={ref} id={id} />
-      <StyledLabel htmlFor={id}>NC</StyledLabel>
-    </React.Fragment>
-  );
-});
-
-const InnerTextareaCausa = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
-  const id = React.useId();
-  return (
-    <React.Fragment>
-      <StyledTextarea minRows={5} cols={30} {...props} ref={ref} id={id} />
-      <StyledLabel htmlFor={id}>Causa</StyledLabel>
-    </React.Fragment>
-  );
-});
 
 export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) => {
   const dispatch = useAppDispatch();
@@ -227,21 +167,17 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     },
   });
 
-  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
-
-  const [_rnc, _setrnc] = useState(findRNCById(id));
-
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    dispatch(list({}));
+    // dispatch(list({}));
+
+    if (id) {
+      dispatch(getById(parseInt(id)));
+    }
   }, []);
 
-  const [k, setK] = useState('');
-
-  const [descAction, setDescAction] = useState('');
   const [descPrazo, setDescPrazo] = useState(new Date());
   const [descResponsavel, setDescResponsavel] = useState('');
-  const [descStatus, setDescStatus] = useState('');
 
   const [listDesc, setListDesc] = useState([]);
 
@@ -279,27 +215,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     setReasonsInvestigation(investigation);
   };
 
-  const appendToListDesc = () => {
-    if (descAction === '' || descPrazo === null || descResponsavel === '' || descStatus === '') return;
-
-    const newItem = {
-      descAction: descAction,
-      descPrazo: descPrazo,
-      descResponsavel: descResponsavel,
-      descStatus: descStatus,
-    };
-
-    setListDesc([...listDesc, newItem]);
-    setDescAction('');
-    setDescPrazo(new Date());
-    setDescResponsavel('');
-    setDescStatus('');
-  };
-
-  const [descPlanoAcao, setDescPlanoAcao] = useState('');
-  const [responsalvePlanoAcao, setResponsalvePlanoAcao] = useState('');
   const [prazoPlanoAcao, setPrazoPlanoAcao] = useState(new Date());
-  const [listPlanoAcao, setListPlanoAcao] = useState([]);
   const [responsaveisMP, setResponsaveisMP] = useState([]);
   const [responsaveisVerificacao, setResponsaveisVerificacao] = useState([]);
   const [responsaveisPlanoAcao, setResponsaveisPlanoAcao] = useState([]);
@@ -311,88 +227,21 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     setResponsaveisMP(typeof value === 'string' ? value.split(',') : value);
   };
 
-  const appendToListPlanoAcao = () => {
-    if (responsalvePlanoAcao === '' || prazoPlanoAcao === null || descPlanoAcao === '') return;
-
-    const newItem = {
-      descPlanoAcao: descPlanoAcao,
-      responsalvePlanoAcao: responsalvePlanoAcao,
-      prazoPlanoAcao: prazoPlanoAcao,
-    };
-
-    setListPlanoAcao([...listPlanoAcao, newItem]);
-    setPrazoPlanoAcao(new Date());
-    setDescPlanoAcao('');
-    setResponsalvePlanoAcao('');
+  const updateInvestigation = () => {
+    if (_rnc) {
+      dispatch(update({ ..._rnc, statusAtual: 'LEVANTAMENTO' }));
+    }
   };
 
-  const handleRemoveItem = (index: number) => {
-    const updatedList = [...listDesc];
-    updatedList.splice(index, 1);
-    setListDesc(updatedList);
-  };
-
-  const renderListDesc = () => {
-    return (
-      <>
-        {listDesc.map((desc, index) => (
-          <div key={index} className="m-2 ms-0">
-            <div style={{ display: 'flex', flexDirection: 'column' }} className="mt-2 w-100">
-              <textarea
-                className="textarea-ishikawa"
-                style={{ padding: '8px 12px' }}
-                name="ncArea"
-                rows={5}
-                cols={30}
-                placeholder="Descrição da ação"
-                value={descAction}
-                onChange={e => setDescAction(e.target.value)}
-              />
-              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2">
-                <FormControl className="m-2 ms-0 mb-2">
-                  <DatePicker
-                    // locale='pt-BR'
-                    label="Prazo"
-                    selected={descPrazo}
-                    onChange={date => setDescPrazo(date)}
-                    className="date-picker"
-                    dateFormat={'dd/MM/yyyy'}
-                    id="date-picker-rnc-acao-prazo"
-                  />
-                </FormControl>
-
-                <TextField
-                  label="Responsável"
-                  id="rnc-text-field"
-                  className="m-2 rnc-form-field"
-                  sx={{ width: '20% !important' }}
-                  value={desc.descResponsavel}
-                />
-                <TextField
-                  label="Status"
-                  id="rnc-text-field"
-                  className="m-2 rnc-form-field"
-                  sx={{ width: '20% !important' }}
-                  value={desc.descStatus}
-                />
-                <IconButton aria-label="Remover" onClick={() => handleRemoveItem(index)}>
-                  <DeleteIcon fontSize="medium" />
-                </IconButton>
-              </div>
-            </div>
-          </div>
-        ))}
-      </>
-    );
+  const updateElaboration = () => {
+    if (_rnc) {
+      dispatch(update({ ..._rnc, statusAtual: 'ELABORACAO' }));
+    }
   };
 
   const [responsaveis, setResponsaveis] = useState([]);
 
   const [listaAcoesCorretivas, setListaAcoesCorretivas] = useState([]);
-
-  const setAcao = (e: any) => {
-    handleChange({ ...registerForm, descricaoAcao: { value: e.target.value, error: registerForm.descricaoAcao.error } });
-  };
 
   const handleChange = (value: any) => {
     setRegisterForm(value);
@@ -400,24 +249,8 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   };
 
   const [checkedIshikawa, setCheckedIshikawa] = React.useState(false);
-  const handleCheckIshikawaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCheckedIshikawa(!checkedIshikawa);
-  };
 
   const [checkedFiveWhy, setCheckedFiveWhy] = React.useState(false);
-  const handleCheckFiveWhy = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCheckedFiveWhy(!checkedFiveWhy);
-  };
-
-  const handleRemoveKeyword = (keyword: string) => {
-    handleChange({
-      ...registerForm,
-      keywords: {
-        value: registerForm.keywords.value.filter((kw: string) => kw !== keyword),
-        error: registerForm.keywords.error,
-      },
-    });
-  };
 
   const handleRemoveListaAcoesCorretivasItem = (index: number) => {
     const updatedList = [...listaAcoesCorretivas];
@@ -529,54 +362,12 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   };
 
   const setTitleMPOrigin = () => {
-    if (_rnc?.origin === 'mp') {
+    if (_rnc.origemNC === 'MATERIA_PRIMA_INSUMO') {
       return 'Decisão sobre Matéria-Prima/Insumo';
-    } else if (_rnc?.origin === 'endProduct') {
+    } else if (_rnc.origemNC === 'PRODUTO_ACABADO') {
       return 'Decisão sobre Produto Acabado';
     }
   };
-  const optionsResponsavelMateriaPrima = [
-    { label: 'Responsavel 1', value: 'Responsavel 1' },
-    { label: 'Responsavel 2', value: 'Responsavel 2' },
-    { label: 'Responsavel 3', value: 'Responsavel 3' },
-    { label: 'Responsavel 4', value: 'Responsavel 4' },
-    { label: 'Responsavel 5', value: 'Responsavel 5' },
-  ];
-
-  const [selectedResponsavelMateriaPrima, setSelectedResponsavelMateriaPrima] = useState([]);
-
-  const validarInvestigacao = () => {
-    if (!checkedFiveWhy && !checkedIshikawa) return false;
-
-    if (checkedFiveWhy) {
-      let counter = 0;
-      counter = registerForm.fiveWhy_n1.value !== '' ? counter + 1 : counter;
-      counter = registerForm.fiveWhy_n2.value !== '' ? counter + 1 : counter;
-      counter = registerForm.fiveWhy_n3.value !== '' ? counter + 1 : counter;
-      counter = registerForm.fiveWhy_n4.value !== '' ? counter + 1 : counter;
-      counter = registerForm.fiveWhy_n5.value !== '' ? counter + 1 : counter;
-      if (counter < 3) {
-        return false;
-      }
-    }
-    if (checkedIshikawa) {
-      if (
-        registerForm.causaMeioAmbiente.value.length > 0 ||
-        registerForm.causaMaoObra.value.length > 0 ||
-        registerForm.causaMetodo.value.length > 0 ||
-        registerForm.causaMaquina.value.length > 0 ||
-        registerForm.causaMedicao.value.length > 0 ||
-        registerForm.causaMateriaPrima.value.length > 0
-      ) {
-        return true;
-      }
-      return false;
-    }
-
-    return true;
-  };
-
-  const buttonAvancarDisabled = !validarInvestigacao();
 
   const [showPlanoAcaoCorretiva, setShowPlanoAcaoCorretiva] = useState(false);
   const users = useAppSelector(state => state.userManagement.users);
@@ -589,13 +380,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     return users.find(user => user.login === login);
   };
 
-  const filterRnc = () => {
-    if (!rncs || rncs.length <= 0) {
-      return null;
-    }
-
-    return rncs.find(rnc => rnc.id === parseInt(id));
-  };
+  const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
 
   return (
     <>
@@ -629,8 +414,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
 
           <ImmediateActions actions={actions} onAdded={onActionAdded} onRemoved={onActionRemoved} users={users.map(u => u.login)} />
 
-          <Divider light />
-          {(_rnc?.origin === 'mp' || _rnc?.origin === 'endProduct') && (
+          {(_rnc?.origemNC == 'MATERIA_PRIMA_INSUMO' || _rnc?.origemNC == 'PRODUTO_ACABADO') && (
             <div className="fake-card mt-3">
               <Typography variant="h5" component="div">
                 {setTitleMPOrigin()}
@@ -823,12 +607,13 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
               <br />
             </div>
           )}
-          <Divider light />
 
           <CauseInvestigation
-            description={_rnc?.descricao}
+            description={''}
             onIshikawaInvestigationChanged={onIshikawaInvestigationChanged}
             onReasonsInvestigationChanged={onReasonsInvestigationChanged}
+            checkIshikawa={setCheckedIshikawa}
+            checkReasons={setCheckedFiveWhy}
           />
 
           {showPlanoAcaoCorretiva && (
@@ -932,6 +717,91 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
             >
               Voltar
             </Button>
+            <Button
+              onClick={() => {
+                if (_rnc && !showPlanoAcaoCorretiva) {
+                  dispatch(saveRange({ description: registerForm.keywords.value.join(','), rncId: _rnc.id }));
+                  dispatch(
+                    saveImmediateAction({
+                      deadline: descPrazo,
+                      description: '',
+                      problem: '',
+                      responsibleId: filterUser(descResponsavel)?.id,
+                      rncId: _rnc.id,
+                      status: 'A',
+                      validated: false,
+                      verifierId: filterUser(descResponsavel)?.id,
+                    })
+                  );
+
+                  if (checkedIshikawa) {
+                    dispatch(
+                      saveEffectCause({
+                        description: '',
+                        environment: registerForm.causaMeioAmbiente.value.toString(),
+                        machine: registerForm.causaMaquina.value.toString(),
+                        measurement: registerForm.causaMedicao.value.toString(),
+                        method: registerForm.causaMetodo.value.toString(),
+                        rawMaterial: registerForm.causaMateriaPrima.value.toString(),
+                        workforce: registerForm.causaMaoObra.value.toString(),
+                      })
+                    );
+                  }
+                  if (checkedFiveWhy) {
+                    dispatch(
+                      saveReason({
+                        cause: '',
+                        fifth: registerForm.fiveWhy_n5.value.toString(),
+                        first: registerForm.fiveWhy_n1.value.toString(),
+                        forth: registerForm.fiveWhy_n4.value.toString(),
+                        problem: '',
+                        second: registerForm.fiveWhy_n2.value.toString(),
+                        third: registerForm.fiveWhy_n3.value.toString(),
+                      })
+                    );
+                  }
+                  // dispatch(
+                  //   savePlannedAction({
+                  //     date: new Date(registerForm.planoAcaoPrazo.value),
+                  //     deadline: new Date(registerForm.planoAcaoPrazo.value),
+                  //     description: registerForm.planoAcaoDescricao.value.toString(),
+                  //     plan: {
+                  //       description: '',
+                  //       deadline: new Date(registerForm.planoAcaoPrazo.value),
+                  //       responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                  //       rncId: _rnc.id,
+                  //       status: 'A',
+                  //     },
+                  //     responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                  //     status: registerForm.planoAcaoStatus.value,
+                  //   })
+                  // );
+                  toast.success('RNC atualizada com sucesso!');
+                  updateInvestigation();
+                } else if (_rnc && showPlanoAcaoCorretiva) {
+                  updateElaboration();
+                  dispatch(
+                    savePlannedAction({
+                      date: new Date(registerForm.planoAcaoPrazo.value),
+                      deadline: new Date(registerForm.planoAcaoPrazo.value),
+                      description: registerForm.planoAcaoDescricao.value.toString(),
+                      plan: {
+                        description: '',
+                        deadline: new Date(registerForm.planoAcaoPrazo.value),
+                        responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                        rncId: _rnc.id,
+                        // ENCERRADO, ELABORACAO, EXECUCAO
+                        status: 'ELABORACAO',
+                      },
+                      responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                      status: registerForm.planoAcaoStatus.value,
+                    })
+                  );
+                }
+              }}
+            >
+              Salvar
+            </Button>
 
             <Button
               className="ms-3"
@@ -943,69 +813,9 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                   setShowPlanoAcaoCorretiva(true);
                   return;
                 }
-
-                if (showPlanoAcaoCorretiva) {
-                  const rnc = filterRnc();
-
-                  dispatch(saveRange({ description: registerForm.keywords.value.join(','), rncId: rnc.id }));
-                  dispatch(
-                    saveImmediateAction({
-                      deadline: descPrazo,
-                      description: '',
-                      problem: '',
-                      responsibleId: filterUser(descResponsavel)?.id,
-                      rncId: rnc.id,
-                      status: 'A',
-                      validated: false,
-                      verifierId: filterUser(descResponsavel)?.id,
-                    })
-                  );
-                  dispatch(
-                    saveEffectCause({
-                      description: '',
-                      environment: registerForm.causaMeioAmbiente.value.toString(),
-                      machine: registerForm.causaMaquina.value.toString(),
-                      measurement: registerForm.causaMedicao.value.toString(),
-                      method: registerForm.causaMetodo.value.toString(),
-                      rawMaterial: registerForm.causaMateriaPrima.value.toString(),
-                      workforce: registerForm.causaMaoObra.value.toString(),
-                    })
-                  );
-                  dispatch(
-                    saveReason({
-                      cause: '',
-                      fifth: registerForm.fiveWhy_n5.value.toString(),
-                      first: registerForm.fiveWhy_n1.value.toString(),
-                      forth: registerForm.fiveWhy_n4.value.toString(),
-                      problem: '',
-                      second: registerForm.fiveWhy_n2.value.toString(),
-                      third: registerForm.fiveWhy_n3.value.toString(),
-                    })
-                  );
-                  dispatch(
-                    savePlannedAction({
-                      date: new Date(registerForm.planoAcaoPrazo.value),
-                      deadline: new Date(registerForm.planoAcaoPrazo.value),
-                      description: registerForm.planoAcaoDescricao.value.toString(),
-                      plan: {
-                        description: '',
-                        deadline: new Date(registerForm.planoAcaoPrazo.value),
-                        responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                        rncId: rnc.id,
-                        status: 'A',
-                      },
-                      responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                      status: registerForm.planoAcaoStatus.value,
-                    })
-                  );
-
-                  navigate('/rnc');
-                  toast.success('RNC atualizada com sucesso!');
-                }
               }}
-              disabled={buttonAvancarDisabled}
             >
-              Salvar
+              Avançar
             </Button>
           </div>
         </div>

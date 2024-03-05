@@ -1,18 +1,25 @@
 import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import './register-implementation.css';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
+import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
+import { Rnc } from 'app/modules/rnc/models';
 
 export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+
+    if (id) {
+      dispatch(getById(parseInt(id)));
+    }
   }, []);
 
   const [firstForm, setFirstForm] = useState({
@@ -27,6 +34,17 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
     handlePrazoImplementacao(value);
   };
   const users = useAppSelector(state => state.userManagement.users);
+
+  const updateStatus = () => {
+    if (_rnc) {
+      dispatch(update({ ..._rnc, statusAtual: 'EXECUCAO' }));
+      setTimeout(() => {
+        navigate('/rnc');
+      }, 1000);
+    }
+  };
+
+  const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
 
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
@@ -80,22 +98,18 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
           <textarea rows={5} cols={80} style={{ width: '100%', border: '1px solid #c1c1c1', borderRadius: '4px' }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
-          <Button
-            variant="contained"
-            className="me-3"
-            style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-            onClick={() => handleTela('geral')}
-          >
+          <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => navigate('/rnc')}>
             Voltar
           </Button>
+          <Button onClick={() => navigate('/rnc')}>Salvar</Button>
           <Button
             className="ms-3"
             variant="contained"
             color="primary"
             style={{ background: '#e6b200', color: '#4e4d4d' }}
-            onClick={() => navigate('/rnc')}
+            onClick={() => updateStatus()}
           >
-            Salvar
+            Avançar
           </Button>
         </div>
       </div>

@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-empty-pattern */
 /* eslint-disable react/jsx-key */
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Search } from '@mui/icons-material';
 import {
   Box,
@@ -11,7 +10,6 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
-  Menu,
   MenuItem,
   OutlinedInput,
   Pagination,
@@ -29,15 +27,16 @@ import {
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
-import { AprovacaoNC } from '../../models';
-import { list, listAprovacaoNC, deleteRnc } from '../../reducers/rnc.reducer';
+import { list, listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
+import { reset as DescriptionResetEntity } from '../../reducers/description.reducer';
+import MenuOptions from '../components/table-menu/table-menu-options';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -75,10 +74,7 @@ const RncList = ({}) => {
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [page, setPage] = useState<number>(1);
-
-  const openOptions = Boolean(anchorEl);
 
   const [filters, setFilters] = useState({
     dtIni: new Date(),
@@ -102,13 +98,6 @@ const RncList = ({}) => {
     );
   };
 
-  const handleClickOptions = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleCloseOptions = () => {
-    setAnchorEl(null);
-  };
-
   // Dispatcher
   const dispatch = useAppDispatch();
 
@@ -129,27 +118,21 @@ const RncList = ({}) => {
     dispatch(list({ page: page - 1, size: 20 }));
   }, [page]);
 
-  const deleteRncById = (id: number) => {
-    dispatch(deleteRnc(id));
-
-    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
-  };
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
   useEffect(() => {
-    if (rncs?.length > 0) {
-      localStorage.setItem('rnc', rncs.length.toString());
-    } else {
-      localStorage.setItem('rnc', '0');
-    }
-  }, []);
-
-  useEffect(() => {
     dispatch(listAprovacaoNC({}));
   }, [rncs]);
+
+  const reloadInfo = () => {
+    dispatch(reset());
+    dispatch(DescriptionResetEntity());
+    setTimeout(() => {
+      dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
+    }, 500);
+  };
 
   const columns = [
     'Número',
@@ -163,6 +146,7 @@ const RncList = ({}) => {
     'Eficácia',
     'Fechamento',
     'Status',
+    '',
   ];
 
   const formatDateToString = (date: Date | null | undefined) => {
@@ -177,11 +161,6 @@ const RncList = ({}) => {
     return `${day}/${month}/${year}`;
   };
 
-  const goToPage = (route: string) => {
-    handleCloseOptions();
-    navigate(route);
-  };
-
   const filterUser = (id: number) => {
     if (!users || users.length <= 0) {
       return null;
@@ -192,10 +171,6 @@ const RncList = ({}) => {
 
   const onPageChanged = (event: React.ChangeEvent<unknown>, page: number) => {
     setPage(page);
-  };
-
-  const canAccessFirstStep = (rnc: Rnc) => {
-    return (userId === rnc.idEmissorNC && rnc.statusAtual === 'PREENCHIMENTO') || userRole === 'ROLE_SGQ';
   };
 
   const renderTable = () => {
@@ -221,31 +196,7 @@ const RncList = ({}) => {
               </TableHead>
               <TableBody>
                 {rncs?.map(rnc => {
-                  const {
-                    acoesImediatas,
-                    aprovacaoNC,
-                    atualizadoEm,
-                    criadoEm,
-                    decisaoNC,
-                    dtNC,
-                    id,
-                    idEmissorNC,
-                    idReceptorNC,
-                    idUsuarioAtual,
-                    ncOutros,
-                    numNC,
-                    origemNC,
-                    possuiReincidencia,
-                    processoEmissor,
-                    processoNC,
-                    statusAtual,
-                    tipoNC,
-                    vinculoAuditoria,
-                    vinculoCliente,
-                    vinculoDocAnterior,
-                    vinculoProduto,
-                    aprovacao,
-                  } = rnc;
+                  const { criadoEm, dtNC, id, idEmissorNC, idReceptorNC, idUsuarioAtual, numNC, aprovacao } = rnc;
 
                   const emissor = filterUser(idEmissorNC);
                   const receptor = filterUser(idReceptorNC);
@@ -261,44 +212,11 @@ const RncList = ({}) => {
                       <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell>
                       <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
-                      <TableCell> {statusAtual} </TableCell>
                       <TableCell> - </TableCell>
+                      <TableCell> - </TableCell>
+                      <TableCell>{rnc.statusAtual}</TableCell>
                       <TableCell>
-                        <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
-                          <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
-                        </IconButton>
-                        <Menu
-                          id="basic-menu"
-                          anchorEl={anchorEl}
-                          open={openOptions}
-                          onClose={handleCloseOptions}
-                          MenuListProps={{
-                            'aria-labelledby': 'basic-button',
-                          }}
-                        >
-                          <MenuItem disabled={!canAccessFirstStep} onClick={() => goToPage(`/rnc/new/${rnc.id}`)}>
-                            Preenchimento
-                          </MenuItem>
-                          <MenuItem disabled={userId !== rnc.idUsuarioAtual} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
-                            Registrar NC
-                          </MenuItem>
-                          <MenuItem disabled={rnc.statusAtual !== 'EXECUCAO'} onClick={() => goToPage('/rnc/general/implementacao')}>
-                            Plano de ação
-                          </MenuItem>
-                          <MenuItem
-                            disabled={rnc.statusAtual !== 'VERIFICACAO'}
-                            onClick={() => goToPage('/rnc/general/implementacao/validacao')}
-                          >
-                            Validação Plano de ação
-                          </MenuItem>
-                          <MenuItem disabled={userRole !== 'SGQ'} onClick={() => goToPage('/rnc/general/implementacao/fechamento')}>
-                            Eficácia Plano de Ação
-                          </MenuItem>
-                          <MenuItem onClick={() => deleteRncById(rnc.id)} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            Remover NC
-                            <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
-                          </MenuItem>
-                        </Menu>
+                        <MenuOptions rnc={rnc} userId={userId} userRole={userRole} reload={reloadInfo} />
                       </TableCell>
                     </TableRow>
                   );

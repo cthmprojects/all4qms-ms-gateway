@@ -15,7 +15,6 @@ import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { list, save, saveAudit, saveClient, saveDescription, saveProduct, update, getById } from '../../reducers/rnc.reducer';
-import rncStore from '../../rnc-store';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
 import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
@@ -79,6 +78,12 @@ export const RNCNew = () => {
 
   const [typeBreadcrumbLabel, setTypeBreadcrumbLabel] = useState('');
   const [originBreadcrumbLabel, setOriginBreadcrumbLabel] = useState('');
+  const [descriptionEvidences, setDescriptionEvidences] = useState([]);
+  const [stateRnc, setStateRnc] = useState<Rnc>();
+
+  const onDescriptionEvidencesChanged = (values: Array<File>) => {
+    setDescriptionEvidences(values);
+  };
 
   const handleTypeChange = event => {
     const { value } = event.target;
@@ -195,7 +200,6 @@ export const RNCNew = () => {
     }
     if (validateFields(firstForm, setFirstForm, setFormError)) {
       toast.success('RNC salva com sucesso!');
-
       const receptorNC = filterUser(firstForm.forwarded.value);
       const dtNC = new Date();
       const idEmissorNC = parseInt(Storage.session.get('ID_USUARIO'));
@@ -330,9 +334,21 @@ export const RNCNew = () => {
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
 
-      dispatch(saveDescription({ details: description, evidence: evidence, requirement: requirement, rncId: rnc.id }));
-      dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO' }));
+      dispatch(
+        saveDescription({
+          details: description,
+          evidence: evidence,
+          requirement: requirement,
+          rncId: rnc.id,
+          anexos: descriptionEvidences,
+        })
+      );
+      dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: selectedRncIds || null }));
     }
+  };
+
+  const goToNextStep = () => {
+    dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO' }));
   };
 
   const filterUser = (login: string) => {
@@ -340,7 +356,7 @@ export const RNCNew = () => {
       return null;
     }
 
-    return users.find(user => user.login === login);
+    return users.find(user => user.nome === login);
   };
 
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
@@ -350,18 +366,40 @@ export const RNCNew = () => {
 
   useEffect(() => {
     if (rnc) {
+      setStateRnc(rnc);
       setFirstForm({
         number: { value: String(rnc.id), error: false },
         emitter: { value: users.find(user => user.id === rnc.idEmissorNC)?.nome || '', error: false },
         date: { value: new Date(rnc.dtNC), error: false },
         processOrigin: { value: rnc.processoEmissor?.toString() || '', error: false },
-        forwarded: { value: users.find(user => user.id === rnc.idUsuarioAtual)?.nome || '', error: false },
+        forwarded: { value: users.find(user => user.id === rnc.idReceptorNC)?.nome || '', error: false },
         processTarget: { value: rnc.processoNC?.toString() || '', error: false },
         type: { value: rnc.tipoNC || '', error: false },
         origin: { value: rnc.origemNC || '', error: false },
       });
+
+      setRepetition(rnc.possuiReincidencia || false);
+      setSelectedRncIds(rnc.vinculoDocAnterior || []);
+
+      if (rnc.statusAtual === 'DETALHAMENTO') {
+        setSecondForm(true);
+
+        // getDescriptionById(rnc.id);
+        // TODO: fetch description and other data
+        // Update the state with the data
+      }
     }
   }, [users, rnc]);
+
+  useEffect(() => {
+    if (users && stateRnc) {
+      setFirstForm({
+        ...firstForm,
+        emitter: { value: users.find(user => user.id === stateRnc.idEmissorNC)?.nome, error: false },
+        forwarded: { value: users.find(user => user.id === stateRnc.idReceptorNC)?.nome, error: false },
+      });
+    }
+  }, [users]);
 
   if (tela === 'cadastro') {
     return (
@@ -557,7 +595,9 @@ export const RNCNew = () => {
                   onDescriptionChanged={onDescriptionChanged}
                   onEvidencesChanged={onEvidencesChanged}
                   onRequirementChanged={onRequirementChanged}
+                  onDescriptionsEvidencesChanged={onDescriptionEvidencesChanged}
                   requirement={requirement}
+                  rncId={id}
                 />
               </Row>
               <Row className="ms-3 me-3 mt-3" fullWidth>
@@ -581,11 +621,15 @@ export const RNCNew = () => {
                   </Button>
                   <Button
                     variant="outlined"
-                    color="primary"
-                    style={{ background: '#e6b200', color: '#4e4d4d' }}
+                    // color="primary"
+                    // style={{ background: '#e6b200', color: '#4e4d4d' }}
+                    className="me-3"
                     onClick={onSaveRncDescription}
                   >
                     Salvar
+                  </Button>
+                  <Button variant="outlined" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }} onClick={goToNextStep}>
+                    Avançar
                   </Button>
                 </div>
               </Row>

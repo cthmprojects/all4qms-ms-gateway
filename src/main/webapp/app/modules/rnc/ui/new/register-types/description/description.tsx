@@ -1,27 +1,40 @@
-import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import { getDescriptionByRNCId } from '../../../../reducers/description.reducer';
+import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import React, { useEffect, useRef, useState } from 'react';
 import './description.css';
 
 type RncDescriptionProps = {
   description: string;
   evidences: Array<string>;
   requirement: string;
+  rncId?: string | number;
   onDescriptionChanged: (value: string) => void;
   onEvidencesChanged: (values: Array<string>) => void;
   onRequirementChanged: (value: string) => void;
+  onDescriptionsEvidencesChanged: (values: Array<File>) => void;
 };
 
 export const DescriptionRnc = ({
   description,
   evidences,
+  requirement,
+  rncId,
   onDescriptionChanged,
   onEvidencesChanged,
   onRequirementChanged,
-  requirement,
+  onDescriptionsEvidencesChanged,
 }: RncDescriptionProps) => {
-  const [files, setFiles] = useState([]);
+  const dispatch = useAppDispatch();
+  const [descFiles, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (rncId) {
+      dispatch(getDescriptionByRNCId(rncId));
+    }
+  }, []);
 
   const onAddEvidence = () => {
     if (!description || !requirement || !evidences || !evidences[0]) return;
@@ -39,13 +52,15 @@ export const DescriptionRnc = ({
 
   const onFileChanged = event => {
     const files = event.target.files;
-    setFiles([...files, ...files]);
+    setFiles([...descFiles, ...files]);
+    onDescriptionsEvidencesChanged([...descFiles, files]);
   };
 
   const removeSelectedFile = (index: number) => {
-    const newFiles = [...files];
+    const newFiles = [...descFiles];
     newFiles.splice(index, 1);
     setFiles(newFiles);
+    onDescriptionsEvidencesChanged(newFiles);
   };
 
   const downloadFile = file => {
@@ -57,6 +72,20 @@ export const DescriptionRnc = ({
     a.click();
     document.body.removeChild(a);
   };
+
+  const descriptionEntity = useAppSelector(state => state.all4qmsmsgateway.description.entity);
+
+  useEffect(() => {
+    onDescriptionChanged(descriptionEntity?.detalhesNaoConformidade);
+    onRequirementChanged(descriptionEntity?.requisitoDescumprido);
+    // onDescriptionsEvidencesChanged(descriptionEntity?.anexos)
+
+    if (descriptionEntity?.anexos) {
+      descriptionEntity.anexos.map(e => {
+        onEvidencesChanged([...evidences, e.nomeArquivoFisico]);
+      });
+    }
+  }, [descriptionEntity]);
 
   return (
     <>
@@ -130,12 +159,12 @@ export const DescriptionRnc = ({
           </div>
         ))}
 
-        {files.length > 0 && (
+        {descFiles.length > 0 && (
           <div className="mt-2 mb-2">
             <Divider variant="middle" sx={{ margin: ' 0.5rem 0px !important' }} />
             <div>
               <h5>Arquivos Selecionados:</h5>
-              {files.map((file, index) => (
+              {descFiles.map((file, index) => (
                 <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
                   <a
                     href="#"
