@@ -21,7 +21,7 @@ export type Rnc = {
   tipoNC: string;
   vinculoAuditoria?: number;
   vinculoCliente?: number;
-  vinculoDocAnterior?: number;
+  vinculoDocAnterior?: Array<number>;
   vinculoProduto?: number;
   aprovacao?: AprovacaoNC;
 };

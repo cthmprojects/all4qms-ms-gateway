@@ -35,6 +35,7 @@ import { Row } from 'reactstrap';
 import { Enums, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { list, listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
+import { reset as DescriptionResetEntity } from '../../reducers/description.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
 import './rnc.css';
 
@@ -127,6 +128,7 @@ const RncList = ({}) => {
 
   const reloadInfo = () => {
     dispatch(reset());
+    dispatch(DescriptionResetEntity());
     setTimeout(() => {
       dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
     }, 500);
