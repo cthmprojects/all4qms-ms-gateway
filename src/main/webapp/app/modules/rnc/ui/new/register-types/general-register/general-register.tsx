@@ -40,6 +40,8 @@ import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { CauseInvestigation, ImmediateActions, ScopeAnalysis } from '../../../components';
 import './general-register.css';
+import { listEnums } from '../../../../reducers/enums.reducer';
+import { Enums } from '../../../../models';
 
 export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) => {
   const dispatch = useAppDispatch();
@@ -169,7 +171,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    // dispatch(list({}));
+    dispatch(listEnums());
 
     if (id) {
       dispatch(getById(parseInt(id)));
@@ -235,7 +237,11 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
 
   const updateElaboration = () => {
     if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'ELABORACAO' }));
+      if (_rnc.statusAtual == 'LEVANTAMENTO') {
+        dispatch(update({ ..._rnc, statusAtual: 'ELABORACAO' }));
+      } else if (_rnc.statusAtual == 'ELABORACAO') {
+        dispatch(update({ ..._rnc, statusAtual: 'EXECUCAO' }));
+      }
     }
   };
 
@@ -381,6 +387,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   };
 
   const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
 
   return (
     <>
@@ -663,9 +670,9 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                 <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
                   <InputLabel>Status</InputLabel>
                   <Select label="Encaminhado para:" name="forwarded">
-                    <MenuItem value="Status 1">Status 1</MenuItem>
-                    <MenuItem value="Status 2">Status 2</MenuItem>
-                    <MenuItem value="Status 3">Status 3</MenuItem>
+                    {enums.actionPlanStatuses.map(e => {
+                      return <MenuItem value={e.value}>{e.name}</MenuItem>;
+                    })}
                   </Select>
                 </FormControl>
 
@@ -760,26 +767,24 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                       })
                     );
                   }
-                  // dispatch(
-                  //   savePlannedAction({
-                  //     date: new Date(registerForm.planoAcaoPrazo.value),
-                  //     deadline: new Date(registerForm.planoAcaoPrazo.value),
-                  //     description: registerForm.planoAcaoDescricao.value.toString(),
-                  //     plan: {
-                  //       description: '',
-                  //       deadline: new Date(registerForm.planoAcaoPrazo.value),
-                  //       responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                  //       rncId: _rnc.id,
-                  //       status: 'A',
-                  //     },
-                  //     responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                  //     status: registerForm.planoAcaoStatus.value,
-                  //   })
-                  // );
+                  dispatch(
+                    savePlannedAction({
+                      date: new Date(registerForm.planoAcaoPrazo.value),
+                      deadline: new Date(registerForm.planoAcaoPrazo.value),
+                      description: registerForm.planoAcaoDescricao.value.toString(),
+                      plan: {
+                        description: '',
+                        deadline: new Date(registerForm.planoAcaoPrazo.value),
+                        responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                        rncId: _rnc.id,
+                        status: 'A',
+                      },
+                      responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
+                      status: registerForm.planoAcaoStatus.value,
+                    })
+                  );
                   toast.success('RNC atualizada com sucesso!');
-                  updateInvestigation();
                 } else if (_rnc && showPlanoAcaoCorretiva) {
-                  updateElaboration();
                   dispatch(
                     savePlannedAction({
                       date: new Date(registerForm.planoAcaoPrazo.value),
@@ -811,6 +816,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
               onClick={() => {
                 if (!showPlanoAcaoCorretiva) {
                   setShowPlanoAcaoCorretiva(true);
+                  updateElaboration();
                   return;
                 }
               }}

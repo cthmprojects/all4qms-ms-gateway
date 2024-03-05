@@ -19,7 +19,7 @@ export const canAccessDetailingInfo = ({ rnc, userId, userRole }: props) => {
 
 export const canAccessInvestigationPage = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idReceptorNC } = rnc;
-  return (userId === idReceptorNC && statusAtual === 'LEVANTAMENTO)') || userRole === 'ROLE_SGQ';
+  return (userId === idReceptorNC && statusAtual === 'LEVANTAMENTO') || userRole === 'ROLE_SGQ';
 };
 
 export const canAccessElaborationPage = ({ rnc, userId, userRole }: props) => {
