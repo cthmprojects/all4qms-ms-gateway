@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UsuarioRequest {
 
-    private long idUsrCreator;
+    private Long idUsrCreator;
 
     private String login; //User
 

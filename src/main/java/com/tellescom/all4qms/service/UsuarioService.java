@@ -205,7 +205,7 @@ public class UsuarioService {
             .createUser(adminUserDTO)
             .flatMap(user -> {
                 Usuario usuario = new Usuario();
-                usuario.setCriadoPorId(request.getIdUsrCreator());
+                usuario.setCriadoPorId((request.getIdUsrCreator() == null) ? null : request.getIdUsrCreator());
                 usuario.setNome(request.getNome());
                 usuario.setCriadoEm(Instant.now());
                 usuario.setEmail(request.getEmail());
@@ -213,15 +213,19 @@ public class UsuarioService {
                 usuario.setFuncaoId(request.getFuncao());
                 usuario.setSetorId(request.getSetor());
                 // Busca os ProcessoDTOs por IDs
-                List<Long> processoIds = request.getProcessos();
-                return processoService
-                    .buscarProcessosPorIds(processoIds)
-                    .collectList()
-                    .flatMap(processos -> {
-                        usuario.setProcessos(new HashSet<>(processos));
-                        usuario.setUserId(user.getId());
-                        return usuarioRepository.save(usuario).map(usuarioMapper::toDto);
-                    });
+                if (request.getProcessos() != null) {
+                    List<Long> processoIds = request.getProcessos();
+                    return processoService
+                        .buscarProcessosPorIds(processoIds)
+                        .collectList()
+                        .flatMap(processos -> {
+                            usuario.setProcessos(new HashSet<>(processos));
+                            usuario.setUserId(user.getId());
+                            return usuarioRepository.save(usuario).map(usuarioMapper::toDto);
+                        });
+                }
+                usuario.setUserId(user.getId());
+                return usuarioRepository.save(usuario).map(usuarioMapper::toDto);
             });
     }
 
