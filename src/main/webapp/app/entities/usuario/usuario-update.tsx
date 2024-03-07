@@ -62,7 +62,7 @@ export const UsuarioUpdate = () => {
     email: '',
     firstName: '',
     lastName: '',
-    profile: '',
+    profile: [],
     login: '',
     manager: false,
     managerProfile: '',
@@ -96,6 +96,14 @@ export const UsuarioUpdate = () => {
     setProcesses(typeof value === 'string' ? value.split(',') : value);
   };
 
+  const handleChangeProfiles = event => {
+    const {
+      target: { value },
+    } = event;
+
+    setFormData({ ...formData, profile: typeof value === 'string' ? value.split(',') : value });
+  };
+
   const handleClose = () => {
     navigate('/usuario' + location.search);
   };
@@ -106,6 +114,7 @@ export const UsuarioUpdate = () => {
     } else {
       dispatch(getEntity(id)).then((r: any) => {
         dispatch(getUser(r.payload.data.user.login.toString())).then((k: any) => {
+          console.log(r, k);
           setFormData({
             email: r.payload.data.email,
             manager: r.payload.data.isGestor,
@@ -114,7 +123,7 @@ export const UsuarioUpdate = () => {
             role: r.payload.data.funcao.id,
             processes: r.payload.data.processos.map(p => p.nome),
             login: r.payload.data.user.login,
-            profile: k.payload.data.authorities[0].toString(),
+            profile: k.payload.data.authorities,
             firstName: k.payload.data.firstName,
             lastName: k.payload.data.lastName,
           });
@@ -137,29 +146,6 @@ export const UsuarioUpdate = () => {
     }
   }, [updateSuccess]);
 
-  const saveEntity = values => {
-    values.criadoEm = convertDateTimeToServer(values.criadoEm);
-    values.atualizadoEm = convertDateTimeToServer(values.atualizadoEm);
-
-    const entity = {
-      ...usuarioEntity,
-      ...values,
-      processos: mapIdList(values.processos),
-      funcao: funcaos.find(it => it.id.toString() === values.funcao.toString()),
-      gestor: usuarios.find(it => it.id.toString() === values.gestor.toString()),
-      criadoPor: usuarios.find(it => it.id.toString() === values.criadoPor.toString()),
-      atualizadoPor: usuarios.find(it => it.id.toString() === values.atualizadoPor.toString()),
-      setor: setors.find(it => it.id.toString() === values.setor.toString()),
-      user: users.find(it => it.id.toString() === values.user.toString()),
-    };
-
-    if (isNew) {
-      dispatch(createEntity(entity));
-    } else {
-      dispatch(updateEntity(entity));
-    }
-  };
-
   const validFields = () => {
     if (formData.firstName === '') {
       setFormError(prevError => ({ ...prevError, firstName: true }));
@@ -177,26 +163,26 @@ export const UsuarioUpdate = () => {
       setFormError(prevError => ({ ...prevError, login: true }));
       return false;
     }
-    if (formData.profile === '') {
+    if (formData.profile.length == 0) {
       setFormError(prevError => ({ ...prevError, profile: true }));
       return false;
     }
-    if (formData.managerProfile === '') {
-      setFormError(prevError => ({ ...prevError, managerProfile: true }));
-      return false;
-    }
-    if (formData.sector === '') {
-      setFormError(prevError => ({ ...prevError, sector: true }));
-      return false;
-    }
-    if (formData.role === '') {
-      setFormError(prevError => ({ ...prevError, role: true }));
-      return false;
-    }
-    if (processes.length === 0) {
-      setFormError(prevError => ({ ...prevError, processes: true }));
-      return false;
-    }
+    // if (formData.managerProfile === '') {
+    //   setFormError(prevError => ({ ...prevError, managerProfile: true }));
+    //   return false;
+    // }
+    // if (formData.sector === '') {
+    //   setFormError(prevError => ({ ...prevError, sector: true }));
+    //   return false;
+    // }
+    // if (formData.role === '') {
+    //   setFormError(prevError => ({ ...prevError, role: true }));
+    //   return false;
+    // }
+    // if (processes.length === 0) {
+    //   setFormError(prevError => ({ ...prevError, processes: true }));
+    //   return false;
+    // }
 
     setFormError({
       email: false,
@@ -225,7 +211,7 @@ export const UsuarioUpdate = () => {
         lastName: formData.lastName,
         email: formData.email,
         activated: true,
-        authorities: [formData.profile],
+        authorities: formData.profile,
         langKey: '',
         createdBy: Storage.session.get('firstName'),
         login: formData.login,
@@ -234,9 +220,9 @@ export const UsuarioUpdate = () => {
       dispatch(createUser(jhipsterUser)).then((r: any) => {
         setIsLoading(false);
         const jhipsterUserId = r.payload.data.id;
-        const funcao = funcaos.find(it => it.id.toString() === formData.role.toString());
-        const gestor = usuarios.find(it => it.id.toString() === formData.managerProfile.toString());
-        const setor = setors.find(it => it.id.toString() === formData.sector.toString());
+        const funcao = formData.role ? funcaos.find(it => it.id.toString() === formData.role.toString()) : null;
+        const gestor = formData.managerProfile ? usuarios.find(it => it.id.toString() === formData.managerProfile.toString()) : null;
+        const setor = formData.sector ? setors.find(it => it.id.toString() === formData.sector.toString()) : null;
         let process = [];
 
         processes.map(p => {
@@ -260,9 +246,9 @@ export const UsuarioUpdate = () => {
         dispatch(createEntity(entity));
       });
     } else {
-      const funcao = funcaos.find(it => it.id.toString() === formData.role.toString());
-      const gestor = usuarios.find(it => it.id.toString() === formData.managerProfile.toString());
-      const setor = setors.find(it => it.id.toString() === formData.sector.toString());
+      const funcao = formData.role ? funcaos.find(it => it.id.toString() === formData.role.toString()) : null;
+      const gestor = formData.managerProfile ? usuarios.find(it => it.id.toString() === formData.managerProfile.toString()) : null;
+      const setor = formData.sector ? setors.find(it => it.id.toString() === formData.sector.toString()) : null;
       let process = [];
 
       processes.map(p => {
@@ -378,16 +364,20 @@ export const UsuarioUpdate = () => {
         <FormControl fullWidth>
           <InputLabel>Perfil</InputLabel>
           <Select
+            multiple
             label="Perfil"
             name="perfil"
             error={formError.profile}
             value={formData.profile}
-            onChange={e => setFormData({ ...formData, profile: e.target.value })}
+            onChange={handleChangeProfiles}
+            input={<OutlinedInput label="Perfis" />}
+            renderValue={selected => selected.join(', ')}
           >
             {authorities
               ? authorities.map(role => (
                   <MenuItem value={role} key={role}>
-                    {role}
+                    <Checkbox checked={formData.profile.indexOf(role) > -1} />
+                    <ListItemText primary={role}></ListItemText>
                   </MenuItem>
                 ))
               : null}
