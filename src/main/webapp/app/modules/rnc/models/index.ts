@@ -14,3 +14,4 @@ export * from './range';
 export * from './reason';
 export * from './rnc';
 export * from './traceability';
+export * from './hashtag';

@@ -1,6 +1,9 @@
 import { AddCircle, LocalOffer } from '@mui/icons-material';
 import { Card, CardContent, Chip, IconButton, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { Hashtag } from 'app/modules/rnc/models';
+import { postHashtagRNC } from 'app/modules/rnc/reducers/hashtag.reducer';
+import React, { useEffect, useState } from 'react';
 
 type ScopeAnalysisProps = {
   keywords: Array<string>;
@@ -9,11 +12,16 @@ type ScopeAnalysisProps = {
 
 const ScopeAnalysis = ({ keywords, onChanged }: ScopeAnalysisProps) => {
   const [keyword, setKeyword] = useState<string>('');
-
+  const hashtags = useAppSelector<Hashtag[]>(state => state.all4qmsmsgateway.hashtag.hashtags);
+  const dispatch = useAppDispatch();
   const onKeywordAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    onChanged([...keywords, keyword]);
-    setKeyword('');
+    dispatch(postHashtagRNC(keyword));
   };
+  useEffect(() => {
+    const hashtagAddedKeywords = [...keywords].concat(hashtags.map(h => h.hashtag));
+    onChanged(hashtagAddedKeywords);
+    setKeyword('');
+  }, [hashtags]);
 
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { value } = event.target;

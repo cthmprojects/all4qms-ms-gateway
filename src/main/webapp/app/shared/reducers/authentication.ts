@@ -25,9 +25,9 @@ export type AuthenticationState = Readonly<typeof initialState>;
 // Actions
 
 export const getSession = (): AppThunk => (dispatch, getState) => {
-  if (Storage.local.get(AUTH_TOKEN_KEY) || Storage.session.get(AUTH_TOKEN_KEY)) {
-    dispatch(getAccount());
-  }
+  // if (Storage.local.get(AUTH_TOKEN_KEY) || Storage.session.get(AUTH_TOKEN_KEY)) {
+  dispatch(getAccount());
+  // }
 };
 
 export const getAccount = createAsyncThunk('authentication/get_account', async () => axios.get<any>('api/account'), {
