@@ -159,6 +159,11 @@ export const UsuarioUpdate = () => {
       setFormError(prevError => ({ ...prevError, email: true }));
       return false;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setFormError(prevError => ({ ...prevError, email: true }));
+      return false;
+    }
     if (formData.login === '') {
       setFormError(prevError => ({ ...prevError, login: true }));
       return false;
@@ -345,7 +350,7 @@ export const UsuarioUpdate = () => {
           label="Email"
           name="email"
           className="ms-3"
-          type="emaila"
+          type="email"
           error={formError.email}
           value={formData.email}
           onChange={e => setFormData({ ...formData, email: e.target.value })}
