@@ -1,19 +1,19 @@
 export type AprovacaoNC = {
   id?: number;
-  possuiImplementacao: boolean;
+  possuiImplementacao?: boolean;
   dataImplementacao?: Date;
   responsavelImplementacao?: number;
-  descImplementacao: string;
-  possuiEficacia: boolean;
+  descImplementacao?: string;
+  possuiEficacia?: boolean;
   dataEficacia?: Date;
   responsavelEficacia?: number;
-  novoRegistro: boolean;
-  descEficacia: string;
+  novoRegistro?: boolean;
+  descEficacia?: string;
   dataFechamento?: Date;
   responsavelFechamento?: number;
-  alterarRisco: boolean;
+  alterarRisco?: boolean;
   vinculoRisco?: number;
-  descFechamento: string;
+  descFechamento?: string;
   criadoEm?: Date;
   atualizadoEm?: Date;
 };
