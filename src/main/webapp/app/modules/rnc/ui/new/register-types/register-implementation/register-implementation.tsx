@@ -14,8 +14,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import './register-implementation.css';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import { saveApprovalNC, updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
 import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
@@ -26,7 +26,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
   const { id } = useParams();
 
   useEffect(() => {
-    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(getUsers({}));
 
     if (id) {
       dispatch(getById(parseInt(id)));
@@ -46,13 +46,13 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
   };
 
   const saveImplementation = () => {
-    if (implementation) {
+    if (_rnc.aprovacaoNC !== null) {
       dispatch(
         updateApprovalNC({
           ...implementation,
           possuiImplementacao: firstForm.implemented.value,
           dataImplementacao: firstForm.date.value,
-          responsavelImplementacao: users.find(user => user.login === firstForm.emitter.value)?.id,
+          responsavelImplementacao: users.find(user => user.nome === firstForm.emitter.value)?.id,
           descImplementacao: firstForm.description.value,
         })
       );
@@ -60,7 +60,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
       const new_implementation = {
         possuiImplementacao: firstForm.implemented.value,
         dataImplementacao: firstForm.date.value,
-        responsavelImplementacao: users.find(user => user.login === firstForm.emitter.value)?.id,
+        responsavelImplementacao: users.find(user => user.nome === firstForm.emitter.value)?.id,
         descImplementacao: firstForm.description.value,
       };
       dispatch(saveApprovalNC(new_implementation));
@@ -77,7 +77,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
   };
 
   const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
-  const users = useAppSelector(state => state.userManagement.users);
+  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
   const implementation = useAppSelector(state => state.all4qmsmsgateway.approval.entity);
 
   useEffect(() => {
@@ -87,20 +87,26 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
   }, [_rnc]);
 
   useEffect(() => {
-    console.log('IMPLEMENTACAO> ', implementation);
+    if (implementation) {
+      console.log(users.find(user => user.id === implementation.responsavelImplementacao)?.nome);
 
-    setFirstForm({
-      date: { value: implementation?.dataImplementacao ? new Date(implementation.dataImplementacao) : new Date(), error: false },
-      emitter: {
-        value: implementation?.responsavelImplementacao
-          ? users.find(user => user.id === implementation.responsavelImplementacao)?.login
-          : '',
-        error: false,
-      },
-      implemented: { value: implementation?.possuiImplementacao ? implementation.possuiImplementacao : false, error: false },
-      description: { value: implementation?.descImplementacao ? implementation.descImplementacao : '1', error: false },
-    });
-  }, [implementation]);
+      setFirstForm({
+        date: { value: implementation?.dataImplementacao ? new Date(implementation.dataImplementacao) : new Date(), error: false },
+        emitter: {
+          value: implementation?.responsavelImplementacao
+            ? users.find(user => user.id === implementation.responsavelImplementacao)?.nome
+            : '',
+          error: false,
+        },
+        implemented: { value: implementation?.possuiImplementacao ? implementation.possuiImplementacao : false, error: false },
+        description: { value: implementation?.descImplementacao ? implementation.descImplementacao : '', error: false },
+      });
+    }
+
+    if (_rnc?.aprovacaoNC == null && implementation?.id) {
+      dispatch(update({ ..._rnc, aprovacaoNC: implementation?.id }));
+    }
+  }, [implementation, users]);
 
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
@@ -145,6 +151,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
                 <DatePicker
                   dateFormat={'dd/MM/yyyy'}
                   selected={firstForm.date.value}
+                  value={firstForm.date.value}
                   onChange={date => handleChangeDate(date)}
                   className="date-picker"
                 />
@@ -157,13 +164,14 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
                 <Select
                   label="Responsável"
                   name="forwarded"
+                  value={firstForm.emitter.value}
                   onChange={(e: SelectChangeEvent<string>) =>
                     setFirstForm({ ...firstForm, emitter: { value: e.target.value, error: false } })
                   }
                 >
                   {users.map((user, i) => (
-                    <MenuItem value={user.login} key={`user-${i}`}>
-                      {user.login}
+                    <MenuItem value={user.nome} key={`user-${i}`}>
+                      {user.nome}
                     </MenuItem>
                   ))}
                 </Select>
@@ -174,6 +182,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
         <div className="mt-4">
           <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Descrição da implementação</h2>
           <textarea
+            value={firstForm.description.value}
             onChange={e => setFirstForm({ ...firstForm, description: { value: e.target.value, error: false } })}
             rows={5}
             cols={80}
@@ -184,7 +193,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
           <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => navigate('/rnc')}>
             Voltar
           </Button>
-          <Button onClick={() => saveImplementation()}>Salvar</Button>
+          <Button onClick={saveImplementation}>Salvar</Button>
           <Button
             className="ms-3"
             variant="contained"

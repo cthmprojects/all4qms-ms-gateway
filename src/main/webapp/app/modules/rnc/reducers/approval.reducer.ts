@@ -46,6 +46,7 @@ const RncApproval = createEntitySlice({
       builder.addMatcher(isFulfilled(updateApprovalNC), (state, action) => {
         state.loading = false;
         state.entity = action.payload;
+        state.updateSuccess = true;
       });
     builder.addMatcher(isFulfilled(getApprovalNC), (state, action) => {
       state.loading = false;
