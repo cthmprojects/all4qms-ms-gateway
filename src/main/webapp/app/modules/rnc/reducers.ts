@@ -4,6 +4,7 @@ import description from './reducers/description.reducer';
 import userManagement from '../../modules/administration/user-management/user-management.reducer';
 import users from '../../entities/usuario/reducers/usuario.reducer';
 import hashtag from './reducers/hashtag.reducer';
+import approval from './reducers/approval.reducer';
 
 const rncReducers = {
   enums,
@@ -12,6 +13,7 @@ const rncReducers = {
   users,
   hashtag,
   description,
+  approval,
 };
 
 export default rncReducers;

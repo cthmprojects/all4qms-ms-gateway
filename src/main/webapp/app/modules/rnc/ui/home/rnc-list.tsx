@@ -37,6 +37,7 @@ import { listEnums } from '../../reducers/enums.reducer';
 import { list, listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import { reset as DescriptionResetEntity } from '../../reducers/description.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
+import { getUsers as getManagementUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -83,6 +84,7 @@ const RncList = ({}) => {
     processoNC: 0,
     tipoNC: '',
   });
+
   const handleApplyFilters = () => {
     const { dtIni, dtFim, statusAtual, processoNC, tipoNC } = filters;
     dispatch(
@@ -106,12 +108,14 @@ const RncList = ({}) => {
   const totalCount: number = useAppSelector(state => state.all4qmsmsgateway.rnc.totalItems);
   const loading: boolean = useAppSelector(state => state.all4qmsmsgateway.rnc.loading);
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
+  const managementUsers = useAppSelector(state => state.userManagement.users);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
 
   useEffect(() => {
     dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
     dispatch(getUsers({}));
     dispatch(listEnums());
+    dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
   }, []);
 
   useEffect(() => {
@@ -125,6 +129,13 @@ const RncList = ({}) => {
   useEffect(() => {
     dispatch(listAprovacaoNC({}));
   }, [rncs]);
+
+  useEffect(() => {
+    if (users && managementUsers) {
+      const myuser = managementUsers.find(user => user.login === userLogin);
+      setUserId(users.find(user => user.user.id === myuser?.id)?.id);
+    }
+  }, [users, managementUsers]);
 
   const reloadInfo = () => {
     dispatch(reset());
