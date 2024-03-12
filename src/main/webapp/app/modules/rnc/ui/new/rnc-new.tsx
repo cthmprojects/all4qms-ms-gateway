@@ -192,6 +192,7 @@ export const RNCNew = () => {
           processoNC: processoNC,
           idReceptorNC: idReceptorNC,
           processoEmissor: processoEmissor,
+          vinculoDocAnterior: null,
         })
       );
 
@@ -223,6 +224,7 @@ export const RNCNew = () => {
           processoNC: processoNC,
           idReceptorNC: idReceptorNC,
           processoEmissor: processoEmissor,
+          vinculoDocAnterior: null,
         })
       );
 
@@ -343,12 +345,14 @@ export const RNCNew = () => {
           anexos: descriptionEvidences,
         })
       );
-      dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: selectedRncIds || null }));
+      dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null }));
     }
   };
 
   const goToNextStep = () => {
-    dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO' }));
+    dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO' })).then(() => {
+      navigate('/rnc');
+    });
   };
 
   const filterUser = (login: string) => {
@@ -600,7 +604,7 @@ export const RNCNew = () => {
                   rncId={id}
                 />
               </Row>
-              <Row className="ms-3 me-3 mt-3" fullWidth>
+              {/* <Row className="ms-3 me-3 mt-3" fullWidth>
                 <RepetitionRnc
                   onRepetitionChanged={onRepetitionChanged}
                   onSelectedRncIdsChanged={onSelectedRncIdsChanged}
@@ -608,7 +612,7 @@ export const RNCNew = () => {
                   rncs={rncs}
                   selectedRncIds={selectedRncIds}
                 />
-              </Row>
+              </Row> */}
               <Row className="m-3">
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Button
