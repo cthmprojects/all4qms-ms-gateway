@@ -130,13 +130,6 @@ const RncList = ({}) => {
     dispatch(listAprovacaoNC({}));
   }, [rncs]);
 
-  useEffect(() => {
-    if (users && managementUsers) {
-      const myuser = managementUsers.find(user => user.login === userLogin);
-      setUserId(users.find(user => user.user.id === myuser?.id)?.id);
-    }
-  }, [users, managementUsers]);
-
   const reloadInfo = () => {
     dispatch(reset());
     dispatch(DescriptionResetEntity());
