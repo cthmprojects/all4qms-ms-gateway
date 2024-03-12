@@ -99,10 +99,7 @@ public class AccountResource {
      */
     @GetMapping("/account")
     public Mono<AdminUserDTO> getAccount() {
-        return userService
-            .getUserWithAuthorities()
-            .map(AdminUserDTO::new)
-            .switchIfEmpty(Mono.error(new AccountResourceException("User could not be found")));
+        return userService.getUserWithAuthorities().map(AdminUserDTO::new).switchIfEmpty(Mono.empty());
     }
 
     /**
