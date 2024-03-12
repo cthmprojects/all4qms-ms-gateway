@@ -80,19 +80,19 @@ export const Login = () => {
             />
           </Row>
           <Row>
-            <div className="leftDiv-checkBoxContainer">
-              <label className="leftDiv-checkBoxLabel">
-                <input type="checkbox" className="leftDiv-checkBox" />
-                Continuar logado
-              </label>
-            </div>
+            {/*             <div className="leftDiv-checkBoxContainer"> */}
+            {/*               <label className="leftDiv-checkBoxLabel"> */}
+            {/*                 <input type="checkbox" className="leftDiv-checkBox" /> */}
+            {/*                 Continuar logado */}
+            {/*               </label> */}
+            {/*             </div> */}
           </Row>
           <Row>
             <div className="leftDiv-buttonContainer">
               <button className="leftDiv-button" onClick={handleLoginFormSubmit} type="submit">
                 Entrar
               </button>
-              <span className="esqueciSenha">Esqueci minha senha</span>
+              {/*               <span className="esqueciSenha">Esqueci minha senha</span> */}
             </div>
           </Row>
         </form>
