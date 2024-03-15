@@ -1,29 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Row, Table } from 'reactstrap';
-import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { getSortState, JhiPagination, Storage } from 'react-jhipster';
 
-import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
-import { IUsuario } from 'app/shared/model/usuario.model';
 import { getEntities } from './usuario.reducer';
-import GeneralList from 'app/shared/layout/list/general-list';
 import { deleteUser as deleteJhipsterUser } from 'app/modules/administration/user-management/user-management.reducer';
 import { deleteEntity as deleteRNCUser } from './usuario.reducer';
+import { UsarioOptions } from './usuario-options';
 
 import {
   Box,
   Breadcrumbs,
   CircularProgress,
   Divider,
-  IconButton,
-  Menu,
-  MenuItem,
-  Pagination,
   Paper,
   TableBody,
   TableCell,
@@ -40,21 +33,12 @@ export const Usuario = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const openOptions = Boolean(anchorEl);
-  const handleClickOptions = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleCloseOptions = () => {
-    setAnchorEl(null);
-  };
-
+  const [userRole, setUserRole] = useState<Array<String>>(Storage.local.get('ROLE'));
   const [paginationState, setPaginationState] = useState(
     overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
 
   const usuarioList = useAppSelector(state => state.all4qmsmsgateway.usuario.entities);
-  const loading = useAppSelector(state => state.all4qmsmsgateway.usuario.loading);
   const totalItems = useAppSelector(state => state.all4qmsmsgateway.usuario.totalItems);
 
   const getAllEntities = () => {
@@ -94,23 +78,11 @@ export const Usuario = () => {
     }
   }, [location.search]);
 
-  const sort = p => () => {
-    setPaginationState({
-      ...paginationState,
-      order: paginationState.order === ASC ? DESC : ASC,
-      sort: p,
-    });
-  };
-
   const handlePagination = currentPage =>
     setPaginationState({
       ...paginationState,
       activePage: currentPage,
     });
-
-  const handleSyncList = () => {
-    sortEntities();
-  };
 
   const handleDeleteUser = (loginJhUser: any, idRncUser: any) => {
     dispatch(deleteRNCUser(idRncUser.toString())).then(() => {
@@ -144,24 +116,7 @@ export const Usuario = () => {
                     <TableCell>{usuario.gestor.nome}</TableCell>
                     <TableCell>{usuario.setor.nome}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
-                        <FontAwesomeIcon icon="ellipsis-vertical" color="#e6b200" />
-                      </IconButton>
-                      <Menu
-                        id="basic-menu"
-                        anchorEl={anchorEl}
-                        open={openOptions}
-                        onClose={handleCloseOptions}
-                        MenuListProps={{
-                          'aria-labelledby': 'basic-button',
-                        }}
-                      >
-                        <MenuItem onClick={() => navigate(`${usuario.id}/edit`)}>Editar usuário</MenuItem>
-                        <MenuItem onClick={() => handleDeleteUser(usuario.user.login, usuario.id)}>
-                          Deletar usuário
-                          <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
-                        </MenuItem>
-                      </Menu>
+                      <UsarioOptions userRole={userRole} user={usuario} deleteUser={handleDeleteUser} />
                     </TableCell>
                   </TableRow>
                 ))}
