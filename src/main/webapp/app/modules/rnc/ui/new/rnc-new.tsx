@@ -204,7 +204,7 @@ export const RNCNew = () => {
       const receptorNC = filterUser(firstForm.forwarded.value);
       const dtNC = new Date();
       const idEmissorNC = parseInt(Storage.session.get('ID_USUARIO'));
-      const idReceptorNC = receptorNC ? parseInt(receptorNC.id) : null;
+      const idReceptorNC = receptorNC ? parseInt(receptorNC.user.id) : null;
       const idUsuarioAtual = parseInt(Storage.session.get('ID_USUARIO'));
       const origemNC = firstForm.origin.value;
       const processoEmissor = parseInt(firstForm.processOrigin.value);
@@ -373,10 +373,10 @@ export const RNCNew = () => {
       setStateRnc(rnc);
       setFirstForm({
         number: { value: String(rnc.id), error: false },
-        emitter: { value: users.find(user => user.id === rnc.idEmissorNC)?.nome || '', error: false },
+        emitter: { value: users.find(user => user.user.id === rnc.idEmissorNC)?.login || '', error: false },
         date: { value: new Date(rnc.dtNC), error: false },
         processOrigin: { value: rnc.processoEmissor?.toString() || '', error: false },
-        forwarded: { value: users.find(user => user.id === rnc.idReceptorNC)?.nome || '', error: false },
+        forwarded: { value: users.find(user => user.user.id === rnc.idReceptorNC)?.login || '', error: false },
         processTarget: { value: rnc.processoNC?.toString() || '', error: false },
         type: { value: rnc.tipoNC || '', error: false },
         origin: { value: rnc.origemNC || '', error: false },
@@ -397,10 +397,12 @@ export const RNCNew = () => {
 
   useEffect(() => {
     if (users && stateRnc) {
+      console.log(users.find(user => user.user.id === stateRnc.idEmissorNC));
+
       setFirstForm({
         ...firstForm,
-        emitter: { value: users.find(user => user.id === stateRnc.idEmissorNC)?.nome, error: false },
-        forwarded: { value: users.find(user => user.id === stateRnc.idReceptorNC)?.nome, error: false },
+        emitter: { value: users.find(user => user.user.id === stateRnc.idEmissorNC)?.nome, error: false },
+        forwarded: { value: users.find(user => user.user.id === stateRnc.idReceptorNC)?.nome, error: false },
       });
     }
   }, [users]);
