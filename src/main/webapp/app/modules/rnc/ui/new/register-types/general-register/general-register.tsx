@@ -22,7 +22,7 @@ import {
 import Checkbox from '@mui/material/Checkbox';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
-import { Action, IshikawaInvestigation, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
+import { Action, ActionPlan, IshikawaInvestigation, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
 import {
   saveEffectCause,
   saveImmediateAction,
@@ -38,10 +38,11 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { CauseInvestigation, ImmediateActions, ScopeAnalysis } from '../../../components';
+import { CauseInvestigation, ImmediateActions, PlannedActions, ScopeAnalysis } from '../../../components';
 import './general-register.css';
 import { listEnums } from '../../../../reducers/enums.reducer';
 import { Enums } from '../../../../models';
+import { savePlan } from 'app/modules/rnc/reducers/plan.reducer';
 
 export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) => {
   const dispatch = useAppDispatch();
@@ -247,7 +248,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
 
   const [responsaveis, setResponsaveis] = useState([]);
 
-  const [listaAcoesCorretivas, setListaAcoesCorretivas] = useState([]);
+  const [listaAcoesCorretivas, setListaAcoesCorretivas] = useState<Array<ActionPlan>>([]);
 
   const handleChange = (value: any) => {
     setRegisterForm(value);
@@ -264,85 +265,98 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     setListaAcoesCorretivas(updatedList);
   };
 
+  const onActionPlansUpdated = (actionPlans: Array<ActionPlan>): void => {
+    setListaAcoesCorretivas(actionPlans);
+  };
+
   const renderListaAcoesCorretivas = () => {
-    return listaAcoesCorretivas.map((item, index) => (
-      <>
-        <TextField
-          label="Descrição da ação"
-          id="rnc-text-field"
-          className="w-100 desc-width m-2"
-          onChange={e =>
-            handleChange({
-              ...registerForm,
-              planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
-            })
-          }
-        />
-        <div key={index} style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-          <FormControl className="m-2 mt-0 rnc-form-field">
-            <DatePicker
-              // locale='pt-BR'
-              label="Prazo"
-              selected={prazoPlanoAcao}
-              onChange={date => setPrazoPlanoAcao(date)}
-              className="date-picker"
-              dateFormat={'dd/MM/yyyy'}
-              id="date-picker-rnc-plano-acao-prazo"
-            />
-          </FormControl>
-          <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-            <InputLabel>Responsável</InputLabel>
-            <Select
-              label="Encaminhado para:"
-              name="forwarded"
-              onChange={e => setResponsaveisPlanoAcao([...responsaveisPlanoAcao, e.target.value])}
-            >
-              {users.map((user, i) => (
-                <MenuItem value={user.login} key={`user-${i}`}>
-                  {user.login}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+    // return listaAcoesCorretivas.map((item, index) => (
+    //   <>
+    //     <TextField
+    //       label="Descrição da ação"
+    //       id="rnc-text-field"
+    //       className="w-100 desc-width m-2"
+    //       onChange={e =>
+    //         handleChange({
+    //           ...registerForm,
+    //           planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
+    //         })
+    //       }
+    //     />
+    //     <div key={index} style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
+    //       <FormControl className="m-2 mt-0 rnc-form-field">
+    //         <DatePicker
+    //           // locale='pt-BR'
+    //           label="Prazo"
+    //           selected={prazoPlanoAcao}
+    //           onChange={date => setPrazoPlanoAcao(date)}
+    //           className="date-picker"
+    //           dateFormat={'dd/MM/yyyy'}
+    //           id="date-picker-rnc-plano-acao-prazo"
+    //         />
+    //       </FormControl>
+    //       <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+    //         <InputLabel>Responsável</InputLabel>
+    //         <Select
+    //           label="Encaminhado para:"
+    //           name="forwarded"
+    //           onChange={e => setResponsaveisPlanoAcao([...responsaveisPlanoAcao, e.target.value])}
+    //         >
+    //           {users.map((user, i) => (
+    //             <MenuItem value={user.login} key={`user-${i}`}>
+    //               {user.login}
+    //             </MenuItem>
+    //           ))}
+    //         </Select>
+    //       </FormControl>
 
-          <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-            <InputLabel>Status</InputLabel>
-            <Select label="Encaminhado para:" name="forwarded">
-              <MenuItem value="Status 1">Status 1</MenuItem>
-              <MenuItem value="Status 2">Status 2</MenuItem>
-              <MenuItem value="Status 3">Status 3</MenuItem>
-            </Select>
-          </FormControl>
+    //       <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+    //         <InputLabel>Status</InputLabel>
+    //         <Select label="Encaminhado para:" name="forwarded" value={item.statusAcao}>
+    //           <MenuItem value="Status 1">Status 1</MenuItem>
+    //           <MenuItem value="Status 2">Status 2</MenuItem>
+    //           <MenuItem value="Status 3">Status 3</MenuItem>
+    //         </Select>
+    //       </FormControl>
 
-          <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-            <InputLabel>Verificação</InputLabel>
-            <Select label="Encaminhado para:" name="forwarded">
-              <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
-              <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
-              <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
-            </Select>
-          </FormControl>
+    //       <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+    //         <InputLabel>Verificação</InputLabel>
+    //         <Select label="Encaminhado para:" name="forwarded">
+    //           <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
+    //           <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
+    //           <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
+    //         </Select>
+    //       </FormControl>
 
-          <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-            <InputLabel>Resp. verificação</InputLabel>
-            <Select
-              label="Encaminhado para:"
-              name="forwarded"
-              onChange={e => setResponsaveisVerificacao([...responsaveisVerificacao, e.target.value])}
-            >
-              {users.map((user, i) => (
-                <MenuItem value={user.login} key={`user-${i}`}>
-                  {user.login}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <IconButton aria-label="Remover" onClick={() => handleRemoveListaAcoesCorretivasItem(index)}>
-            <DeleteIcon fontSize="medium" />
-          </IconButton>
-        </div>
-      </>
-    ));
+    //       <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+    //         <InputLabel>Resp. verificação</InputLabel>
+    //         <Select
+    //           label="Encaminhado para:"
+    //           name="forwarded"
+    //           onChange={e => }
+    //         >
+    //           {users.map((user, i) => (
+    //             <MenuItem value={user.login} key={`user-${i}`}>
+    //               {user.login}
+    //             </MenuItem>
+    //           ))}
+    //         </Select>
+    //       </FormControl>
+    //       <IconButton aria-label="Remover" onClick={() => handleRemoveListaAcoesCorretivasItem(index)}>
+    //         <DeleteIcon fontSize="medium" />
+    //       </IconButton>
+    //     </div>
+    //   </>
+    // ));
+
+    return (
+      <PlannedActions
+        actionPlans={listaAcoesCorretivas}
+        onUpdated={onActionPlansUpdated}
+        statuses={enums.actionPlanStatuses}
+        users={users}
+      />
+    );
   };
 
   const renderResponsaveis = () => {
@@ -629,88 +643,6 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                 Plano de Ação Corretiva
               </Typography>
               <br />
-              <TextField
-                label="Descrição da ação"
-                id="rnc-text-field"
-                className="w-100 desc-width m-2"
-                onChange={e =>
-                  handleChange({
-                    ...registerForm,
-                    planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
-                  })
-                }
-              />
-              <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-                <FormControl className="m-2 mt-0 rnc-form-field">
-                  <DatePicker
-                    // locale='pt-BR'
-                    label="Prazo"
-                    selected={prazoPlanoAcao}
-                    onChange={date => setPrazoPlanoAcao(date)}
-                    className="date-picker"
-                    dateFormat={'dd/MM/yyyy'}
-                    id="date-picker-rnc-plano-acao-prazo"
-                  />
-                </FormControl>
-                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-                  <InputLabel>Responsável</InputLabel>
-                  <Select
-                    label="Encaminhado para:"
-                    name="forwarded"
-                    onChange={e => setResponsaveisPlanoAcao([...responsaveisPlanoAcao, e.target.value])}
-                  >
-                    {users.map((user, i) => (
-                      <MenuItem value={user.login} key={`user-${i}`}>
-                        {user.login}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-                  <InputLabel>Status</InputLabel>
-                  <Select label="Encaminhado para:" name="forwarded">
-                    {enums.actionPlanStatuses.map(e => {
-                      return <MenuItem value={e.value}>{e.name}</MenuItem>;
-                    })}
-                  </Select>
-                </FormControl>
-
-                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-                  <InputLabel>Verificação</InputLabel>
-                  <Select label="Encaminhado para:" name="forwarded">
-                    <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
-                    <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
-                    <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
-                  </Select>
-                </FormControl>
-
-                <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-                  <InputLabel>Resp. verificação</InputLabel>
-                  <Select
-                    label="Encaminhado para:"
-                    name="forwarded"
-                    onChange={e => setResponsaveisVerificacao([...responsaveisVerificacao, e.target.value])}
-                  >
-                    {users.map((user, i) => (
-                      <MenuItem value={user.login} key={`user-${i}`}>
-                        {user.login}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <div style={{ marginLeft: 'auto' }}>
-                  <Fab
-                    color="primary"
-                    aria-label="add"
-                    size="medium"
-                    className="btn-add-fab me-2"
-                    onClick={() => setListaAcoesCorretivas([...listaAcoesCorretivas, 1])}
-                  >
-                    <Add />
-                  </Fab>
-                </div>
-              </div>
               {renderListaAcoesCorretivas()}
             </div>
           )}
@@ -768,38 +700,31 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                     );
                   }
                   dispatch(
-                    savePlannedAction({
-                      date: new Date(registerForm.planoAcaoPrazo.value),
-                      deadline: new Date(registerForm.planoAcaoPrazo.value),
-                      description: registerForm.planoAcaoDescricao.value.toString(),
+                    savePlan({
+                      actionPlans: listaAcoesCorretivas,
                       plan: {
-                        description: '',
-                        deadline: new Date(registerForm.planoAcaoPrazo.value),
-                        responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                        rncId: _rnc.id,
-                        status: 'A',
+                        dtConclusaoPlano: new Date(),
+                        idNaoConformidade: _rnc.id,
+                        percentualPlano: 0,
+                        qtdAcoes: listaAcoesCorretivas.length,
+                        qtdAcoesConcluidas: 0,
+                        statusPlano: 'ABERTO',
                       },
-                      responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                      status: registerForm.planoAcaoStatus.value,
                     })
                   );
                   toast.success('RNC atualizada com sucesso!');
                 } else if (_rnc && showPlanoAcaoCorretiva) {
                   dispatch(
-                    savePlannedAction({
-                      date: new Date(registerForm.planoAcaoPrazo.value),
-                      deadline: new Date(registerForm.planoAcaoPrazo.value),
-                      description: registerForm.planoAcaoDescricao.value.toString(),
+                    savePlan({
+                      actionPlans: listaAcoesCorretivas,
                       plan: {
-                        description: '',
-                        deadline: new Date(registerForm.planoAcaoPrazo.value),
-                        responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                        rncId: _rnc.id,
-                        // ENCERRADO, ELABORACAO, EXECUCAO
-                        status: 'ELABORACAO',
+                        dtConclusaoPlano: new Date(),
+                        idNaoConformidade: _rnc.id,
+                        percentualPlano: 0,
+                        qtdAcoes: listaAcoesCorretivas.length,
+                        qtdAcoesConcluidas: 0,
+                        statusPlano: 'ABERTO',
                       },
-                      responsibleId: filterUser(registerForm.planoAcaoResponsavel.value)?.id,
-                      status: registerForm.planoAcaoStatus.value,
                     })
                   );
                 }

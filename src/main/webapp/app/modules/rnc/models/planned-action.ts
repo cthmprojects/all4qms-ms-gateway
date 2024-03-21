@@ -21,3 +21,19 @@ export type RncPlannedAction = {
   status: string;
   plan: RncPlan;
 };
+
+export type ActionPlan = {
+  id?: number;
+  idPlano: number;
+  descricaoAcao: string;
+  prazoAcao: Date;
+  idResponsavelAcao: number;
+  statusAcao: string;
+  dataVerificao: Date;
+  idResponsavelVerificaoAcao: number;
+  idAnexosExecucao: number;
+  dataConclusaoAcao: Date;
+  criadoEm?: Date;
+  atualizadoEm?: Date;
+  planoId: number;
+};
