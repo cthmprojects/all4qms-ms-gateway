@@ -31,16 +31,28 @@ type Payload = {
   plan: Plan;
 };
 
-export const savePlan = createAsyncThunk('/plan/save', async ({ actionPlans, plan }: Payload) => {
-  console.log('plan', plan);
-  console.log('actionPlans', actionPlans);
+const formatDate = (date: Date, shortened: boolean = false): string => {
+  const year: string = date.getFullYear().toString();
+  const month: string = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day: string = date.getDate().toString().padStart(2, '0');
+  const hours: string = date.getHours().toString().padStart(2, '0');
+  const minutes: string = date.getMinutes().toString().padStart(2, '0');
+  const seconds: string = date.getSeconds().toString().padStart(2, '0');
+  const milliseconds: string = date.getMilliseconds().toString().padStart(3, '0');
 
+  const long: string = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}Z`;
+  const short: string = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+  return !shortened ? long : short;
+};
+
+export const savePlan = createAsyncThunk('/plan/save', async ({ actionPlans, plan }: Payload) => {
   const planResponse = await axios.post<Plan>(apiUrl, {
     statusPlano: plan.statusPlano,
     qtdAcoes: plan.qtdAcoes,
     qtdAcoesConcluidas: plan.qtdAcoesConcluidas,
     percentualPlano: plan.percentualPlano,
-    dtConclusaoPlano: plan.dtConclusaoPlano,
+    dtConclusaoPlano: formatDate(plan.dtConclusaoPlano),
     idNaoConformidade: plan.idNaoConformidade,
   });
 
@@ -52,13 +64,13 @@ export const savePlan = createAsyncThunk('/plan/save', async ({ actionPlans, pla
     const response = await axios.post(actionPlanApiUrl, {
       idPlano: savedPlan.id,
       descricaoAcao: actionPlan.descricaoAcao,
-      prazoAcao: actionPlan.prazoAcao,
+      prazoAcao: formatDate(actionPlan.prazoAcao, true),
       idResponsavelAcao: actionPlan.idResponsavelAcao,
       statusAcao: actionPlan.statusAcao,
-      dataVerificao: actionPlan.dataVerificao,
+      dataVerificao: formatDate(actionPlan.dataVerificao, true),
       idResponsavelVerificaoAcao: actionPlan.idResponsavelVerificaoAcao,
       idAnexosExecucao: actionPlan.idAnexosExecucao,
-      dataConclusaoAcao: actionPlan.dataConclusaoAcao,
+      dataConclusaoAcao: formatDate(actionPlan.dataConclusaoAcao),
       planoId: savedPlan.id,
     });
   }
