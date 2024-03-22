@@ -20,7 +20,7 @@ const initialState: InitialState = {
 // Actions
 
 export const postHashtagRNC = createAsyncThunk('hastags-ia-rnc', async (body: string) => {
-  return axios.post<Hashtag[]>(`${hashtagApiUrl}`, body);
+  return axios.post<Hashtag[]>(`https://all4qms-ia.cthmprojetos.com/get_hashtags`, body);
 });
 
 const HashtagSlice = createSlice({
