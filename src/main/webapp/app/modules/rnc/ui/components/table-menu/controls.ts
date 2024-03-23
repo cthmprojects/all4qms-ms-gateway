@@ -8,23 +8,23 @@ interface props {
 
 export const canAccessFillingPage = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
-  return statusAtual === 'PREENCHIMENTO' || userRole === 'ROLE_SGQ';
+  return (userId === idEmissorNC && statusAtual === 'PREENCHIMENTO') || userRole === 'ROLE_SGQ';
 };
 
 export const canAccessDetailingInfo = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
 
-  return statusAtual === 'DETALHAMENTO' || userRole === 'ROLE_SGQ';
+  return (userId === idEmissorNC && statusAtual === 'DETALHAMENTO') || userRole === 'ROLE_SGQ';
 };
 
 export const canAccessInvestigationPage = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idReceptorNC } = rnc;
-  return statusAtual === 'LEVANTAMENTO' || userRole === 'ROLE_SGQ';
+  return (userId === idReceptorNC && statusAtual === 'LEVANTAMENTO') || userRole === 'ROLE_SGQ';
 };
 
 export const canAccessElaborationPage = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idReceptorNC } = rnc;
-  return statusAtual === 'ELABORACAO' || userRole === 'ROLE_SGQ';
+  return (userId === idReceptorNC && statusAtual === 'ELABORACAO') || userRole === 'ROLE_SGQ';
 };
 
 export const canAccessExecutionPage = ({ rnc, userRole }: props) => {

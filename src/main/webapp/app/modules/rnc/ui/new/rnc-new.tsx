@@ -25,7 +25,6 @@ import RepetitionRnc from './register-types/repetition/repetition-rnc';
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
-import { getUsers as getManagementUsers } from 'app/modules/administration/user-management/user-management.reducer';
 
 export const RNCNew = () => {
   const dispatch = useAppDispatch();
@@ -35,7 +34,6 @@ export const RNCNew = () => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(list({}));
     dispatch(listEnums());
-    dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
 
     if (id) {
       dispatch(getById(parseInt(id)));
@@ -366,7 +364,6 @@ export const RNCNew = () => {
   };
 
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
-  const allUsers = useAppSelector(state => state.userManagement.users);
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
@@ -488,7 +485,7 @@ export const RNCNew = () => {
                       setFirstForm({ ...firstForm, forwarded: { value: event.target.value, error: firstForm.forwarded.error } })
                     }
                   >
-                    {allUsers.map((user, i) => (
+                    {users.map((user, i) => (
                       <MenuItem value={user.login} key={`user-${i}`}>
                         {user.login}
                       </MenuItem>
