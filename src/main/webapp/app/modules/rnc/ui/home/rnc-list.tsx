@@ -210,9 +210,9 @@ const RncList = ({}) => {
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
-                      <TableCell>{users.find(user => user.user.id == rnc.idEmissorNC)?.nome || '-'}</TableCell>
-                      <TableCell> {'-'} </TableCell>
-                      <TableCell>{users.find(user => user.user.id == rnc.idUsuarioAtual)?.nome || '-'}</TableCell>
+                      <TableCell>{emissor?.nome || '-'}</TableCell>
+                      <TableCell> {'-'}</TableCell>
+                      <TableCell>{usuarioAtual?.nome || '-'}</TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell>
                       <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>

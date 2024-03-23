@@ -360,10 +360,11 @@ export const RNCNew = () => {
       return null;
     }
 
-    return users.find(user => user.nome === login);
+    return users.find(user => user.user.login === login);
   };
 
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
+
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
@@ -486,8 +487,8 @@ export const RNCNew = () => {
                     }
                   >
                     {users.map((user, i) => (
-                      <MenuItem value={user.login} key={`user-${i}`}>
-                        {user.login}
+                      <MenuItem value={user.user.login} key={`user-${i}`}>
+                        {user.user.login}
                       </MenuItem>
                     ))}
                   </Select>
