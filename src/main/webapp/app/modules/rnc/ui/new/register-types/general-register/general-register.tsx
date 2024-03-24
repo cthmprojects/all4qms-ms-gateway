@@ -727,6 +727,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                       },
                     })
                   );
+                  navigate('/rnc');
                 }
               }}
             >
@@ -742,7 +743,22 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
                 if (!showPlanoAcaoCorretiva) {
                   setShowPlanoAcaoCorretiva(true);
                   updateElaboration();
-                  return;
+                } else {
+                  dispatch(
+                    savePlan({
+                      actionPlans: listaAcoesCorretivas,
+                      plan: {
+                        dtConclusaoPlano: new Date(),
+                        idNaoConformidade: _rnc.id,
+                        percentualPlano: 0,
+                        qtdAcoes: listaAcoesCorretivas.length,
+                        qtdAcoesConcluidas: 0,
+                        statusPlano: 'ABERTO',
+                      },
+                    })
+                  );
+                  updateInvestigation();
+                  navigate('/rnc');
                 }
               }}
             >
