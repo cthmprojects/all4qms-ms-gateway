@@ -9,3 +9,15 @@ export type RncPlan = {
   responsibleId: number;
   rncId: number;
 };
+
+export type Plan = {
+  id?: number;
+  statusPlano: string;
+  qtdAcoes: number;
+  qtdAcoesConcluidas: number;
+  percentualPlano: number;
+  dtConclusaoPlano: Date;
+  criadoEm?: Date;
+  atualizadoEm?: Date;
+  idNaoConformidade: number;
+};
