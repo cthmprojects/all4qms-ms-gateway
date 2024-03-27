@@ -1,15 +1,8 @@
-import { TextareaAutosize } from '@mui/base/TextareaAutosize';
-import { Add } from '@mui/icons-material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { styled } from '@mui/joy/styles';
 import {
   Breadcrumbs,
   Button,
   Card,
-  Divider,
-  Fab,
   FormControl,
-  IconButton,
   InputLabel,
   ListItemText,
   MenuItem,
@@ -23,15 +16,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import { Action, ActionPlan, IshikawaInvestigation, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
-import {
-  saveEffectCause,
-  saveImmediateAction,
-  savePlannedAction,
-  saveRange,
-  saveReason,
-  getById,
-  update,
-} from 'app/modules/rnc/reducers/rnc.reducer';
+import { saveEffectCause, saveImmediateAction, saveRange, saveReason, getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -44,7 +29,7 @@ import { listEnums } from '../../../../reducers/enums.reducer';
 import { Enums } from '../../../../models';
 import { savePlan } from 'app/modules/rnc/reducers/plan.reducer';
 
-export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) => {
+export const GeneralRegister = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -182,12 +167,23 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   const [descPrazo, setDescPrazo] = useState(new Date());
   const [descResponsavel, setDescResponsavel] = useState('');
 
-  const [listDesc, setListDesc] = useState([]);
-
   /*
    * Immediate action
    */
   const [actions, setActions] = useState<Array<Action>>([]);
+
+  /*
+   * Cause investigation
+   */
+  const [ishikawaInvestigation, setIshikawaInvestigation] = useState<IshikawaInvestigation>();
+  const [reasonsInvestigation, setReasonsInvestigation] = useState<ReasonsInvestigation>();
+
+  const [responsaveisMP, setResponsaveisMP] = useState([]);
+  const [responsaveis, setResponsaveis] = useState([]);
+  const [listaAcoesCorretivas, setListaAcoesCorretivas] = useState<Array<ActionPlan>>([]);
+  const [checkedIshikawa, setCheckedIshikawa] = React.useState(false);
+  const [checkedFiveWhy, setCheckedFiveWhy] = React.useState(false);
+  const [showPlanoAcaoCorretiva, setShowPlanoAcaoCorretiva] = useState(false);
 
   const onActionAdded = (action: Action): void => {
     setActions([...actions, action]);
@@ -204,12 +200,6 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     setActions([...newActions]);
   };
 
-  /*
-   * Cause investigation
-   */
-  const [ishikawaInvestigation, setIshikawaInvestigation] = useState<IshikawaInvestigation>();
-  const [reasonsInvestigation, setReasonsInvestigation] = useState<ReasonsInvestigation>();
-
   const onIshikawaInvestigationChanged = (investigation: IshikawaInvestigation): void => {
     setIshikawaInvestigation(investigation);
   };
@@ -217,11 +207,6 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   const onReasonsInvestigationChanged = (investigation: ReasonsInvestigation): void => {
     setReasonsInvestigation(investigation);
   };
-
-  const [prazoPlanoAcao, setPrazoPlanoAcao] = useState(new Date());
-  const [responsaveisMP, setResponsaveisMP] = useState([]);
-  const [responsaveisVerificacao, setResponsaveisVerificacao] = useState([]);
-  const [responsaveisPlanoAcao, setResponsaveisPlanoAcao] = useState([]);
 
   const handleChangeResponsaveisMP = (event: SelectChangeEvent<typeof responsaveisMP>) => {
     const {
@@ -246,23 +231,8 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     }
   };
 
-  const [responsaveis, setResponsaveis] = useState([]);
-
-  const [listaAcoesCorretivas, setListaAcoesCorretivas] = useState<Array<ActionPlan>>([]);
-
   const handleChange = (value: any) => {
     setRegisterForm(value);
-    // onRegisterChange(registerForm);
-  };
-
-  const [checkedIshikawa, setCheckedIshikawa] = React.useState(false);
-
-  const [checkedFiveWhy, setCheckedFiveWhy] = React.useState(false);
-
-  const handleRemoveListaAcoesCorretivasItem = (index: number) => {
-    const updatedList = [...listaAcoesCorretivas];
-    updatedList.splice(index, 1);
-    setListaAcoesCorretivas(updatedList);
   };
 
   const onActionPlansUpdated = (actionPlans: Array<ActionPlan>): void => {
@@ -270,85 +240,6 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   };
 
   const renderListaAcoesCorretivas = () => {
-    // return listaAcoesCorretivas.map((item, index) => (
-    //   <>
-    //     <TextField
-    //       label="Descrição da ação"
-    //       id="rnc-text-field"
-    //       className="w-100 desc-width m-2"
-    //       onChange={e =>
-    //         handleChange({
-    //           ...registerForm,
-    //           planoAcaoDescricao: { value: e.target.value, error: registerForm.planoAcaoDescricao.error },
-    //         })
-    //       }
-    //     />
-    //     <div key={index} style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-    //       <FormControl className="m-2 mt-0 rnc-form-field">
-    //         <DatePicker
-    //           // locale='pt-BR'
-    //           label="Prazo"
-    //           selected={prazoPlanoAcao}
-    //           onChange={date => setPrazoPlanoAcao(date)}
-    //           className="date-picker"
-    //           dateFormat={'dd/MM/yyyy'}
-    //           id="date-picker-rnc-plano-acao-prazo"
-    //         />
-    //       </FormControl>
-    //       <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-    //         <InputLabel>Responsável</InputLabel>
-    //         <Select
-    //           label="Encaminhado para:"
-    //           name="forwarded"
-    //           onChange={e => setResponsaveisPlanoAcao([...responsaveisPlanoAcao, e.target.value])}
-    //         >
-    //           {users.map((user, i) => (
-    //             <MenuItem value={user.login} key={`user-${i}`}>
-    //               {user.login}
-    //             </MenuItem>
-    //           ))}
-    //         </Select>
-    //       </FormControl>
-
-    //       <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-    //         <InputLabel>Status</InputLabel>
-    //         <Select label="Encaminhado para:" name="forwarded" value={item.statusAcao}>
-    //           <MenuItem value="Status 1">Status 1</MenuItem>
-    //           <MenuItem value="Status 2">Status 2</MenuItem>
-    //           <MenuItem value="Status 3">Status 3</MenuItem>
-    //         </Select>
-    //       </FormControl>
-
-    //       <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-    //         <InputLabel>Verificação</InputLabel>
-    //         <Select label="Encaminhado para:" name="forwarded">
-    //           <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
-    //           <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
-    //           <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
-    //         </Select>
-    //       </FormControl>
-
-    //       <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-    //         <InputLabel>Resp. verificação</InputLabel>
-    //         <Select
-    //           label="Encaminhado para:"
-    //           name="forwarded"
-    //           onChange={e => }
-    //         >
-    //           {users.map((user, i) => (
-    //             <MenuItem value={user.login} key={`user-${i}`}>
-    //               {user.login}
-    //             </MenuItem>
-    //           ))}
-    //         </Select>
-    //       </FormControl>
-    //       <IconButton aria-label="Remover" onClick={() => handleRemoveListaAcoesCorretivasItem(index)}>
-    //         <DeleteIcon fontSize="medium" />
-    //       </IconButton>
-    //     </div>
-    //   </>
-    // ));
-
     return (
       <PlannedActions
         actionPlans={listaAcoesCorretivas}
@@ -363,14 +254,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     return responsaveis.map((responsavel, index) => (
       <FormControl className="w-100">
         <InputLabel>Responsável</InputLabel>
-        <Select
-          label="Responsável"
-          name="forwarded"
-          // disabled={false}
-          value={responsavel}
-          disabled
-          // onChange={e => setResponsaveis([...responsaveis, e.target.value])}
-        >
+        <Select label="Responsável" name="forwarded" value={responsavel} disabled>
           {users.map((user, i) => (
             <MenuItem value={user.login} key={`user-${i}`}>
               {user.login}
@@ -389,7 +273,6 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
     }
   };
 
-  const [showPlanoAcaoCorretiva, setShowPlanoAcaoCorretiva] = useState(false);
   const users = useAppSelector(state => state.userManagement.users);
 
   const filterUser = (login: string) => {
@@ -420,6 +303,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
           </Breadcrumbs>
         </Row>
         <div className="container-style">
+          {/* Análise de Abrangência NC */}
           <ScopeAnalysis
             keywords={registerForm.keywords.value}
             onChanged={newKeyWords =>
@@ -433,6 +317,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
             }
           />
 
+          {/* Ação imediata */}
           <ImmediateActions actions={actions} onAdded={onActionAdded} onRemoved={onActionRemoved} users={users.map(u => u.login)} />
 
           {(_rnc?.origemNC == 'MATERIA_PRIMA_INSUMO' || _rnc?.origemNC == 'PRODUTO_ACABADO') && (

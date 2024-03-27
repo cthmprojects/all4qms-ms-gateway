@@ -18,39 +18,6 @@ const handleTela = (tela: string) => {
 };
 
 const RncRoutes = () => {
-  const [RNCs, setRNCs] = useState([]);
-
-  const handleRNCNewFirstForm = rnc => {
-    const newRNC = {
-      id: rnc.number.value,
-      emitter: rnc.emitter.value,
-      date: rnc.date.value,
-      processOrigin: rnc.processOrigin.value,
-      forwarded: rnc.forwarded.value,
-      processTarget: rnc.processTarget.value,
-      type: rnc.type.value,
-      origin: rnc.origin.value,
-    };
-
-    setRNCs([...RNCs, newRNC]);
-  };
-
-  const handleUpdateRNC = obj => {
-    const updatedRNCs = RNCs.map(item => {
-      if (item.id === obj.id) {
-        console.log({ ...item, ...obj });
-        return { ...item, ...obj };
-      }
-      return item;
-    });
-
-    setRNCs(updatedRNCs);
-  };
-
-  const findRNCById = id => {
-    return RNCs.find(item => item.id === id);
-  };
-
   const store = getStore();
   store.injectReducer('all4qmsmsgateway', combineReducers(rncReducers as ReducersMapObject));
 
@@ -60,10 +27,7 @@ const RncRoutes = () => {
         <Route path="" element={<RncList />} />
         <Route path="new/" element={<RNCNew />} />
         <Route path="new/:id" element={<RNCNew />} />
-        <Route
-          path="general/:id"
-          element={<GeneralRegister handleTela={handleTela} handleUpdateRNC={handleUpdateRNC} findRNCById={findRNCById} />}
-        ></Route>
+        <Route path="general/:id" element={<GeneralRegister />}></Route>
         <Route
           path="general/implementacao/:id"
           element={<RegisterImplementation handleTela={handleTela} handlePrazoImplementacao={handleTela} />}
