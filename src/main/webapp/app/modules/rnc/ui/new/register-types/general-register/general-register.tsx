@@ -422,11 +422,11 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
         <div className="container-style">
           <ScopeAnalysis
             keywords={registerForm.keywords.value}
-            onChanged={keywords =>
+            onChanged={newKeyWords =>
               handleChange({
                 ...registerForm,
                 keywords: {
-                  value: [...keywords],
+                  value: [...newKeyWords],
                   error: registerForm.keywords.error,
                 },
               })
@@ -659,7 +659,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
             <Button
               onClick={() => {
                 if (_rnc && !showPlanoAcaoCorretiva) {
-                  dispatch(saveRange({ description: registerForm.keywords.value.join(','), rncId: _rnc.id }));
+                  dispatch(saveRange({ description: registerForm.keywords.value.join(';'), rncId: _rnc.id }));
                   dispatch(
                     saveImmediateAction({
                       deadline: descPrazo,

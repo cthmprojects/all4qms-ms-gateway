@@ -8,15 +8,22 @@ import React, { useEffect, useState } from 'react';
 type ScopeAnalysisProps = {
   keywords: Array<string>;
   onChanged: (value: Array<string>) => void;
+  disabled?: boolean;
 };
 
-const ScopeAnalysis = ({ keywords, onChanged }: ScopeAnalysisProps) => {
+const ScopeAnalysis = ({ keywords, onChanged, disabled }: ScopeAnalysisProps) => {
+  const [keywordList, setKeywordList] = useState<Array<string>>(keywords);
   const [keyword, setKeyword] = useState<string>('');
   const hashtags = useAppSelector<Hashtag[]>(state => state.all4qmsmsgateway.hashtag.hashtags);
   const dispatch = useAppDispatch();
+
   const onKeywordAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    dispatch(postHashtagRNC(keyword));
+    // dispatch(postHashtagRNC(keyword));
+    setKeywordList([...keywordList, keyword]);
+    setKeyword('');
+    onChanged([...keywordList, keyword]);
   };
+
   useEffect(() => {
     const hashtagAddedKeywords = [...keywords].concat(hashtags.map(h => h.hashtag));
     onChanged(hashtagAddedKeywords);
@@ -29,8 +36,9 @@ const ScopeAnalysis = ({ keywords, onChanged }: ScopeAnalysisProps) => {
   };
 
   const onKeywordRemoved = (event: any, index: number): void => {
-    const newKeywords: Array<string> = keywords.filter((_, idx) => idx !== index);
-    onChanged(newKeywords);
+    // const newKeywords: Array<string> = keywordList.filter((_, idx) => idx !== index);
+    setKeywordList(keywordList.filter((_, idx) => idx !== index));
+    onChanged(keywordList);
   };
 
   return (
@@ -52,13 +60,14 @@ const ScopeAnalysis = ({ keywords, onChanged }: ScopeAnalysisProps) => {
             style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
             onChange={onKeywordChanged}
             value={keyword}
+            disabled={disabled}
           />
           <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
             <AddCircle fontSize="large" />
           </IconButton>
         </div>
         <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
-          {keywords.map((keyword: string, index: number) => (
+          {keywordList.map((keyword: string, index: number) => (
             <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
           ))}
         </div>
