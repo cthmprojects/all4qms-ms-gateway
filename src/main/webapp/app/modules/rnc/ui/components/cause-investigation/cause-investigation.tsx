@@ -70,15 +70,18 @@ const InnerTextareaCausa = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicEl
 type IshikawaInvestigationProps = {
   description?: string;
   onChanged: (investigation: IshikawaInvestigation) => void;
+  ishikawa;
+  newIshikawa;
 };
 
-const IshikawaInvestigation = ({ description, onChanged }: IshikawaInvestigationProps) => {
-  const [environmentCauses, setEnvironmentCauses] = useState<Array<string>>([]);
-  const [machineCauses, setMachineCauses] = useState<Array<string>>([]);
-  const [manpowerCauses, setManpowerCauses] = useState<Array<string>>([]);
-  const [measurementCauses, setMeasurementCauses] = useState<Array<string>>([]);
-  const [methodCauses, setMethodCauses] = useState<Array<string>>([]);
-  const [rawMaterialCauses, setRawMaterialCauses] = useState<Array<string>>([]);
+const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }: IshikawaInvestigationProps) => {
+  const [environmentCauses, setEnvironmentCauses] = useState<Array<string>>(ishikawa?.environment || []);
+  const [machineCauses, setMachineCauses] = useState<Array<string>>(ishikawa?.machine || []);
+  const [manpowerCauses, setManpowerCauses] = useState<Array<string>>(ishikawa?.manpower || []);
+  const [measurementCauses, setMeasurementCauses] = useState<Array<string>>(ishikawa?.measurement || []);
+  const [methodCauses, setMethodCauses] = useState<Array<string>>(ishikawa?.method || []);
+  const [rawMaterialCauses, setRawMaterialCauses] = useState<Array<string>>(ishikawa?.rawMaterial || []);
+  const [invalid, setInvalid] = useState<boolean>(false);
 
   useEffect(() => {
     onChanged({
@@ -89,36 +92,44 @@ const IshikawaInvestigation = ({ description, onChanged }: IshikawaInvestigation
       method: methodCauses,
       rawMaterial: rawMaterialCauses,
     });
+
+    let counter = 0;
+    if (environmentCauses.length > 0) counter++;
+    if (machineCauses.length > 0) counter++;
+    if (manpowerCauses.length > 0) counter++;
+    if (measurementCauses.length > 0) counter++;
+    if (methodCauses.length > 0) counter++;
+    if (rawMaterialCauses.length > 0) counter++;
+
+    if (counter < 1) {
+      setInvalid(true);
+    } else {
+      setInvalid(false);
+    }
   }, [environmentCauses, machineCauses, manpowerCauses, measurementCauses, methodCauses, rawMaterialCauses]);
 
-  const onEnvironmentCausesChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
-    const { value } = event.target;
-    setEnvironmentCauses([...environmentCauses, value]);
+  const onEnvironmentCausesChanged = (inputValue): void => {
+    setEnvironmentCauses(inputValue);
   };
 
-  const onMachineCausesChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
-    const { value } = event.target;
-    setMachineCauses([...machineCauses, value]);
+  const onMachineCausesChanged = (inputValue): void => {
+    setMachineCauses(inputValue);
   };
 
-  const onManpowerCausesChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
-    const { value } = event.target;
-    setManpowerCauses([...manpowerCauses, value]);
+  const onManpowerCausesChanged = (inputValue): void => {
+    setManpowerCauses(inputValue);
   };
 
-  const onMeasurementCausesChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
-    const { value } = event.target;
-    setMeasurementCauses([...measurementCauses, value]);
+  const onMeasurementCausesChanged = (inputValue): void => {
+    setMeasurementCauses(inputValue);
   };
 
-  const onMethodCausesChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
-    const { value } = event.target;
-    setMethodCauses([...methodCauses, value]);
+  const onMethodCausesChanged = (inputValue): void => {
+    setMethodCauses(inputValue);
   };
 
-  const onRawMaterialCausesChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
-    const { value } = event.target;
-    setRawMaterialCauses([...rawMaterialCauses, value]);
+  const onRawMaterialCausesChanged = (inputValue): void => {
+    setRawMaterialCauses(inputValue);
   };
 
   return (
@@ -141,54 +152,34 @@ const IshikawaInvestigation = ({ description, onChanged }: IshikawaInvestigation
             className="m-2"
             id="tags-outlined"
             options={['']}
-            defaultValue={[]}
+            defaultValue={environmentCauses}
+            disabled={!newIshikawa}
             freeSolo
             renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+              value.map(
+                (option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />,
+                onEnvironmentCausesChanged(value)
+              )
             }
             disableClearable
-            renderInput={params => <TextField {...params} label="Meio Ambiente" onChange={onEnvironmentCausesChanged} />}
+            renderInput={params => <TextField {...params} label="Meio Ambiente" />}
           />
           <Autocomplete
             multiple
             className="m-2"
             id="tags-outlined"
+            disabled={!newIshikawa}
             options={['']}
-            defaultValue={[]}
+            defaultValue={machineCauses}
             freeSolo
             renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+              value.map(
+                (option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />,
+                onMachineCausesChanged(value)
+              )
             }
             disableClearable
-            renderInput={params => <TextField {...params} label="Máquina" onChange={onMachineCausesChanged} />}
-          />
-        </div>
-        <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
-          <Autocomplete
-            multiple
-            className="m-2"
-            id="tags-outlined"
-            options={['']}
-            defaultValue={[]}
-            freeSolo
-            renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
-            }
-            disableClearable
-            renderInput={params => <TextField {...params} label="Mão de obra" onChange={onManpowerCausesChanged} />}
-          />
-          <Autocomplete
-            multiple
-            className="m-2"
-            id="tags-outlined"
-            options={['']}
-            defaultValue={[]}
-            freeSolo
-            renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
-            }
-            disableClearable
-            renderInput={params => <TextField {...params} label="Medição" onChange={onMeasurementCausesChanged} />}
+            renderInput={params => <TextField {...params} label="Máquina" />}
           />
         </div>
         <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
@@ -196,30 +187,79 @@ const IshikawaInvestigation = ({ description, onChanged }: IshikawaInvestigation
             multiple
             className="m-2"
             id="tags-outlined"
+            disabled={!newIshikawa}
             options={['']}
-            defaultValue={[]}
+            defaultValue={manpowerCauses}
             freeSolo
             renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+              value.map(
+                (option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />,
+                onManpowerCausesChanged(value)
+              )
             }
             disableClearable
-            renderInput={params => <TextField {...params} label="Método" onChange={onMethodCausesChanged} />}
+            renderInput={params => <TextField {...params} label="Mão de obra" />}
           />
           <Autocomplete
             multiple
             className="m-2"
             id="tags-outlined"
+            disabled={!newIshikawa}
             options={['']}
-            defaultValue={[]}
+            defaultValue={measurementCauses}
             freeSolo
             renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+              value.map(
+                (option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />,
+                onMeasurementCausesChanged(value)
+              )
             }
             disableClearable
-            renderInput={params => <TextField {...params} label="Matéria-prima" onChange={onRawMaterialCausesChanged} />}
+            renderInput={params => <TextField {...params} label="Medição" />}
+          />
+        </div>
+        <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
+          <Autocomplete
+            multiple
+            className="m-2"
+            id="tags-outlined"
+            disabled={!newIshikawa}
+            options={['']}
+            defaultValue={methodCauses}
+            freeSolo
+            renderTags={(value: readonly string[], getTagProps) =>
+              value.map(
+                (option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />,
+                onMethodCausesChanged(value)
+              )
+            }
+            disableClearable
+            renderInput={params => <TextField {...params} label="Método" />}
+          />
+          <Autocomplete
+            multiple
+            className="m-2"
+            id="tags-outlined"
+            disabled={!newIshikawa}
+            options={['']}
+            defaultValue={rawMaterialCauses}
+            freeSolo
+            renderTags={(value: readonly string[], getTagProps) =>
+              value.map(
+                (option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />,
+                onRawMaterialCausesChanged(value)
+              )
+            }
+            disableClearable
+            renderInput={params => <TextField {...params} label="Matéria-prima" />}
           />
         </div>
       </div>
+      {invalid && (
+        <span style={{ justifyContent: 'start', color: 'red' }} className="ms-2 mb-2">
+          * você precisa preencher no mínimo um campo e apertar enter
+        </span>
+      )}
     </Card>
   );
 };
@@ -227,48 +267,95 @@ const IshikawaInvestigation = ({ description, onChanged }: IshikawaInvestigation
 type ReasonsInvestigationProps = {
   description?: string;
   onChanged: (investigation: ReasonsInvestigation) => void;
+  reasons;
+  newReasons;
 };
 
-const ReasonsInvestigation = ({ description, onChanged }: ReasonsInvestigationProps) => {
-  const [firstReason, setFirstReason] = useState<string>('');
-  const [secondReason, setSecondReason] = useState<string>('');
-  const [thirdReason, setThirdReason] = useState<string>('');
-  const [fourthReason, setFourthReason] = useState<string>('');
-  const [fifthReason, setFifthReason] = useState<string>('');
+const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: ReasonsInvestigationProps) => {
+  const [firstReason, setFirstReason] = useState<string>(reasons?.first || '');
+  const [secondReason, setSecondReason] = useState<string>(reasons?.second || '');
+  const [thirdReason, setThirdReason] = useState<string>(reasons?.third || '');
+  const [fourthReason, setFourthReason] = useState<string>(reasons?.fourth || '');
+  const [fifthReason, setFifthReason] = useState<string>(reasons?.fifth || '');
+  const [invalid, setInvalid] = useState<boolean>(false);
 
-  useEffect(() => {
-    onChanged({
-      first: firstReason,
+  const validateAndSave = (reasons: any) => {
+    onChanged(reasons);
+
+    let counter = 0;
+
+    if (reasons.first) counter++;
+    if (reasons.second) counter++;
+    if (reasons.third) counter++;
+    if (reasons.fourth) counter++;
+    if (reasons.fifth) counter++;
+
+    if (counter < 3) {
+      setInvalid(true);
+    } else {
+      setInvalid(false);
+    }
+  };
+
+  const onFirstReasonChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    const { value } = event.target;
+    setFirstReason(value);
+
+    validateAndSave({
+      first: value,
       second: secondReason,
       third: thirdReason,
       fourth: fourthReason,
       fifth: fifthReason,
     });
-  }, []);
-
-  const onFirstReasonChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-    const { value } = event.target;
-    setFirstReason(value);
   };
 
   const onSecondReasonChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { value } = event.target;
     setSecondReason(value);
+    validateAndSave({
+      first: firstReason,
+      second: value,
+      third: thirdReason,
+      fourth: fourthReason,
+      fifth: fifthReason,
+    });
   };
 
   const onThirdReasonChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { value } = event.target;
     setThirdReason(value);
+    validateAndSave({
+      first: firstReason,
+      second: secondReason,
+      third: value,
+      fourth: fourthReason,
+      fifth: fifthReason,
+    });
   };
 
   const onFourthReasonChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { value } = event.target;
     setFourthReason(value);
+    validateAndSave({
+      first: firstReason,
+      second: secondReason,
+      third: thirdReason,
+      fourth: value,
+      fifth: fifthReason,
+    });
   };
 
   const onFifthReasonChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { value } = event.target;
     setFifthReason(value);
+    validateAndSave({
+      first: firstReason,
+      second: secondReason,
+      third: thirdReason,
+      fourth: fourthReason,
+      fifth: value,
+    });
   };
 
   return (
@@ -286,11 +373,11 @@ const ReasonsInvestigation = ({ description, onChanged }: ReasonsInvestigationPr
           />
         </div>
         <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
-          <TextField label="Porquê?" className="m-2" required onChange={onFirstReasonChanged} value={firstReason} />
-          <TextField label="Porquê?" className="m-2" required onChange={onSecondReasonChanged} value={secondReason} />
-          <TextField label="Porquê?" className="m-2" required onChange={onThirdReasonChanged} value={thirdReason} />
-          <TextField label="Porquê?" className="m-2" onChange={onFourthReasonChanged} value={fourthReason} />
-          <TextField label="Porquê?" className="m-2" onChange={onFifthReasonChanged} value={fifthReason} />
+          <TextField label="Porquê?" className="m-2" disabled={!newReasons} onChange={onFirstReasonChanged} value={firstReason} />
+          <TextField label="Porquê?" className="m-2" disabled={!newReasons} onChange={onSecondReasonChanged} value={secondReason} />
+          <TextField label="Porquê?" className="m-2" disabled={!newReasons} onChange={onThirdReasonChanged} value={thirdReason} />
+          <TextField label="Porquê?" className="m-2" disabled={!newReasons} onChange={onFourthReasonChanged} value={fourthReason} />
+          <TextField label="Porquê?" className="m-2" disabled={!newReasons} onChange={onFifthReasonChanged} value={fifthReason} />
         </div>
         <div className="flex-col">
           <br />
@@ -304,6 +391,11 @@ const ReasonsInvestigation = ({ description, onChanged }: ReasonsInvestigationPr
           />
         </div>
       </div>
+      {invalid && (
+        <span style={{ justifyContent: 'start', color: 'red' }} className="ms-2 mb-2">
+          * você precisa preencher no mínimo três campos
+        </span>
+      )}
     </Card>
   );
 };
@@ -314,6 +406,12 @@ type CauseInvestigationProps = {
   onReasonsInvestigationChanged: (investigation: ReasonsInvestigation) => void;
   checkIshikawa: (check: boolean) => void;
   checkReasons: (check: boolean) => void;
+  checkedIshikawa: boolean;
+  checkedReasons: boolean;
+  ishikawa;
+  reasons;
+  newIshikawa;
+  newReasons;
 };
 
 const CauseInvestigation = ({
@@ -322,17 +420,18 @@ const CauseInvestigation = ({
   onReasonsInvestigationChanged,
   checkIshikawa,
   checkReasons,
+  checkedIshikawa,
+  checkedReasons,
+  ishikawa,
+  reasons,
+  newIshikawa,
+  newReasons,
 }: CauseInvestigationProps) => {
-  const [ishikawaEnabled, setIshikawaEnabled] = useState<boolean>(false);
-  const [reasonsEnabled, setReasonsEnabled] = useState<boolean>(false);
-
   const onIshikawaChanged = (event: React.SyntheticEvent<Element, Event>, checked: boolean): void => {
-    setIshikawaEnabled(checked);
     checkIshikawa(checked);
   };
 
   const onReasonsChanged = (event: React.SyntheticEvent<Element, Event>, checked: boolean): void => {
-    setReasonsEnabled(checked);
     checkReasons(checked);
   };
 
@@ -344,13 +443,27 @@ const CauseInvestigation = ({
         </Typography>
 
         <div className="mt-2" style={{ display: 'flex' }}>
-          <FormControlLabel control={<Checkbox />} onChange={onIshikawaChanged} label="Ishikawa" />
-          <FormControlLabel control={<Checkbox />} onChange={onReasonsChanged} label="Resposta dos 5 porquês" />
+          <FormControlLabel control={<Checkbox checked={checkedIshikawa} />} onChange={onIshikawaChanged} label="Ishikawa" />
+          <FormControlLabel control={<Checkbox checked={checkedReasons} />} onChange={onReasonsChanged} label="Resposta dos 5 porquês" />
         </div>
 
-        {ishikawaEnabled && <IshikawaInvestigation description={description} onChanged={onIshikawaInvestigationChanged} />}
+        {checkedIshikawa && (
+          <IshikawaInvestigation
+            newIshikawa={newIshikawa}
+            ishikawa={ishikawa}
+            description={description}
+            onChanged={onIshikawaInvestigationChanged}
+          />
+        )}
 
-        {reasonsEnabled && <ReasonsInvestigation description={description} onChanged={onReasonsInvestigationChanged} />}
+        {checkedReasons && (
+          <ReasonsInvestigation
+            newReasons={newReasons}
+            reasons={reasons}
+            description={description}
+            onChanged={onReasonsInvestigationChanged}
+          />
+        )}
       </CardContent>
     </Card>
   );

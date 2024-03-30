@@ -322,6 +322,75 @@ export const saveReason = createAsyncThunk('rnc/reason/save', async (reason: Rnc
   return response;
 });
 
+export const updateEffectCause = async (id, effectCause: RncEffectCause) => {
+  return await axios.patch(`${effectCauseApiUrl}/${id}`, {
+    id: id,
+    descCausaEfeito: effectCause.description,
+    meioAmbiente: effectCause.environment,
+    maoDeObra: effectCause.workforce,
+    metodo: effectCause.method,
+    maquina: effectCause.machine,
+    medicao: effectCause.measurement,
+    materiaPrima: effectCause.rawMaterial,
+  });
+};
+
+export const updateReason = async (id, reason: RncReason) => {
+  return await axios.patch(`${reasonApiUrl}/${id}`, {
+    id: id,
+    descProblema: reason.problem,
+    pq1: reason.first,
+    pq2: reason.second,
+    pq3: reason.third,
+    pq4: reason.forth,
+    pq5: reason.fifth,
+    descCausa: reason.cause,
+  });
+};
+
+export const saveInvestigation = async (id, effectCause?: RncEffectCause, reason?: RncReason) => {
+  let effectId;
+  let reasonId;
+
+  if (effectCause) {
+    await axios
+      .post(effectCauseApiUrl, {
+        descCausaEfeito: effectCause.description,
+        meioAmbiente: effectCause.environment,
+        maoDeObra: effectCause.workforce,
+        metodo: effectCause.method,
+        maquina: effectCause.machine,
+        medicao: effectCause.measurement,
+        materiaPrima: effectCause.rawMaterial,
+      })
+      .then(response => {
+        effectId = response.data.id;
+      });
+  }
+
+  if (reason) {
+    await axios
+      .post(reasonApiUrl, {
+        descProblema: reason.problem,
+        pq1: reason.first,
+        pq2: reason.second,
+        pq3: reason.third,
+        pq4: reason.forth,
+        pq5: reason.fifth,
+        descCausa: reason.cause,
+      })
+      .then(response => {
+        reasonId = response.data.id;
+      });
+  }
+
+  await axios.post('services/all4qmsmsrnc/api/investigacao', {
+    idNaoConformidade: id,
+    idCausaEfeito: effectId,
+    idPorques: reasonId,
+  });
+};
+
 export const saveRange = createAsyncThunk('rnc/range/save', async (range: RncRange) => {
   const response = await axios.post(rangeApiUrl, {
     descricaoAbrangencia: range.description,
