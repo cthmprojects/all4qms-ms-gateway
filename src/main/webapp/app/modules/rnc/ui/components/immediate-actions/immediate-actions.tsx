@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { Action } from 'app/modules/rnc/models';
+import { Action, Option } from 'app/modules/rnc/models';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 
@@ -21,10 +21,11 @@ type ImmediateActionProps = {
   onAdded?: (action: Action) => void;
   onRemoved?: (action: Action) => void;
   readonly?: boolean;
+  statuses: Array<Option>;
   users: Array<string>;
 };
 
-const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: ImmediateActionProps) => {
+const ImmediateAction = ({ action, onAdded, onRemoved, readonly, statuses, users }: ImmediateActionProps) => {
   const [deadline, setDeadline] = useState<Date>(new Date());
   const [description, setDescription] = useState<string>('');
   const [responsible, setResponsible] = useState<string>('');
@@ -125,15 +126,14 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
                 ))}
               </Select>
             </FormControl>
-            <TextField
-              className="m-2 rnc-form-field"
-              disabled={readonly}
-              id="rnc-text-field"
-              label="Status"
-              onChange={onStatusChanged}
-              sx={{ width: '20% !important' }}
-              value={status}
-            />
+            <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+              <InputLabel>Status</InputLabel>
+              <Select name="forwarded" onChange={e => setStatus(e.target.value as string)}>
+                {statuses.map(e => {
+                  return <MenuItem value={e.value}>{e.name}</MenuItem>;
+                })}
+              </Select>
+            </FormControl>
           </div>
         </div>
         {!readonly && (
@@ -155,10 +155,11 @@ type ImmediateActionsProps = {
   actions: Array<Action>;
   onAdded: (action: Action) => void;
   onRemoved: (action: Action) => void;
+  statuses: Array<Option>;
   users: Array<string>;
 };
 
-const ImmediateActions = ({ actions, onAdded, onRemoved, users }: ImmediateActionsProps) => {
+const ImmediateActions = ({ actions, onAdded, onRemoved, statuses, users }: ImmediateActionsProps) => {
   const onActionAdded = (action: Action): void => {
     onAdded(action);
   };
@@ -174,11 +175,18 @@ const ImmediateActions = ({ actions, onAdded, onRemoved, users }: ImmediateActio
           Ação Imediata / Disposição para conter a NC
         </Typography>
 
-        <ImmediateAction onAdded={onActionAdded} users={users} />
+        <ImmediateAction onAdded={onActionAdded} statuses={statuses} users={users} />
 
         {actions?.length > 0 &&
           actions.map((action, index) => (
-            <ImmediateAction action={action} key={`immediate-action-${index}`} onRemoved={onActionRemoved} readonly users={users} />
+            <ImmediateAction
+              action={action}
+              key={`immediate-action-${index}`}
+              onRemoved={onActionRemoved}
+              readonly
+              statuses={statuses}
+              users={users}
+            />
           ))}
       </CardContent>
     </Card>

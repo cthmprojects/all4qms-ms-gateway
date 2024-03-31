@@ -390,7 +390,7 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
   };
 
   const [showPlanoAcaoCorretiva, setShowPlanoAcaoCorretiva] = useState(false);
-  const users = useAppSelector(state => state.userManagement.users);
+  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
 
   const filterUser = (login: string) => {
     if (!users || users.length <= 0) {
@@ -433,7 +433,13 @@ export const GeneralRegister = ({ handleTela, handleUpdateRNC, findRNCById }) =>
             }
           />
 
-          <ImmediateActions actions={actions} onAdded={onActionAdded} onRemoved={onActionRemoved} users={users.map(u => u.login)} />
+          <ImmediateActions
+            actions={actions}
+            onAdded={onActionAdded}
+            onRemoved={onActionRemoved}
+            statuses={enums.immediateActionTypes}
+            users={users.map(u => u.login)}
+          />
 
           {(_rnc?.origemNC == 'MATERIA_PRIMA_INSUMO' || _rnc?.origemNC == 'PRODUTO_ACABADO') && (
             <div className="fake-card mt-3">
