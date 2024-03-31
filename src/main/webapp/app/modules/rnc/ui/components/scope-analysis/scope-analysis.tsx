@@ -18,7 +18,6 @@ const ScopeAnalysis = ({ keywords, onChanged, disabled }: ScopeAnalysisProps) =>
   const dispatch = useAppDispatch();
 
   const onKeywordAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    // dispatch(postHashtagRNC(keyword));
     setKeywordList([...keywordList, keyword]);
     setKeyword('');
     onChanged([...keywordList, keyword]);
@@ -30,13 +29,19 @@ const ScopeAnalysis = ({ keywords, onChanged, disabled }: ScopeAnalysisProps) =>
     setKeyword('');
   }, [hashtags]);
 
+  useEffect(() => {
+    if (keywordList.length !== keywords.length) {
+      setKeywordList(keywords);
+    }
+  }, [keywords]);
+
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { value } = event.target;
     setKeyword(value);
   };
 
   const onKeywordRemoved = (event: any, index: number): void => {
-    // const newKeywords: Array<string> = keywordList.filter((_, idx) => idx !== index);
+    if (disabled) return;
     setKeywordList(keywordList.filter((_, idx) => idx !== index));
     onChanged(keywordList);
   };
@@ -62,13 +67,13 @@ const ScopeAnalysis = ({ keywords, onChanged, disabled }: ScopeAnalysisProps) =>
             value={keyword}
             disabled={disabled}
           />
-          <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
+          <IconButton disabled={disabled} aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
             <AddCircle fontSize="large" />
           </IconButton>
         </div>
         <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
           {keywordList.map((keyword: string, index: number) => (
-            <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
+            <Chip disabled={disabled} label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
           ))}
         </div>
       </CardContent>

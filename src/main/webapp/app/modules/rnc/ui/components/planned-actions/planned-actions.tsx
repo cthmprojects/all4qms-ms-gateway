@@ -1,5 +1,5 @@
 import { Add, Delete } from '@mui/icons-material';
-import { Fab, FormControl, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Fab, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { ActionPlan, Option } from 'app/modules/rnc/models';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
@@ -9,11 +9,12 @@ type PlannedActionProps = {
   onChanged: (actionPlan: ActionPlan) => void;
   onRemoved: () => void;
   statuses: Array<Option>;
-  users: Array<{ id: number; login: string }>;
+  users: Array<any>;
 };
 
 const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: PlannedActionProps) => {
   const [deadline, setDeadline] = useState<Date>(new Date());
+  const [verification, setVerification] = useState<Date>(new Date());
   const [description, setDescription] = useState<string>('');
   const [responsible, setResponsible] = useState<string>('');
   const [status, setStatus] = useState<string>('');
@@ -21,8 +22,8 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
 
   useEffect(() => {
     onChanged({
-      dataConclusaoAcao: new Date(),
-      dataVerificao: new Date(),
+      dataConclusaoAcao: deadline || new Date(),
+      dataVerificao: verification || new Date(),
       descricaoAcao: description,
       idAnexosExecucao: 0,
       idPlano: 0,
@@ -40,6 +41,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
     setResponsible(actionPlan.idResponsavelAcao.toString());
     setStatus(actionPlan.statusAcao);
     setVerifier(actionPlan.idResponsavelVerificaoAcao.toString());
+    setVerification(actionPlan.dataVerificao);
   }, [actionPlan]);
 
   return (
@@ -67,7 +69,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
           <Select label="Encaminhado para:" name="forwarded" onChange={e => setResponsible(e.target.value as string)}>
             {users.map((user, i) => (
               <MenuItem value={user.id} key={`user-${i}`}>
-                {user.login}
+                {user.nome}
               </MenuItem>
             ))}
           </Select>
@@ -83,12 +85,15 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
         </FormControl>
 
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-          <InputLabel>Verificação</InputLabel>
-          <Select label="Encaminhado para:" name="forwarded">
-            <MenuItem value="Verificacao 1">Verificação 1</MenuItem>
-            <MenuItem value="Verificacao 2">Verificação 2</MenuItem>
-            <MenuItem value="Verificacao 3">Verificação 3</MenuItem>
-          </Select>
+          <DatePicker
+            // locale='pt-BR'
+            label="Verificação"
+            selected={verification}
+            onChange={date => setVerification(date)}
+            className="date-picker"
+            dateFormat={'dd/MM/yyyy'}
+            id="date-picker-rnc-plano-acao-prazo"
+          />
         </FormControl>
 
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
@@ -96,7 +101,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
           <Select label="Encaminhado para:" name="forwarded" onChange={e => setVerifier(e.target.value as string)}>
             {users.map((user, i) => (
               <MenuItem value={user.id} key={`user-${i}`}>
-                {user.login}
+                {user.nome}
               </MenuItem>
             ))}
           </Select>
@@ -162,6 +167,14 @@ const PlannedActions = ({ actionPlans, onUpdated, statuses, users }: PlannedActi
 
   return (
     <>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Typography variant="h5" component="div">
+          Plano de Ação Corretiva
+        </Typography>
+        <Fab aria-label="add" size="medium" className="btn-add-fab me-2 ms-2" onClick={onAdded}>
+          <Add />
+        </Fab>
+      </div>
       {actionPlans.map((actionPlan, index) => (
         <PlannedAction
           actionPlan={actionPlan}
@@ -171,11 +184,6 @@ const PlannedActions = ({ actionPlans, onUpdated, statuses, users }: PlannedActi
           users={users}
         />
       ))}
-      <div>
-        <Fab color="primary" aria-label="add" size="medium" className="btn-add-fab me-2" onClick={onAdded}>
-          <Add />
-        </Fab>
-      </div>
     </>
   );
 };

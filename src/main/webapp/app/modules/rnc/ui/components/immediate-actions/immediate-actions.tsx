@@ -12,7 +12,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { Action } from 'app/modules/rnc/models';
+import { useAppSelector } from 'app/config/store';
+import { Action, Enums } from 'app/modules/rnc/models';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 
@@ -59,6 +60,7 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
     };
 
     onAdded(action);
+    clearFields();
   };
 
   const onActionRemoved = (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -83,10 +85,12 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
     setResponsible(value);
   };
 
-  const onStatusChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+  const onStatusChanged = (event: SelectChangeEvent<any>, _: React.ReactNode): void => {
     const { value } = event.target;
     setStatus(value);
   };
+
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
 
   return (
     <>
@@ -125,7 +129,17 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
                 ))}
               </Select>
             </FormControl>
-            <TextField
+            <FormControl className="rnc-form-field m-2">
+              <InputLabel>Status</InputLabel>
+              <Select label="Status" name="forwarded" value={status} onChange={onStatusChanged} disabled={readonly}>
+                {enums?.immediateActionTypes.map((type, idx) => (
+                  <MenuItem value={type.name} key={`type-${idx}`}>
+                    {type.value}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {/* <TextField
               className="m-2 rnc-form-field"
               disabled={readonly}
               id="rnc-text-field"
@@ -133,7 +147,7 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
               onChange={onStatusChanged}
               sx={{ width: '20% !important' }}
               value={status}
-            />
+            /> */}
           </div>
         </div>
         {!readonly && (
