@@ -69,7 +69,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
 
   const updateStatus = () => {
     if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'EXECUCAO' }));
+      dispatch(update({ ..._rnc, statusAtual: 'VERIFICACAO' }));
       setTimeout(() => {
         navigate('/rnc');
       }, 1000);

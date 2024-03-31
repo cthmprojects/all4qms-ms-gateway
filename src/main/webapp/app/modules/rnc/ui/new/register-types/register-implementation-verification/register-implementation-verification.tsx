@@ -60,7 +60,7 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
 
   const updateStatus = () => {
     if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'VERIFICACAO' }));
+      dispatch(update({ ..._rnc, statusAtual: 'VALIDACAO' }));
       setTimeout(() => {
         navigate('/rnc');
       }, 1000);
