@@ -25,10 +25,13 @@ import RepetitionRnc from './register-types/repetition/repetition-rnc';
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
+import { getProcesses } from '../../reducers/process.reducer';
 
 export const RNCNew = () => {
   const dispatch = useAppDispatch();
   const { id } = useParams();
+
+  const [processOptions, setProcessOptions] = useState([]);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -38,6 +41,10 @@ export const RNCNew = () => {
     if (id) {
       dispatch(getById(parseInt(id)));
     }
+
+    getProcesses().then(data => {
+      setProcessOptions(data);
+    });
   }, []);
 
   const navigate = useNavigate();
@@ -466,11 +473,11 @@ export const RNCNew = () => {
                       setFirstForm({ ...firstForm, processOrigin: { value: event.target.value, error: firstForm.processOrigin.error } })
                     }
                   >
-                    <MenuItem value="1">Produção</MenuItem>
-                    <MenuItem value="2">Engenharia de teste</MenuItem>
-                    <MenuItem value="3">Estoque</MenuItem>
-                    <MenuItem value="4">Expedição</MenuItem>
-                    <MenuItem value="5">PCP</MenuItem>
+                    {processOptions.map((process, i) => (
+                      <MenuItem value={process.id} key={`process-${i}`}>
+                        {process.nome}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
 
@@ -488,7 +495,7 @@ export const RNCNew = () => {
                   >
                     {users.map((user, i) => (
                       <MenuItem value={user.user.login} key={`user-${i}`}>
-                        {user.user.login}
+                        {user.nome}
                       </MenuItem>
                     ))}
                   </Select>
@@ -506,11 +513,11 @@ export const RNCNew = () => {
                       setFirstForm({ ...firstForm, processTarget: { value: event.target.value, error: firstForm.processTarget.error } })
                     }
                   >
-                    <MenuItem value="1">Produção</MenuItem>
-                    <MenuItem value="2">Engenharia de teste</MenuItem>
-                    <MenuItem value="3">Estoque</MenuItem>
-                    <MenuItem value="4">Expedição</MenuItem>
-                    <MenuItem value="5">PCP</MenuItem>
+                    {processOptions.map((process, i) => (
+                      <MenuItem value={process.id} key={`process-${i}`}>
+                        {process.nome}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
 
