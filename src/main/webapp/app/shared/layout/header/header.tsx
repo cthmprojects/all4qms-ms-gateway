@@ -32,15 +32,17 @@ const Header = (props: IHeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorAdm, setAnchorAdm] = React.useState(null);
+  const [anchorUser, setAnchorUser] = React.useState(null);
 
   const location = useLocation();
   const dispatch = useAppDispatch();
   const logoutUrl = useAppSelector(state => state.authentication.logoutUrl);
 
   const userMenuOpen = Boolean(anchorEl);
-  const navigate = useNavigate();
-
   const admMenuOpen = Boolean(anchorAdm);
+  const profileMenuOpen = Boolean(anchorUser);
+
+  const navigate = useNavigate();
 
   const handleOpenAdmMenu = event => {
     setAnchorAdm(event.currentTarget);
@@ -48,6 +50,14 @@ const Header = (props: IHeaderProps) => {
 
   const handleCloseAdmMenu = () => {
     setAnchorAdm(null);
+  };
+
+  const handleOpenProfileMenu = event => {
+    setAnchorUser(event.currentTarget);
+  };
+
+  const handleCloseProfileMenu = () => {
+    setAnchorUser(null);
   };
 
   const handleOpenUserMenu = event => {
@@ -136,10 +146,16 @@ const Header = (props: IHeaderProps) => {
                 <MenuItem onClick={() => navigate('/setor')}>Setores</MenuItem>
                 <MenuItem onClick={() => navigate('/processo')}>Processos</MenuItem>
                 <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem>
+                <MenuItem onClick={() => navigate('/account/reset/finish')}>Alterar senha</MenuItem>
               </Menu>
-              <Button startIcon={<AccountCircleIcon />} className="remove-margin-top-icon">
+              <Button startIcon={<AccountCircleIcon />} className="remove-margin-top-icon" onClick={handleOpenProfileMenu}>
                 {Storage.session.get('firstName')}
               </Button>
+              <Menu open={profileMenuOpen} anchorEl={anchorUser} onClose={handleCloseProfileMenu}>
+                <MenuItem onClick={() => navigate('/account/reset/finish')}>Trocar senha</MenuItem>
+                <MenuItem onClick={() => navigate('/logout')}>Sair</MenuItem>
+              </Menu>
+
               <IconButton onClick={() => navigate('/logout')}>
                 <LogoutIcon />
               </IconButton>
