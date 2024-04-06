@@ -195,9 +195,9 @@ export const RNCNew = () => {
           tipoNC: tipoNC,
           origemNC: origemNC,
           possuiReincidencia: true,
-          idEmissorNC: idEmissorNC,
+          idEmissorNC: users.find(user => user.nome == firstForm.emitter.value)?.id,
           processoNC: processoNC,
-          idReceptorNC: idReceptorNC,
+          idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
           vinculoDocAnterior: null,
         })
@@ -227,9 +227,9 @@ export const RNCNew = () => {
           tipoNC: tipoNC,
           origemNC: origemNC,
           possuiReincidencia: true,
-          idEmissorNC: idEmissorNC,
+          idEmissorNC: users.find(user => user.nome == firstForm.emitter.value)?.id,
           processoNC: processoNC,
-          idReceptorNC: idReceptorNC,
+          idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
           vinculoDocAnterior: null,
         })
@@ -404,13 +404,13 @@ export const RNCNew = () => {
   }, [users, rnc]);
 
   useEffect(() => {
-    if (users && stateRnc) {
-      console.log(users.find(user => user.user.id === stateRnc.idEmissorNC));
+    if (users) {
+      console.log(users, stateRnc);
 
       setFirstForm({
         ...firstForm,
-        emitter: { value: users.find(user => user.user.id === stateRnc.idEmissorNC)?.nome, error: false },
-        forwarded: { value: users.find(user => user.user.id === stateRnc.idReceptorNC)?.nome, error: false },
+        emitter: { value: users.find(user => user.id === stateRnc?.idEmissorNC)?.nome, error: false },
+        forwarded: { value: users.find(user => user.id === stateRnc?.idReceptorNC)?.nome, error: false },
       });
     }
   }, [users]);
@@ -452,7 +452,7 @@ export const RNCNew = () => {
 
                 <TextField
                   sx={{ height: '60px' }}
-                  label="Emitido por:"
+                  label="."
                   name="emitter"
                   id="rnc-text-field"
                   value={firstForm.emitter.value}
@@ -494,7 +494,7 @@ export const RNCNew = () => {
                     }
                   >
                     {users.map((user, i) => (
-                      <MenuItem value={user.user.login} key={`user-${i}`}>
+                      <MenuItem value={user.nome} key={`user-${i}`}>
                         {user.nome}
                       </MenuItem>
                     ))}
