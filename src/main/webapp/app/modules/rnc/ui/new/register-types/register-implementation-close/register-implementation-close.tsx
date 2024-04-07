@@ -60,7 +60,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
 
   const updateStatus = () => {
     if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'VALIDACAO' }));
+      dispatch(update({ ..._rnc, statusAtual: 'CONCLUIDO' }));
       setTimeout(() => {
         navigate('/rnc');
       }, 1000);
@@ -140,7 +140,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
               ))}
             </Select>
           </FormControl>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
+          {/* <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
             <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Alterar Risco/Oportunidade</h2>
             <div className="mt-3" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
               <FormControlLabel
@@ -169,7 +169,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
               <MenuItem value="1">Risco</MenuItem>
               <MenuItem value="2">Oportunidade</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
         </div>
         <div className="mt-4">
           <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Descrição do Fechamento</h2>
