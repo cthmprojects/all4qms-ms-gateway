@@ -307,12 +307,6 @@ export const GeneralRegister = () => {
     setResponsaveisMP(typeof value === 'string' ? value.split(',') : value);
   };
 
-  const updateInvestigation = () => {
-    if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'LEVANTAMENTO' }));
-    }
-  };
-
   const updateElaboration = () => {
     if (_rnc) {
       if (_rnc.statusAtual == 'LEVANTAMENTO') {
@@ -862,7 +856,7 @@ export const GeneralRegister = () => {
                       },
                     })
                   );
-                  updateInvestigation();
+                  updateElaboration();
                   navigate('/rnc');
                 }
               }}
