@@ -1,24 +1,22 @@
 import { TextField } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-export const OthersRegister = ({ onOthersRegisterChange }) => {
-  const [othersForm, setOthersForm] = useState({
-    others: {
-      value: '',
-      error: false,
-    },
-  });
+type OthersRegisterProps = {
+  onChanged: (others: string) => void;
+};
 
-  const handleChange = (value: any) => {
-    setOthersForm(value);
-    onOthersRegisterChange(othersForm);
-  };
+export const OthersRegister = ({ onChanged }: OthersRegisterProps) => {
+  const [others, setOthers] = useState<string>('');
+
+  useEffect(() => {
+    onChanged(others);
+  }, [others]);
 
   return (
     <>
       <TextField
-        value={othersForm.others.value}
-        onChange={e => handleChange({ ...othersForm, others: { value: e.target.value, error: false } })}
+        value={others}
+        onChange={e => setOthers(e.target.value)}
         label="Escreva aqui..."
         name="others-register-field"
         className="m-2 mb-3"

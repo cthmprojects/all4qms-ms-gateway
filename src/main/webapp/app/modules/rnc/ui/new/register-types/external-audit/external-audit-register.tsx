@@ -1,25 +1,23 @@
-import React from 'react';
-import { Button, Card, Divider, TextField } from '@mui/material';
+import { Card, Divider, TextField } from '@mui/material';
+import { GeneralAudit } from 'app/modules/rnc/models';
+import React, { useEffect, useState } from 'react';
 import './external-audit.css';
-import { toast } from 'react-toastify';
 
-export const ExternalAuditRegister = ({ setExternalAuditRegister }) => {
-  const [external, setExternal] = React.useState({
-    norma: '',
-    numberNC: '',
-    normaRequiremeents: '',
-    numberReport: '',
+type ExternalAuditRegisterProps = {
+  onChanged: (externalAudit: GeneralAudit) => void;
+};
+
+export const ExternalAuditRegister = ({ onChanged }: ExternalAuditRegisterProps) => {
+  const [external, setExternal] = useState<GeneralAudit>({
+    ncNumber: 0,
+    norm: '',
+    normRequirements: '',
+    reportNumber: 0,
   });
 
-  const handleChange = () => {
-    setExternalAuditRegister({
-      norma: external.norma,
-      numberNC: external.numberNC,
-      normaRequiremeents: external.normaRequiremeents,
-      numberReport: external.numberReport,
-    });
-    toast.success('Origem salva com sucesso!');
-  };
+  useEffect(() => {
+    onChanged(external);
+  }, [external]);
 
   return (
     <>
@@ -32,8 +30,8 @@ export const ExternalAuditRegister = ({ setExternalAuditRegister }) => {
             label="Norma"
             name="norma"
             className="form-field m-3"
-            value={external.norma}
-            onChange={e => setExternal({ ...external, norma: e.target.value })}
+            value={external.norm}
+            onChange={e => setExternal({ ...external, norm: e.target.value })}
           />
           <TextField
             fullWidth
@@ -41,16 +39,16 @@ export const ExternalAuditRegister = ({ setExternalAuditRegister }) => {
             name="numeroNC"
             className="form-field m-3"
             type="number"
-            value={external.numberNC}
-            onChange={e => setExternal({ ...external, numberNC: e.target.value })}
+            value={external.ncNumber}
+            onChange={e => setExternal({ ...external, ncNumber: parseInt(e.target.value) })}
           />
           <TextField
             fullWidth
             label="Requisito(s) da Norma"
             name="requisitosNorma"
             className="form-field m-3"
-            value={external.normaRequiremeents}
-            onChange={e => setExternal({ ...external, normaRequiremeents: e.target.value })}
+            value={external.normRequirements}
+            onChange={e => setExternal({ ...external, normRequirements: e.target.value })}
           />
           <TextField
             fullWidth
@@ -58,20 +56,9 @@ export const ExternalAuditRegister = ({ setExternalAuditRegister }) => {
             name="numeroRelatorio"
             type="number"
             className="form-field m-3"
-            value={external.numberReport}
-            onChange={e => setExternal({ ...external, numberReport: e.target.value })}
+            value={external.reportNumber}
+            onChange={e => setExternal({ ...external, reportNumber: parseInt(e.target.value) })}
           />
-        </div>
-        <div className="m-2" style={{ display: 'flex', width: '100%', justifyContent: 'end' }}>
-          <Button
-            className="me-4 mb-3"
-            variant="contained"
-            color="primary"
-            style={{ background: '#e6b200', color: '#4e4d4d' }}
-            onClick={() => handleChange()}
-          >
-            Salvar
-          </Button>
         </div>
       </Card>
     </>
