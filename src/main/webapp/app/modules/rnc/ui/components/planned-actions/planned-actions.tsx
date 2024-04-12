@@ -20,20 +20,25 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
   const [status, setStatus] = useState<string>('');
   const [verifier, setVerifier] = useState<string>('');
 
-  useEffect(() => {
-    onChanged({
-      dataConclusaoAcao: deadline || new Date(),
-      dataVerificao: verification || new Date(),
-      descricaoAcao: description,
-      idAnexosExecucao: 0,
-      idPlano: 0,
-      idResponsavelAcao: parseInt(responsible),
-      idResponsavelVerificaoAcao: parseInt(verifier),
-      planoId: 0,
-      prazoAcao: deadline,
-      statusAcao: status,
-    });
-  }, [deadline, description, responsible, status, verifier]);
+  const onDescription = value => {
+    setDescription(value);
+    onChanged({ ...actionPlan, descricaoAcao: value });
+  };
+
+  const onResponsible = value => {
+    setResponsible(value);
+    onChanged({ ...actionPlan, idResponsavelAcao: parseInt(value) });
+  };
+
+  const onStatus = value => {
+    setStatus(value);
+    onChanged({ ...actionPlan, statusAcao: value });
+  };
+
+  const onVerifier = value => {
+    setVerifier(value);
+    onChanged({ ...actionPlan, idResponsavelVerificaoAcao: parseInt(value) });
+  };
 
   useEffect(() => {
     setDeadline(actionPlan.prazoAcao);
@@ -50,7 +55,8 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
         label="Descrição da ação"
         id="rnc-text-field"
         className="w-100 desc-width m-2"
-        onChange={e => setDescription(e.target.value)}
+        onChange={e => onDescription(e.target.value)}
+        value={description}
       />
       <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
         <FormControl className="m-2 mt-0 rnc-form-field">
@@ -59,6 +65,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
             label="Prazo"
             selected={deadline}
             onChange={date => setDeadline(date)}
+            value={deadline}
             className="date-picker"
             dateFormat={'dd/MM/yyyy'}
             id="date-picker-rnc-plano-acao-prazo"
@@ -66,7 +73,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
         </FormControl>
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
           <InputLabel>Responsável</InputLabel>
-          <Select label="Encaminhado para:" name="forwarded" onChange={e => setResponsible(e.target.value as string)}>
+          <Select label="Encaminhado para:" name="forwarded" onChange={e => onResponsible(e.target.value as string)} value={responsible}>
             {users.map((user, i) => (
               <MenuItem value={user.id} key={`user-${i}`}>
                 {user.nome}
@@ -77,7 +84,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
 
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
           <InputLabel>Status</InputLabel>
-          <Select label="Encaminhado para:" name="forwarded" onChange={e => setStatus(e.target.value as string)}>
+          <Select label="Encaminhado para:" name="forwarded" onChange={e => onStatus(e.target.value as string)} value={status}>
             {statuses.map(e => {
               return <MenuItem value={e.value}>{e.name}</MenuItem>;
             })}
@@ -90,6 +97,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
             label="Verificação"
             selected={verification}
             onChange={date => setVerification(date)}
+            value={verification}
             className="date-picker"
             dateFormat={'dd/MM/yyyy'}
             id="date-picker-rnc-plano-acao-prazo"
@@ -98,7 +106,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
 
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
           <InputLabel>Resp. verificação</InputLabel>
-          <Select label="Encaminhado para:" name="forwarded" onChange={e => setVerifier(e.target.value as string)}>
+          <Select label="Encaminhado para:" name="forwarded" onChange={e => onVerifier(e.target.value as string)} value={verifier}>
             {users.map((user, i) => (
               <MenuItem value={user.id} key={`user-${i}`}>
                 {user.nome}

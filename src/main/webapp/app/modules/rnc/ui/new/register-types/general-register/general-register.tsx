@@ -41,7 +41,7 @@ import { rangeList } from 'app/modules/rnc/reducers/range.reducer';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Storage } from 'react-jhipster';
 import { getImmediateActionByRnc, removeImmediateAction } from 'app/modules/rnc/reducers/immediate-action.reducer';
-import { getInvestigationByRnc } from 'app/modules/rnc/reducers/investigation.reducer';
+import { getInvestigationByRnc, getPlanoByRnc } from 'app/modules/rnc/reducers/investigation.reducer';
 import { getDescriptionByRNCId } from 'app/modules/rnc/reducers/description.reducer';
 
 export const GeneralRegister = () => {
@@ -230,6 +230,32 @@ export const GeneralRegister = () => {
             fourth: res.porques.pq4,
             fifth: res.porques.pq5,
             cause: res.porques.descCausa,
+          });
+        }
+      });
+
+      getPlanoByRnc(id).then(res => {
+        if (res.length > 0) {
+          setShowPlanoAcaoCorretiva(true);
+          res.map((actionPlan: any) => {
+            setListaAcoesCorretivas([
+              ...listaAcoesCorretivas,
+              {
+                id: actionPlan?.acoes[0]?.id,
+                idPlano: actionPlan?.acoes[0]?.idPlano,
+                descricaoAcao: actionPlan?.acoes[0]?.descricaoAcao,
+                prazoAcao: new Date(actionPlan?.acoes[0]?.prazoAcao) || new Date(),
+                idResponsavelAcao: actionPlan?.acoes[0]?.idResponsavelAcao,
+                statusAcao: actionPlan?.acoes[0]?.statusAcao,
+                dataVerificao: new Date(actionPlan?.acoes[0]?.dataVerificao) || new Date(),
+                idResponsavelVerificaoAcao: actionPlan?.acoes[0]?.idResponsavelVerificaoAcao,
+                idAnexosExecucao: actionPlan?.acoes[0]?.idAnexosExecucao,
+                dataConclusaoAcao: new Date(actionPlan?.acoes[0]?.dataConclusaoAcao) || new Date(),
+                criadoEm: actionPlan?.acoes[0]?.criadoEm,
+                atualizadoEm: actionPlan?.acoes[0]?.atualizadoEm,
+                planoId: actionPlan?.acoes[0]?.planoId,
+              },
+            ]);
           });
         }
       });
