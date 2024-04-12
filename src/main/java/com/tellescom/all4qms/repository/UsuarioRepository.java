@@ -45,7 +45,7 @@ public interface UsuarioRepository extends ReactiveCrudRepository<Usuario, Long>
     Flux<Usuario> findAllWhereSetorIsNull();
 
     @Query("SELECT * FROM usuario entity WHERE entity.user_id = :id")
-    Flux<Usuario> findByUser(Long id);
+    Mono<Usuario> findByUser(Long id);
 
     @Query("SELECT * FROM usuario entity WHERE entity.user_id IS NULL")
     Flux<Usuario> findAllWhereUserIsNull();

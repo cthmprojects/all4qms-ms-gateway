@@ -39,7 +39,7 @@ import tech.jhipster.web.util.reactive.ResponseUtil;
  * REST controller for managing {@link com.tellescom.all4qms.domain.Usuario}.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/usuarios")
 public class UsuarioResource {
 
     private final Logger log = LoggerFactory.getLogger(UsuarioResource.class);
@@ -59,13 +59,13 @@ public class UsuarioResource {
     }
 
     /**
-     * {@code POST  /usuarios} : Create a new usuario.
+     * {@code POST  } : Create a new usuario.
      *
      * @param usuarioDTO the usuarioDTO to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new usuarioDTO, or with status {@code 400 (Bad Request)} if the usuario has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/usuarios")
+    @PostMapping("")
     public Mono<ResponseEntity<UsuarioDTO>> createUsuario(@Valid @RequestBody UsuarioDTO usuarioDTO) throws URISyntaxException {
         log.debug("REST request to save Usuario : {}", usuarioDTO);
         if (usuarioDTO.getId() != null) {
@@ -86,7 +86,7 @@ public class UsuarioResource {
     }
 
     /**
-     * {@code PUT  /usuarios/:id} : Updates an existing usuario.
+     * {@code PUT  /:id} : Updates an existing usuario.
      *
      * @param id         the id of the usuarioDTO to save.
      * @param usuarioDTO the usuarioDTO to update.
@@ -95,7 +95,7 @@ public class UsuarioResource {
      * or with status {@code 500 (Internal Server Error)} if the usuarioDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/usuarios/{id}")
+    @PutMapping("/{id}")
     public Mono<ResponseEntity<UsuarioDTO>> updateUsuario(
         @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody UsuarioDTO usuarioDTO
@@ -128,7 +128,7 @@ public class UsuarioResource {
     }
 
     /**
-     * {@code PATCH  /usuarios/:id} : Partial updates given fields of an existing usuario, field will ignore if it is null
+     * {@code PATCH  /:id} : Partial updates given fields of an existing usuario, field will ignore if it is null
      *
      * @param id         the id of the usuarioDTO to save.
      * @param usuarioDTO the usuarioDTO to update.
@@ -138,7 +138,7 @@ public class UsuarioResource {
      * or with status {@code 500 (Internal Server Error)} if the usuarioDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/usuarios/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public Mono<ResponseEntity<UsuarioDTO>> partialUpdateUsuario(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody UsuarioDTO usuarioDTO
@@ -158,28 +158,37 @@ public class UsuarioResource {
                     return Mono.error(new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound"));
                 }
 
-                Mono<UsuarioDTO> result = usuarioService.partialUpdate(usuarioDTO);
-
-                return result
+                return usuarioService
+                    .update(usuarioDTO)
                     .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                    .map(res ->
+                    .map(result ->
                         ResponseEntity
                             .ok()
-                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, res.getId().toString()))
-                            .body(res)
+                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
+                            .body(result)
                     );
+                //                Mono<UsuarioDTO> result = usuarioService.partialUpdate(usuarioDTO);
+                //
+                //                return result
+                //                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                //                    .map(res ->
+                //                        ResponseEntity
+                //                            .ok()
+                //                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, res.getId().toString()))
+                //                            .body(res)
+                //                    );
             });
     }
 
     /**
-     * {@code GET  /usuarios} : get all the usuarios.
+     * {@code GET  } : get all the usuarios.
      *
      * @param pageable  the pagination information.
      * @param request   a {@link ServerHttpRequest} request.
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of usuarios in body.
      */
-    @GetMapping("/usuarios")
+    @GetMapping("")
     public Mono<ResponseEntity<List<UsuarioDTO>>> getAllUsuarios(
         @ParameterObject Pageable pageable,
         ServerHttpRequest request,
@@ -203,12 +212,12 @@ public class UsuarioResource {
     }
 
     /**
-     * {@code GET  /usuarios/:id} : get the "id" usuario.
+     * {@code GET  /:id} : get the "id" usuario.
      *
      * @param id the id of the usuarioDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the usuarioDTO, or with status {@code 404 (Not Found)}.
      */
-    @GetMapping("/usuarios/{id}")
+    @GetMapping("/{id}")
     public Mono<ResponseEntity<UsuarioDTO>> getUsuario(@PathVariable Long id) {
         log.debug("REST request to get Usuario : {}", id);
         Mono<UsuarioDTO> usuarioDTO = usuarioService.findOne(id);
@@ -216,12 +225,12 @@ public class UsuarioResource {
     }
 
     /**
-     * {@code DELETE  /usuarios/:id} : delete the "id" usuario.
+     * {@code DELETE  /:id} : delete the "id" usuario.
      *
      * @param id the id of the usuarioDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/usuarios/{id}")
+    @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteUsuario(@PathVariable Long id) {
         log.debug("REST request to delete Usuario : {}", id);
         return usuarioService
@@ -237,13 +246,13 @@ public class UsuarioResource {
     }
 
     /**
-     * {@code POST  /usuarios/create} : Create a new usuario.
+     * {@code POST  /create} : Create a new usuario.
      *
      * @param request the usuarioRequest to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new usuarioDTO, or with status {@code 400 (Bad Request)} if the usuario has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/usuarios/create")
+    @PostMapping("/create")
     public Mono<ResponseEntity<UsuarioDTO>> criaUsuario(@RequestBody UsuarioRequest request) {
         log.debug("REST request to create Usuario : {}", request);
         if (request.getLogin() == null) {
@@ -271,9 +280,13 @@ public class UsuarioResource {
             });
     }
 
-    @GetMapping("/usuarios/gestores")
+    @GetMapping("/gestores")
     public Mono<List<GestorResponse>> buscarTodosGestores() {
-        log.info("Retorna todos os Gestores");
         return usuarioService.findAllManagers();
+    }
+
+    @GetMapping("/byuserid/{id}")
+    public Mono<ResponseEntity<UsuarioDTO>> getByUserJhId(@PathVariable("id") Long id) {
+        return usuarioService.findAllByUserJhId(id).map(ResponseEntity::ok);
     }
 }

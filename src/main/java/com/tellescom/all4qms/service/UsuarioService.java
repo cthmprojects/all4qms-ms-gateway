@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -153,7 +154,6 @@ public class UsuarioService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    @Transactional(readOnly = true)
     public Mono<UsuarioDTO> findOne(Long id) {
         log.debug("Request to get Usuario : {}", id);
         return processoService
@@ -237,5 +237,10 @@ public class UsuarioService {
     public Flux<UsuarioDTO> findByProcessos(Long id) {
         log.debug("Busca somente por usuarios do processo");
         return usuarioRepository.findByProcessos(id).map(usuarioMapper::toDto);
+    }
+
+    public Mono<UsuarioDTO> findAllByUserJhId(Long id) {
+        log.debug("Request to get all Usuarios");
+        return usuarioRepository.findByUser(id).flatMap(usuario -> findOne(usuario.getId()));
     }
 }
