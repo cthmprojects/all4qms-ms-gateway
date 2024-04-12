@@ -12,20 +12,19 @@ import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { Enums, Rnc } from '../../models';
+import { Enums, GeneralAudit, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
-import { list, save, saveAudit, saveClient, saveDescription, saveProduct, update, getById } from '../../reducers/rnc.reducer';
+import { getProcesses } from '../../reducers/process.reducer';
+import { getById, list, save, saveAudit, saveClient, saveDescription, saveProduct, update } from '../../reducers/rnc.reducer';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
 import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
 import MPRegister from './register-types/mp-register/mp-register';
 import OthersRegister from './register-types/others-register/others-register';
 import ProductRegister from './register-types/product-register/product-register';
-import RepetitionRnc from './register-types/repetition/repetition-rnc';
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
-import { getProcesses } from '../../reducers/process.reducer';
 
 export const RNCNew = () => {
   const dispatch = useAppDispatch();
@@ -164,6 +163,13 @@ export const RNCNew = () => {
   const [repetition, setRepetition] = useState<boolean>();
   const [selectedRncIds, setSelectedRncIds] = useState<Array<number>>([]);
 
+  /*
+   NC Origin
+   */
+  const [externalAudit, setExternalAudit] = useState<GeneralAudit | null>(null);
+  const [internalAudit, setInternalAudit] = useState<GeneralAudit | null>(null);
+  const [others, setOthers] = useState<string | null>(null);
+
   const onRepetitionChanged = (value: boolean) => {
     setRepetition(value);
   };
@@ -240,13 +246,21 @@ export const RNCNew = () => {
     return;
   };
 
-  const setExternalAuditRegister = data => {
+  const onExternalAuditChanged = (externalAudit: GeneralAudit): void => {
+    setExternalAudit(externalAudit);
+  };
+
+  const saveExternalAudit = (): void => {
+    if (!externalAudit) {
+      return;
+    }
+
     dispatch(
       saveAudit({
-        norm: data.norma,
-        occurrence: data.numberNC,
-        process: data.numberReport,
-        requirement: data.normaRequiremeents,
+        norm: internalAudit.norm,
+        occurrence: internalAudit.ncNumber.toString(),
+        process: internalAudit.reportNumber,
+        requirement: internalAudit.normRequirements,
         rncId: rnc?.id,
         sequence: 1,
       })
@@ -277,13 +291,21 @@ export const RNCNew = () => {
     );
   };
 
-  const setInternalAuditRegister = data => {
+  const onInternalAuditChanged = (internalAudit: GeneralAudit): void => {
+    setInternalAudit(internalAudit);
+  };
+
+  const saveInternalAudit = (): void => {
+    if (!internalAudit) {
+      return;
+    }
+
     dispatch(
       saveAudit({
-        norm: data.norma,
-        occurrence: data.numberNC,
-        process: data.numberReport,
-        requirement: data.normaRequiremeents,
+        norm: internalAudit.norm,
+        occurrence: internalAudit.ncNumber.toString(),
+        process: internalAudit.reportNumber,
+        requirement: internalAudit.normRequirements,
         rncId: rnc?.id,
         sequence: 1,
       })
@@ -318,16 +340,16 @@ export const RNCNew = () => {
     );
   };
 
-  const setOthersRegister = data => {
-    console.log('[others] data', data);
+  const onOthersChanged = (others: string): void => {
+    setOthers(others);
   };
 
   const renderComponents = () => {
     switch (firstForm.origin.value) {
       case 'AUDITORIA_EXTERNA':
-        return <ExternalAuditRegister setExternalAuditRegister={setExternalAuditRegister} />;
+        return <ExternalAuditRegister onChanged={onExternalAuditChanged} />;
       case 'AUDITORIA_INTERNA':
-        return <InternalAuditRegister setInternalAuditRegister={setInternalAuditRegister} />;
+        return <InternalAuditRegister onChanged={onInternalAuditChanged} />;
       case 'CLIENTE':
         return <ClientRegister onClientChange={setClientRegister} />;
       case 'MATERIA_PRIMA_INSUMO':
@@ -335,11 +357,14 @@ export const RNCNew = () => {
       case 'PRODUTO_ACABADO':
         return <ProductRegister onProductRegisterChange={setProductRegister} />;
       case 'PROCEDIMENTO_OUTROS':
-        return <OthersRegister onOthersRegisterChange={setOthersRegister} />;
+        return <OthersRegister onChanged={onOthersChanged} />;
     }
   };
 
   const onSaveRncDescription = () => {
+    saveInternalAudit();
+    saveExternalAudit();
+
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
 
@@ -357,6 +382,9 @@ export const RNCNew = () => {
   };
 
   const goToNextStep = () => {
+    saveInternalAudit();
+    saveExternalAudit();
+
     dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO' })).then(() => {
       navigate('/rnc');
     });

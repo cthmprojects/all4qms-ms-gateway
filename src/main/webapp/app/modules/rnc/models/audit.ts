@@ -6,3 +6,10 @@ export type RncAudit = {
   sequence: number;
   rncId: number | null;
 };
+
+export type GeneralAudit = {
+  ncNumber: number;
+  norm: string;
+  normRequirements: string;
+  reportNumber: number;
+};
