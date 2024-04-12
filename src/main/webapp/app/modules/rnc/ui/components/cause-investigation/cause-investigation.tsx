@@ -277,6 +277,7 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
   const [thirdReason, setThirdReason] = useState<string>(reasons?.third || '');
   const [fourthReason, setFourthReason] = useState<string>(reasons?.fourth || '');
   const [fifthReason, setFifthReason] = useState<string>(reasons?.fifth || '');
+  const [causeReason, setCauseReason] = useState<string>(reasons?.cause || '');
   const [invalid, setInvalid] = useState<boolean>(false);
 
   const validateAndSave = (reasons: any) => {
@@ -307,6 +308,7 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
       third: thirdReason,
       fourth: fourthReason,
       fifth: fifthReason,
+      cause: causeReason,
     });
   };
 
@@ -319,6 +321,7 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
       third: thirdReason,
       fourth: fourthReason,
       fifth: fifthReason,
+      cause: causeReason,
     });
   };
 
@@ -331,6 +334,7 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
       third: value,
       fourth: fourthReason,
       fifth: fifthReason,
+      cause: causeReason,
     });
   };
 
@@ -343,6 +347,7 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
       third: thirdReason,
       fourth: value,
       fifth: fifthReason,
+      cause: causeReason,
     });
   };
 
@@ -355,6 +360,20 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
       third: thirdReason,
       fourth: fourthReason,
       fifth: value,
+      cause: causeReason,
+    });
+  };
+
+  const onCauseReasonChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    const { value } = event.target;
+    setCauseReason(value);
+    validateAndSave({
+      first: firstReason,
+      second: secondReason,
+      third: thirdReason,
+      fourth: fourthReason,
+      fifth: fifthReason,
+      cause: value,
     });
   };
 
@@ -386,8 +405,9 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
             slotProps={{ textarea: { placeholder: 'Causa', label: 'Causa' } }}
             sx={{ borderRadius: '6px' }}
             name="ncArea"
-            value={description || ''}
-            readOnly
+            onChange={onCauseReasonChanged}
+            value={causeReason}
+            disabled={!newReasons}
           />
         </div>
       </div>

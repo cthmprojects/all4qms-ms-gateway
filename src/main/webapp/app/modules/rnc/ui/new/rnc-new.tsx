@@ -180,7 +180,7 @@ export const RNCNew = () => {
 
   const handleSubmit = e => {
     e.preventDefault();
-    if (rnc) {
+    if (id) {
       const receptorNC = filterUser(firstForm.forwarded.value);
       const dtNC = new Date();
       const idEmissorNC = parseInt(Storage.session.get('ID_USUARIO'));
@@ -194,14 +194,14 @@ export const RNCNew = () => {
 
       dispatch(
         update({
-          id: rnc.id,
+          id: parseInt(id),
           statusAtual: statusAtual,
           idUsuarioAtual: idUsuarioAtual,
           dtNC: dtNC,
           tipoNC: tipoNC,
           origemNC: origemNC,
           possuiReincidencia: true,
-          idEmissorNC: users.find(user => user.nome == firstForm.emitter.value)?.id,
+          idEmissorNC: users.find(user => user.user.login == Storage.session.get('firstName'))?.id,
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
@@ -233,7 +233,7 @@ export const RNCNew = () => {
           tipoNC: tipoNC,
           origemNC: origemNC,
           possuiReincidencia: true,
-          idEmissorNC: users.find(user => user.nome == firstForm.emitter.value)?.id,
+          idEmissorNC: users.find(user => user.user.login == Storage.session.get('firstName'))?.id,
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
@@ -257,10 +257,10 @@ export const RNCNew = () => {
 
     dispatch(
       saveAudit({
-        norm: internalAudit.norm,
-        occurrence: internalAudit.ncNumber.toString(),
-        process: internalAudit.reportNumber,
-        requirement: internalAudit.normRequirements,
+        norm: internalAudit?.norm,
+        occurrence: internalAudit?.ncNumber?.toString(),
+        process: internalAudit?.reportNumber,
+        requirement: internalAudit?.normRequirements,
         rncId: rnc?.id,
         sequence: 1,
       })
@@ -302,10 +302,10 @@ export const RNCNew = () => {
 
     dispatch(
       saveAudit({
-        norm: internalAudit.norm,
-        occurrence: internalAudit.ncNumber.toString(),
-        process: internalAudit.reportNumber,
-        requirement: internalAudit.normRequirements,
+        norm: internalAudit?.norm,
+        occurrence: internalAudit?.ncNumber.toString(),
+        process: internalAudit?.reportNumber,
+        requirement: internalAudit?.normRequirements,
         rncId: rnc?.id,
         sequence: 1,
       })
@@ -446,8 +446,6 @@ export const RNCNew = () => {
 
   useEffect(() => {
     if (users) {
-      console.log(users, stateRnc);
-
       setFirstForm({
         ...firstForm,
         emitter: { value: users.find(user => user.id === stateRnc?.idEmissorNC)?.nome, error: false },
@@ -633,7 +631,7 @@ export const RNCNew = () => {
                     Voltar
                   </Button>
                   <Button type="submit" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-                    {rnc ? 'Atualizar' : 'Salvar'}
+                    {stateRnc ? 'Atualizar' : 'Salvar'}
                   </Button>
                 </div>
               )}

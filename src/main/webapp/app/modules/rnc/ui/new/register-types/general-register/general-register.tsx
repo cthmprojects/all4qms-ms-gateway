@@ -205,15 +205,15 @@ export const GeneralRegister = () => {
 
       loadImmediateActions();
       getInvestigationByRnc(id).then(res => {
-        if (res.ishikawa !== null) {
+        if (res.ishikawa) {
           setCheckedIshikawa(true);
           setNewIshikawa(false);
           setIshikawaId(res.ishikawa.id);
           setIshikawaInvestigation({
             environment: res.ishikawa?.meioAmbiente.length > 0 ? res.ishikawa?.meioAmbiente.split(';') : [],
-            machine: res.ishikawa?.maquina.lenght > 0 ? res.ishikawa?.maquina.split(';') : [],
-            measurement: res.ishikawa?.medicao.lenght > 0 ? res.ishikawa?.medicao.split(';') : [],
-            method: res.ishikawa?.metodo.lenght > 0 ? res.ishikawa?.metodo.split(';') : [],
+            machine: res.ishikawa?.maquina.length > 0 ? res.ishikawa?.maquina.split(';') : [],
+            measurement: res.ishikawa?.medicao.length > 0 ? res.ishikawa?.medicao.split(';') : [],
+            method: res.ishikawa?.metodo.length > 0 ? res.ishikawa?.metodo.split(';') : [],
             rawMaterial: res.ishikawa?.materiaPrima.length > 0 ? res.ishikawa?.materiaPrima.split(';') : [],
             manpower: res.ishikawa?.maoDeObra.length > 0 ? res.ishikawa?.maoDeObra.split(';') : [],
           });
@@ -229,6 +229,7 @@ export const GeneralRegister = () => {
             third: res.porques.pq3,
             fourth: res.porques.pq4,
             fifth: res.porques.pq5,
+            cause: res.porques.descCausa,
           });
         }
       });
@@ -478,27 +479,56 @@ export const GeneralRegister = () => {
 
     if (_rnc && !showPlanoAcaoCorretiva) {
       if (newIshikawa && newFiveWhy) {
-        saveInvestigation(
-          id,
-          {
-            description: descriptionEntity?.detalhesNaoConformidade,
-            environment: ishikawaInvestigation?.environment.join(';'),
-            machine: ishikawaInvestigation?.machine.join(';'),
-            measurement: ishikawaInvestigation?.measurement.join(';'),
-            method: ishikawaInvestigation?.method.join(';'),
-            rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
-            workforce: ishikawaInvestigation?.manpower.join(';'),
-          },
-          {
-            cause: descriptionEntity?.detalhesNaoConformidade,
+        if (checkedIshikawa && !checkedFiveWhy) {
+          saveInvestigation(
+            id,
+            {
+              description: descriptionEntity?.detalhesNaoConformidade,
+              environment: ishikawaInvestigation?.environment.join(';'),
+              machine: ishikawaInvestigation?.machine.join(';'),
+              measurement: ishikawaInvestigation?.measurement.join(';'),
+              method: ishikawaInvestigation?.method.join(';'),
+              rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
+              workforce: ishikawaInvestigation?.manpower.join(';'),
+            },
+            null
+          );
+        }
+        if (checkedFiveWhy && !checkedIshikawa) {
+          saveInvestigation(id, null, {
+            cause: reasonsInvestigation?.cause,
             fifth: reasonsInvestigation?.fifth,
             first: reasonsInvestigation?.first,
             forth: reasonsInvestigation?.fourth,
             problem: descriptionEntity?.detalhesNaoConformidade,
             second: reasonsInvestigation?.second,
             third: reasonsInvestigation?.third,
-          }
-        ).then(() => {});
+          });
+        }
+
+        if (checkedFiveWhy && checkedIshikawa) {
+          saveInvestigation(
+            id,
+            {
+              description: descriptionEntity?.detalhesNaoConformidade,
+              environment: ishikawaInvestigation?.environment.join(';'),
+              machine: ishikawaInvestigation?.machine.join(';'),
+              measurement: ishikawaInvestigation?.measurement.join(';'),
+              method: ishikawaInvestigation?.method.join(';'),
+              rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
+              workforce: ishikawaInvestigation?.manpower.join(';'),
+            },
+            {
+              cause: reasonsInvestigation?.cause,
+              fifth: reasonsInvestigation?.fifth,
+              first: reasonsInvestigation?.first,
+              forth: reasonsInvestigation?.fourth,
+              problem: descriptionEntity?.detalhesNaoConformidade,
+              second: reasonsInvestigation?.second,
+              third: reasonsInvestigation?.third,
+            }
+          ).then(() => {});
+        }
       }
 
       if (!newIshikawa && checkedIshikawa) {
