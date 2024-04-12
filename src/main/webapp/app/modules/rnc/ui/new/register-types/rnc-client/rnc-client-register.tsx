@@ -118,7 +118,7 @@ export const ClientRegister = ({ onClientChange }) => {
               onChange={e =>
                 setClientForm({ ...clientForm, productCode2: { value: e.target.value, error: clientForm.productCode2.error } })
               }
-              label="Código do produto"
+              label="Nome do fornecedor"
               name="product-code-2"
               className="ms-3 m-2"
               sx={{ width: '10% !important' }}

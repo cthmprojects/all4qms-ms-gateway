@@ -13,4 +13,5 @@ export type ReasonsInvestigation = {
   third: string;
   fourth: string;
   fifth: string;
+  cause?: string;
 };
