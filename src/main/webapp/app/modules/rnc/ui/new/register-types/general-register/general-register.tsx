@@ -268,7 +268,7 @@ export const GeneralRegister = () => {
         rncId: _rnc.id,
         status: action.status,
         validated: false,
-        verifierId: userId,
+        verifierId: userId?.id,
       })
     ).then(() => {
       loadImmediateActions();
@@ -308,6 +308,20 @@ export const GeneralRegister = () => {
   };
 
   const updateElaboration = () => {
+    if (!checkedFiveWhy && !checkedIshikawa) {
+      toast.error('Você deve preencher ao menos um campo de investigação de causas para continuar');
+      return;
+    }
+
+    if (checkedIshikawa && !validIshikawa()) {
+      toast.error('Você deve preencher ao menos um campo do Ishikawa para continuar');
+      return;
+    }
+    if (checkedFiveWhy && !valid5why()) {
+      toast.error('Você deve preencher ao menos três campos dos 5 porquês para continuar');
+      return;
+    }
+
     if (_rnc) {
       if (_rnc.statusAtual == 'LEVANTAMENTO') {
         dispatch(update({ ..._rnc, statusAtual: 'ELABORACAO' }));
