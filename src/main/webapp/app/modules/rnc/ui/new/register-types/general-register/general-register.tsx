@@ -205,15 +205,16 @@ export const GeneralRegister = () => {
 
       loadImmediateActions();
       getInvestigationByRnc(id).then(res => {
-        if (res.ishikawa !== null) {
+        console.log(res);
+        if (res.ishikawa) {
           setCheckedIshikawa(true);
           setNewIshikawa(false);
           setIshikawaId(res.ishikawa.id);
           setIshikawaInvestigation({
             environment: res.ishikawa?.meioAmbiente.length > 0 ? res.ishikawa?.meioAmbiente.split(';') : [],
-            machine: res.ishikawa?.maquina.lenght > 0 ? res.ishikawa?.maquina.split(';') : [],
-            measurement: res.ishikawa?.medicao.lenght > 0 ? res.ishikawa?.medicao.split(';') : [],
-            method: res.ishikawa?.metodo.lenght > 0 ? res.ishikawa?.metodo.split(';') : [],
+            machine: res.ishikawa?.maquina.length > 0 ? res.ishikawa?.maquina.split(';') : [],
+            measurement: res.ishikawa?.medicao.length > 0 ? res.ishikawa?.medicao.split(';') : [],
+            method: res.ishikawa?.metodo.length > 0 ? res.ishikawa?.metodo.split(';') : [],
             rawMaterial: res.ishikawa?.materiaPrima.length > 0 ? res.ishikawa?.materiaPrima.split(';') : [],
             manpower: res.ishikawa?.maoDeObra.length > 0 ? res.ishikawa?.maoDeObra.split(';') : [],
           });
