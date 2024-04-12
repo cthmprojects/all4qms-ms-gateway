@@ -144,8 +144,8 @@ const RncList = ({}) => {
     'Emissor',
     'Descrição',
     'Responsável',
-    'Prazo',
-    'Ações',
+    // 'Prazo',
+    // 'Ações',
     'Verificação',
     'Eficácia',
     'Fechamento',
@@ -213,8 +213,8 @@ const RncList = ({}) => {
                       <TableCell>{emissor?.nome || '-'}</TableCell>
                       <TableCell> {'-'}</TableCell>
                       <TableCell>{usuarioAtual?.nome || '-'}</TableCell>
-                      <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
-                      <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell>
+                      {/* <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
+                      <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell> */}
                       <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
                       <TableCell> - </TableCell>
                       <TableCell> - </TableCell>
