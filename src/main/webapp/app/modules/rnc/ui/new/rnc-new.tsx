@@ -385,9 +385,22 @@ export const RNCNew = () => {
     saveInternalAudit();
     saveExternalAudit();
 
-    dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO' })).then(() => {
-      navigate('/rnc');
-    });
+    for (let i = 0; i < evidences.length; i++) {
+      const evidence = evidences[i];
+
+      dispatch(
+        saveDescription({
+          details: description,
+          evidence: evidence,
+          requirement: requirement,
+          rncId: rnc.id,
+          anexos: descriptionEvidences,
+        })
+      );
+      dispatch(update({ ...rnc, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })).then(() => {
+        navigate('/rnc');
+      });
+    }
   };
 
   const filterUser = (login: string) => {
