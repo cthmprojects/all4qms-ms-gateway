@@ -3,19 +3,14 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { login } from 'app/shared/reducers/authentication';
-import LoginModal from './login-modal';
+import { toast } from 'react-toastify';
 
 import './login.scss';
-import { Link } from 'react-router-dom';
 import { TextField } from '@mui/material';
-import { Row } from 'reactstrap';
+import { Alert, Row } from 'reactstrap';
 
 export const Login = () => {
   const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector(state => state.authentication.isAuthenticated);
-  const loginError = useAppSelector(state => state.authentication.loginError);
-  const showModalLogin = useAppSelector(state => state.authentication.showModalLogin);
-  const [showModal, setShowModal] = useState(showModalLogin);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,10 +19,6 @@ export const Login = () => {
 
   const [usernameError, setUsernameError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
-
-  useEffect(() => {
-    setShowModal(true);
-  }, []);
 
   const handleUsernameChange = event => {
     setUsername(event.target.value);
@@ -47,6 +38,15 @@ export const Login = () => {
     dispatch(login(username, password));
   };
 
+  const isAuthenticated = useAppSelector(state => state.authentication.isAuthenticated);
+  const loginError = useAppSelector(state => state.authentication.loginError);
+
+  useEffect(() => {
+    if (loginError) {
+      toast.error('Usuário ou senha inválidos');
+    }
+  }, [loginError]);
+
   const { from } = (location.state as any) || { from: { pathname: '/', search: location.search } };
   if (isAuthenticated) {
     return <Navigate to={from} replace />;
@@ -63,7 +63,7 @@ export const Login = () => {
               //value={username}
               onChange={handleUsernameChange}
               className="textField"
-              error={usernameError}
+              error={loginError}
               //autoFocus
             />
           </Row>
@@ -76,7 +76,7 @@ export const Login = () => {
               //value={password}
               onChange={handlePasswordChange}
               className="textField"
-              error={passwordError}
+              error={loginError}
             />
           </Row>
           <Row>
