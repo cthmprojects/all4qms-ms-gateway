@@ -14,3 +14,25 @@ export type RncProduct = {
   supplier: string;
   traceability: RncTraceability;
 };
+
+export type RawMaterial = {
+  batch: string;
+  batchSize: number;
+  code: string;
+  defects: number;
+  deliveredAt: Date;
+  description: string;
+  identifier: string;
+  inspectionRule: string;
+  inspector: string;
+  invoice: string;
+  invoiceDate: Date;
+  line: string;
+  nqa: string;
+  operator: string;
+  opNumber: number;
+  rejectionRate: number;
+  requestNumber: number;
+  samples: number;
+  shift: string;
+};

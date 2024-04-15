@@ -12,7 +12,7 @@ import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { Enums, GeneralAudit, Rnc } from '../../models';
+import { Enums, GeneralAudit, RawMaterial, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
 import { getById, list, save, saveAudit, saveClient, saveDescription, saveProduct, update } from '../../reducers/rnc.reducer';
@@ -169,6 +169,7 @@ export const RNCNew = () => {
   const [externalAudit, setExternalAudit] = useState<GeneralAudit | null>(null);
   const [internalAudit, setInternalAudit] = useState<GeneralAudit | null>(null);
   const [others, setOthers] = useState<string | null>(null);
+  const [rawMaterial, setRawMaterial] = useState<RawMaterial | null>(null);
 
   const onRepetitionChanged = (value: boolean) => {
     setRepetition(value);
@@ -312,8 +313,36 @@ export const RNCNew = () => {
     );
   };
 
-  const setMPRegister = data => {
-    console.log('[mp] data', data);
+  const onRawMaterialChanged = (rawMaterial: RawMaterial): void => {
+    setRawMaterial(rawMaterial);
+  };
+
+  const saveRawMaterial = (): void => {
+    if (!rawMaterial) {
+      return;
+    }
+
+    dispatch(
+      saveProduct({
+        batch: rawMaterial.batch,
+        batchAmount: rawMaterial.batchSize,
+        code: rawMaterial.code,
+        defects: rawMaterial.defects,
+        description: rawMaterial.description,
+        name: rawMaterial.code,
+        opNumber: rawMaterial.opNumber.toString(),
+        order: rawMaterial.requestNumber.toString(),
+        rejected: rawMaterial.rejectionRate,
+        samples: rawMaterial.samples,
+        supplier: rawMaterial.nqa,
+        traceability: {
+          date: rawMaterial.invoiceDate,
+          deliveredAt: rawMaterial.deliveredAt,
+          identifier: rawMaterial.invoice,
+          rncId: rnc.id,
+        },
+      })
+    );
   };
 
   const setProductRegister = data => {
@@ -344,6 +373,8 @@ export const RNCNew = () => {
     setOthers(others);
   };
 
+  const saveOthers = (): void => {};
+
   const renderComponents = () => {
     switch (firstForm.origin.value) {
       case 'AUDITORIA_EXTERNA':
@@ -353,7 +384,7 @@ export const RNCNew = () => {
       case 'CLIENTE':
         return <ClientRegister onClientChange={setClientRegister} />;
       case 'MATERIA_PRIMA_INSUMO':
-        return <MPRegister onMPChange={setMPRegister} />;
+        return <MPRegister onChanged={onRawMaterialChanged} />;
       case 'PRODUTO_ACABADO':
         return <ProductRegister onProductRegisterChange={setProductRegister} />;
       case 'PROCEDIMENTO_OUTROS':
@@ -364,6 +395,8 @@ export const RNCNew = () => {
   const onSaveRncDescription = () => {
     saveInternalAudit();
     saveExternalAudit();
+    saveRawMaterial();
+    saveOthers();
 
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];

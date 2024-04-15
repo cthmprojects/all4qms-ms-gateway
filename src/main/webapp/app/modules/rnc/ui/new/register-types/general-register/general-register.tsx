@@ -26,13 +26,13 @@ import {
   updateEffectCause,
   updateReason,
 } from 'app/modules/rnc/reducers/rnc.reducer';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { CauseInvestigation, ImmediateActions, PlannedActions, ScopeAnalysis } from '../../../components';
+import { CauseInvestigation, ImmediateActions, PlannedActions, ProductDecision, ScopeAnalysis } from '../../../components';
 import './general-register.css';
 import { listEnums } from '../../../../reducers/enums.reducer';
 import { Enums } from '../../../../models';
@@ -43,6 +43,8 @@ import { Storage } from 'react-jhipster';
 import { getImmediateActionByRnc, removeImmediateAction } from 'app/modules/rnc/reducers/immediate-action.reducer';
 import { getInvestigationByRnc, getPlanoByRnc } from 'app/modules/rnc/reducers/investigation.reducer';
 import { getDescriptionByRNCId } from 'app/modules/rnc/reducers/description.reducer';
+import { Decision } from 'app/modules/rnc/models/decision';
+import { findDecisionByRnc, saveDecision } from 'app/modules/rnc/reducers/decision.reducer';
 
 export const GeneralRegister = () => {
   const dispatch = useAppDispatch();
@@ -184,7 +186,13 @@ export const GeneralRegister = () => {
   const [ishikawaInvestigation, setIshikawaInvestigation] = useState<IshikawaInvestigation>();
   const [reasonsInvestigation, setReasonsInvestigation] = useState<ReasonsInvestigation>();
 
-  const [responsaveisMP, setResponsaveisMP] = useState([]);
+  /*
+   * Decision
+   */
+  const [decision, setDecision] = useState<Decision | null>();
+  const [readonlyDecision, setReadonlyDecision] = useState<boolean>(false);
+
+  const [responsaveisMP, setResponsaveisMP] = useState<Array<string>>([]);
   const [responsaveis, setResponsaveis] = useState([]);
   const [listaAcoesCorretivas, setListaAcoesCorretivas] = useState<Array<ActionPlan>>([]);
   const [checkedIshikawa, setCheckedIshikawa] = useState(false);
@@ -202,6 +210,7 @@ export const GeneralRegister = () => {
     if (id) {
       dispatch(getById(parseInt(id)));
       dispatch(getDescriptionByRNCId(id));
+      dispatch(findDecisionByRnc(id));
 
       loadImmediateActions();
       getInvestigationByRnc(id).then(res => {
@@ -503,6 +512,8 @@ export const GeneralRegister = () => {
       });
     }
 
+    saveProductDecision();
+
     if (_rnc && !showPlanoAcaoCorretiva) {
       if (newIshikawa && newFiveWhy) {
         if (checkedIshikawa && !checkedFiveWhy) {
@@ -612,12 +623,26 @@ export const GeneralRegister = () => {
     }
   };
 
-  const setTitleMPOrigin = () => {
+  const getDecisionTitle = (): string => {
     if (_rnc.origemNC === 'MATERIA_PRIMA_INSUMO') {
       return 'Decisão sobre Matéria-Prima/Insumo';
     } else if (_rnc.origemNC === 'PRODUTO_ACABADO') {
       return 'Decisão sobre Produto Acabado';
     }
+  };
+
+  const onDecisionChanged = (decision: Decision): void => {
+    setDecision(decision);
+  };
+
+  const saveProductDecision = (): void => {
+    if (!decision) {
+      return;
+    }
+
+    decision.rncId = _rnc.id;
+
+    dispatch(saveDecision(decision));
   };
 
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
@@ -639,6 +664,30 @@ export const GeneralRegister = () => {
   const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const descriptionEntity = useAppSelector(state => state.all4qmsmsgateway.description.entity);
+  const decisionEntity = useAppSelector(state => state.all4qmsmsgateway.decision.entity);
+
+  const getDecisionInitialData = useMemo((): Decision | null => {
+    if (!decisionEntity || decisionEntity.length <= 0) {
+      return null;
+    }
+
+    const data = decisionEntity[0];
+    setReadonlyDecision(true);
+
+    const decision: Decision = {
+      approved: data.qtdAprovada,
+      current: data.qtdAtual,
+      date: new Date(data.dataDecisao),
+      description: data.descricaoDecisao,
+      rejected: data.qtdRejeitada,
+      reproved: data.qtdReprovada,
+      responsibles: data.responsaveis,
+      rncId: data.idNaoConformidade,
+      type: data.tipoDecisao.toLowerCase(),
+    };
+
+    return decision;
+  }, [decisionEntity]);
 
   useEffect(() => {
     if (_rnc?.statusAtual == 'ELABORACAO') {
@@ -683,197 +732,13 @@ export const GeneralRegister = () => {
           <ImmediateActions actions={actions} onAdded={onActionAdded} onRemoved={onActionRemoved} users={users.map(u => u.nome)} />
 
           {(_rnc?.origemNC == 'MATERIA_PRIMA_INSUMO' || _rnc?.origemNC == 'PRODUTO_ACABADO') && (
-            <div className="fake-card mt-3">
-              <Typography variant="h5" component="div">
-                {setTitleMPOrigin()}
-              </Typography>
-              <br />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className="mt-2 mb-2">
-                <FormControl className="mb-2 rnc-form-field me-2" sx={{ display: 'flex', maxWidth: '40%' }}>
-                  <InputLabel>Decisão</InputLabel>
-                  <Select
-                    label="Decisão"
-                    name="decision"
-                    value={registerForm.decision.value}
-                    onChange={event =>
-                      setRegisterForm({ ...registerForm, decision: { value: event.target.value, error: registerForm.decision.error } })
-                    }
-                  >
-                    <MenuItem value="retrabalho">Retrabalho</MenuItem>
-                    <MenuItem value="seleção">Seleção</MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  sx={{ height: '60px', maxWidth: '50% !important' }}
-                  label="Descrição da decisão"
-                  name="number"
-                  id="rnc-text-field"
-                  // value={firstForm.number.value}
-                  className="rnc-form-field me-2 mb-2"
-                />
-
-                <FormControl className="mb-2 rnc-form-field me-2">
-                  <DatePicker
-                    selected={registerForm.implementationDate.value}
-                    onChange={date =>
-                      handleChange({ ...registerForm, implementationDate: { value: date, error: registerForm.implementationDate.error } })
-                    }
-                    className="date-picker"
-                    dateFormat={'dd/MM/yyyy'}
-                    id="date-picker-general-register"
-                  />
-                  <label htmlFor="" className="rnc-date-label">
-                    Data
-                  </label>
-                </FormControl>
-              </div>
-              <br />
-              <div
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '196px' }}
-                className="mt-2 mb-2"
-              >
-                <Card
-                  className="p-3"
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    width: '30%',
-                    maxHeight: '194px !important',
-                    minHeight: '194px !important',
-                    overflowY: 'scroll',
-                  }}
-                >
-                  <FormControl className="w-100 m-2">
-                    <InputLabel>Responsável</InputLabel>
-                    <Select
-                      multiple
-                      value={responsaveisMP}
-                      onChange={handleChangeResponsaveisMP}
-                      input={<OutlinedInput label="Responsáveis" />}
-                      renderValue={selected => selected.join(', ')}
-                    >
-                      {users.map((user, i) => (
-                        <MenuItem value={user.login} key={`user-${i}`}>
-                          <Checkbox checked={responsaveisMP.indexOf(user.login) > -1} />
-                          <ListItemText primary={user.login} />
-                          {/* {user.login} */}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {renderResponsaveis()}
-                </Card>
-                <div
-                  style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%', height: '100%' }}
-                  className="ms-3"
-                >
-                  {registerForm.decision.value == 'retrabalho' ? (
-                    <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <TextField
-                        label="Quantidade retrabalhada"
-                        className="m-2"
-                        sx={{ width: '20% !important' }}
-                        type="number"
-                        onChange={event =>
-                          setRegisterForm({
-                            ...registerForm,
-                            decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
-                          })
-                        }
-                      />
-                      <TextField
-                        label="Quantidade aprovada"
-                        className="m-2"
-                        sx={{ width: '20% !important' }}
-                        type="number"
-                        onChange={event =>
-                          setRegisterForm({
-                            ...registerForm,
-                            decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
-                          })
-                        }
-                      />
-                      <TextField
-                        label="Quantidade reprovada"
-                        className="m-2"
-                        sx={{ width: '20% !important' }}
-                        type="number"
-                        onChange={event =>
-                          setRegisterForm({
-                            ...registerForm,
-                            decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
-                          })
-                        }
-                      />
-                      <TextField
-                        label="% Rejeição"
-                        className="m-2"
-                        sx={{ width: '20% !important' }}
-                        type="number"
-                        onChange={event =>
-                          setRegisterForm({
-                            ...registerForm,
-                            decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
-                          })
-                        }
-                      />
-                    </Card>
-                  ) : (
-                    <Card className="p-2" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <TextField
-                        label="Quantidade selecionada"
-                        className="m-2"
-                        sx={{ width: '20% !important' }}
-                        type="number"
-                        onChange={event =>
-                          setRegisterForm({
-                            ...registerForm,
-                            decisaoQtdSelecionada: { value: event.target.value, error: registerForm.decisaoQtdSelecionada.error },
-                          })
-                        }
-                      />
-                      <TextField
-                        label="Quantidade aprovada"
-                        className="m-2"
-                        sx={{ width: '20% !important' }}
-                        type="number"
-                        onChange={event =>
-                          setRegisterForm({
-                            ...registerForm,
-                            decisaoQtdAprovada: { value: event.target.value, error: registerForm.decisaoQtdAprovada.error },
-                          })
-                        }
-                      />
-                      <TextField
-                        label="Quantidade reprovada"
-                        className="m-2"
-                        sx={{ width: '20% !important' }}
-                        type="number"
-                        onChange={event =>
-                          setRegisterForm({
-                            ...registerForm,
-                            decisaoQtdReprovada: { value: event.target.value, error: registerForm.decisaoQtdReprovada.error },
-                          })
-                        }
-                      />
-                      <TextField
-                        label="% Rejeição"
-                        className="m-2"
-                        sx={{ width: '20% !important' }}
-                        type="number"
-                        onChange={event =>
-                          setRegisterForm({
-                            ...registerForm,
-                            decisaoPercentRejeicao: { value: event.target.value, error: registerForm.decisaoPercentRejeicao.error },
-                          })
-                        }
-                      />
-                    </Card>
-                  )}
-                </div>
-              </div>
-              <br />
-            </div>
+            <ProductDecision
+              initialData={getDecisionInitialData}
+              onChanged={onDecisionChanged}
+              readonly={readonlyDecision}
+              title={getDecisionTitle()}
+              users={users.map(u => u.nome)}
+            />
           )}
 
           <CauseInvestigation
