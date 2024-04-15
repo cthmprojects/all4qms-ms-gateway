@@ -15,7 +15,17 @@ import { Row } from 'reactstrap';
 import { Enums, GeneralAudit, RawMaterial, Rnc } from '../../models';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
-import { getById, list, save, saveAudit, saveClient, saveDescription, saveProduct, update } from '../../reducers/rnc.reducer';
+import {
+  getById,
+  list,
+  save,
+  saveAudit,
+  saveClient,
+  saveDescription,
+  saveProduct,
+  saveRawMaterial,
+  update,
+} from '../../reducers/rnc.reducer';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
 import InternalAuditRegister from './register-types/internal-audit/internal-audit-register';
@@ -25,6 +35,7 @@ import ProductRegister from './register-types/product-register/product-register'
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
+import { getDescriptionByRNCId } from '../../reducers/description.reducer';
 
 export const RNCNew = () => {
   const dispatch = useAppDispatch();
@@ -39,6 +50,7 @@ export const RNCNew = () => {
 
     if (id) {
       dispatch(getById(parseInt(id)));
+      dispatch(getDescriptionByRNCId(id));
     }
 
     getProcesses().then(data => {
@@ -317,24 +329,14 @@ export const RNCNew = () => {
     setRawMaterial(rawMaterial);
   };
 
-  const saveRawMaterial = (): void => {
+  const saveMaterial = (): void => {
     if (!rawMaterial) {
       return;
     }
 
     dispatch(
-      saveProduct({
-        batch: rawMaterial.batch,
-        batchAmount: rawMaterial.batchSize,
-        code: rawMaterial.code,
-        defects: rawMaterial.defects,
-        description: rawMaterial.description,
-        name: rawMaterial.code,
-        opNumber: rawMaterial.opNumber.toString(),
-        order: rawMaterial.requestNumber.toString(),
-        rejected: rawMaterial.rejectionRate,
-        samples: rawMaterial.samples,
-        supplier: rawMaterial.nqa,
+      saveRawMaterial({
+        ...rawMaterial,
         traceability: {
           date: rawMaterial.invoiceDate,
           deliveredAt: rawMaterial.deliveredAt,
@@ -395,7 +397,7 @@ export const RNCNew = () => {
   const onSaveRncDescription = () => {
     saveInternalAudit();
     saveExternalAudit();
-    saveRawMaterial();
+    saveMaterial();
     saveOthers();
 
     for (let i = 0; i < evidences.length; i++) {
@@ -449,6 +451,17 @@ export const RNCNew = () => {
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
+  const nonConformityDescription = useAppSelector(state => state.all4qmsmsgateway.description.entity);
+
+  useEffect(() => {
+    if (!nonConformityDescription) {
+      return;
+    }
+
+    setDescription(nonConformityDescription.detalhesNaoConformidade);
+    setRequirements(nonConformityDescription.requisitoDescumprido);
+    setEvidences([nonConformityDescription.evidenciaObjetiva]);
+  }, [nonConformityDescription]);
 
   useEffect(() => {
     if (rnc) {

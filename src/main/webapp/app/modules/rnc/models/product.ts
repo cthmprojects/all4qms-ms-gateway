@@ -35,4 +35,5 @@ export type RawMaterial = {
   requestNumber: number;
   samples: number;
   shift: string;
+  traceability: RncTraceability;
 };

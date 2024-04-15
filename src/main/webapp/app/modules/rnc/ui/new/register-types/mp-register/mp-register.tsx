@@ -30,6 +30,7 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
     requestNumber: 0,
     samples: 0,
     shift: '',
+    traceability: null,
   });
 
   useEffect(() => {
@@ -140,7 +141,8 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
                 label="Regime de inspeção"
                 name="inspection-type"
               >
-                <MenuItem value="1">Amostragem</MenuItem>
+                <MenuItem value="AMOSTRAGEM">Amostragem</MenuItem>
+                <MenuItem value="COMPLETA">Completa</MenuItem>
               </Select>
             </FormControl>
             <TextField

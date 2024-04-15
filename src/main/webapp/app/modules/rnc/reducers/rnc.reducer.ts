@@ -3,6 +3,7 @@ import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducer
 import axios from 'axios';
 import {
   AprovacaoNC,
+  RawMaterial,
   Rnc,
   RncAudit,
   RncClient,
@@ -211,8 +212,31 @@ export const saveProduct = createAsyncThunk('rnc/product/save', async (product: 
   return response;
 });
 
-export const saveRawMaterial = createAsyncThunk('rnc/raw-material/save', async () => {
-  const response = await axios.post('', {});
+export const saveRawMaterial = createAsyncThunk('rnc/raw-material/save', async (rawMaterial: RawMaterial) => {
+  const traceabilityResponse = await axios.post(traceabilityApiUrl, {
+    dtEntregaNF: rawMaterial.traceability.deliveredAt,
+    numNF: rawMaterial.traceability.identifier,
+    dtNF: rawMaterial.traceability.date,
+    idNaoConformidade: rawMaterial.traceability.rncId,
+  });
+
+  const response = await axios.post(productApiUrl, {
+    codigoProduto: rawMaterial.code,
+    nomeProduto: '',
+    nomeFornecedor: '',
+    lote: rawMaterial.batch,
+    qtdLote: rawMaterial.batchSize,
+    nqa: rawMaterial.description,
+    qtdAmostra: rawMaterial.samples,
+    qtdDefeito: rawMaterial.defects,
+    qtdRejeicao: rawMaterial.rejectionRate,
+    numPedido: rawMaterial.requestNumber,
+    numOP: rawMaterial.opNumber,
+    identificador: rawMaterial.identifier,
+    regimeInspecao: rawMaterial.inspectionRule,
+    idRastreabilidadesRegistro: traceabilityResponse.data.id,
+  });
+
   return response;
 });
 
