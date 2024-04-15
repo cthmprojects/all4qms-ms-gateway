@@ -18,14 +18,13 @@ import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
 import {
   axiosSaveAudit,
-  axiosSaveClient,
-  axiosSaveProduct,
   axiosSaveRawMaterial,
   getById,
   list,
   save,
-  saveClient,
+  saveClientComplaint,
   saveDescription,
+  saveProductComplaint,
   update,
 } from '../../reducers/rnc.reducer';
 import DescriptionRnc from './register-types/description/description';
@@ -286,7 +285,7 @@ export const RNCNew = () => {
   };
 
   const setClientRegister = async data => {
-    const response = await axiosSaveClient({
+    const payload = {
       batch: data.lot,
       batchAmount: data.lotQuantity,
       code: data.productCode,
@@ -304,9 +303,15 @@ export const RNCNew = () => {
         identifier: data.receipt,
         rncId: rnc.id,
       },
-    });
-    const id = response.data.id;
-    setClientLink(id);
+    };
+
+    // const response = await axiosSaveClient(payload);
+    // const id = response.data.id;
+    // setClientLink(id);
+
+    const rncId = rnc.id;
+    dispatch(saveClientComplaint({ id: rncId, client: payload }));
+    dispatch(getById(rncId));
   };
 
   const onInternalAuditChanged = (internalAudit: GeneralAudit): void => {
@@ -349,7 +354,7 @@ export const RNCNew = () => {
   };
 
   const setProductRegister = async data => {
-    const response = await axiosSaveProduct({
+    const payload = {
       batch: data.lot,
       batchAmount: data.lotQuantity,
       code: data.productCode,
@@ -367,10 +372,15 @@ export const RNCNew = () => {
         identifier: data.receipt,
         rncId: rnc.id,
       },
-    });
+    };
 
-    const id = response.data.id;
-    setProductLink(id);
+    // const response = await axiosSaveProduct(payload);
+    // const id = response.data.id;
+    // setProductLink(id);
+
+    const rncId = rnc.id;
+    dispatch(saveProductComplaint({ id: rncId, product: payload }));
+    dispatch(getById(rncId));
   };
 
   const onOthersChanged = (others: string): void => {
@@ -424,8 +434,8 @@ export const RNCNew = () => {
           possuiReincidencia: repetition,
           vinculoDocAnterior: null,
           vinculoAuditoria: auditLink,
-          vinculoCliente: clientLink,
-          vinculoProduto: rawMaterialLink?.id ?? productLink,
+          vinculoCliente: clientLink ?? rnc.vinculoCliente,
+          vinculoProduto: rawMaterialLink?.id ?? rnc.vinculoProduto,
         })
       );
     }

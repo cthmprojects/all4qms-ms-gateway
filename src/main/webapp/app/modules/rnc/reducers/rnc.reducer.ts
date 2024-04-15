@@ -21,6 +21,7 @@ import {
 const apiUrl = 'services/all4qmsmsrnc/api/nao-conformidades';
 const aprovacaoNCApiUrl = 'services/all4qmsmsrnc/api/aprovacao-ncs';
 const auditApiUrl = 'services/all4qmsmsrnc/api/auditorias';
+const complaintApiUrl = 'services/all4qmsmsrnc/api/reclamacaos';
 const descriptionApiUrl = 'services/all4qmsmsrnc/api/descricao-nao-conformidades';
 const effectCauseApiUrl = 'services/all4qmsmsrnc/api/causa-efeitos';
 const immediateActionApiUrl = 'services/all4qmsmsrnc/api/acao-imediatas';
@@ -59,6 +60,16 @@ interface ListParams {
   dtFim?: string;
   page?: number;
   size?: number;
+}
+
+interface ProductComplaint {
+  id: number;
+  product: RncProduct;
+}
+
+interface ClientComplaint {
+  id: number;
+  client: RncClient;
 }
 
 export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
@@ -165,7 +176,11 @@ export const saveClient = createAsyncThunk('rnc/other/client', async (client: Rn
   return await axiosSaveClient(client);
 });
 
-export const axiosSaveClient = async (client: RncClient) => {
+export const saveClientComplaint = createAsyncThunk('rnc/other/client/complaint', async ({ id, client }: ClientComplaint) => {
+  return await axiosSaveClient(client, id);
+});
+
+export const axiosSaveClient = async (client: RncClient, id?: number) => {
   const traceabilityResponse = await axios.post(traceabilityApiUrl, {
     dtEntregaNF: client.traceability.deliveredAt,
     numNF: client.traceability.identifier,
@@ -173,7 +188,13 @@ export const axiosSaveClient = async (client: RncClient) => {
     idNaoConformidade: client.traceability.rncId,
   });
 
-  const response = await axios.post(productApiUrl, {
+  const complaintResponse = await axios.post(complaintApiUrl, {
+    nomeClienteReclamacao: client.name,
+  });
+
+  const url = id ? `${productApiUrl}/${id}` : productApiUrl;
+
+  const response = await axios.post(url, {
     codigoProduto: client.code,
     nomeProduto: client.name,
     nomeFornecedor: client.supplier,
@@ -200,7 +221,11 @@ export const saveProduct = createAsyncThunk('rnc/product/save', async (product: 
   return await axiosSaveProduct(product);
 });
 
-export const axiosSaveProduct = async (product: RncProduct) => {
+export const saveProductComplaint = createAsyncThunk('rnc/product/save/rnc', async ({ id, product }: ProductComplaint) => {
+  return await axiosSaveProduct(product, id);
+});
+
+export const axiosSaveProduct = async (product: RncProduct, id?: number) => {
   const traceabilityResponse = await axios.post(traceabilityApiUrl, {
     dtEntregaNF: product.traceability.deliveredAt,
     numNF: product.traceability.identifier,
@@ -208,7 +233,9 @@ export const axiosSaveProduct = async (product: RncProduct) => {
     idNaoConformidade: product.traceability.rncId,
   });
 
-  const response = await axios.post(productApiUrl, {
+  const url = id ? `${productApiUrl}/${id}` : productApiUrl;
+
+  const response = await axios.post(url, {
     codigoProduto: product.code,
     nomeProduto: product.name,
     nomeFornecedor: product.supplier,
