@@ -210,6 +210,7 @@ export const RNCNew = () => {
       const processoNC = parseInt(firstForm.processTarget.value);
       const statusAtual = 'PREENCHIMENTO';
       const tipoNC = firstForm.type.value;
+      console.log(users);
 
       dispatch(
         update({
@@ -220,7 +221,7 @@ export const RNCNew = () => {
           tipoNC: tipoNC,
           origemNC: origemNC,
           possuiReincidencia: true,
-          idEmissorNC: users.find(user => user.user.login == Storage.session.get('firstName'))?.id,
+          idEmissorNC: users.find(user => user.user.login == Storage.session.get('LOGIN'))?.id,
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
@@ -574,7 +575,7 @@ export const RNCNew = () => {
 
                 <TextField
                   sx={{ height: '60px' }}
-                  label="."
+                  label="Emitido por:"
                   name="emitter"
                   id="rnc-text-field"
                   value={firstForm.emitter.value}
