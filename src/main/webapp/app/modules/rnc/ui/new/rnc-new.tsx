@@ -65,7 +65,7 @@ export const RNCNew = () => {
   const navigate = useNavigate();
   const [firstForm, setFirstForm] = useState({
     number: {
-      value: '1',
+      value: '-',
       error: false,
     },
     emitter: {
@@ -253,7 +253,7 @@ export const RNCNew = () => {
           tipoNC: tipoNC,
           origemNC: origemNC,
           possuiReincidencia: true,
-          idEmissorNC: users.find(user => user.user.login == Storage.session.get('firstName'))?.id,
+          idEmissorNC: users.find(user => user.user.login == Storage.session.get('login'))?.id,
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
@@ -580,6 +580,9 @@ export const RNCNew = () => {
                   id="rnc-text-field"
                   value={firstForm.emitter.value}
                   disabled
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
                   className="rnc-form-field me-2 mb-2"
                 />
 
