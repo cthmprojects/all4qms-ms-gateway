@@ -410,7 +410,7 @@ export const RNCNew = () => {
           anexos: descriptionEvidences,
         })
       );
-      dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null }));
+      dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO', ncOutros: others, possuiReincidencia: repetition, vinculoDocAnterior: null }));
     }
   };
 
@@ -463,6 +463,7 @@ export const RNCNew = () => {
         type: { value: rnc.tipoNC || '', error: false },
         origin: { value: rnc.origemNC || '', error: false },
       });
+      setOthers(rnc.ncOutros);
 
       setRepetition(rnc.possuiReincidencia || false);
       setSelectedRncIds(rnc.vinculoDocAnterior || []);
