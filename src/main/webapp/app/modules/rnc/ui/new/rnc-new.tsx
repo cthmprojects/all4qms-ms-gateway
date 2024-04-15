@@ -13,17 +13,19 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { Enums, GeneralAudit, RawMaterial, Rnc } from '../../models';
+import { getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
 import {
+  axiosSaveAudit,
+  axiosSaveClient,
+  axiosSaveProduct,
+  axiosSaveRawMaterial,
   getById,
   list,
   save,
-  saveAudit,
   saveClient,
   saveDescription,
-  saveProduct,
-  saveRawMaterial,
   update,
 } from '../../reducers/rnc.reducer';
 import DescriptionRnc from './register-types/description/description';
@@ -35,7 +37,6 @@ import ProductRegister from './register-types/product-register/product-register'
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
-import { getDescriptionByRNCId } from '../../reducers/description.reducer';
 
 export const RNCNew = () => {
   const dispatch = useAppDispatch();
@@ -51,6 +52,10 @@ export const RNCNew = () => {
     if (id) {
       dispatch(getById(parseInt(id)));
       dispatch(getDescriptionByRNCId(id));
+    } else {
+      setDescription('');
+      setRequirements('');
+      setEvidences(['']);
     }
 
     getProcesses().then(data => {
@@ -182,6 +187,8 @@ export const RNCNew = () => {
   const [internalAudit, setInternalAudit] = useState<GeneralAudit | null>(null);
   const [others, setOthers] = useState<string | null>(null);
   const [rawMaterial, setRawMaterial] = useState<RawMaterial | null>(null);
+  const [clientLink, setClientLink] = useState<number | null>(null);
+  const [productLink, setProductLink] = useState<number | null>(null);
 
   const onRepetitionChanged = (value: boolean) => {
     setRepetition(value);
@@ -263,112 +270,107 @@ export const RNCNew = () => {
     setExternalAudit(externalAudit);
   };
 
-  const saveExternalAudit = (): void => {
+  const saveExternalAudit = async () => {
     if (!externalAudit) {
-      return;
+      return null;
     }
 
-    dispatch(
-      saveAudit({
-        norm: internalAudit?.norm,
-        occurrence: internalAudit?.ncNumber?.toString(),
-        process: internalAudit?.reportNumber,
-        requirement: internalAudit?.normRequirements,
-        rncId: rnc?.id,
-        sequence: 1,
-      })
-    );
+    return await axiosSaveAudit({
+      norm: internalAudit?.norm,
+      occurrence: internalAudit?.ncNumber?.toString(),
+      process: internalAudit?.reportNumber,
+      requirement: internalAudit?.normRequirements,
+      rncId: rnc?.id,
+      sequence: 1,
+    });
   };
 
-  const setClientRegister = data => {
-    dispatch(
-      saveClient({
-        batch: data.lot,
-        batchAmount: data.lotQuantity,
-        code: data.productCode,
-        defects: data.defectRate,
-        description: data.productDescription,
-        name: data.name,
-        opNumber: data.opNumber,
-        order: data.requestNumber,
-        rejected: data.rejectedQuantity,
-        samples: data.batchAmount,
-        supplier: data.productCode2,
-        traceability: {
-          date: data.nfDate,
-          deliveredAt: data.deliveryDate,
-          identifier: data.receipt,
-          rncId: rnc.id,
-        },
-      })
-    );
+  const setClientRegister = async data => {
+    const response = await axiosSaveClient({
+      batch: data.lot,
+      batchAmount: data.lotQuantity,
+      code: data.productCode,
+      defects: data.defectRate,
+      description: data.productDescription,
+      name: data.name,
+      opNumber: data.opNumber,
+      order: data.requestNumber,
+      rejected: data.rejectedQuantity,
+      samples: data.batchAmount,
+      supplier: data.productCode2,
+      traceability: {
+        date: data.nfDate,
+        deliveredAt: data.deliveryDate,
+        identifier: data.receipt,
+        rncId: rnc.id,
+      },
+    });
+    const id = response.data.id;
+    setClientLink(id);
   };
 
   const onInternalAuditChanged = (internalAudit: GeneralAudit): void => {
     setInternalAudit(internalAudit);
   };
 
-  const saveInternalAudit = (): void => {
+  const saveInternalAudit = async () => {
     if (!internalAudit) {
-      return;
+      return null;
     }
 
-    dispatch(
-      saveAudit({
-        norm: internalAudit?.norm,
-        occurrence: internalAudit?.ncNumber.toString(),
-        process: internalAudit?.reportNumber,
-        requirement: internalAudit?.normRequirements,
-        rncId: rnc?.id,
-        sequence: 1,
-      })
-    );
+    return await axiosSaveAudit({
+      norm: internalAudit?.norm,
+      occurrence: internalAudit?.ncNumber.toString(),
+      process: internalAudit?.reportNumber,
+      requirement: internalAudit?.normRequirements,
+      rncId: rnc?.id,
+      sequence: 1,
+    });
   };
 
   const onRawMaterialChanged = (rawMaterial: RawMaterial): void => {
     setRawMaterial(rawMaterial);
   };
 
-  const saveMaterial = (): void => {
+  const saveMaterial = async () => {
     if (!rawMaterial) {
-      return;
+      return null;
     }
 
-    dispatch(
-      saveRawMaterial({
-        ...rawMaterial,
-        traceability: {
-          date: rawMaterial.invoiceDate,
-          deliveredAt: rawMaterial.deliveredAt,
-          identifier: rawMaterial.invoice,
-          rncId: rnc.id,
-        },
-      })
-    );
+    return await axiosSaveRawMaterial({
+      ...rawMaterial,
+      traceability: {
+        date: rawMaterial.invoiceDate,
+        deliveredAt: rawMaterial.deliveredAt,
+        identifier: rawMaterial.invoice,
+        rncId: rnc.id,
+      },
+    });
   };
 
-  const setProductRegister = data => {
-    dispatch(
-      saveProduct({
-        batch: data.lot,
-        batchAmount: data.lotQuantity,
-        code: data.productCode,
-        defects: data.defectRate,
-        description: data.productDescription,
-        name: data.name,
-        opNumber: data.opNumber,
-        order: data.requestNumber,
-        rejected: data.rejectedQuantity,
-        samples: data.batchAmount,
-        supplier: data.productCode2,
-        traceability: {
-          date: data.nfDate,
-          deliveredAt: data.deliveryDate,
-          identifier: data.receipt,
-          rncId: rnc.id,
-        },
-      })
-    );
+  const setProductRegister = async data => {
+    const response = await axiosSaveProduct({
+      batch: data.lot,
+      batchAmount: data.lotQuantity,
+      code: data.productCode,
+      defects: data.defectRate,
+      description: data.productDescription,
+      name: data.name,
+      opNumber: data.opNumber,
+      order: data.requestNumber,
+      rejected: data.rejectedQuantity,
+      samples: data.batchAmount,
+      supplier: data.productCode2,
+      traceability: {
+        date: data.nfDate,
+        deliveredAt: data.deliveryDate,
+        identifier: data.receipt,
+        rncId: rnc.id,
+      },
+    });
+
+    const id = response.data.id;
+    setProductLink(id);
   };
 
   const onOthersChanged = (others: string): void => {
@@ -394,10 +396,12 @@ export const RNCNew = () => {
     }
   };
 
-  const onSaveRncDescription = () => {
-    saveInternalAudit();
-    saveExternalAudit();
-    saveMaterial();
+  const onSaveRncDescription = async () => {
+    const internalAuditLink = (await saveInternalAudit())?.data;
+    const externalAuditLink = (await saveExternalAudit())?.data;
+    const auditLink = internalAuditLink?.id ?? externalAuditLink?.id;
+    const rawMaterialLink = (await saveMaterial())?.data;
+
     saveOthers();
 
     for (let i = 0; i < evidences.length; i++) {
@@ -412,7 +416,18 @@ export const RNCNew = () => {
           anexos: descriptionEvidences,
         })
       );
-      dispatch(update({ ...rnc, statusAtual: 'DETALHAMENTO', ncOutros: others, possuiReincidencia: repetition, vinculoDocAnterior: null }));
+      dispatch(
+        update({
+          ...rnc,
+          statusAtual: 'DETALHAMENTO',
+          ncOutros: others,
+          possuiReincidencia: repetition,
+          vinculoDocAnterior: null,
+          vinculoAuditoria: auditLink,
+          vinculoCliente: clientLink,
+          vinculoProduto: rawMaterialLink?.id ?? productLink,
+        })
+      );
     }
   };
 

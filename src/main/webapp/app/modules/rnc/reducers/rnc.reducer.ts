@@ -146,6 +146,10 @@ export const update = createAsyncThunk('rnc/update', async (rnc: Rnc) => {
 });
 
 export const saveAudit = createAsyncThunk('rnc/audit/save', async (audit: RncAudit) => {
+  return await axiosSaveAudit(audit);
+});
+
+export const axiosSaveAudit = async (audit: RncAudit) => {
   const response = await axios.post(auditApiUrl, {
     sequecialAuditoria: audit.sequence,
     normaAuditoria: audit.norm,
@@ -155,9 +159,13 @@ export const saveAudit = createAsyncThunk('rnc/audit/save', async (audit: RncAud
     idNaoConformidade: audit.rncId,
   });
   return response;
-});
+};
 
 export const saveClient = createAsyncThunk('rnc/other/client', async (client: RncClient) => {
+  return await axiosSaveClient(client);
+});
+
+export const axiosSaveClient = async (client: RncClient) => {
   const traceabilityResponse = await axios.post(traceabilityApiUrl, {
     dtEntregaNF: client.traceability.deliveredAt,
     numNF: client.traceability.identifier,
@@ -179,7 +187,9 @@ export const saveClient = createAsyncThunk('rnc/other/client', async (client: Rn
     numOP: client.opNumber,
     idRastreabilidadesRegistro: traceabilityResponse.data.id,
   });
-});
+
+  return response;
+};
 
 export const saveOther = createAsyncThunk('rnc/other/save', async () => {
   const response = await axios.post('', {});
@@ -187,6 +197,10 @@ export const saveOther = createAsyncThunk('rnc/other/save', async () => {
 });
 
 export const saveProduct = createAsyncThunk('rnc/product/save', async (product: RncProduct) => {
+  return await axiosSaveProduct(product);
+});
+
+export const axiosSaveProduct = async (product: RncProduct) => {
   const traceabilityResponse = await axios.post(traceabilityApiUrl, {
     dtEntregaNF: product.traceability.deliveredAt,
     numNF: product.traceability.identifier,
@@ -210,9 +224,13 @@ export const saveProduct = createAsyncThunk('rnc/product/save', async (product: 
   });
 
   return response;
-});
+};
 
 export const saveRawMaterial = createAsyncThunk('rnc/raw-material/save', async (rawMaterial: RawMaterial) => {
+  return axiosSaveRawMaterial(rawMaterial);
+});
+
+export const axiosSaveRawMaterial = async (rawMaterial: RawMaterial) => {
   const traceabilityResponse = await axios.post(traceabilityApiUrl, {
     dtEntregaNF: rawMaterial.traceability.deliveredAt,
     numNF: rawMaterial.traceability.identifier,
@@ -238,7 +256,7 @@ export const saveRawMaterial = createAsyncThunk('rnc/raw-material/save', async (
   });
 
   return response;
-});
+};
 
 export const saveTraceability = createAsyncThunk('rnc/traceability/save', async (traceability: RncTraceability) => {
   const response = await axios.post(traceabilityApiUrl, {
@@ -464,11 +482,17 @@ const RncSlice = createEntitySlice({
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
+
+        const { data } = action.payload;
+        state.entity = { ...state.entity, vinculoAuditoria: data.id };
       })
       .addMatcher(isFulfilled(saveClient), (state, action) => {
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
+
+        const { data } = action.payload;
+        state.entity = { ...state.entity, vinculoCliente: data.id };
       })
       .addMatcher(isFulfilled(saveDescription), (state, action) => {
         state.updating = false;
@@ -484,11 +508,17 @@ const RncSlice = createEntitySlice({
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
+
+        const { data } = action.payload;
+        state.entity = { ...state.entity, vinculoProduto: data.id };
       })
       .addMatcher(isFulfilled(saveRawMaterial), (state, action) => {
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;
+
+        const { data } = action.payload;
+        state.entity = { ...state.entity, vinculoProduto: data.id };
       })
       .addMatcher(isFulfilled(saveTraceability), (state, action) => {
         state.updating = false;
