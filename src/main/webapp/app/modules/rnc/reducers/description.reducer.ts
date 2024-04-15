@@ -21,7 +21,7 @@ export const getById = createAsyncThunk('description/', async (id: string | numb
 });
 
 export const getDescriptionByRNCId = createAsyncThunk('description/rnc', async (id: string | number) => {
-  const response = await axios.get(`${apiUrl}/rnc/${id}`);
+  const response = await axios.get(`${apiUrl}/list/${id}`);
   return response;
 });
 
@@ -35,7 +35,7 @@ const rncDescriptionSlice = createEntitySlice({
     }),
       builder.addMatcher(isFulfilled(getDescriptionByRNCId), (state, action) => {
         state.loading = false;
-        state.entity = action.payload.data;
+        state.entities = action.payload.data;
       });
   },
 });

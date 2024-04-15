@@ -452,6 +452,7 @@ export const RNCNew = () => {
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const nonConformityDescription = useAppSelector(state => state.all4qmsmsgateway.description.entity);
+  const nonConformityDescriptions = useAppSelector(state => state.all4qmsmsgateway.description.entities);
 
   useEffect(() => {
     if (!nonConformityDescription) {
@@ -462,6 +463,16 @@ export const RNCNew = () => {
     setRequirements(nonConformityDescription.requisitoDescumprido);
     setEvidences([nonConformityDescription.evidenciaObjetiva]);
   }, [nonConformityDescription]);
+
+  useEffect(() => {
+    if (!nonConformityDescriptions || nonConformityDescriptions.length <= 0) {
+      return;
+    }
+
+    setDescription(nonConformityDescriptions[0].detalhesNaoConformidade);
+    setRequirements(nonConformityDescriptions[0].requisitoDescumprido);
+    setEvidences(nonConformityDescriptions.map(ncd => ncd.evidenciaObjetiva));
+  }, [nonConformityDescriptions]);
 
   useEffect(() => {
     if (rnc) {
