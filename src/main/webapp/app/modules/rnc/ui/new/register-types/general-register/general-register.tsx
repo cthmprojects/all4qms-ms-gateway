@@ -247,24 +247,26 @@ export const GeneralRegister = () => {
         if (res.length > 0) {
           setShowPlanoAcaoCorretiva(true);
           res.map((actionPlan: any) => {
-            setListaAcoesCorretivas([
-              ...listaAcoesCorretivas,
-              {
-                id: actionPlan?.acoes[0]?.id,
-                idPlano: actionPlan?.acoes[0]?.idPlano,
-                descricaoAcao: actionPlan?.acoes[0]?.descricaoAcao,
-                prazoAcao: new Date(actionPlan?.acoes[0]?.prazoAcao) || new Date(),
-                idResponsavelAcao: actionPlan?.acoes[0]?.idResponsavelAcao,
-                statusAcao: actionPlan?.acoes[0]?.statusAcao,
-                dataVerificao: new Date(actionPlan?.acoes[0]?.dataVerificao) || new Date(),
-                idResponsavelVerificaoAcao: actionPlan?.acoes[0]?.idResponsavelVerificaoAcao,
-                idAnexosExecucao: actionPlan?.acoes[0]?.idAnexosExecucao,
-                dataConclusaoAcao: new Date(actionPlan?.acoes[0]?.dataConclusaoAcao) || new Date(),
-                criadoEm: actionPlan?.acoes[0]?.criadoEm,
-                atualizadoEm: actionPlan?.acoes[0]?.atualizadoEm,
-                planoId: actionPlan?.acoes[0]?.planoId,
-              },
-            ]);
+            actionPlan.acoes.map(acao => {
+              setListaAcoesCorretivas([
+                ...listaAcoesCorretivas,
+                {
+                  id: acao?.id,
+                  idPlano: acao?.idPlano,
+                  descricaoAcao: acao?.descricaoAcao,
+                  prazoAcao: new Date(acao?.prazoAcao) || new Date(),
+                  idResponsavelAcao: acao?.idResponsavelAcao,
+                  statusAcao: acao?.statusAcao,
+                  dataVerificao: new Date(acao?.dataVerificao) || new Date(),
+                  idResponsavelVerificaoAcao: acao?.idResponsavelVerificaoAcao,
+                  idAnexosExecucao: acao?.idAnexosExecucao,
+                  dataConclusaoAcao: new Date(acao?.dataConclusaoAcao) || new Date(),
+                  criadoEm: acao?.criadoEm,
+                  atualizadoEm: acao?.atualizadoEm,
+                  planoId: acao?.planoId,
+                },
+              ]);
+            });
           });
         }
       });
@@ -373,6 +375,7 @@ export const GeneralRegister = () => {
 
   const onActionPlansUpdated = (actionPlans: Array<ActionPlan>): void => {
     setListaAcoesCorretivas(actionPlans);
+    console.log(listaAcoesCorretivas);
   };
 
   const renderListaAcoesCorretivas = () => {
@@ -671,7 +674,7 @@ export const GeneralRegister = () => {
       return null;
     }
 
-    const data = decisionEntity[0];
+    const data = decisionEntity.length > 0 ? decisionEntity[0] : decisionEntity;
     setReadonlyDecision(true);
 
     const decision: Decision = {

@@ -36,6 +36,7 @@ const rncDescriptionSlice = createEntitySlice({
       builder.addMatcher(isFulfilled(getDescriptionByRNCId), (state, action) => {
         state.loading = false;
         state.entities = action.payload.data;
+        state.entity = action.payload.data.length > 0 ? action.payload.data[0] : null;
       });
   },
 });
