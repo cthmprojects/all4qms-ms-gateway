@@ -200,10 +200,7 @@ export const RNCNew = () => {
   const handleSubmit = e => {
     e.preventDefault();
     if (id) {
-      const receptorNC = filterUser(firstForm.forwarded.value);
       const dtNC = new Date();
-      const idEmissorNC = parseInt(Storage.session.get('ID_USUARIO'));
-      const idReceptorNC = receptorNC ? parseInt(receptorNC.id) : null;
       const idUsuarioAtual = parseInt(Storage.session.get('ID_USUARIO'));
       const origemNC = firstForm.origin.value;
       const processoEmissor = parseInt(firstForm.processOrigin.value);
@@ -253,7 +250,7 @@ export const RNCNew = () => {
           tipoNC: tipoNC,
           origemNC: origemNC,
           possuiReincidencia: true,
-          idEmissorNC: users.find(user => user.user.login == Storage.session.get('login'))?.id,
+          idEmissorNC: users.find(user => user.user.login == Storage.session.get('LOGIN'))?.id,
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
@@ -505,14 +502,15 @@ export const RNCNew = () => {
       setStateRnc(rnc);
       setFirstForm({
         number: { value: String(rnc.id), error: false },
-        emitter: { value: users.find(user => user.user.id === rnc.idEmissorNC)?.login || '', error: false },
+        emitter: { value: users.find(user => user.id === rnc.idEmissorNC)?.nome || '', error: false },
         date: { value: new Date(rnc.dtNC), error: false },
-        processOrigin: { value: rnc.processoEmissor?.toString() || '', error: false },
-        forwarded: { value: users.find(user => user.user.id === rnc.idReceptorNC)?.login || '', error: false },
-        processTarget: { value: rnc.processoNC?.toString() || '', error: false },
+        processOrigin: { value: String(rnc?.processoEmissor) || '', error: false },
+        forwarded: { value: users.find(user => user.id === rnc.idReceptorNC)?.nome || '', error: false },
+        processTarget: { value: String(rnc?.processoNC) || '', error: false },
         type: { value: rnc.tipoNC || '', error: false },
         origin: { value: rnc.origemNC || '', error: false },
       });
+
       setOthers(rnc.ncOutros);
 
       setRepetition(rnc.possuiReincidencia || false);
@@ -526,7 +524,7 @@ export const RNCNew = () => {
         // Update the state with the data
       }
     }
-  }, [users, rnc]);
+  }, [rnc]);
 
   useEffect(() => {
     if (users) {
@@ -761,8 +759,7 @@ export const RNCNew = () => {
                   </Button>
                   <Button
                     variant="outlined"
-                    // color="primary"
-                    // style={{ background: '#e6b200', color: '#4e4d4d' }}
+                    // color="p
                     className="me-3"
                     onClick={onSaveRncDescription}
                   >
