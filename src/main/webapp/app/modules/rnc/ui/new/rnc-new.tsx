@@ -211,6 +211,7 @@ export const RNCNew = () => {
       const processoNC = parseInt(firstForm.processTarget.value);
       const statusAtual = 'PREENCHIMENTO';
       const tipoNC = firstForm.type.value;
+      const idEmissorNC = users.find(user => user.user.login == Storage.session.get('LOGIN'))?.id;
 
       dispatch(
         update({
@@ -221,7 +222,7 @@ export const RNCNew = () => {
           tipoNC: tipoNC,
           origemNC: origemNC,
           possuiReincidencia: true,
-          idEmissorNC: users.find(user => user.user.login == Storage.session.get('LOGIN'))?.id,
+          idEmissorNC: idEmissorNC,
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
