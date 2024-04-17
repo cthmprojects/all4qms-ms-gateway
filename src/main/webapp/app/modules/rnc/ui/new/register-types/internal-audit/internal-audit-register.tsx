@@ -34,7 +34,7 @@ export const InternalAuditRegister = ({ onChanged }: InternalAuditRegisterProps)
           />
           <TextField
             fullWidth
-            onChange={e => setInternal({ ...internal, ncNumber: parseInt(e.target.value) })}
+            onChange={e => setInternal({ ...internal, ncNumber: parseInt(e.target.value.slice(0, 10), 10) })}
             type="number"
             label="Número NC"
             name="numeroNC"
@@ -49,7 +49,7 @@ export const InternalAuditRegister = ({ onChanged }: InternalAuditRegisterProps)
           />
           <TextField
             fullWidth
-            onChange={e => setInternal({ ...internal, reportNumber: parseInt(e.target.value) })}
+            onChange={e => setInternal({ ...internal, reportNumber: parseInt(e.target.value.slice(0, 10), 10) })}
             type="number"
             label="Número do Relatório"
             name="numeroRelatorio"

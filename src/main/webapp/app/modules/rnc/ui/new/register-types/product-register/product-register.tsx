@@ -174,7 +174,7 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
           <div style={{ display: 'flex', width: '100%' }}>
             <TextField
               value={productForm.lot.value}
-              onChange={e => handleChange({ ...productForm, lot: { value: e.target.value, error: productForm.lot.error } })}
+              onChange={e => handleChange({ ...productForm, lot: { value: e.target.value.slice(0, 10), error: productForm.lot.error } })}
               label="Lote"
               type="number"
               name="lot"
@@ -206,7 +206,10 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
             <TextField
               value={productForm.sampleQuantity.value}
               onChange={e =>
-                handleChange({ ...productForm, sampleQuantity: { value: e.target.value, error: productForm.sampleQuantity.error } })
+                handleChange({
+                  ...productForm,
+                  sampleQuantity: { value: e.target.value.slice(0, 10), error: productForm.sampleQuantity.error },
+                })
               }
               label="Número de amostras"
               type="number"
@@ -217,7 +220,10 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
             <TextField
               value={productForm.defectQuantity.value}
               onChange={e =>
-                handleChange({ ...productForm, defectQuantity: { value: e.target.value, error: productForm.defectQuantity.error } })
+                handleChange({
+                  ...productForm,
+                  defectQuantity: { value: e.target.value.slice(0, 10), error: productForm.defectQuantity.error },
+                })
               }
               label="Número de defeitos"
               type="number"
@@ -227,7 +233,9 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
             />
             <TextField
               value={productForm.defectRate.value}
-              onChange={e => handleChange({ ...productForm, defectRate: { value: e.target.value, error: productForm.defectRate.error } })}
+              onChange={e =>
+                handleChange({ ...productForm, defectRate: { value: e.target.value.slice(0, 10), error: productForm.defectRate.error } })
+              }
               label="% Rejeição"
               type="number"
               name="rejection-rate"
@@ -273,7 +281,10 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
             <TextField
               value={productForm.requestNumber.value}
               onChange={e =>
-                handleChange({ ...productForm, requestNumber: { value: e.target.value, error: productForm.requestNumber.error } })
+                handleChange({
+                  ...productForm,
+                  requestNumber: { value: e.target.value.slice(0, 10), error: productForm.requestNumber.error },
+                })
               }
               label="Número do pedido"
               type="number"
@@ -283,7 +294,9 @@ export const ProductRegister = ({ onProductRegisterChange }) => {
             />
             <TextField
               value={productForm.opNumber.value}
-              onChange={e => handleChange({ ...productForm, opNumber: { value: e.target.value, error: productForm.opNumber.error } })}
+              onChange={e =>
+                handleChange({ ...productForm, opNumber: { value: e.target.value.slice(0, 10), error: productForm.opNumber.error } })
+              }
               label="Número OP"
               type="number"
               name="op-number"
