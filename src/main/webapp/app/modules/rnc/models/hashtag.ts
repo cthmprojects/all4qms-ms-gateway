@@ -1,4 +1,4 @@
 export type Hashtag = {
-  hashtag: string;
+  text: string;
   extrator: string;
 };

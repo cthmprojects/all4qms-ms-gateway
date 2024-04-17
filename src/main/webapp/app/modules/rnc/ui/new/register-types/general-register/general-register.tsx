@@ -720,6 +720,7 @@ export const GeneralRegister = () => {
         <div className="container-style">
           {/* Análise de Abrangência NC */}
           <ScopeAnalysis
+            description={descriptionEntity?.detalhesNaoConformidade}
             disabled={!registerForm.keywords.editable}
             keywords={registerForm.keywords.value}
             onChanged={newKeyWords =>

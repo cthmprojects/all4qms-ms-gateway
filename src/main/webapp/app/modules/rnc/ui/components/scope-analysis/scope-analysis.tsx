@@ -6,16 +6,25 @@ import { postHashtagRNC } from 'app/modules/rnc/reducers/hashtag.reducer';
 import React, { useEffect, useState } from 'react';
 
 type ScopeAnalysisProps = {
+  description: string;
   keywords: Array<string>;
   onChanged: (value: Array<string>) => void;
   disabled?: boolean;
 };
 
-const ScopeAnalysis = ({ keywords, onChanged, disabled }: ScopeAnalysisProps) => {
+const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnalysisProps) => {
   const [keywordList, setKeywordList] = useState<Array<string>>(keywords);
   const [keyword, setKeyword] = useState<string>('');
   const hashtags = useAppSelector<Hashtag[]>(state => state.all4qmsmsgateway.hashtag.hashtags);
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (!description || description.length <= 0 || disabled) {
+      return;
+    }
+
+    dispatch(postHashtagRNC(description));
+  }, [description, disabled]);
 
   const onKeywordAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setKeywordList([...keywordList, keyword]);
@@ -24,10 +33,15 @@ const ScopeAnalysis = ({ keywords, onChanged, disabled }: ScopeAnalysisProps) =>
   };
 
   useEffect(() => {
-    const hashtagAddedKeywords = [...keywords].concat(hashtags.map(h => h.hashtag));
-    onChanged(hashtagAddedKeywords);
+    if (!hashtags || disabled) {
+      return;
+    }
+
+    const generatedTags: Array<string> = hashtags.map(h => h.text);
+    const allKeywords: Array<string> = [...keywords].concat(generatedTags);
+    onChanged(allKeywords);
     setKeyword('');
-  }, [hashtags]);
+  }, [hashtags, disabled]);
 
   useEffect(() => {
     if (keywordList.length !== keywords.length) {
