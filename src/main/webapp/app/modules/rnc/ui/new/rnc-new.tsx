@@ -13,7 +13,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { Enums, GeneralAudit, RawMaterial, Rnc } from '../../models';
-import { getDescriptionByRNCId } from '../../reducers/description.reducer';
+import { getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
 import {
@@ -102,7 +102,7 @@ export const RNCNew = () => {
 
   const [typeBreadcrumbLabel, setTypeBreadcrumbLabel] = useState('');
   const [originBreadcrumbLabel, setOriginBreadcrumbLabel] = useState('');
-  const [descriptionEvidences, setDescriptionEvidences] = useState([]);
+  const [descriptionEvidences, setDescriptionEvidences] = useState<Array<File>>();
   const [stateRnc, setStateRnc] = useState<Rnc>();
 
   const onDescriptionEvidencesChanged = (values: Array<File>) => {
@@ -160,7 +160,7 @@ export const RNCNew = () => {
    NC Description
    */
   const [description, setDescription] = useState<string>('');
-  const [evidences, setEvidences] = useState<Array<string>>(['']);
+  const [evidences, setEvidences] = useState<Array<string>>([]);
   const [requirement, setRequirements] = useState<string>('');
 
   const onDescriptionChanged = (value: string) => {
@@ -409,19 +409,20 @@ export const RNCNew = () => {
           anexos: descriptionEvidences,
         })
       );
-      dispatch(
-        update({
-          ...stateRnc,
-          statusAtual: 'DETALHAMENTO',
-          ncOutros: others,
-          possuiReincidencia: repetition,
-          vinculoDocAnterior: null,
-          vinculoAuditoria: auditLink,
-          vinculoCliente: clientLink ?? rnc?.vinculoCliente,
-          vinculoProduto: rawMaterialLink?.id ?? rnc?.vinculoProduto,
-        })
-      );
     }
+
+    dispatch(
+      update({
+        ...stateRnc,
+        statusAtual: 'DETALHAMENTO',
+        ncOutros: others,
+        possuiReincidencia: repetition,
+        vinculoDocAnterior: null,
+        vinculoAuditoria: auditLink,
+        vinculoCliente: clientLink ?? rnc?.vinculoCliente,
+        vinculoProduto: rawMaterialLink?.id ?? rnc?.vinculoProduto,
+      })
+    );
   };
 
   const goToNextStep = () => {
@@ -459,28 +460,6 @@ export const RNCNew = () => {
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
-  const nonConformityDescription = useAppSelector(state => state.all4qmsmsgateway.description.entity);
-  const nonConformityDescriptions = useAppSelector(state => state.all4qmsmsgateway.description.entities);
-
-  useEffect(() => {
-    if (!nonConformityDescription) {
-      return;
-    }
-
-    setDescription(nonConformityDescription.detalhesNaoConformidade);
-    setRequirements(nonConformityDescription.requisitoDescumprido);
-    setEvidences([nonConformityDescription.evidenciaObjetiva]);
-  }, [nonConformityDescription]);
-
-  useEffect(() => {
-    if (!nonConformityDescriptions || nonConformityDescriptions.length <= 0) {
-      return;
-    }
-
-    setDescription(nonConformityDescriptions[0].detalhesNaoConformidade);
-    setRequirements(nonConformityDescriptions[0].requisitoDescumprido);
-    setEvidences(nonConformityDescriptions.map(ncd => ncd.evidenciaObjetiva));
-  }, [nonConformityDescriptions]);
 
   useEffect(() => {
     if (rnc) {
@@ -503,6 +482,18 @@ export const RNCNew = () => {
 
       if (rnc.statusAtual === 'DETALHAMENTO') {
         setSecondForm(true);
+
+        getDescription(rnc.id).then(response => {
+          const descriptionEntity = response.data;
+
+          if (descriptionEntity) {
+            descriptionEntity.map(e => {
+              onDescriptionChanged(e.detalhesNaoConformidade || '');
+              onRequirementChanged(e.requisitoDescumprido || '');
+              setEvidences([...evidences, e.evidenciaObjetiva]);
+            });
+          }
+        });
 
         if (rnc.origemNC === 'PRODUTO_ACABADO') {
           renderProduct();
