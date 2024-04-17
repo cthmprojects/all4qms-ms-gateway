@@ -17,7 +17,9 @@ import { getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
 import {
+  axiosGetProduct,
   axiosSaveAudit,
+  axiosSaveProduct,
   axiosSaveRawMaterial,
   getById,
   list,
@@ -186,6 +188,8 @@ export const RNCNew = () => {
   const [internalAudit, setInternalAudit] = useState<GeneralAudit | null>(null);
   const [others, setOthers] = useState<string | null>(null);
   const [rawMaterial, setRawMaterial] = useState<RawMaterial | null>(null);
+  const [productComplaint, setProductComplaint] = useState<RawMaterial | null>(null);
+  const [productComplaintFinal, setProductComplaintFinal] = useState<RawMaterial | null>(null);
   const [clientLink, setClientLink] = useState<number | null>(null);
   const [productLink, setProductLink] = useState<number | null>(null);
 
@@ -207,7 +211,6 @@ export const RNCNew = () => {
       const processoNC = parseInt(firstForm.processTarget.value);
       const statusAtual = 'PREENCHIMENTO';
       const tipoNC = firstForm.type.value;
-      console.log(users);
 
       dispatch(
         update({
@@ -351,34 +354,15 @@ export const RNCNew = () => {
     });
   };
 
-  const setProductRegister = async data => {
-    const payload = {
-      batch: data.lot,
-      batchAmount: data.lotQuantity,
-      code: data.productCode,
-      defects: data.defectRate,
-      description: data.productDescription,
-      name: data.name,
-      opNumber: data.opNumber,
-      order: data.requestNumber,
-      rejected: data.rejectedQuantity,
-      samples: data.batchAmount,
-      supplier: data.productCode2,
-      traceability: {
-        date: data.nfDate,
-        deliveredAt: data.deliveryDate,
-        identifier: data.receipt,
-        rncId: rnc.id,
-      },
-    };
+  const onProductComplaintChanged = (productComplaint: RawMaterial): void => {
+    setProductComplaint(productComplaint);
+  };
 
-    // const response = await axiosSaveProduct(payload);
-    // const id = response.data.id;
-    // setProductLink(id);
-
-    const rncId = rnc.id;
-    dispatch(saveProductComplaint({ id: rncId, product: payload }));
-    dispatch(getById(rncId));
+  const setProductRegister = async () => {
+    if (!productComplaint) {
+      return null;
+    }
+    return await axiosSaveProduct(productComplaint, stateRnc.id);
   };
 
   const onOthersChanged = (others: string): void => {
@@ -398,7 +382,7 @@ export const RNCNew = () => {
       case 'MATERIA_PRIMA_INSUMO':
         return <MPRegister onChanged={onRawMaterialChanged} />;
       case 'PRODUTO_ACABADO':
-        return <ProductRegister onProductRegisterChange={setProductRegister} />;
+        return <ProductRegister onProductRegisterChange={onProductComplaintChanged} initialData={productComplaintFinal} />;
       case 'PROCEDIMENTO_OUTROS':
         return <OthersRegister onChanged={onOthersChanged} />;
     }
@@ -409,6 +393,7 @@ export const RNCNew = () => {
     const externalAuditLink = (await saveExternalAudit())?.data;
     const auditLink = internalAuditLink?.id ?? externalAuditLink?.id;
     const rawMaterialLink = (await saveMaterial())?.data;
+    const productComplaint = (await setProductRegister())?.data;
 
     saveOthers();
 
@@ -420,20 +405,20 @@ export const RNCNew = () => {
           details: description,
           evidence: evidence,
           requirement: requirement,
-          rncId: rnc.id,
+          rncId: stateRnc.id,
           anexos: descriptionEvidences,
         })
       );
       dispatch(
         update({
-          ...rnc,
+          ...stateRnc,
           statusAtual: 'DETALHAMENTO',
           ncOutros: others,
           possuiReincidencia: repetition,
           vinculoDocAnterior: null,
           vinculoAuditoria: auditLink,
-          vinculoCliente: clientLink ?? rnc.vinculoCliente,
-          vinculoProduto: rawMaterialLink?.id ?? rnc.vinculoProduto,
+          vinculoCliente: clientLink ?? rnc?.vinculoCliente,
+          vinculoProduto: rawMaterialLink?.id ?? rnc?.vinculoProduto,
         })
       );
     }
@@ -451,11 +436,11 @@ export const RNCNew = () => {
           details: description,
           evidence: evidence,
           requirement: requirement,
-          rncId: rnc.id,
+          rncId: stateRnc.id,
           anexos: descriptionEvidences,
         })
       );
-      dispatch(update({ ...rnc, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })).then(() => {
+      dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })).then(() => {
         navigate('/rnc');
       });
     }
@@ -519,12 +504,44 @@ export const RNCNew = () => {
       if (rnc.statusAtual === 'DETALHAMENTO') {
         setSecondForm(true);
 
-        // getDescriptionById(rnc.id);
-        // TODO: fetch description and other data
-        // Update the state with the data
+        if (rnc.origemNC === 'PRODUTO_ACABADO') {
+          renderProduct();
+        }
       }
     }
   }, [rnc]);
+
+  const renderProduct = async () => {
+    await axiosGetProduct(rnc.vinculoProduto).then(data => {
+      setProductComplaintFinal({
+        code: data.product?.codigoProduto,
+        description: data.product?.nomeProduto,
+        identifier: data.product?.identificador,
+        shift: data.operator?.turnoOperador,
+        line: data.operator?.linhaOperador,
+        operator: data.operator?.nomeOperador,
+        inspector: data.operator?.nomeInspetorOperador,
+        nqa: data.product?.nqa,
+        samples: data.product?.qtdAmostra,
+        defects: data.product?.qtdDefeito,
+        rejectionRate: data.product?.qtdRejeicao,
+        batch: data.product?.lote,
+        batchSize: data.product?.qtdLote,
+        inspectionRule: data.product?.regimeInspecao,
+        invoice: '',
+        requestNumber: data.product?.numPedido,
+        deliveredAt: new Date(),
+        invoiceDate: new Date(),
+        opNumber: 0,
+        traceability: {
+          date: data.traceability.dtNF,
+          deliveredAt: data.traceability.dtEntregaNF,
+          identifier: data.traceability.numNF,
+          rncId: rnc.id,
+        },
+      });
+    });
+  };
 
   useEffect(() => {
     if (users) {
