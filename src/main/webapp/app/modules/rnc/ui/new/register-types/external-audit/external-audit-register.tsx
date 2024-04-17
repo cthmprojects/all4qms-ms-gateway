@@ -19,6 +19,18 @@ export const ExternalAuditRegister = ({ onChanged }: ExternalAuditRegisterProps)
     onChanged(external);
   }, [external]);
 
+  const validateNegativeFields = (data, value) => {
+    if (parseFloat(value) < 0) {
+      return;
+    }
+
+    if (parseFloat(value) > 999999999) {
+      return;
+    }
+
+    setExternal(data);
+  };
+
   return (
     <>
       <Card>
@@ -40,7 +52,7 @@ export const ExternalAuditRegister = ({ onChanged }: ExternalAuditRegisterProps)
             className="form-field m-3"
             type="number"
             value={external.ncNumber}
-            onChange={e => setExternal({ ...external, ncNumber: parseInt(e.target.value) })}
+            onChange={e => validateNegativeFields({ ...external, ncNumber: parseInt(e.target.value) }, e.target.value)}
           />
           <TextField
             fullWidth
@@ -57,7 +69,7 @@ export const ExternalAuditRegister = ({ onChanged }: ExternalAuditRegisterProps)
             type="number"
             className="form-field m-3"
             value={external.reportNumber}
-            onChange={e => setExternal({ ...external, reportNumber: parseInt(e.target.value) })}
+            onChange={e => validateNegativeFields({ ...external, reportNumber: parseInt(e.target.value) }, e.target.value)}
           />
         </div>
       </Card>
