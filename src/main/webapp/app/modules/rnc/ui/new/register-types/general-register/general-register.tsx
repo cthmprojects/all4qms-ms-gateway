@@ -246,28 +246,30 @@ export const GeneralRegister = () => {
       getPlanoByRnc(id).then(res => {
         if (res.length > 0) {
           setShowPlanoAcaoCorretiva(true);
-          res.map((actionPlan: any) => {
-            actionPlan.acoes.map(acao => {
-              setListaAcoesCorretivas([
-                ...listaAcoesCorretivas,
-                {
-                  id: acao?.id,
-                  idPlano: acao?.idPlano,
-                  descricaoAcao: acao?.descricaoAcao,
-                  prazoAcao: new Date(acao?.prazoAcao) || new Date(),
-                  idResponsavelAcao: acao?.idResponsavelAcao,
-                  statusAcao: acao?.statusAcao,
-                  dataVerificao: new Date(acao?.dataVerificao) || new Date(),
-                  idResponsavelVerificaoAcao: acao?.idResponsavelVerificaoAcao,
-                  idAnexosExecucao: acao?.idAnexosExecucao,
-                  dataConclusaoAcao: new Date(acao?.dataConclusaoAcao) || new Date(),
-                  criadoEm: acao?.criadoEm,
-                  atualizadoEm: acao?.atualizadoEm,
-                  planoId: acao?.planoId,
-                },
-              ]);
-            });
-          });
+          const actionPlans = res;
+          const newActions = [];
+          for (let i = 0; i < actionPlans.length; i++) {
+            const actions = actionPlans[i].acoes;
+            for (let j = 0; j < actions.length; j++) {
+              const action = actions[j];
+              newActions.push({
+                id: action?.id,
+                idPlano: action?.idPlano,
+                descricaoAcao: action?.descricaoAcao,
+                prazoAcao: new Date(action?.prazoAcao) || new Date(),
+                idResponsavelAcao: action?.idResponsavelAcao,
+                statusAcao: action?.statusAcao,
+                dataVerificao: new Date(action?.dataVerificao) || new Date(),
+                idResponsavelVerificaoAcao: action?.idResponsavelVerificaoAcao,
+                idAnexosExecucao: action?.idAnexosExecucao,
+                dataConclusaoAcao: new Date(action?.dataConclusaoAcao) || new Date(),
+                criadoEm: action?.criadoEm,
+                atualizadoEm: action?.atualizadoEm,
+                planoId: action?.planoId,
+              });
+            }
+          }
+          setListaAcoesCorretivas(newActions);
         }
       });
     }
@@ -375,10 +377,11 @@ export const GeneralRegister = () => {
 
   const onActionPlansUpdated = (actionPlans: Array<ActionPlan>): void => {
     setListaAcoesCorretivas(actionPlans);
-    console.log(listaAcoesCorretivas);
   };
 
   const renderListaAcoesCorretivas = () => {
+    console.log('lista', listaAcoesCorretivas);
+
     return (
       <PlannedActions
         actionPlans={listaAcoesCorretivas}

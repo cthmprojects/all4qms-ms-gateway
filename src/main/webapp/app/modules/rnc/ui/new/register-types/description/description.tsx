@@ -1,5 +1,4 @@
 import { Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
-import { getDescriptionByRNCId } from '../../../../reducers/description.reducer';
 import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import React, { useEffect, useRef, useState } from 'react';
@@ -30,12 +29,6 @@ export const DescriptionRnc = ({
   const [descFiles, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    if (rncId) {
-      dispatch(getDescriptionByRNCId(rncId));
-    }
-  }, []);
-
   const onAddEvidence = () => {
     if (!description || !requirement || !evidences || !evidences[0]) return;
 
@@ -52,7 +45,9 @@ export const DescriptionRnc = ({
 
   const onFileChanged = event => {
     const files = event.target.files;
-    setFiles([...descFiles, ...files]);
+    if (!files) return;
+
+    setFiles([...descFiles, files]);
     onDescriptionsEvidencesChanged([...descFiles, files]);
   };
 
@@ -73,19 +68,56 @@ export const DescriptionRnc = ({
     document.body.removeChild(a);
   };
 
-  const descriptionEntity = useAppSelector(state => state.all4qmsmsgateway.description.entity);
+  const renderEvidences = () => {
+    if (evidences.length > 0) {
+      console.log(evidences);
 
-  useEffect(() => {
-    onDescriptionChanged(descriptionEntity?.detalhesNaoConformidade);
-    onRequirementChanged(descriptionEntity?.requisitoDescumprido);
-    // onDescriptionsEvidencesChanged(descriptionEntity?.anexos)
-
-    if (descriptionEntity?.anexos) {
-      descriptionEntity.anexos.map(e => {
-        onEvidencesChanged([...evidences, e.nomeArquivoFisico]);
-      });
+      return (
+        <>
+          {evidences.map((evidencia, index) => (
+            <div key={index} className="mt-2 mb-2" style={{ position: 'relative' }}>
+              <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <TextField
+                  label={`Evidência objetiva ${index + 1}`}
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  value={evidencia}
+                  onChange={event => {
+                    const newEvidences = [...evidences];
+                    newEvidences[index] = event.target.value;
+                    onEvidencesChanged(newEvidences);
+                  }}
+                />
+                {index > 0 && (
+                  <IconButton sx={{ marginTop: '8px', marginLeft: '8px' }} onClick={() => onRemoveEvidence(index)}>
+                    <DeleteOutlined />
+                  </IconButton>
+                )}
+              </div>
+            </div>
+          ))}
+        </>
+      );
+    } else {
+      return (
+        <>
+          <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <TextField
+              label={`Evidência objetiva 1`}
+              fullWidth
+              sx={{ mt: 2 }}
+              value={evidences[0]}
+              onChange={event => {
+                onEvidencesChanged([event.target.value]);
+              }}
+            />
+          </div>
+        </>
+      );
     }
-  }, [descriptionEntity]);
+  };
 
   return (
     <>
@@ -135,29 +167,7 @@ export const DescriptionRnc = ({
           onChange={event => onRequirementChanged(event.target.value)}
         />
 
-        {evidences.map((evidencia, index) => (
-          <div key={index} className="mt-2 mb-2" style={{ position: 'relative' }}>
-            <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <TextField
-                label={`Evidência objetiva ${index + 1}`}
-                fullWidth
-                sx={{ mt: 2 }}
-                value={evidencia}
-                onChange={event => {
-                  const newEvidences = [...evidences];
-                  newEvidences[index] = event.target.value;
-                  onEvidencesChanged(newEvidences);
-                }}
-              />
-              {index > 0 && (
-                <IconButton sx={{ marginTop: '8px', marginLeft: '8px' }} onClick={() => onRemoveEvidence(index)}>
-                  <DeleteOutlined />
-                </IconButton>
-              )}
-            </div>
-          </div>
-        ))}
+        {renderEvidences()}
 
         {descFiles.length > 0 && (
           <div className="mt-2 mb-2">

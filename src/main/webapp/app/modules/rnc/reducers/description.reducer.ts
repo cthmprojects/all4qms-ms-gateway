@@ -25,6 +25,11 @@ export const getDescriptionByRNCId = createAsyncThunk('description/rnc', async (
   return response;
 });
 
+export const getDescription = async (id: string | number) => {
+  const response = await axios.get(`${apiUrl}/list/${id}`);
+  return response;
+};
+
 const rncDescriptionSlice = createEntitySlice({
   name: 'description',
   initialState,

@@ -126,7 +126,7 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
             />
             <TextField
               value={rawMaterial.batchSize}
-              onChange={e => setRawMaterial({ ...rawMaterial, batchSize: parseInt(e.target.value) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, batchSize: parseInt(e.target.value.slice(0, 10), 10) })}
               label="Quantidade do Lote"
               name="lot-quantity"
               className="m-2"
@@ -155,7 +155,7 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
             />
             <TextField
               value={rawMaterial.samples}
-              onChange={e => setRawMaterial({ ...rawMaterial, samples: parseInt(e.target.value) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, samples: parseInt(e.target.value.slice(0, 10), 10) })}
               label="Número de amostras"
               type="number"
               name="number-samples"
@@ -164,7 +164,7 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
             />
             <TextField
               value={rawMaterial.defects}
-              onChange={e => setRawMaterial({ ...rawMaterial, defects: parseInt(e.target.value) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, defects: parseInt(e.target.value.slice(0, 10), 10) })}
               label="Número de defeitos"
               name="number-defects"
               type="number"
@@ -173,7 +173,7 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
             />
             <TextField
               value={rawMaterial.rejectionRate}
-              onChange={e => setRawMaterial({ ...rawMaterial, rejectionRate: parseInt(e.target.value) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, rejectionRate: parseInt(e.target.value.slice(0, 10), 10) })}
               label="% Rejeição"
               name="rejection-rate"
               type="number"
@@ -218,7 +218,7 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
             </FormControl>
             <TextField
               value={rawMaterial.requestNumber}
-              onChange={e => setRawMaterial({ ...rawMaterial, requestNumber: parseInt(e.target.value) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, requestNumber: parseInt(e.target.value.slice(0, 10), 10) })}
               label="Número do pedido"
               type="number"
               name="request-number"
@@ -227,7 +227,7 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
             />
             <TextField
               value={rawMaterial.opNumber}
-              onChange={e => setRawMaterial({ ...rawMaterial, opNumber: parseInt(e.target.value) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, opNumber: parseInt(e.target.value.slice(0, 10), 10) })}
               label="Número OP"
               type="number"
               name="op-number"

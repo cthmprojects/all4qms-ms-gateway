@@ -85,6 +85,12 @@ export const ClientRegister = ({ onClientChange }) => {
     }
   };
 
+  const validateIntLimit = (data, value) => {
+    if (value.target.length > 10) {
+      return;
+    }
+  };
+
   return (
     <>
       <Card>
@@ -137,7 +143,9 @@ export const ClientRegister = ({ onClientChange }) => {
             <TextField
               error={clientForm.lotQuantity.error}
               value={clientForm.lotQuantity.value}
-              onChange={e => setClientForm({ ...clientForm, lotQuantity: { value: e.target.value, error: clientForm.lotQuantity.error } })}
+              onChange={e =>
+                setClientForm({ ...clientForm, lotQuantity: { value: e.target.value.slice(0, 10), error: clientForm.lotQuantity.error } })
+              }
               label="Quantidade do lote"
               name="lot-quantity"
               type="number"
@@ -148,7 +156,10 @@ export const ClientRegister = ({ onClientChange }) => {
               error={clientForm.rejectedQuantity.error}
               value={clientForm.rejectedQuantity.value}
               onChange={e =>
-                setClientForm({ ...clientForm, rejectedQuantity: { value: e.target.value, error: clientForm.rejectedQuantity.error } })
+                setClientForm({
+                  ...clientForm,
+                  rejectedQuantity: { value: e.target.value.slice(0, 10), error: clientForm.rejectedQuantity.error },
+                })
               }
               label="Quantidade rejeitada"
               name="rejected-quantity"
@@ -159,7 +170,9 @@ export const ClientRegister = ({ onClientChange }) => {
             <TextField
               error={clientForm.defectRate.error}
               value={clientForm.defectRate.value}
-              onChange={e => setClientForm({ ...clientForm, defectRate: { value: e.target.value, error: clientForm.defectRate.error } })}
+              onChange={e =>
+                setClientForm({ ...clientForm, defectRate: { value: e.target.value.slice(0, 10), error: clientForm.defectRate.error } })
+              }
               label="% defeito"
               name="defect-rate"
               className="m-2"
@@ -216,7 +229,10 @@ export const ClientRegister = ({ onClientChange }) => {
               value={clientForm.requestNumber.value}
               error={clientForm.requestNumber.error}
               onChange={e =>
-                setClientForm({ ...clientForm, requestNumber: { value: e.target.value, error: clientForm.requestNumber.error } })
+                setClientForm({
+                  ...clientForm,
+                  requestNumber: { value: e.target.value.slice(0, 10), error: clientForm.requestNumber.error },
+                })
               }
               label="Número do pedido"
               name="request-number"
@@ -227,7 +243,9 @@ export const ClientRegister = ({ onClientChange }) => {
             <TextField
               value={clientForm.opNumber.value}
               error={clientForm.opNumber.error}
-              onChange={e => setClientForm({ ...clientForm, opNumber: { value: e.target.value, error: clientForm.opNumber.error } })}
+              onChange={e =>
+                setClientForm({ ...clientForm, opNumber: { value: e.target.value.slice(0, 10), error: clientForm.opNumber.error } })
+              }
               label="Número OP"
               name="op-number"
               type="number"
