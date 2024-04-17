@@ -64,7 +64,7 @@ interface ListParams {
 
 interface ProductComplaint {
   id: number;
-  product: RncProduct;
+  product: RawMaterial;
 }
 
 interface ClientComplaint {
@@ -217,7 +217,7 @@ export const saveOther = createAsyncThunk('rnc/other/save', async () => {
   return response;
 });
 
-export const saveProduct = createAsyncThunk('rnc/product/save', async (product: RncProduct) => {
+export const saveProduct = createAsyncThunk('rnc/product/save', async (product: RawMaterial) => {
   return await axiosSaveProduct(product);
 });
 
@@ -225,32 +225,49 @@ export const saveProductComplaint = createAsyncThunk('rnc/product/save/rnc', asy
   return await axiosSaveProduct(product, id);
 });
 
-export const axiosSaveProduct = async (product: RncProduct, id?: number) => {
+export const axiosSaveProduct = async (product: RawMaterial, id?: number) => {
+  const url = id ? `${productApiUrl}/${id}` : productApiUrl;
+
   const traceabilityResponse = await axios.post(traceabilityApiUrl, {
     dtEntregaNF: product.traceability.deliveredAt,
     numNF: product.traceability.identifier,
     dtNF: product.traceability.date,
-    idNaoConformidade: product.traceability.rncId,
+    idNaoConformidade: id,
   });
 
-  const url = id ? `${productApiUrl}/${id}` : productApiUrl;
+  const operatorResponse = await axios.post('services/all4qmsmsrnc/api/operador', {
+    nomeOperador: product.operator,
+    linhaOperador: product.line,
+    turnoOperador: product.shift,
+    nomeInspetorOperador: product.inspector,
+  });
 
   const response = await axios.post(url, {
     codigoProduto: product.code,
-    nomeProduto: product.name,
-    nomeFornecedor: product.supplier,
-    lote: product.batch,
-    qtdLote: product.batchAmount,
-    nqa: product.description,
+    nomeProduto: product.description,
+    idOperadorOcorrencia: operatorResponse.data?.id,
+    nqa: product.nqa,
     qtdAmostra: product.samples,
     qtdDefeito: product.defects,
-    qtdRejeicao: product.rejected,
-    numPedido: product.order,
+    qtdRejeicao: product.defects / product.samples,
+    lote: product.batch,
+    qtdLote: product.batchSize,
+    regimeInspecao: product.inspectionRule,
+    numPedido: product.requestNumber,
     numOP: product.opNumber,
+    identificador: product.identifier,
     idRastreabilidadesRegistro: traceabilityResponse.data.id,
   });
 
   return response;
+};
+
+export const axiosGetProduct = async (productId: number) => {
+  const product = await axios.get(`${productApiUrl}/${productId}`);
+  const traceability = await axios.get(`${traceabilityApiUrl}/${product.data.idRastreabilidadesRegistro}`);
+  const operator = await axios.get(`services/all4qmsmsrnc/api/operador/${product.data.idOperadorOcorrencia}`);
+
+  return { product: product.data, traceability: traceability.data, operator: operator.data };
 };
 
 export const saveRawMaterial = createAsyncThunk('rnc/raw-material/save', async (rawMaterial: RawMaterial) => {
