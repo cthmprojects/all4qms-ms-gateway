@@ -3,8 +3,8 @@ import axios from 'axios';
 import { Hashtag } from '../models';
 
 // Constants
-const hashtagApiUrl = 'services/all4qmsmsrnc/api/gerar-hashtag';
-const similaridadeApiUrl = 'services/all4qmsmsrnc/api/similaridade';
+const hashtagApiUrl = 'services/all4qmsmsrnc/api/ia/gerar-hashtag';
+const similaridadeApiUrl = 'services/all4qmsmsrnc/api/ia/similaridade';
 
 // Initial State
 type InitialState = {
