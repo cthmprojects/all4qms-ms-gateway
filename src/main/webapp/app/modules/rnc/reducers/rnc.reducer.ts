@@ -320,8 +320,13 @@ export const saveDescription = createAsyncThunk('rnc/description/save', async (d
   formData.append('naoConformidade', description.rncId.toString());
 
   // Convert the array of File objects to a Blob object
-  const blobAnexos = new Blob(description.anexos);
-  formData.append('anexos', blobAnexos);
+
+  if (description.anexos) {
+    const blobAnexos = new Blob(description.anexos);
+    formData.append('anexos', blobAnexos);
+  } else {
+    formData.append('anexos', new Blob());
+  }
 
   const response = await axios.post(descriptionApiUrl, formData, {
     headers: {

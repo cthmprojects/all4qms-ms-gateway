@@ -12,7 +12,7 @@ import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { Enums, GeneralAudit, RawMaterial, Rnc } from '../../models';
+import { DescriptionResponse, Enums, GeneralAudit, RawMaterial, Rnc } from '../../models';
 import { getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
@@ -52,11 +52,6 @@ export const RNCNew = () => {
 
     if (id) {
       dispatch(getById(parseInt(id)));
-      dispatch(getDescriptionByRNCId(id));
-    } else {
-      setDescription('');
-      setRequirements('');
-      setEvidences(['']);
     }
 
     getProcesses().then(data => {
@@ -159,20 +154,10 @@ export const RNCNew = () => {
   /*
    NC Description
    */
-  const [description, setDescription] = useState<string>('');
-  const [evidences, setEvidences] = useState<Array<string>>([]);
-  const [requirement, setRequirements] = useState<string>('');
+  const [description, setDescription] = useState<Array<DescriptionResponse>>();
 
-  const onDescriptionChanged = (value: string) => {
+  const onDescriptionChanged = value => {
     setDescription(value);
-  };
-
-  const onEvidencesChanged = (values: Array<string>) => {
-    setEvidences(values);
-  };
-
-  const onRequirementChanged = (value: string) => {
-    setRequirements(value);
   };
 
   /*
@@ -398,19 +383,19 @@ export const RNCNew = () => {
 
     saveOthers();
 
-    for (let i = 0; i < evidences.length; i++) {
-      const evidence = evidences[i];
+    // for (let i = 0; i < evidences.length; i++) {
+    //   const evidence = evidences[i];
 
-      dispatch(
-        saveDescription({
-          details: description,
-          evidence: evidence,
-          requirement: requirement,
-          rncId: stateRnc.id,
-          anexos: descriptionEvidences,
-        })
-      );
-    }
+    //   dispatch(
+    //     saveDescription({
+    //       details: description,
+    //       evidence: evidence,
+    //       requirement: requirement,
+    //       rncId: stateRnc.id,
+    //       anexos: descriptionEvidences,
+    //     })
+    //   );
+    // }
 
     dispatch(
       update({
@@ -430,22 +415,22 @@ export const RNCNew = () => {
     saveInternalAudit();
     saveExternalAudit();
 
-    for (let i = 0; i < evidences.length; i++) {
-      const evidence = evidences[i];
+    // for (let i = 0; i < evidences.length; i++) {
+    //   const evidence = evidences[i];
 
-      dispatch(
-        saveDescription({
-          details: description,
-          evidence: evidence,
-          requirement: requirement,
-          rncId: stateRnc.id,
-          anexos: descriptionEvidences,
-        })
-      );
-      dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })).then(() => {
-        navigate('/rnc');
-      });
-    }
+    //   dispatch(
+    //     saveDescription({
+    //       details: description,
+    //       evidence: evidence,
+    //       requirement: requirement,
+    //       rncId: stateRnc.id,
+    //       anexos: descriptionEvidences,
+    //     })
+    //   );
+    // }
+    dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })).then(() => {
+      navigate('/rnc');
+    });
   };
 
   const filterUser = (login: string) => {
@@ -483,18 +468,6 @@ export const RNCNew = () => {
 
       if (rnc.statusAtual === 'DETALHAMENTO') {
         setSecondForm(true);
-
-        getDescription(rnc.id).then(response => {
-          const descriptionEntity = response.data;
-
-          if (descriptionEntity) {
-            descriptionEntity.map(e => {
-              onDescriptionChanged(e.detalhesNaoConformidade || '');
-              onRequirementChanged(e.requisitoDescumprido || '');
-              setEvidences([...evidences, e.evidenciaObjetiva]);
-            });
-          }
-        });
 
         if (rnc.origemNC === 'PRODUTO_ACABADO') {
           renderProduct();
@@ -736,16 +709,7 @@ export const RNCNew = () => {
             <>
               <Row className="ms-3 me-3 mt-3">{renderComponents()}</Row>
               <Row className="ms-3 me-3 mt-3">
-                <DescriptionRnc
-                  description={description}
-                  evidences={evidences}
-                  onDescriptionChanged={onDescriptionChanged}
-                  onEvidencesChanged={onEvidencesChanged}
-                  onRequirementChanged={onRequirementChanged}
-                  onDescriptionsEvidencesChanged={onDescriptionEvidencesChanged}
-                  requirement={requirement}
-                  rncId={id}
-                />
+                <DescriptionRnc description={description} onDescriptionChanged={onDescriptionChanged} rncId={id} />
               </Row>
               {/* <Row className="ms-3 me-3 mt-3" fullWidth>
                 <RepetitionRnc
