@@ -20,7 +20,7 @@ const initialState: InitialState = {
 // Actions
 
 export const postHashtagRNC = createAsyncThunk('hastags-ia-rnc', async (body: string) => {
-  return axios.post<string>(hashtagApiUrl, body);
+  return axios.post<Array<Hashtag>>(hashtagApiUrl, body);
 });
 
 const HashtagSlice = createSlice({
@@ -38,7 +38,7 @@ const HashtagSlice = createSlice({
         return {
           ...state,
           loading: false,
-          hashtags: JSON.parse(data),
+          hashtags: data,
         };
       });
   },
