@@ -524,7 +524,7 @@ export const RNCNew = () => {
         requestNumber: data.product?.numPedido,
         deliveredAt: new Date(),
         invoiceDate: new Date(),
-        opNumber: 0,
+        opNumber: data.product?.numOP,
         traceability: {
           date: data.traceability.dtNF,
           deliveredAt: data.traceability.dtEntregaNF,
