@@ -30,7 +30,8 @@ services:
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
-      - JHIPSTER_SLEEP=65 # gives time for other services to boot before the application
+      - IA-HOST=https://all4qms-ia.cthmprojetos.com
+      #- JHIPSTER_SLEEP=65 # gives time for other services to boot before the application
   all4qmsmsgateway-postgresql:
     image: postgres:14.5
     # volumes:
