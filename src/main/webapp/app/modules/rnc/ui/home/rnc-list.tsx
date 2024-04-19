@@ -23,6 +23,7 @@ import {
   TableHead,
   TableRow,
   Tabs,
+  TextField,
   Typography,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
@@ -39,6 +40,7 @@ import { reset as DescriptionResetEntity } from '../../reducers/description.redu
 import MenuOptions from '../components/table-menu/table-menu-options';
 import { getUsers as getManagementUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import './rnc.css';
+import { height } from '@fortawesome/free-solid-svg-icons/faCogs';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -81,7 +83,7 @@ const RncList = ({}) => {
     dtIni: new Date(),
     dtFim: new Date(),
     statusAtual: '',
-    processoNC: 0,
+    processoNC: '',
     tipoNC: '',
   });
 
@@ -94,7 +96,7 @@ const RncList = ({}) => {
         dtIni: dtIni.toISOString(),
         dtFim: dtFim.toISOString(),
         statusAtual,
-        processoNC,
+        processoNC: parseInt(processoNC as string, 10),
         tipoNC,
       })
     );
@@ -266,7 +268,6 @@ const RncList = ({}) => {
           >
             Novo Registro
           </Button>
-
           <FormControl className="me-2">
             <DatePicker
               selected={filters.dtIni}
@@ -292,26 +293,28 @@ const RncList = ({}) => {
             </label>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
-            <InputLabel>Status</InputLabel>
+            <InputLabel id="status">Status</InputLabel>
             <Select
               label="Selecione"
-              name=""
+              labelId="status"
               value={filters.statusAtual}
               onChange={event => setFilters({ ...filters, statusAtual: event.target.value as string })}
             >
-              <MenuItem value="FINALIZADO">Finalizado</MenuItem>
-              <MenuItem value="PREENCHIMENTO">Preenhimento</MenuItem>
+              <MenuItem>Todos</MenuItem>
+              <MenuItem value="LEVANTAMENTO">Levantamento</MenuItem>
+              <MenuItem value="ELABORACAO">Elaboração</MenuItem>
               <MenuItem value="OUTRO">Outro</MenuItem>
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
-            <InputLabel>Processo</InputLabel>
+            <InputLabel id="processo">Processo</InputLabel>
             <Select
               label="Selecione"
-              name=""
+              labelId="processo"
               value={filters.processoNC}
-              onChange={event => setFilters({ ...filters, processoNC: parseInt(event.target.value as string, 10) })}
+              onChange={event => setFilters({ ...filters, processoNC: event.target.value as string })}
             >
+              <MenuItem>Todos</MenuItem>
               <MenuItem value={1}>Produção</MenuItem>
               <MenuItem value={2}>Outro</MenuItem>
             </Select>
@@ -324,33 +327,30 @@ const RncList = ({}) => {
               value={filters.tipoNC}
               onChange={event => setFilters({ ...filters, tipoNC: event.target.value })}
             >
+              <MenuItem value="">Todos</MenuItem>
               <MenuItem value="NC">NC</MenuItem>
               <MenuItem value="OM">OM</MenuItem>
             </Select>
           </FormControl>
-
-          <Button
-            variant="contained"
-            className="primary-button me-2 rnc-list-form-field"
-            style={{ height: '49px' }}
-            onClick={handleApplyFilters}
-          >
-            Aplicar Filtros
-          </Button>
-          <FormControl id="search-filter">
-            <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
-              Pesquisar
-            </InputLabel>
-            <OutlinedInput
-              id="outlined-adornment-search"
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton aria-label="toggle password visibility" edge="end">
+          <FormControl className="rnc-list-form-field me-2">
+            <TextField
+              style={{ height: '100px' }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
                     <Search />
-                  </IconButton>
-                </InputAdornment>
-              }
+                    Pesquisar
+                  </InputAdornment>
+                ),
+              }}
             />
+          </FormControl>
+          <FormControl>
+            <Button variant="contained" style={{ height: '49px' }} onClick={handleApplyFilters}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Search />
+              </div>
+            </Button>
           </FormControl>
         </div>
 

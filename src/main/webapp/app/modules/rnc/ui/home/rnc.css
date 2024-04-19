@@ -1,7 +1,3 @@
-#outlined-adornment-search {
-  height: 36px !important;
-}
-
 #search-filter {
   /* 200px search buttons + 8px margin */
   width: calc(100% / 7) !important;
@@ -18,7 +14,7 @@
 
 .rnc-list-form-field {
   width: 100%;
-  max-width: calc(100% / 7 - 0.5rem);
+  max-width: calc(100% / 8 - 0.5rem);
   min-width: 150px !important;
 }
 
