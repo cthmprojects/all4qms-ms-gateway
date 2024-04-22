@@ -7,6 +7,7 @@ import hashtag from './reducers/hashtag.reducer';
 import approval from './reducers/approval.reducer';
 import plan from './reducers/plan.reducer';
 import decision from './reducers/decision.reducer';
+import nonConformities from './reducers/non-conformity.reducer';
 
 const rncReducers = {
   enums,
@@ -18,6 +19,7 @@ const rncReducers = {
   approval,
   plan,
   decision,
+  nonConformities,
 };
 
 export default rncReducers;

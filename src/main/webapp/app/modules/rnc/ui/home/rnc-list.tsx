@@ -27,17 +27,18 @@ import {
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsers as getManagementUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
-import { Enums, Rnc } from '../../models';
-import { listEnums } from '../../reducers/enums.reducer';
-import { list, listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
+import { Enums, ExtendedNc, Rnc } from '../../models';
 import { reset as DescriptionResetEntity } from '../../reducers/description.reducer';
+import { listEnums } from '../../reducers/enums.reducer';
+import { listNonConformities } from '../../reducers/non-conformity.reducer';
+import { list, listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
-import { getUsers as getManagementUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import './rnc.css';
 
 interface TabPanelProps {
@@ -98,6 +99,17 @@ const RncList = ({}) => {
         tipoNC,
       })
     );
+    dispatch(
+      listNonConformities({
+        page: 0,
+        size: 20,
+        dtIni: dtIni.toISOString(),
+        dtFim: dtFim.toISOString(),
+        statusAtual,
+        processoNC,
+        tipoNC,
+      })
+    );
   };
 
   // Dispatcher
@@ -107,12 +119,16 @@ const RncList = ({}) => {
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
   const totalCount: number = useAppSelector(state => state.all4qmsmsgateway.rnc.totalItems);
   const loading: boolean = useAppSelector(state => state.all4qmsmsgateway.rnc.loading);
+  const nonConformities: Array<ExtendedNc> = useAppSelector(state => state.all4qmsmsgateway.nonConformities.entities);
+  const nonConformitiesCount: number = useAppSelector(state => state.all4qmsmsgateway.nonConformities.totalItems);
+  const loadingNonConformities: boolean = useAppSelector(state => state.all4qmsmsgateway.nonConformities.loading);
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
   const managementUsers = useAppSelector(state => state.userManagement.users);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
 
   useEffect(() => {
     dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
+    dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
     dispatch(getUsers({}));
     dispatch(listEnums());
     dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -120,6 +136,7 @@ const RncList = ({}) => {
 
   useEffect(() => {
     dispatch(list({ page: page - 1, size: 20 }));
+    dispatch(listNonConformities({ page: page - 1, size: 20 }));
   }, [page]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -178,7 +195,7 @@ const RncList = ({}) => {
   };
 
   const renderTable = () => {
-    if (loading) {
+    if (loadingNonConformities) {
       return (
         <Row className="justify-content-center mt-5">
           <span style={{ color: '#7d7d7d' }}>Carregando...</span>
@@ -186,7 +203,7 @@ const RncList = ({}) => {
       );
     }
 
-    if (rncs?.length > 0) {
+    if (nonConformities?.length > 0) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -199,28 +216,54 @@ const RncList = ({}) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rncs?.map(rnc => {
-                  const { criadoEm, dtNC, id, idEmissorNC, idReceptorNC, idUsuarioAtual, numNC, aprovacao } = rnc;
+                {nonConformities?.map(rnc => {
+                  const { nc, dados } = rnc;
+                  const {
+                    dtNC,
+                    idEmissorNC,
+                    idReceptorNC,
+                    idUsuarioAtual,
+                    origemNC,
+                    possuiReincidencia,
+                    processoEmissor,
+                    processoNC,
+                    statusAtual,
+                    tipoNC,
+                    acoesImediatas,
+                    aprovacao,
+                    aprovacaoNC,
+                    atualizadoEm,
+                    criadoEm,
+                    decisaoNC,
+                    id,
+                    ncOutros,
+                    numNC,
+                    vinculoAuditoria,
+                    vinculoCliente,
+                    vinculoDocAnterior,
+                    vinculoProduto,
+                  } = nc;
+                  const { descricao, eficacia, emissor, fechamento, idNc, responsavel, verificacao } = dados;
 
-                  const emissor = filterUser(idEmissorNC);
-                  const receptor = filterUser(idReceptorNC);
+                  const emissorNc = filterUser(idEmissorNC);
+                  const receptorNc = filterUser(idReceptorNC);
                   const usuarioAtual = filterUser(idUsuarioAtual);
 
                   return (
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
-                      <TableCell>{emissor?.nome || '-'}</TableCell>
-                      <TableCell> {'-'}</TableCell>
+                      <TableCell>{emissorNc?.nome || '-'}</TableCell>
+                      <TableCell> {descricao ?? '-'}</TableCell>
                       <TableCell>{usuarioAtual?.nome || '-'}</TableCell>
                       {/* <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell> */}
                       <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
-                      <TableCell> - </TableCell>
-                      <TableCell> - </TableCell>
-                      <TableCell>{rnc.statusAtual}</TableCell>
+                      <TableCell> {eficacia ? formatDateToString(new Date(eficacia)) : '-'} </TableCell>
+                      <TableCell> {verificacao ? formatDateToString(new Date(verificacao)) : '-'} </TableCell>
+                      <TableCell>{statusAtual}</TableCell>
                       <TableCell>
-                        <MenuOptions rnc={rnc} userId={userId} userRole={userRole} reload={reloadInfo} />
+                        <MenuOptions rnc={nc} userId={userId} userRole={userRole} reload={reloadInfo} />
                       </TableCell>
                     </TableRow>
                   );
@@ -230,7 +273,7 @@ const RncList = ({}) => {
           </TableContainer>
           <Row className="justify-content-center mt-5">
             <Pagination
-              count={Math.floor(totalCount / 20) + (totalCount % 20 > 0 ? 1 : 0)}
+              count={Math.floor(nonConformitiesCount / 20) + (nonConformitiesCount % 20 > 0 ? 1 : 0)}
               onChange={onPageChanged}
               page={page}
               style={{ width: '370px' }}

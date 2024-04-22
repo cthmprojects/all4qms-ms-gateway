@@ -39,3 +39,18 @@ export type RNC = {
   fechamento: Date;
   status: string;
 };
+
+export type RncData = {
+  idNc: number;
+  descricao: string;
+  emissor: string;
+  responsavel: string;
+  verificacao: Date;
+  eficacia: Date;
+  fechamento: Date;
+};
+
+export type ExtendedNc = {
+  nc: Rnc;
+  dados: RncData;
+};
