@@ -137,6 +137,50 @@ export const DescriptionRnc = ({ description, rncId, onDescriptionChanged }: Rnc
   //   newEvidences.splice(index, 1);
   //   onEvidencesChanged(newEvidences);
   // };
+  const onRequisitoDescumpridoChanged = (value: string) => {
+    setRequisitoDescumprido(value);
+
+    if (description) {
+      let descriptionList = description;
+      let newDescription: DescriptionResponse = {
+        id: description[0].id,
+        detalhesNaoConformidade: description[0].detalhesNaoConformidade,
+        requisitoDescumprido: value,
+        evidenciaObjetiva: description[0].evidenciaObjetiva,
+        idNaoConformidade: description[0].idNaoConformidade,
+        anexos: description[0].anexos,
+        anexosRequest: description[0].anexosRequest,
+      };
+
+      descriptionList[0] = newDescription;
+
+      onDescriptionChanged(descriptionList);
+    } else {
+      let newDescription: DescriptionResponse = {
+        id: 0,
+        detalhesNaoConformidade: '',
+        requisitoDescumprido: value,
+        evidenciaObjetiva: '',
+        idNaoConformidade: parseInt(rncId),
+      };
+
+      onDescriptionChanged([newDescription]);
+    }
+  };
+
+  // const onAddEvidence = () => {
+  //   if (!description || !requirement || !evidences || !evidences[0]) return;
+
+  //   onEvidencesChanged([...evidences, '']);
+  // };
+
+  // const onRemoveEvidence = (index: number) => {
+  //   if (index === 0 || evidences.length === 1) return;
+
+  //   const newEvidences = [...evidences];
+  //   newEvidences.splice(index, 1);
+  //   onEvidencesChanged(newEvidences);
+  // };
 
   const onFileChanged = event => {
     const files = event.target.files;
@@ -228,7 +272,7 @@ export const DescriptionRnc = ({ description, rncId, onDescriptionChanged }: Rnc
                 color="primary"
                 aria-label="add"
                 size="medium"
-                onClick={onAddEvidence}
+                // onClick={onAddEvidence}
               >
                 <Add />
               </Fab>
