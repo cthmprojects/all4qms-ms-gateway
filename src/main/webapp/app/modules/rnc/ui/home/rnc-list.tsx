@@ -92,8 +92,8 @@ const RncList = ({}) => {
       list({
         page: 0,
         size: 20,
-        dtIni: dtIni.toISOString(),
-        dtFim: dtFim.toISOString(),
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
         statusAtual,
         processoNC,
         tipoNC,
@@ -103,8 +103,8 @@ const RncList = ({}) => {
       listNonConformities({
         page: 0,
         size: 20,
-        dtIni: dtIni.toISOString(),
-        dtFim: dtFim.toISOString(),
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
         statusAtual,
         processoNC,
         tipoNC,
@@ -318,6 +318,7 @@ const RncList = ({}) => {
               className="rnc-list-date-picker mt-4"
               locale="pt-BR"
               id="start-date-picker"
+              placeholderText="Data de início"
             />
             <label htmlFor="start-date-picker" className="rnc-list-date-label">
               Início
@@ -329,6 +330,7 @@ const RncList = ({}) => {
               onChange={date => setFilters({ ...filters, dtFim: date })}
               dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
+              placeholderText="Data de fim"
             />
             <label htmlFor="" className="rnc-list-date-label">
               Fim
