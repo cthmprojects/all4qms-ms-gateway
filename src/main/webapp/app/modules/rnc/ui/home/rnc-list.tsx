@@ -79,11 +79,11 @@ const RncList = ({}) => {
   const [page, setPage] = useState<number>(1);
 
   const [filters, setFilters] = useState({
-    dtIni: new Date(),
-    dtFim: new Date(),
-    statusAtual: '',
-    processoNC: 0,
-    tipoNC: '',
+    dtIni: null,
+    dtFim: null,
+    statusAtual: null,
+    processoNC: null,
+    tipoNC: null,
   });
 
   const handleApplyFilters = () => {
@@ -359,7 +359,7 @@ const RncList = ({}) => {
               <MenuItem value={2}>Outro</MenuItem>
             </Select>
           </FormControl>
-          <FormControl className="rnc-list-form-field me-2">
+          <FormControl className="rnc-list-form-field me-2" style={{ width: '70px' }}>
             <InputLabel>Tipo</InputLabel>
             <Select
               label="Selecione"
@@ -371,30 +371,21 @@ const RncList = ({}) => {
               <MenuItem value="OM">OM</MenuItem>
             </Select>
           </FormControl>
+          <FormControl id="search-filter">
+            <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
+              Pesquisar por Descrição
+            </InputLabel>
+            <OutlinedInput id="outlined-adornment-search" endAdornment={<InputAdornment position="end"></InputAdornment>} />
+          </FormControl>
 
           <Button
             variant="contained"
-            className="primary-button me-2 rnc-list-form-field"
-            style={{ height: '49px' }}
+            className="update-button me-2 rnc-list-form-field"
+            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
             onClick={handleApplyFilters}
           >
-            Aplicar Filtros
+            Pesquisar
           </Button>
-          <FormControl id="search-filter">
-            <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
-              Pesquisar
-            </InputLabel>
-            <OutlinedInput
-              id="outlined-adornment-search"
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton aria-label="toggle password visibility" edge="end">
-                    <Search />
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </FormControl>
         </div>
 
         <Box sx={{ width: '100%' }}>
