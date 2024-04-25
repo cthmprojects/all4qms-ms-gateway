@@ -27,10 +27,11 @@ interface ListParams {
   dtFim?: string;
   page?: number;
   size?: number;
+  descricao?: string;
 }
 
 export const listNonConformities = createAsyncThunk('non-conformity/list', async (params: ListParams) => {
-  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size } = params;
+  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size, descricao } = params;
   const queryParams: string[] = [];
 
   if (statusAtual) {
@@ -59,6 +60,10 @@ export const listNonConformities = createAsyncThunk('non-conformity/list', async
 
   if (size !== undefined) {
     queryParams.push(`size=${size}`);
+  }
+
+  if (descricao) {
+    queryParams.push(`descricaoNc=${encodeURI(descricao)}`);
   }
 
   queryParams.push(`cacheBuster=${new Date().getTime()}`);

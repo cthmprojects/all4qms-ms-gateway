@@ -60,6 +60,7 @@ interface ListParams {
   dtFim?: string;
   page?: number;
   size?: number;
+  descricao?: string;
 }
 
 interface ProductComplaint {
@@ -73,7 +74,7 @@ interface ClientComplaint {
 }
 
 export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
-  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size } = params;
+  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size, descricao } = params;
   const queryParams: string[] = [];
 
   if (statusAtual) {
@@ -104,12 +105,14 @@ export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
     queryParams.push(`size=${size}`);
   }
 
+  if (descricao) {
+    queryParams.push(`descricaoNc=${encodeURI(descricao)}`);
+  }
+
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
 
   const queryString = queryParams.join('&');
   const url = `${apiUrl}${queryString ? `?${queryString}` : ''}`;
-
-  console.log('erickson', `list(${url})`);
 
   return axios.get<Array<Rnc>>(url);
 });

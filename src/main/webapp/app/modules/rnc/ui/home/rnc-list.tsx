@@ -21,6 +21,7 @@ import {
   TableHead,
   TableRow,
   Tabs,
+  TextField,
   Typography,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
@@ -76,6 +77,7 @@ const RncList = ({}) => {
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
   const [page, setPage] = useState<number>(1);
+  const [description, setDescription] = useState<string>('');
 
   const [filters, setFilters] = useState({
     dtIni: null,
@@ -96,6 +98,7 @@ const RncList = ({}) => {
         statusAtual,
         processoNC,
         tipoNC,
+        descricao: description.length > 0 ? description : null,
       })
     );
     dispatch(
@@ -107,6 +110,7 @@ const RncList = ({}) => {
         statusAtual,
         processoNC,
         tipoNC,
+        descricao: description.length > 0 ? description : null,
       })
     );
   };
@@ -380,10 +384,16 @@ const RncList = ({}) => {
             </Select>
           </FormControl>
           <FormControl id="search-filter">
-            <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
-              Pesquisar por Descrição
-            </InputLabel>
-            <OutlinedInput id="outlined-adornment-search" endAdornment={<InputAdornment position="end"></InputAdornment>} />
+            <TextField
+              className="m-2"
+              label="Descrição"
+              onChange={e => {
+                const { value } = e.target;
+                setDescription(value);
+              }}
+              placeholder="Descrição"
+              value={description}
+            />
           </FormControl>
 
           <Button
