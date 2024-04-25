@@ -1,13 +1,11 @@
 /* eslint-disable no-console */
 /* eslint-disable no-empty-pattern */
 /* eslint-disable react/jsx-key */
-import { Search } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
   Button,
   FormControl,
-  IconButton,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -33,10 +31,11 @@ import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
-import { Enums, ExtendedNc, Rnc } from '../../models';
+import { Enums, ExtendedNc, Process, Rnc } from '../../models';
 import { reset as DescriptionResetEntity } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { listNonConformities } from '../../reducers/non-conformity.reducer';
+import { getProcesses } from '../../reducers/process.reducer';
 import { list, listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
 import './rnc.css';
@@ -125,6 +124,7 @@ const RncList = ({}) => {
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
   const managementUsers = useAppSelector(state => state.userManagement.users);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
 
   useEffect(() => {
     dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
@@ -132,6 +132,7 @@ const RncList = ({}) => {
     dispatch(getUsers({}));
     dispatch(listEnums());
     dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(getProcesses());
   }, []);
 
   useEffect(() => {
@@ -344,9 +345,11 @@ const RncList = ({}) => {
               value={filters.statusAtual}
               onChange={event => setFilters({ ...filters, statusAtual: event.target.value as string })}
             >
-              <MenuItem value="FINALIZADO">Finalizado</MenuItem>
-              <MenuItem value="PREENCHIMENTO">Preenhimento</MenuItem>
-              <MenuItem value="OUTRO">Outro</MenuItem>
+              {enums?.nonConformityStatuses.map((type, idx) => (
+                <MenuItem value={type.name} key={`type-${idx}`}>
+                  {type.value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
@@ -357,8 +360,11 @@ const RncList = ({}) => {
               value={filters.processoNC}
               onChange={event => setFilters({ ...filters, processoNC: parseInt(event.target.value as string, 10) })}
             >
-              <MenuItem value={1}>Produção</MenuItem>
-              <MenuItem value={2}>Outro</MenuItem>
+              {processes?.map((process, i) => (
+                <MenuItem value={process.id} key={`process-${i}`}>
+                  {process.nome}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2" style={{ width: '70px' }}>

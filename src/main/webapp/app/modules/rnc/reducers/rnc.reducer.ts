@@ -109,6 +109,8 @@ export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
   const queryString = queryParams.join('&');
   const url = `${apiUrl}${queryString ? `?${queryString}` : ''}`;
 
+  console.log('erickson', `list(${url})`);
+
   return axios.get<Array<Rnc>>(url);
 });
 

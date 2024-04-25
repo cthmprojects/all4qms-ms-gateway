@@ -8,6 +8,7 @@ import approval from './reducers/approval.reducer';
 import plan from './reducers/plan.reducer';
 import decision from './reducers/decision.reducer';
 import nonConformities from './reducers/non-conformity.reducer';
+import process from './reducers/process.reducer';
 
 const rncReducers = {
   enums,
@@ -20,6 +21,7 @@ const rncReducers = {
   plan,
   decision,
   nonConformities,
+  process,
 };
 
 export default rncReducers;
