@@ -70,8 +70,6 @@ function a11yProps(index: number) {
 
 const RncList = ({}) => {
   const navigate = useNavigate();
-  const [dtIni, setdtIni] = useState(new Date());
-  const [dtFim, setdtFim] = useState(new Date());
   const [value, setValue] = useState(0);
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
@@ -85,10 +83,11 @@ const RncList = ({}) => {
     statusAtual: null,
     processoNC: null,
     tipoNC: null,
+    descricao: null,
   });
 
   const handleApplyFilters = () => {
-    const { dtIni, dtFim, statusAtual, processoNC, tipoNC } = filters;
+    const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao } = filters;
     dispatch(
       list({
         page: 0,
@@ -98,7 +97,7 @@ const RncList = ({}) => {
         statusAtual,
         processoNC,
         tipoNC,
-        descricao: description.length > 0 ? description : null,
+        descricao,
       })
     );
     dispatch(
@@ -110,9 +109,30 @@ const RncList = ({}) => {
         statusAtual,
         processoNC,
         tipoNC,
-        descricao: description.length > 0 ? description : null,
+        descricao,
       })
     );
+  };
+
+  useEffect(() => {
+    const value: string | null = description.length > 0 ? description : null;
+
+    setFilters({ ...filters, descricao: value });
+  }, [description]);
+
+  const clearFilters = () => {
+    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
+    dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
+    setDescription('');
+    setFilters({
+      ...filters,
+      dtIni: null,
+      dtFim: null,
+      statusAtual: null,
+      processoNC: null,
+      tipoNC: null,
+      descricao: null,
+    });
   };
 
   // Dispatcher
@@ -131,8 +151,8 @@ const RncList = ({}) => {
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
 
   useEffect(() => {
-    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
-    dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
+    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
+    dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
     dispatch(getUsers({}));
     dispatch(listEnums());
     dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -156,7 +176,8 @@ const RncList = ({}) => {
     dispatch(reset());
     dispatch(DescriptionResetEntity());
     setTimeout(() => {
-      dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
+      dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
+      dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
     }, 500);
   };
 
@@ -387,9 +408,8 @@ const RncList = ({}) => {
             <TextField
               className="m-2"
               label="Descrição"
-              onChange={e => {
-                const { value } = e.target;
-                setDescription(value);
+              onChange={event => {
+                setDescription(event.target.value);
               }}
               placeholder="Descrição"
               value={description}
@@ -403,6 +423,15 @@ const RncList = ({}) => {
             onClick={handleApplyFilters}
           >
             Pesquisar
+          </Button>
+
+          <Button
+            variant="contained"
+            className="secondary-button me-2 rnc-list-form-field"
+            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
+            onClick={clearFilters}
+          >
+            Limpar
           </Button>
         </div>
 
