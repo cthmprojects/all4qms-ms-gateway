@@ -6,10 +6,8 @@ import {
   Breadcrumbs,
   Button,
   FormControl,
-  InputAdornment,
   InputLabel,
   MenuItem,
-  OutlinedInput,
   Pagination,
   Paper,
   Select,
@@ -32,12 +30,12 @@ import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
-import { Enums, ExtendedNc, Process, Rnc } from '../../models';
+import { Enums, ExtendedNc, Process } from '../../models';
 import { reset as DescriptionResetEntity } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { listNonConformities } from '../../reducers/non-conformity.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
-import { list, listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
+import { listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
 import './rnc.css';
 
@@ -84,22 +82,11 @@ const RncList = ({}) => {
     processoNC: null,
     tipoNC: null,
     descricao: null,
+    origemNC: null,
   });
 
   const handleApplyFilters = () => {
-    const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao } = filters;
-    dispatch(
-      list({
-        page: 0,
-        size: 20,
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
-        statusAtual,
-        processoNC,
-        tipoNC,
-        descricao,
-      })
-    );
+    const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
     dispatch(
       listNonConformities({
         page: 0,
@@ -110,6 +97,7 @@ const RncList = ({}) => {
         processoNC,
         tipoNC,
         descricao,
+        origemNC,
       })
     );
   };
@@ -121,8 +109,19 @@ const RncList = ({}) => {
   }, [description]);
 
   const clearFilters = () => {
-    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
-    dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
+    dispatch(
+      listNonConformities({
+        page: 0,
+        size: 20,
+        dtIni: '',
+        dtFim: '',
+        statusAtual: '',
+        processoNC: 0,
+        tipoNC: '',
+        descricao: '',
+        origemNC: '',
+      })
+    );
     setDescription('');
     setFilters({
       ...filters,
@@ -132,6 +131,7 @@ const RncList = ({}) => {
       processoNC: null,
       tipoNC: null,
       descricao: null,
+      origemNC: null,
     });
   };
 
@@ -139,19 +139,14 @@ const RncList = ({}) => {
   const dispatch = useAppDispatch();
 
   // Reducer states
-  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
-  const totalCount: number = useAppSelector(state => state.all4qmsmsgateway.rnc.totalItems);
-  const loading: boolean = useAppSelector(state => state.all4qmsmsgateway.rnc.loading);
   const nonConformities: Array<ExtendedNc> = useAppSelector(state => state.all4qmsmsgateway.nonConformities.entities);
   const nonConformitiesCount: number = useAppSelector(state => state.all4qmsmsgateway.nonConformities.totalItems);
   const loadingNonConformities: boolean = useAppSelector(state => state.all4qmsmsgateway.nonConformities.loading);
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
-  const managementUsers = useAppSelector(state => state.userManagement.users);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
 
   useEffect(() => {
-    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
     dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
     dispatch(getUsers({}));
     dispatch(listEnums());
@@ -160,24 +155,75 @@ const RncList = ({}) => {
   }, []);
 
   useEffect(() => {
-    dispatch(list({ page: page - 1, size: 20 }));
+    if (page <= 0) {
+      return;
+    }
+
     dispatch(listNonConformities({ page: page - 1, size: 20 }));
   }, [page]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    let type: string = '';
+
+    switch (newValue) {
+      case 1:
+        type = 'AUDITORIA';
+        break;
+      case 2:
+        type = 'CLIENTE';
+        break;
+      case 3:
+        type = 'MATERIA_PRIMA_INSUMO';
+        break;
+      case 4:
+        type = 'PRODUTO_ACABADO';
+        break;
+      case 5:
+        type = 'PROCEDIMENTO_OUTROS';
+        break;
+      default:
+        break;
+    }
+
+    const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
+    dispatch(
+      listNonConformities({
+        page: 0,
+        size: 20,
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
+        statusAtual,
+        processoNC,
+        tipoNC,
+        descricao,
+        origemNC: type,
+      })
+    );
+
     setValue(newValue);
   };
 
   useEffect(() => {
     dispatch(listAprovacaoNC({}));
-  }, [rncs]);
+  }, [nonConformities]);
 
   const reloadInfo = () => {
     dispatch(reset());
     dispatch(DescriptionResetEntity());
     setTimeout(() => {
-      dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
-      dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
+      dispatch(
+        listNonConformities({
+          page: 0,
+          size: 20,
+          dtIni: '',
+          dtFim: '',
+          statusAtual: '',
+          processoNC: 0,
+          tipoNC: '',
+          descricao: '',
+          origemNC: '',
+        })
+      );
     }, 500);
   };
 
