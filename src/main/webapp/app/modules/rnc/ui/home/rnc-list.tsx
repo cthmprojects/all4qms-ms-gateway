@@ -8,7 +8,6 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Pagination,
   Paper,
   Select,
   Tab,
@@ -17,6 +16,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   Tabs,
   TextField,
@@ -72,7 +72,8 @@ const RncList = ({}) => {
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(5);
   const [description, setDescription] = useState<string>('');
 
   const [filters, setFilters] = useState({
@@ -90,7 +91,7 @@ const RncList = ({}) => {
     dispatch(
       listNonConformities({
         page: 0,
-        size: 20,
+        size: pageSize,
         dtIni: dtIni?.toISOString(),
         dtFim: dtFim?.toISOString(),
         statusAtual,
@@ -112,7 +113,7 @@ const RncList = ({}) => {
     dispatch(
       listNonConformities({
         page: 0,
-        size: 20,
+        size: pageSize,
         dtIni: '',
         dtFim: '',
         statusAtual: '',
@@ -147,7 +148,9 @@ const RncList = ({}) => {
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
 
   useEffect(() => {
-    dispatch(listNonConformities({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' }));
+    dispatch(
+      listNonConformities({ page: 0, size: pageSize, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' })
+    );
     dispatch(getUsers({}));
     dispatch(listEnums());
     dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -159,7 +162,7 @@ const RncList = ({}) => {
       return;
     }
 
-    dispatch(listNonConformities({ page: page - 1, size: 20 }));
+    dispatch(listNonConformities({ page: page, size: pageSize }));
   }, [page]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -189,7 +192,7 @@ const RncList = ({}) => {
     dispatch(
       listNonConformities({
         page: 0,
-        size: 20,
+        size: pageSize,
         dtIni: dtIni?.toISOString(),
         dtFim: dtFim?.toISOString(),
         statusAtual,
@@ -214,7 +217,7 @@ const RncList = ({}) => {
       dispatch(
         listNonConformities({
           page: 0,
-          size: 20,
+          size: pageSize,
           dtIni: '',
           dtFim: '',
           statusAtual: '',
@@ -265,6 +268,15 @@ const RncList = ({}) => {
   const onPageChanged = (event: React.ChangeEvent<unknown>, page: number) => {
     setPage(page);
   };
+
+  const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setPageSize(parseInt(event.target.value, 10));
+    setPage(1);
+  };
+
+  function displayedRowsLabel({ from, to, count }) {
+    return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
+  }
 
   const renderTable = () => {
     if (loadingNonConformities) {
@@ -343,12 +355,18 @@ const RncList = ({}) => {
               </TableBody>
             </Table>
           </TableContainer>
-          <Row className="justify-content-center mt-5">
-            <Pagination
-              count={Math.floor(nonConformitiesCount / 20) + (nonConformitiesCount % 20 > 0 ? 1 : 0)}
-              onChange={onPageChanged}
+          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
+            <TablePagination
+              component="div"
+              count={nonConformitiesCount}
+              labelDisplayedRows={displayedRowsLabel}
+              labelRowsPerPage="Itens por página:"
+              onPageChange={onPageChanged}
+              onRowsPerPageChange={onRowsPerPageChanged}
               page={page}
-              style={{ width: '370px' }}
+              rowsPerPage={pageSize}
+              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+              style={{ display: 'flex', alignContent: 'center', width: '370px' }}
             />
           </Row>
         </>
