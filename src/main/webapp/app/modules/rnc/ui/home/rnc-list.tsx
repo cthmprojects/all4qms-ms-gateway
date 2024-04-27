@@ -6,6 +6,7 @@ import {
   Breadcrumbs,
   Button,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -38,6 +39,7 @@ import { getProcesses } from '../../reducers/process.reducer';
 import { listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
 import './rnc.css';
+import { VisibilityOutlined } from '@mui/icons-material';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -243,6 +245,7 @@ const RncList = ({}) => {
     'Fechamento',
     'Status',
     '',
+    '',
   ];
 
   const formatDateToString = (date: Date | null | undefined) => {
@@ -277,6 +280,10 @@ const RncList = ({}) => {
   function displayedRowsLabel({ from, to, count }) {
     return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
   }
+
+  const onViewClicked = (id: number, event: React.MouseEvent<HTMLButtonElement>): void => {
+    navigate(`/rnc/view/${id}`);
+  };
 
   const renderTable = () => {
     if (loadingNonConformities) {
@@ -346,6 +353,11 @@ const RncList = ({}) => {
                       <TableCell> {eficacia ? formatDateToString(new Date(eficacia)) : '-'} </TableCell>
                       <TableCell> {verificacao ? formatDateToString(new Date(verificacao)) : '-'} </TableCell>
                       <TableCell>{statusAtual}</TableCell>
+                      <TableCell>
+                        <IconButton onClick={event => onViewClicked(id, event)}>
+                          <VisibilityOutlined />
+                        </IconButton>
+                      </TableCell>
                       <TableCell>
                         <MenuOptions rnc={nc} userId={userId} userRole={userRole} reload={reloadInfo} />
                       </TableCell>
