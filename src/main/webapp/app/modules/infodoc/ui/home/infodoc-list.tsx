@@ -22,8 +22,12 @@ import {
   Box,
   Tabs,
   Tab,
+  Alert,
 } from '@mui/material';
 
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PrintIcon from '@mui/icons-material/Print';
+import CancelIcon from '@mui/icons-material/Cancel';
 import DatePicker from 'react-datepicker';
 import React, { useEffect, useState } from 'react';
 import { Card, Row } from 'reactstrap';
@@ -69,6 +73,21 @@ const InfodocList = () => {
 
   const infodocs = infodocStore(state => state.infodocs);
 
+  /* Codigo vai ser removido quando o reducer for implementado a partir do endpoint correto */
+  const infodocA = {
+    codigo: 'string',
+    titulo: 'string',
+    emissor: 'string',
+    revisao: 'string',
+    data: new Date(),
+    area_processo: 'string',
+    origem: 'string',
+    situacao: 'string',
+    distribuicao: 'string',
+  };
+  infodocs.push(infodocA);
+  /* ----------------------------------------------------------------  */
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -91,7 +110,26 @@ const InfodocList = () => {
     return `${day}/${month}/${year}`;
   };
 
-  //////////////////////////////////
+  const onEditClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // navigate(`/somepath/${id}`);
+    alert('Editar Doc - Em Desenvolvimento!');
+  };
+
+  const onViewClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // navigate(`/somepath/${id}`);
+    alert('Visualizar Doc - Em Desenvolvimento!');
+  };
+
+  const onPrintClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // navigate(`/somepath/${id}`);
+    alert('Imprimir Doc - Em Desenvolvimento!');
+  };
+
+  const onCancelClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // navigate(`/somepath/${id}`);
+    alert('Cancelar Doc - Em Desenvolvimento!');
+  };
+
   const renderTable = () => {
     if (infodocs?.length > 0) {
       return (
@@ -119,25 +157,21 @@ const InfodocList = () => {
                     <TableCell>{infodoc.situacao}</TableCell>
                     <TableCell>{infodoc.distribuicao}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" aria-label="add to shopping cart">
+                      <IconButton color="primary" onClick={event => onEditClicked(infodoc.codigo, event)}>
                         <EditIcon sx={{ color: '#e6b200' }} />
+                      </IconButton>
+                      <IconButton color="primary" onClick={event => onViewClicked(infodoc.codigo, event)}>
+                        <VisibilityIcon sx={{ color: '#0EBDCE' }} />
+                      </IconButton>
+                      <IconButton color="primary" onClick={event => onPrintClicked(infodoc.codigo, event)}>
+                        <PrintIcon sx={{ color: '#03AC59' }} />
+                      </IconButton>
+                      <IconButton color="primary" onClick={event => onCancelClicked(infodoc.codigo, event)}>
+                        <CancelIcon sx={{ color: '#FF0000' }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
-
-                {/* {rows.map(row => (
-                          <TableRow>
-                            {row.map(item => (
-                              <TableCell>{item}</TableCell>
-                            ))}
-                            <TableCell>
-                              <IconButton color="primary" aria-label="add to shopping cart">
-                                <EditIcon sx={{ color: '#e6b200' }} />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        ))} */}
               </TableBody>
             </Table>
           </TableContainer>
