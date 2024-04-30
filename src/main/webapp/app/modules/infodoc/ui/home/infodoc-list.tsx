@@ -1,7 +1,6 @@
 import {
   Breadcrumbs,
   Button,
-  Divider,
   FormControl,
   IconButton,
   InputAdornment,
@@ -16,13 +15,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
   Select,
   Box,
   Tabs,
   Tab,
-  Alert,
 } from '@mui/material';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -64,6 +61,38 @@ function a11yProps(index: number) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
+
+/*
+const [filters, setFilters] = useState({
+  dtIni: null,
+  dtFim: null,
+  areaProcesso: null,
+  origem: null,
+  situacao: null,
+});
+
+ const handleApplyFilters = () => {
+  const { dtIni, dtFim, areaProcesso, origem,situacao } = filters;
+  /* dispatch(
+    listInfoDoc({
+      page: 0,
+      size: pageSize,
+      dtIni: dtIni?.toISOString(),
+      dtFim: dtFim?.toISOString(),
+      areaProcesso,
+      origem,
+      situacao,
+    })
+  ); 
+};*/
+
+/*useEffect(() => {
+  setFilters({ ...filters });
+});*/
+/*
+const clearFilters = () => {
+
+};*/
 
 const InfodocList = () => {
   const navigate = useNavigate();
