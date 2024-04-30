@@ -55,56 +55,60 @@ export type ExtendedNc = {
   dados: RncData;
 };
 
+export type NonConformity = {
+  id: number;
+  numNC: number;
+  statusAtual: string;
+  idUsuarioAtual: number;
+  dtNC: Date;
+  tipoNC: string;
+  origemNC: string;
+  ncOutros: string;
+  possuiReincidencia: boolean;
+  idEmissorNC: number;
+  processoNC: number;
+  idReceptorNC: number;
+  processoEmissor: number;
+  vinculoAuditoria: number;
+  acoesImediatas: number;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  vinculoCliente: number;
+  vinculoProduto: number;
+  decisaoNC: number;
+  aprovacaoNC: number;
+  vinculoDocAnterior: number;
+};
+
+export type NonConformityAttachment = {
+  id: number;
+  nomeArquivoFisico: string;
+  nomeArquivoOriginal: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  idDescricaoNaoConformidade: number;
+  idReclamacao: number;
+};
+
+export type NonConformityDescriptionSummary = {
+  id: number;
+  detalhesNaoConformidade: string;
+  requisitoDescumprido: string;
+  evidenciaObjetiva: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  idNaoConformidade: number;
+  anexos: Array<NonConformityAttachment>;
+};
+
+export type NonConformityDescription = {
+  descricaoNaoConformidade: NonConformityDescriptionSummary;
+  caminhoAnexo: string;
+};
+
 export type CompleteNc = {
-  naoConformidade: {
-    id: number;
-    numNC: number;
-    statusAtual: string;
-    idUsuarioAtual: number;
-    dtNC: Date;
-    tipoNC: string;
-    origemNC: string;
-    ncOutros: string;
-    possuiReincidencia: boolean;
-    idEmissorNC: number;
-    processoNC: number;
-    idReceptorNC: number;
-    processoEmissor: number;
-    vinculoAuditoria: number;
-    acoesImediatas: number;
-    criadoEm: Date;
-    atualizadoEm: Date;
-    vinculoCliente: number;
-    vinculoProduto: number;
-    decisaoNC: number;
-    aprovacaoNC: number;
-    vinculoDocAnterior: number;
-  };
-  descricaoNC: [
-    {
-      descricaoNaoConformidade: {
-        id: number;
-        detalhesNaoConformidade: string;
-        requisitoDescumprido: string;
-        evidenciaObjetiva: string;
-        criadoEm: Date;
-        atualizadoEm: Date;
-        idNaoConformidade: number;
-        anexos: [
-          {
-            id: number;
-            nomeArquivoFisico: string;
-            nomeArquivoOriginal: string;
-            criadoEm: Date;
-            atualizadoEm: Date;
-            idDescricaoNaoConformidade: number;
-            idReclamacao: number;
-          }
-        ];
-      };
-      caminhoAnexo: string;
-    }
-  ];
+  naoConformidade: NonConformity;
+  descricaoNC: Array<NonConformityDescription>;
   origem: {
     outros: string;
     auditoria: {
