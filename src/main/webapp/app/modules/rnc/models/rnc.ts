@@ -106,204 +106,205 @@ export type NonConformityDescription = {
   caminhoAnexo: string;
 };
 
+export type NonConformityAudit = {
+  id: number;
+  sequecialAuditoria: number;
+  normaAuditoria: string;
+  ocorrenciaAuditoria: string;
+  requisitoAuditoria: string;
+  processoAuditoria: number;
+  idNaoConformidade: number;
+};
+
+export type NonConformityImmediateAction = {
+  id: number;
+  descricaoAcaoImediata: string;
+  prazoAcaoImediata: Date;
+  validacaoAcaoImediata: boolean;
+  inconformidadeAcaoImediata: string;
+  statusAcaoImediata: string;
+  idResponsavelAcaoImediata: number;
+  idResponsavelValidacaoAcaoImediata: number;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  idNaoConformidade: number;
+};
+
+export type NonConformityDecision = {
+  id: number;
+  descricaoDecisao: string;
+  dataDecisao: Date;
+  qtdAtual: number;
+  qtdAprovada: number;
+  qtdReprovada: number;
+  qtdRejeitada: number;
+  responsaveis: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  idDecisaoAtual: number;
+  tipoDecisao: string;
+  idNaoConformidade: number;
+};
+
+export type NonConformityCauseEffect = {
+  id: number;
+  descCausaEfeito: string;
+  meioAmbiente: string;
+  maoDeObra: string;
+  metodo: string;
+  maquina: string;
+  medicao: string;
+  materiaPrima: string;
+};
+
+export type NonConformityReason = {
+  id: number;
+  descProblema: string;
+  pq1: string;
+  pq2: string;
+  pq3: string;
+  pq4: string;
+  pq5: string;
+  descCausa: string;
+};
+
+export type NonConformityCoverage = {
+  id: number;
+  descricaoAbrangencia: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  idNaoConformidade: number;
+};
+
+export type NonConformityAction = {
+  id: number;
+  idPlano: number;
+  descricaoAcao: string;
+  prazoAcao: Date;
+  idResponsavelAcao: number;
+  statusAcao: string;
+  dataVerificao: Date;
+  idResponsavelVerificaoAcao: number;
+  idAnexosExecucao: number;
+  dataConclusaoAcao: Date;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  planoId: number;
+};
+
+export type NonConformityPlan = {
+  id: number;
+  statusPlano: string;
+  qtdAcoes: number;
+  qtdAcoesConcluidas: number;
+  percentualPlano: number;
+  dtConclusaoPlano: Date;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  idNaoConformidade: number;
+};
+
+export type NonConformityActionPlan = {
+  plano: NonConformityPlan;
+  acoes: Array<NonConformityAction>;
+};
+
+export type NonConformityApproval = {
+  id: number;
+  possuiImplementacao: boolean;
+  dataImplementacao: Date;
+  responsavelImplementacao: number;
+  descImplementacao: string;
+  possuiEficacia: boolean;
+  dataEficacia: Date;
+  responsavelEficacia: number;
+  novoRegistro: boolean;
+  descEficacia: string;
+  dataFechamento: Date;
+  responsavelFechamento: number;
+  alterarRisco: boolean;
+  vinculoRisco: number;
+  descFechamento: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+};
+
+export type NonConformityClient = {
+  id: number;
+  nomeClienteReclamacao: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+};
+
+export type NonConformityProduct = {
+  id: number;
+  codigoProduto: string;
+  nomeProduto: string;
+  nomeFornecedor: string;
+  lote: string;
+  qtdLote: number;
+  nqa: string;
+  qtdAmostra: number;
+  qtdDefeito: number;
+  qtdRejeicao: number;
+  numPedido: string;
+  numOP: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  identificador: string;
+  idOperadorOcorrencia: number;
+  regimeInspecao: string;
+  idRastreabilidadesRegistro: number;
+};
+
+export type NonConformityTraceability = {
+  id: number;
+  dtEntregaNF: Date;
+  numNF: string;
+  dtNF: Date;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  idNaoConformidade: number;
+};
+
+export type NonConformityComplaint = {
+  cliente: NonConformityClient;
+  produto: NonConformityProduct;
+  rastreabilidade: NonConformityTraceability;
+};
+
+export type NonConformityOperator = {
+  id: number;
+  nomeOperador: string;
+  linhaOperador: string;
+  turnoOperador: string;
+  nomeInspetorOperador: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+};
+
+export type NonConformityRawMaterial = {
+  produto: NonConformityProduct;
+  operador: NonConformityOperator;
+  rastreabilidade: NonConformityTraceability;
+};
+
+export type NonConformityOrigin = {
+  outros: string;
+  auditoria: NonConformityAudit;
+  cliente: NonConformityComplaint;
+  mpprod: NonConformityRawMaterial;
+};
+
 export type CompleteNc = {
   naoConformidade: NonConformity;
   descricaoNC: Array<NonConformityDescription>;
-  origem: {
-    outros: string;
-    auditoria: {
-      id: number;
-      sequecialAuditoria: number;
-      normaAuditoria: string;
-      ocorrenciaAuditoria: string;
-      requisitoAuditoria: string;
-      processoAuditoria: number;
-      idNaoConformidade: number;
-    };
-    cliente: {
-      cliente: {
-        id: number;
-        nomeClienteReclamacao: string;
-        criadoEm: Date;
-        atualizadoEm: Date;
-      };
-      produto: {
-        id: number;
-        codigoProduto: string;
-        nomeProduto: string;
-        nomeFornecedor: string;
-        lote: string;
-        qtdLote: number;
-        nqa: string;
-        qtdAmostra: number;
-        qtdDefeito: number;
-        qtdRejeicao: number;
-        numPedido: string;
-        numOP: string;
-        criadoEm: Date;
-        atualizadoEm: Date;
-        identificador: string;
-        idOperadorOcorrencia: number;
-        regimeInspecao: string;
-        idRastreabilidadesRegistro: number;
-      };
-      rastreabilidade: {
-        id: number;
-        dtEntregaNF: Date;
-        numNF: string;
-        dtNF: Date;
-        criadoEm: Date;
-        atualizadoEm: Date;
-        idNaoConformidade: number;
-      };
-    };
-    mpprod: {
-      produto: {
-        id: number;
-        codigoProduto: string;
-        nomeProduto: string;
-        nomeFornecedor: string;
-        lote: string;
-        qtdLote: number;
-        nqa: string;
-        qtdAmostra: number;
-        qtdDefeito: number;
-        qtdRejeicao: number;
-        numPedido: string;
-        numOP: string;
-        criadoEm: Date;
-        atualizadoEm: Date;
-        identificador: string;
-        idOperadorOcorrencia: number;
-        regimeInspecao: string;
-        idRastreabilidadesRegistro: number;
-      };
-      operador: {
-        id: number;
-        nomeOperador: string;
-        linhaOperador: string;
-        turnoOperador: string;
-        nomeInspetorOperador: string;
-        criadoEm: Date;
-        atualizadoEm: Date;
-      };
-      rastreabilidade: {
-        id: number;
-        dtEntregaNF: Date;
-        numNF: string;
-        dtNF: Date;
-        criadoEm: Date;
-        atualizadoEm: Date;
-        idNaoConformidade: number;
-      };
-    };
-  };
-  abrangencia: {
-    id: number;
-    descricaoAbrangencia: string;
-    criadoEm: Date;
-    atualizadoEm: Date;
-    idNaoConformidade: number;
-  };
-  acaoImediata: [
-    {
-      id: number;
-      descricaoAcaoImediata: string;
-      prazoAcaoImediata: Date;
-      validacaoAcaoImediata: boolean;
-      inconformidadeAcaoImediata: string;
-      statusAcaoImediata: string;
-      idResponsavelAcaoImediata: number;
-      idResponsavelValidacaoAcaoImediata: number;
-      criadoEm: Date;
-      atualizadoEm: Date;
-      idNaoConformidade: number;
-    }
-  ];
-  decisao: {
-    id: number;
-    descricaoDecisao: string;
-    dataDecisao: Date;
-    qtdAtual: number;
-    qtdAprovada: number;
-    qtdReprovada: number;
-    qtdRejeitada: number;
-    responsaveis: string;
-    criadoEm: Date;
-    atualizadoEm: Date;
-    idDecisaoAtual: number;
-    tipoDecisao: string;
-    idNaoConformidade: number;
-  };
-  ishikawa: {
-    id: number;
-    descCausaEfeito: string;
-    meioAmbiente: string;
-    maoDeObra: string;
-    metodo: string;
-    maquina: string;
-    medicao: string;
-    materiaPrima: string;
-  };
-  porques: {
-    id: number;
-    descProblema: string;
-    pq1: string;
-    pq2: string;
-    pq3: string;
-    pq4: string;
-    pq5: string;
-    descCausa: string;
-  };
-  acaoPlano: [
-    {
-      plano: {
-        id: number;
-        statusPlano: string;
-        qtdAcoes: number;
-        qtdAcoesConcluidas: number;
-        percentualPlano: number;
-        dtConclusaoPlano: Date;
-        criadoEm: Date;
-        atualizadoEm: Date;
-        idNaoConformidade: number;
-      };
-      acoes: [
-        {
-          id: number;
-          idPlano: number;
-          descricaoAcao: string;
-          prazoAcao: Date;
-          idResponsavelAcao: number;
-          statusAcao: string;
-          dataVerificao: Date;
-          idResponsavelVerificaoAcao: number;
-          idAnexosExecucao: number;
-          dataConclusaoAcao: Date;
-          criadoEm: Date;
-          atualizadoEm: Date;
-          planoId: number;
-        }
-      ];
-    }
-  ];
-  aprovacao: {
-    id: number;
-    possuiImplementacao: boolean;
-    dataImplementacao: Date;
-    responsavelImplementacao: number;
-    descImplementacao: string;
-    possuiEficacia: boolean;
-    dataEficacia: Date;
-    responsavelEficacia: number;
-    novoRegistro: boolean;
-    descEficacia: string;
-    dataFechamento: Date;
-    responsavelFechamento: number;
-    alterarRisco: boolean;
-    vinculoRisco: number;
-    descFechamento: string;
-    criadoEm: Date;
-    atualizadoEm: Date;
-  };
+  origem: NonConformityOrigin;
+  abrangencia: NonConformityCoverage;
+  acaoImediata: Array<NonConformityImmediateAction>;
+  decisao: NonConformityDecision;
+  ishikawa: NonConformityCauseEffect;
+  porques: NonConformityReason;
+  acaoPlano: Array<NonConformityActionPlan>;
+  aprovacao: NonConformityApproval;
 };
