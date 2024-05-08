@@ -1,10 +1,10 @@
-import { Box, Breadcrumbs, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import React, { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CompleteNc } from '../../models';
 import { findCompleteNonConformity } from '../../reducers/complete-non-conformity.reducer';
-import { NonConformitySummary } from '../components';
+import { NonConformityActionPlanSummary, NonConformityDescriptionSummary, NonConformitySummary } from '../components';
 
 const RncDetails = () => {
   const { id } = useParams();
@@ -44,6 +44,22 @@ const RncDetails = () => {
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <NonConformitySummary nonConformity={nonConformity?.naoConformidade} />
+          </Box>
+
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Stack spacing={2}>
+              {nonConformity?.descricaoNC.map((d, index) => (
+                <NonConformityDescriptionSummary key={index} description={d} />
+              ))}
+            </Stack>
+          </Box>
+
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Stack spacing={2}>
+              {nonConformity?.acaoPlano.map((a, index) => (
+                <NonConformityActionPlanSummary key={index} actionPlan={a} />
+              ))}
+            </Stack>
           </Box>
         </Box>
       </div>
