@@ -4,7 +4,15 @@ import React, { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CompleteNc } from '../../models';
 import { findCompleteNonConformity } from '../../reducers/complete-non-conformity.reducer';
-import { NonConformityActionPlanSummary, NonConformityDescriptionSummary, NonConformitySummary } from '../components';
+import {
+  NonConformityActionPlanSummary,
+  NonConformityCauseInvestigationSummary,
+  NonConformityCoverageSummary,
+  NonConformityDescriptionSummary,
+  NonConformityImmediateActionSummary,
+  NonConformityStageSummary,
+  NonConformitySummary,
+} from '../components';
 
 const RncDetails = () => {
   const { id } = useParams();
@@ -42,25 +50,83 @@ const RncDetails = () => {
         </Breadcrumbs>
         <h1 className="title">Detalhes {`${nonConformity?.naoConformidade?.id}`}</h1>
         <Box sx={{ width: '100%' }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <NonConformitySummary nonConformity={nonConformity?.naoConformidade} />
-          </Box>
+          <Stack spacing={2}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <NonConformitySummary nonConformity={nonConformity?.naoConformidade} />
+            </Box>
 
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Stack spacing={2}>
-              {nonConformity?.descricaoNC.map((d, index) => (
-                <NonConformityDescriptionSummary key={index} description={d} />
-              ))}
-            </Stack>
-          </Box>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Stack spacing={2}>
+                {nonConformity?.descricaoNC.map((d, index) => (
+                  <NonConformityDescriptionSummary key={index} description={d} />
+                ))}
+              </Stack>
+            </Box>
 
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Stack spacing={2}>
-              {nonConformity?.acaoPlano.map((a, index) => (
-                <NonConformityActionPlanSummary key={index} actionPlan={a} />
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Stack spacing={2}>
+                {nonConformity?.acaoPlano.map((a, index) => (
+                  <NonConformityActionPlanSummary key={index} actionPlan={a} />
+                ))}
+              </Stack>
+            </Box>
+
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <NonConformityCoverageSummary coverage={nonConformity?.abrangencia} />
+            </Box>
+
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              {nonConformity?.acaoImediata.map((a, index) => (
+                <NonConformityImmediateActionSummary key={index} immediateAction={a} />
               ))}
-            </Stack>
-          </Box>
+            </Box>
+
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <NonConformityCauseInvestigationSummary ishikawa={nonConformity?.ishikawa} reason={nonConformity?.porques} />
+            </Box>
+
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <NonConformityStageSummary
+                available={nonConformity?.aprovacao?.possuiImplementacao}
+                date={nonConformity?.aprovacao?.dataImplementacao}
+                dateLabel="Data Implementação"
+                description={nonConformity?.aprovacao?.descImplementacao}
+                descriptionLabel="Descrição da Implementação"
+                responsible={nonConformity?.aprovacao?.responsavelImplementacao.toString()}
+                responsibleLabel="Resp. Verificação"
+                showAvailability={true}
+                title="Implementação do Plano"
+              />
+            </Box>
+
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <NonConformityStageSummary
+                available={nonConformity?.aprovacao?.possuiEficacia}
+                date={nonConformity?.aprovacao?.dataEficacia}
+                dateLabel="Data Verificação"
+                description={nonConformity?.aprovacao?.descEficacia}
+                descriptionLabel="Descrição da Eficácia"
+                responsible={nonConformity?.aprovacao?.responsavelEficacia.toString()}
+                responsibleLabel="Resp. Verificação"
+                showAvailability={true}
+                title="Verificação da Eficácia"
+              />
+            </Box>
+
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <NonConformityStageSummary
+                available={false}
+                date={nonConformity?.aprovacao?.dataFechamento}
+                dateLabel="Data do Fechamento"
+                description={nonConformity?.aprovacao?.descFechamento}
+                descriptionLabel="Descrição do Fechamento"
+                responsible={nonConformity?.aprovacao?.responsavelFechamento.toString()}
+                responsibleLabel="Resp. Verificação"
+                showAvailability={false}
+                title="Fechamento"
+              />
+            </Box>
+          </Stack>
         </Box>
       </div>
     </div>
