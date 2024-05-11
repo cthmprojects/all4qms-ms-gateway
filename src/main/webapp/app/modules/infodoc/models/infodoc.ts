@@ -1,0 +1,22 @@
+export type InfoDoc = {
+  id: number;
+  codigo: string;
+  titulo: string;
+  revisao?: number;
+  descricaoDoc?: string;
+  idArquivo: number;
+  enumSituacao?: string;
+  origem?: string;
+  tipoDoc?: string;
+  idProcesso?: number;
+  idDocumentacaoAnterior?: number;
+  ignorarValidade?: boolean;
+  dataValidade?: Date;
+  idPrazo?: number;
+  idUsuarioCriacao?: number;
+  dataCricao?: Date;
+  dataPublicacao?: Date;
+  emissor?: string;
+  areaProcesso?: string;
+  distribuicao?: string;
+};

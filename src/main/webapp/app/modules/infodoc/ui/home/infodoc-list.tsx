@@ -31,9 +31,21 @@ import { Card, Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from '@mui/icons-material';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
 
 import './infodoc.css';
 import infodocStore, { INFODOC } from '../../infodoc-store';
+
+import { list } from '../../reducers/infodoc.reducer';
+import { InfoDoc } from '../../models';
+
+const dispatch = useAppDispatch();
+
+useEffect(() => {
+  dispatch(list({}));
+}, []);
+
+const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -100,23 +112,6 @@ const InfodocList = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
 
-  const infodocs = infodocStore(state => state.infodocs);
-
-  /* Codigo vai ser removido quando o reducer for implementado a partir do endpoint correto */
-  const infodocA = {
-    codigo: 'string',
-    titulo: 'string',
-    emissor: 'string',
-    revisao: 'string',
-    data: new Date(),
-    area_processo: 'string',
-    origem: 'string',
-    situacao: 'string',
-    distribuicao: 'string',
-  };
-  infodocs.push(infodocA);
-  /* ----------------------------------------------------------------  */
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -174,16 +169,16 @@ const InfodocList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {infodocs?.map((infodoc: INFODOC) => (
+                {infodocs?.map((infodoc: InfoDoc) => (
                   <TableRow key={infodoc.codigo}>
                     <TableCell>{infodoc.codigo}</TableCell>
                     <TableCell>{infodoc.titulo}</TableCell>
                     <TableCell>{infodoc.emissor}</TableCell>
                     <TableCell>{infodoc.revisao}</TableCell>
-                    <TableCell>{formatDateToString(infodoc.data)}</TableCell>
-                    <TableCell>{infodoc.area_processo}</TableCell>
+                    <TableCell>{formatDateToString(infodoc.dataCricao)}</TableCell>
+                    <TableCell>{infodoc.areaProcesso}</TableCell>
                     <TableCell>{infodoc.origem}</TableCell>
-                    <TableCell>{infodoc.situacao}</TableCell>
+                    <TableCell>{infodoc.enumSituacao}</TableCell>
                     <TableCell>{infodoc.distribuicao}</TableCell>
                     <TableCell>
                       <IconButton color="primary" onClick={event => onEditClicked(infodoc.codigo, event)}>
