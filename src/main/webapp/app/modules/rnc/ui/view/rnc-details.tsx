@@ -92,7 +92,7 @@ const RncDetails = () => {
                 dateLabel="Data Implementação"
                 description={nonConformity?.aprovacao?.descImplementacao}
                 descriptionLabel="Descrição da Implementação"
-                responsible={nonConformity?.aprovacao?.responsavelImplementacao.toString()}
+                responsible={nonConformity?.aprovacao?.responsavelImplementacao?.toString()}
                 responsibleLabel="Resp. Verificação"
                 showAvailability={true}
                 title="Implementação do Plano"
@@ -106,7 +106,7 @@ const RncDetails = () => {
                 dateLabel="Data Verificação"
                 description={nonConformity?.aprovacao?.descEficacia}
                 descriptionLabel="Descrição da Eficácia"
-                responsible={nonConformity?.aprovacao?.responsavelEficacia.toString()}
+                responsible={nonConformity?.aprovacao?.responsavelEficacia?.toString()}
                 responsibleLabel="Resp. Verificação"
                 showAvailability={true}
                 title="Verificação da Eficácia"
@@ -120,7 +120,7 @@ const RncDetails = () => {
                 dateLabel="Data do Fechamento"
                 description={nonConformity?.aprovacao?.descFechamento}
                 descriptionLabel="Descrição do Fechamento"
-                responsible={nonConformity?.aprovacao?.responsavelFechamento.toString()}
+                responsible={nonConformity?.aprovacao?.responsavelFechamento?.toString()}
                 responsibleLabel="Resp. Verificação"
                 showAvailability={false}
                 title="Fechamento"
