@@ -44,9 +44,10 @@ import HourglassFullIcon from '@mui/icons-material/HourglassFull';
 import PrintDisabledIcon from '@mui/icons-material/PrintDisabled';
 import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
-
+import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
-import infodocStore, { INFODOC } from '../../infodoc-store';
+import { InfoDoc } from '../../models';
+import { listdocs } from '../../reducers/infodoc.reducer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -174,8 +175,11 @@ const InfodocList = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
-
-  const infodocs = infodocStore(state => state.infodocs);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(listdocs({}));
+  }, []);
+  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -187,14 +191,6 @@ const InfodocList = () => {
     } else {
       localStorage.setItem('infodoc', '0');
     }
-    infodocStore.setState(state => ({
-      ...state,
-      infodocs: [...state.infodocs, infodocA],
-    }));
-    infodocStore.setState(state => ({
-      ...state,
-      infodocs: [...state.infodocs, infodocA],
-    }));
   }, []);
 
   const columns = [
@@ -254,7 +250,7 @@ const InfodocList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {infodocs?.map((infodoc: INFODOC) => (
+                {infodocs?.map((infodoc: InfoDoc) => (
                   <TableRow key={infodoc.codigo}>
                     <Tooltip title={infodoc.titulo}>
                       <TableCell>{infodoc.codigo}</TableCell>
@@ -262,13 +258,13 @@ const InfodocList = () => {
                     <TableCell>{infodoc.titulo}</TableCell>
                     <TableCell>{infodoc.emissor}</TableCell>
                     <TableCell>{infodoc.revisao}</TableCell>
-                    <TableCell>{formatDateToString(infodoc.data)}</TableCell>
-                    <TableCell>{infodoc.area_processo}</TableCell>
+                    <TableCell>{formatDateToString(infodoc.dataCricao)}</TableCell>
+                    <TableCell>{infodoc.areaProcesso}</TableCell>
                     <TableCell>{infodoc.origem}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        {getSituacaoIcon(infodoc.situacao).icon}
-                        {infodoc.situacao}
+                        {getSituacaoIcon(infodoc.enumSituacao).icon}
+                        {infodoc.enumSituacao}
                       </Box>
                     </TableCell>
                     <TableCell>

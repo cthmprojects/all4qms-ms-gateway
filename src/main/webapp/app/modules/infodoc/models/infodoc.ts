@@ -19,4 +19,5 @@ export type InfoDoc = {
   emissor?: string;
   areaProcesso?: string;
   distribuicao?: string;
+  status?: string;
 };
