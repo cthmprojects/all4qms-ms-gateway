@@ -9,6 +9,7 @@ export type INFODOC = {
   area_processo: string;
   origem: string;
   situacao: string;
+  status: string;
   distribuicao: string;
 };
 
