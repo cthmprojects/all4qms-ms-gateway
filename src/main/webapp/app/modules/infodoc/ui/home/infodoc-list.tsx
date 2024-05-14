@@ -20,8 +20,9 @@ import {
   Box,
   Tabs,
   Tab,
+  Tooltip,
 } from '@mui/material';
-import { useAppDispatch, useAppSelector } from 'app/config/store';
+
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PrintIcon from '@mui/icons-material/Print';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -31,11 +32,21 @@ import { Card, Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from '@mui/icons-material';
-import { InfoDoc } from '../../models';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import BlockIcon from '@mui/icons-material/Block';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import HourglassFullIcon from '@mui/icons-material/HourglassFull';
+import PrintDisabledIcon from '@mui/icons-material/PrintDisabled';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+
 import './infodoc.css';
 import infodocStore, { INFODOC } from '../../infodoc-store';
-
-import { listdocs } from '../../reducers/infodoc.reducer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -96,34 +107,109 @@ const clearFilters = () => {
 
 };*/
 
+/* Codigo vai ser removido quando o reducer for implementado a partir do endpoint correto */
+const infodocA = {
+  codigo: 'string',
+  titulo: 'string',
+  emissor: 'string',
+  revisao: 'string',
+  data: new Date(),
+  area_processo: 'string',
+  origem: 'string',
+  situacao: 'Emissão',
+  status: 'Concluído',
+  distribuicao: 'string',
+};
+
+/* ----------------------------------------------------------------  */
+
+const getSituacaoIcon = situacao => {
+  switch (situacao) {
+    case 'Emissão':
+      return { icon: <EditIcon />, text: 'Em Emissão' };
+    case 'Homologado':
+      return { icon: <CheckCircleIcon />, text: 'Homologado' };
+    case 'Revisão':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Revisão' };
+    case 'Obsoleto':
+      return { icon: <BlockIcon />, text: 'Obsoleto' };
+    case 'Cancelado':
+      return { icon: <CancelIcon />, text: 'Cancelado' };
+    default:
+      return { icon: <InfoIcon />, text: 'Indefinido' };
+  }
+};
+
+const getStatusIcon = status => {
+  switch (status) {
+    case 'Em Emissão':
+      return { icon: <EditIcon />, text: 'Em Emissão' };
+    case 'Em Validação':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Validação' };
+    case 'Em Aprovação':
+      return { icon: <ThumbUpIcon />, text: 'Em Aprovação' };
+    case 'Em Revisão':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Revisão' };
+    case 'Em Validação da Revisão':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Validação da Revisão' };
+    case 'Em Aprovação da Revisão':
+      return { icon: <ThumbUpIcon />, text: 'Em Aprovação da Revisão' };
+    case 'Em Distribuição':
+      return { icon: <HourglassFullIcon />, text: 'Em Distribuição' };
+    case 'Em Assinatura':
+      return { icon: <AssignmentIndIcon />, text: 'Em Assinatura' };
+    case 'Em Cancelamento':
+      return { icon: <CancelIcon />, text: 'Em Cancelamento' };
+    case 'Em Aprovação do Cancelamento':
+      return { icon: <ThumbDownIcon />, text: 'Em Aprovação do Cancelamento' };
+    case 'Concluído':
+      return { icon: <DoneAllIcon />, text: 'Concluído' };
+    default:
+      return { icon: <InfoIcon />, text: 'Indefinido' };
+  }
+};
+
 const InfodocList = () => {
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(listdocs({}));
-  }, []);
-
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
 
-  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
+  const infodocs = infodocStore(state => state.infodocs);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
   useEffect(() => {
-    console.log(infodocs);
     if (infodocs?.length > 0) {
       localStorage.setItem('infodoc', infodocs.length.toString());
     } else {
       localStorage.setItem('infodoc', '0');
     }
+    infodocStore.setState(state => ({
+      ...state,
+      infodocs: [...state.infodocs, infodocA],
+    }));
+    infodocStore.setState(state => ({
+      ...state,
+      infodocs: [...state.infodocs, infodocA],
+    }));
   }, []);
 
-  const columns = ['Código', 'Título', 'Emissor', 'Revisão', 'Data', 'Área/Processo', 'Origem', 'Situação', 'Distribuição', 'Ações'];
+  const columns = [
+    'Código',
+    'Título',
+    'Emissor',
+    'Revisão',
+    'Data',
+    'Área/Processo',
+    'Origem',
+    'Situação',
+    'Status',
+    'Distribuição',
+    'Ações',
+  ];
 
   const formatDateToString = (date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
@@ -168,16 +254,29 @@ const InfodocList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {infodocs?.map((infodoc: InfoDoc) => (
+                {infodocs?.map((infodoc: INFODOC) => (
                   <TableRow key={infodoc.codigo}>
-                    <TableCell>{infodoc.codigo}</TableCell>
+                    <Tooltip title={infodoc.titulo}>
+                      <TableCell>{infodoc.codigo}</TableCell>
+                    </Tooltip>
                     <TableCell>{infodoc.titulo}</TableCell>
                     <TableCell>{infodoc.emissor}</TableCell>
                     <TableCell>{infodoc.revisao}</TableCell>
-                    <TableCell>{formatDateToString(infodoc.dataCricao)}</TableCell>
-                    <TableCell>{infodoc.areaProcesso}</TableCell>
+                    <TableCell>{formatDateToString(infodoc.data)}</TableCell>
+                    <TableCell>{infodoc.area_processo}</TableCell>
                     <TableCell>{infodoc.origem}</TableCell>
-                    <TableCell>{infodoc.enumSituacao}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {getSituacaoIcon(infodoc.situacao).icon}
+                        {infodoc.situacao}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {getStatusIcon(infodoc.status).icon}
+                        {infodoc.status}
+                      </Box>
+                    </TableCell>
                     <TableCell>{infodoc.distribuicao}</TableCell>
                     <TableCell>
                       <IconButton color="primary" onClick={event => onEditClicked(infodoc.codigo, event)}>
