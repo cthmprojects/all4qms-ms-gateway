@@ -1,18 +1,14 @@
 /* eslint-disable no-console */
 /* eslint-disable no-empty-pattern */
 /* eslint-disable react/jsx-key */
-import { Search } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
   Button,
   FormControl,
   IconButton,
-  InputAdornment,
   InputLabel,
   MenuItem,
-  OutlinedInput,
-  Pagination,
   Paper,
   Select,
   Tab,
@@ -21,24 +17,29 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   Tabs,
+  TextField,
   Typography,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsers as getManagementUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
-import { Enums, Rnc } from '../../models';
-import { listEnums } from '../../reducers/enums.reducer';
-import { list, listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
+import { Enums, ExtendedNc, Process } from '../../models';
 import { reset as DescriptionResetEntity } from '../../reducers/description.reducer';
+import { listEnums } from '../../reducers/enums.reducer';
+import { listNonConformities } from '../../reducers/non-conformity.reducer';
+import { getProcesses } from '../../reducers/process.reducer';
+import { listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
-import { getUsers as getManagementUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import './rnc.css';
+import { VisibilityOutlined } from '@mui/icons-material';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -69,72 +70,165 @@ function a11yProps(index: number) {
 
 const RncList = ({}) => {
   const navigate = useNavigate();
-  const [dtIni, setdtIni] = useState(new Date());
-  const [dtFim, setdtFim] = useState(new Date());
   const [value, setValue] = useState(0);
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(5);
+  const [description, setDescription] = useState<string>('');
 
   const [filters, setFilters] = useState({
-    dtIni: new Date(),
-    dtFim: new Date(),
-    statusAtual: '',
-    processoNC: 0,
-    tipoNC: '',
+    dtIni: null,
+    dtFim: null,
+    statusAtual: null,
+    processoNC: null,
+    tipoNC: null,
+    descricao: null,
+    origemNC: null,
   });
 
   const handleApplyFilters = () => {
-    const { dtIni, dtFim, statusAtual, processoNC, tipoNC } = filters;
+    const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
     dispatch(
-      list({
+      listNonConformities({
         page: 0,
-        size: 20,
-        dtIni: dtIni.toISOString(),
-        dtFim: dtFim.toISOString(),
+        size: pageSize,
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
         statusAtual,
         processoNC,
         tipoNC,
+        descricao,
+        origemNC,
       })
     );
+  };
+
+  useEffect(() => {
+    const value: string | null = description.length > 0 ? description : null;
+
+    setFilters({ ...filters, descricao: value });
+  }, [description]);
+
+  const clearFilters = () => {
+    dispatch(
+      listNonConformities({
+        page: 0,
+        size: pageSize,
+        dtIni: '',
+        dtFim: '',
+        statusAtual: '',
+        processoNC: 0,
+        tipoNC: '',
+        descricao: '',
+        origemNC: '',
+      })
+    );
+    setDescription('');
+    setFilters({
+      ...filters,
+      dtIni: null,
+      dtFim: null,
+      statusAtual: null,
+      processoNC: null,
+      tipoNC: null,
+      descricao: null,
+      origemNC: null,
+    });
   };
 
   // Dispatcher
   const dispatch = useAppDispatch();
 
   // Reducer states
-  const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
-  const totalCount: number = useAppSelector(state => state.all4qmsmsgateway.rnc.totalItems);
-  const loading: boolean = useAppSelector(state => state.all4qmsmsgateway.rnc.loading);
+  const nonConformities: Array<ExtendedNc> = useAppSelector(state => state.all4qmsmsgateway.nonConformities.entities);
+  const nonConformitiesCount: number = useAppSelector(state => state.all4qmsmsgateway.nonConformities.totalItems);
+  const loadingNonConformities: boolean = useAppSelector(state => state.all4qmsmsgateway.nonConformities.loading);
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
-  const managementUsers = useAppSelector(state => state.userManagement.users);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
 
   useEffect(() => {
-    dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
+    dispatch(
+      listNonConformities({ page: 0, size: pageSize, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '', descricao: '' })
+    );
     dispatch(getUsers({}));
     dispatch(listEnums());
     dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(getProcesses());
   }, []);
 
   useEffect(() => {
-    dispatch(list({ page: page - 1, size: 20 }));
+    if (page <= 0) {
+      return;
+    }
+
+    dispatch(listNonConformities({ page: page, size: pageSize }));
   }, [page]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    let type: string = '';
+
+    switch (newValue) {
+      case 1:
+        type = 'AUDITORIA';
+        break;
+      case 2:
+        type = 'CLIENTE';
+        break;
+      case 3:
+        type = 'MATERIA_PRIMA_INSUMO';
+        break;
+      case 4:
+        type = 'PRODUTO_ACABADO';
+        break;
+      case 5:
+        type = 'PROCEDIMENTO_OUTROS';
+        break;
+      default:
+        break;
+    }
+
+    const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
+    dispatch(
+      listNonConformities({
+        page: 0,
+        size: pageSize,
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
+        statusAtual,
+        processoNC,
+        tipoNC,
+        descricao,
+        origemNC: type,
+      })
+    );
+
     setValue(newValue);
   };
 
   useEffect(() => {
     dispatch(listAprovacaoNC({}));
-  }, [rncs]);
+  }, [nonConformities]);
 
   const reloadInfo = () => {
     dispatch(reset());
     dispatch(DescriptionResetEntity());
     setTimeout(() => {
-      dispatch(list({ page: 0, size: 20, dtIni: '', dtFim: '', statusAtual: '', processoNC: 0, tipoNC: '' }));
+      dispatch(
+        listNonConformities({
+          page: 0,
+          size: pageSize,
+          dtIni: '',
+          dtFim: '',
+          statusAtual: '',
+          processoNC: 0,
+          tipoNC: '',
+          descricao: '',
+          origemNC: '',
+        })
+      );
     }, 500);
   };
 
@@ -150,6 +244,7 @@ const RncList = ({}) => {
     'Eficácia',
     'Fechamento',
     'Status',
+    '',
     '',
   ];
 
@@ -177,8 +272,21 @@ const RncList = ({}) => {
     setPage(page);
   };
 
+  const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setPageSize(parseInt(event.target.value, 10));
+    setPage(1);
+  };
+
+  function displayedRowsLabel({ from, to, count }) {
+    return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
+  }
+
+  const onViewClicked = (id: number, event: React.MouseEvent<HTMLButtonElement>): void => {
+    navigate(`/rnc/view/${id}`);
+  };
+
   const renderTable = () => {
-    if (loading) {
+    if (loadingNonConformities) {
       return (
         <Row className="justify-content-center mt-5">
           <span style={{ color: '#7d7d7d' }}>Carregando...</span>
@@ -186,7 +294,7 @@ const RncList = ({}) => {
       );
     }
 
-    if (rncs?.length > 0) {
+    if (nonConformities?.length > 0) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -199,28 +307,59 @@ const RncList = ({}) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rncs?.map(rnc => {
-                  const { criadoEm, dtNC, id, idEmissorNC, idReceptorNC, idUsuarioAtual, numNC, aprovacao } = rnc;
+                {nonConformities?.map(rnc => {
+                  const { nc, dados } = rnc;
+                  const {
+                    dtNC,
+                    idEmissorNC,
+                    idReceptorNC,
+                    idUsuarioAtual,
+                    origemNC,
+                    possuiReincidencia,
+                    processoEmissor,
+                    processoNC,
+                    statusAtual,
+                    tipoNC,
+                    acoesImediatas,
+                    aprovacao,
+                    aprovacaoNC,
+                    atualizadoEm,
+                    criadoEm,
+                    decisaoNC,
+                    id,
+                    ncOutros,
+                    numNC,
+                    vinculoAuditoria,
+                    vinculoCliente,
+                    vinculoDocAnterior,
+                    vinculoProduto,
+                  } = nc;
+                  const { descricao, eficacia, emissor, fechamento, idNc, responsavel, verificacao } = dados;
 
-                  const emissor = filterUser(idEmissorNC);
-                  const receptor = filterUser(idReceptorNC);
+                  const emissorNc = filterUser(idEmissorNC);
+                  const receptorNc = filterUser(idReceptorNC);
                   const usuarioAtual = filterUser(idUsuarioAtual);
 
                   return (
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
-                      <TableCell>{emissor?.nome || '-'}</TableCell>
-                      <TableCell> {'-'}</TableCell>
+                      <TableCell>{emissorNc?.nome || '-'}</TableCell>
+                      <TableCell> {descricao ?? '-'}</TableCell>
                       <TableCell>{usuarioAtual?.nome || '-'}</TableCell>
                       {/* <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell> */}
                       <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
-                      <TableCell> - </TableCell>
-                      <TableCell> - </TableCell>
-                      <TableCell>{rnc.statusAtual}</TableCell>
+                      <TableCell> {eficacia ? formatDateToString(new Date(eficacia)) : '-'} </TableCell>
+                      <TableCell> {verificacao ? formatDateToString(new Date(verificacao)) : '-'} </TableCell>
+                      <TableCell>{statusAtual}</TableCell>
                       <TableCell>
-                        <MenuOptions rnc={rnc} userId={userId} userRole={userRole} reload={reloadInfo} />
+                        <IconButton onClick={event => onViewClicked(id, event)}>
+                          <VisibilityOutlined />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <MenuOptions rnc={nc} userId={userId} userRole={userRole} reload={reloadInfo} />
                       </TableCell>
                     </TableRow>
                   );
@@ -228,12 +367,18 @@ const RncList = ({}) => {
               </TableBody>
             </Table>
           </TableContainer>
-          <Row className="justify-content-center mt-5">
-            <Pagination
-              count={Math.floor(totalCount / 20) + (totalCount % 20 > 0 ? 1 : 0)}
-              onChange={onPageChanged}
+          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
+            <TablePagination
+              component="div"
+              count={nonConformitiesCount}
+              labelDisplayedRows={displayedRowsLabel}
+              labelRowsPerPage="Itens por página:"
+              onPageChange={onPageChanged}
+              onRowsPerPageChange={onRowsPerPageChanged}
               page={page}
-              style={{ width: '370px' }}
+              rowsPerPage={pageSize}
+              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+              style={{ display: 'flex', alignContent: 'center', width: '370px' }}
             />
           </Row>
         </>
@@ -275,6 +420,7 @@ const RncList = ({}) => {
               className="rnc-list-date-picker mt-4"
               locale="pt-BR"
               id="start-date-picker"
+              placeholderText="Data de início"
             />
             <label htmlFor="start-date-picker" className="rnc-list-date-label">
               Início
@@ -286,6 +432,7 @@ const RncList = ({}) => {
               onChange={date => setFilters({ ...filters, dtFim: date })}
               dateFormat={'dd/MM/yyyy'}
               className="rnc-list-date-picker mt-4"
+              placeholderText="Data de fim"
             />
             <label htmlFor="" className="rnc-list-date-label">
               Fim
@@ -299,9 +446,11 @@ const RncList = ({}) => {
               value={filters.statusAtual}
               onChange={event => setFilters({ ...filters, statusAtual: event.target.value as string })}
             >
-              <MenuItem value="FINALIZADO">Finalizado</MenuItem>
-              <MenuItem value="PREENCHIMENTO">Preenhimento</MenuItem>
-              <MenuItem value="OUTRO">Outro</MenuItem>
+              {enums?.nonConformityStatuses.map((type, idx) => (
+                <MenuItem value={type.name} key={`type-${idx}`}>
+                  {type.value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <FormControl className="rnc-list-form-field me-2">
@@ -312,11 +461,14 @@ const RncList = ({}) => {
               value={filters.processoNC}
               onChange={event => setFilters({ ...filters, processoNC: parseInt(event.target.value as string, 10) })}
             >
-              <MenuItem value={1}>Produção</MenuItem>
-              <MenuItem value={2}>Outro</MenuItem>
+              {processes?.map((process, i) => (
+                <MenuItem value={process.id} key={`process-${i}`}>
+                  {process.nome}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
-          <FormControl className="rnc-list-form-field me-2">
+          <FormControl className="rnc-list-form-field me-2" style={{ width: '70px' }}>
             <InputLabel>Tipo</InputLabel>
             <Select
               label="Selecione"
@@ -328,30 +480,35 @@ const RncList = ({}) => {
               <MenuItem value="OM">OM</MenuItem>
             </Select>
           </FormControl>
+          <FormControl id="search-filter">
+            <TextField
+              className="m-2"
+              label="Descrição"
+              onChange={event => {
+                setDescription(event.target.value);
+              }}
+              placeholder="Descrição"
+              value={description}
+            />
+          </FormControl>
 
           <Button
             variant="contained"
-            className="primary-button me-2 rnc-list-form-field"
-            style={{ height: '49px' }}
+            className="update-button me-2 rnc-list-form-field"
+            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
             onClick={handleApplyFilters}
           >
-            Aplicar Filtros
+            Pesquisar
           </Button>
-          <FormControl id="search-filter">
-            <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
-              Pesquisar
-            </InputLabel>
-            <OutlinedInput
-              id="outlined-adornment-search"
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton aria-label="toggle password visibility" edge="end">
-                    <Search />
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </FormControl>
+
+          <Button
+            variant="contained"
+            className="secondary-button me-2 rnc-list-form-field"
+            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
+            onClick={clearFilters}
+          >
+            Limpar
+          </Button>
         </div>
 
         <Box sx={{ width: '100%' }}>

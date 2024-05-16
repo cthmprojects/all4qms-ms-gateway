@@ -3,8 +3,8 @@ import axios from 'axios';
 import { Hashtag } from '../models';
 
 // Constants
-const hashtagApiUrl = 'services/all4qmsmsrnc/api/gerar-hashtag';
-const similaridadeApiUrl = 'services/all4qmsmsrnc/api/similaridade';
+const hashtagApiUrl = 'services/all4qmsmsrnc/api/ia/gerar-hashtag';
+const similaridadeApiUrl = 'services/all4qmsmsrnc/api/ia/similaridade';
 
 // Initial State
 type InitialState = {
@@ -20,7 +20,7 @@ const initialState: InitialState = {
 // Actions
 
 export const postHashtagRNC = createAsyncThunk('hastags-ia-rnc', async (body: string) => {
-  return axios.post<string>(`https://all4qms-ia.cthmprojetos.com/get_hashtags`, body);
+  return axios.post<Array<Hashtag>>(hashtagApiUrl, body);
 });
 
 const HashtagSlice = createSlice({
@@ -38,7 +38,7 @@ const HashtagSlice = createSlice({
         return {
           ...state,
           loading: false,
-          hashtags: JSON.parse(data),
+          hashtags: data,
         };
       });
   },

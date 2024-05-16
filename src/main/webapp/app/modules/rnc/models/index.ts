@@ -15,3 +15,4 @@ export * from './reason';
 export * from './rnc';
 export * from './traceability';
 export * from './hashtag';
+export * from './process';

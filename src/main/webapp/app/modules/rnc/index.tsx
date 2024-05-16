@@ -1,17 +1,16 @@
 import getStore from 'app/config/store';
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
-import React, { useState } from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
 import { ReducersMapObject, combineReducers } from 'redux';
 import rncReducers from './reducers';
-import { list } from './reducers/rnc.reducer';
 import RncList from './ui/home/rnc-list';
 import GeneralRegister from './ui/new/register-types/general-register/general-register';
 import RegisterImplementationClose from './ui/new/register-types/register-implementation-close/register-implementation-close';
 import RegisterImplementationVerification from './ui/new/register-types/register-implementation-verification/register-implementation-verification';
 import RegisterImplementation from './ui/new/register-types/register-implementation/register-implementation';
 import RNCNew from './ui/new/rnc-new';
-import entitiesReducers from 'app/entities/reducers';
+import RncDetails from './ui/view/rnc-details';
 
 const handleTela = (tela: string) => {
   console.log(tela);
@@ -40,6 +39,7 @@ const RncRoutes = () => {
           path="general/implementacao/fechamento/:id"
           element={<RegisterImplementationClose handleTela={handleTela} save={handleTela} handlePrazoFechamento={handleTela} />}
         />
+        <Route path="view/:id" element={<RncDetails />} />
       </ErrorBoundaryRoutes>
     </div>
   );
