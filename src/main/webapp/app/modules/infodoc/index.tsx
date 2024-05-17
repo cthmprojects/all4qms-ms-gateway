@@ -10,6 +10,7 @@ import rncReducer from '../rnc/reducers';
 import infodocReducers from './reducers';
 
 import { ReducersMapObject, combineReducers } from 'redux';
+import UpdateDocument from './update/update-document';
 
 const handleTela = (tela: string) => {
   console.log(tela);
@@ -25,6 +26,7 @@ const InfodocRoutes = () => {
         <Route path="" element={<InfodocList />} />
         <Route path="upload-file" element={<UploadInfoFile />} />
         <Route path="upload-file/new" element={<NewDocument />} />
+        <Route path="upload-file/update/" element={<UpdateDocument />} />
       </ErrorBoundaryRoutes>
     </div>
   );
