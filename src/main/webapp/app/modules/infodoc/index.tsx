@@ -17,7 +17,7 @@ const handleTela = (tela: string) => {
 
 const InfodocRoutes = () => {
   const store = getStore();
-  store.injectReducer('all4qmsmsgateway', combineReducers(rncReducer as ReducersMapObject));
+  store.injectReducer('all4qmsmsgatewayrnc', combineReducers(rncReducer as ReducersMapObject));
   store.injectReducer('all4qmsmsgateway', combineReducers(infodocReducers as ReducersMapObject));
   return (
     <div>
