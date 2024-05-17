@@ -23,7 +23,7 @@ import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-re
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { AddCircle } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import axios from 'axios';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -54,6 +54,12 @@ const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicE
   );
 });
 
+const getProcesses = async () => {
+  const apiUrl = 'services/all4qmsmsgateway/api/processos';
+  const response = await axios.get(`${apiUrl}`);
+  return response.data;
+};
+
 export const NewDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -76,6 +82,7 @@ export const NewDocument = () => {
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+
     getProcesses().then(data => {
       setProcesses(data);
       if (data.length > 0) {
@@ -109,7 +116,7 @@ export const NewDocument = () => {
     }
   };
 
-  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
 
   return (
     <>
