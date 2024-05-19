@@ -3,8 +3,10 @@ export { default as ImmediateActions } from './immediate-actions/immediate-actio
 export { default as NonConformityActionPlanSummary } from './non-conformity-action-plan-summary/non-conformity-action-plan-summary';
 export { default as NonConformityCauseInvestigationSummary } from './non-conformity-cause-investigation-summary/non-conformity-cause-investigation-summary';
 export { default as NonConformityCoverageSummary } from './non-conformity-coverage-summary/non-conformity-coverage-summary';
+export { default as NonConformityDecisionSummary } from './non-conformity-decision-summary/non-conformity-decision-summary';
 export { default as NonConformityDescriptionSummary } from './non-conformity-description-summary/non-conformity-description-summary';
 export { default as NonConformityImmediateActionSummary } from './non-conformity-immediate-action-summary/non-conformity-immediate-action-summary';
+export { default as NonConformityOriginSummary } from './non-conformity-origin-summary/non-conformity-origin-summary';
 export { default as NonConformityStageSummary } from './non-conformity-stage-summary/non-conformity-stage-summary';
 export { default as NonConformitySummary } from './non-conformity-summary/non-conformity-summary';
 export { default as PlannedActions } from './planned-actions/planned-actions';

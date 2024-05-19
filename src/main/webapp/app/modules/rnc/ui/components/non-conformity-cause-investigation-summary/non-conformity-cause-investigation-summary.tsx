@@ -75,9 +75,8 @@ const NonConformityCauseInvestigationSummary = ({ ishikawa, reason }: NonConform
       <CardHeader title="Investigação de Causas" />
       <CardContent>
         <Stack spacing={2}>
-          <IshikawaSummary ishikawa={ishikawa} />
-
-          <ReasonSummary reason={reason} />
+          {ishikawa && <IshikawaSummary ishikawa={ishikawa} />}
+          {reason && <ReasonSummary reason={reason} />}
         </Stack>
       </CardContent>
     </Card>

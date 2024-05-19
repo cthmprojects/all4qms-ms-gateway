@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Stack, Typography } from '@mui/material';
+import { Card, CardContent, CardHeader, Stack, TextField, Typography } from '@mui/material';
 import { NonConformityActionPlan } from 'app/modules/rnc/models';
 import React from 'react';
 
@@ -28,18 +28,26 @@ const NonConformityActionPlanSummary = ({ actionPlan }: NonConformityActionPlanS
 
   return (
     <Card>
-      <CardHeader title={`Status: ${actionPlan?.plano.statusPlano}`} />
+      <CardHeader title="Plano de Ação Corretiva" />
       <CardContent>
         <Stack spacing={2}>
           {actionPlan.acoes.map((a, index) => (
-            <div key={index}>
-              <Typography>{`Status ação: ${a.statusAcao}`}</Typography>
-              <Typography>{`Data de conclusão: ${formatTimestamp(a?.dataConclusaoAcao)}`}</Typography>
-              <Typography>{`Data de verificação: ${formatTimestamp(a?.dataVerificao)}`}</Typography>
-              <Typography>{`Prazo: ${formatTimestamp(a?.prazoAcao)}`}</Typography>
-              <Typography>{`Criado em: ${formatTimestamp(a?.criadoEm)}`}</Typography>
-              <Typography>{`Última atualização: ${formatTimestamp(a?.atualizadoEm)}`}</Typography>
-            </div>
+            <Stack spacing={2} key={index}>
+              <TextField disabled label="Descrição da Ação" placeholder="Descrição da Ação" value={a?.descricaoAcao} />
+
+              <Stack direction="row" spacing={2}>
+                <TextField disabled label="Prazo" placeholder="Prazo" value={formatTimestamp(a?.prazoAcao)} />
+                <TextField disabled label="Responsável" placeholder="Responsável" value={a?.idResponsavelAcao} />
+                <TextField disabled label="Status" placeholder="Status" value={a?.statusAcao} />
+                <TextField disabled label="Verificação" placeholder="Verificação" value={formatTimestamp(a?.dataVerificao)} />
+                <TextField
+                  disabled
+                  label="Responsável verificação"
+                  placeholder="Responsável verificação"
+                  value={a?.idResponsavelVerificaoAcao}
+                />
+              </Stack>
+            </Stack>
           ))}
         </Stack>
       </CardContent>

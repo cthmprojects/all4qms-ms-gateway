@@ -28,7 +28,7 @@ const NonConformityImmediateActionSummary = ({ immediateAction }: NonConformityI
 
   return (
     <Card>
-      <CardHeader title="Descrição" />
+      <CardHeader title="Ação imediata / Disposição para conter a NC" />
       <CardContent>
         <Stack spacing={2}>
           <TextField disabled label="Descrição da ação" placeholder="Descrição da ação" value={immediateAction?.descricaoAcaoImediata} />

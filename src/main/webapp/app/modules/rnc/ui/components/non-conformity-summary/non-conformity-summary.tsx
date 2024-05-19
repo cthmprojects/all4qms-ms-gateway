@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Stack, Typography } from '@mui/material';
+import { Card, CardContent, CardHeader, Stack, TextField, Typography } from '@mui/material';
 import { NonConformity } from 'app/modules/rnc/models';
 import React from 'react';
 
@@ -28,12 +28,21 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
 
   return (
     <Card>
-      <CardHeader title={`ID: ${nonConformity?.id}`} />
+      <CardHeader title="Visualização" />
       <CardContent>
         <Stack spacing={2}>
-          <Typography>{`Criado em: ${formatTimestamp(nonConformity?.criadoEm)}`}</Typography>
-          <Typography>{`Status: ${nonConformity?.statusAtual}`}</Typography>
-          <Typography>{`Última atualização: ${formatTimestamp(nonConformity?.atualizadoEm)}`}</Typography>
+          <Stack direction="row" spacing={2}>
+            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.numNC} />
+            <TextField disabled label="Emitido por" placeholder="Emitido por" value={nonConformity?.idEmissorNC} />
+            <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={nonConformity?.processoEmissor} />
+            <TextField disabled label="Encaminhado para" placeholder="Encaminhado para" value={nonConformity?.idReceptorNC} />
+            <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={nonConformity?.processoNC} />
+            <TextField disabled label="Data" placeholder="Data" value={formatTimestamp(nonConformity?.dtNC)} />
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <TextField disabled label="Tipo" placeholder="Tipo" value={nonConformity?.tipoNC} />
+            <TextField disabled label="Origem" placeholder="Origem" value={nonConformity?.origemNC} />
+          </Stack>
         </Stack>
       </CardContent>
     </Card>
