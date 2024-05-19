@@ -1,11 +1,17 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Breadcrumbs, Typography } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Row } from 'reactstrap';
+import { Button } from 'reactstrap';
 import './upload-files.css';
+import { useNavigate } from 'react-router-dom';
 
-const UploadInfoFile = () => {
+type UploadFileModalProps = {
+  open: boolean;
+  handleClose: () => void;
+};
+
+const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
+  const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
 
@@ -21,22 +27,13 @@ const UploadInfoFile = () => {
   };
 
   return (
-    <>
-      <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
-        <Row className="justify-content-center mt-5">
-          <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">
-            <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-              Home
-            </Link>
-            <Link to={'/infodoc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Informação Documentada
-            </Link>
-            <Typography style={{ color: '#606060' }}>Enviar arquivos</Typography>
-          </Breadcrumbs>
-          <h2 className="ms-5 mt-5">Enviar arquivos</h2>
-        </Row>
-        <div className="upload-container">
-          <input type="file" multiple style={{ display: 'none' }} onChange={onFileChanged} ref={fileInputRef} />
+    <React.Fragment>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle id="alert-dialog-title">
+          <h2>Enviar arquivos</h2>
+        </DialogTitle>
+        <DialogContent>
+          <input type="file" style={{ display: 'none' }} onChange={onFileChanged} ref={fileInputRef} />
 
           {files.length == 0 && (
             <button
@@ -68,23 +65,17 @@ const UploadInfoFile = () => {
               ))}
             </div>
           )}
-        </div>
-      </div>
-    </>
-    // <div>
-    //     a
-    //     <div className="form-group">
-    //         <label htmlFor="file">File</label>
-    //         <input type="file" className="form-control" id="file" name="file" onChange={handleFileChange} />
-    //     </div>
-    //     <div className="form-group">
-    //         <label htmlFor="description">Description</label>
-    //         <input type="text" className="form-control" id="description" name="description" onChange={handleDescriptionChange} />
-    //     </div>
-    //     <div className="form-group">
-    //         <button type="button" className="btn btn-primary" onClick={handleUploadFile}>Upload</button>
-    //     </div>
-    // </div>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" className="me-2 close-button" onClick={handleClose}>
+            Voltar
+          </Button>
+          <Button disabled={files.length == 0} className="add-button me-3" onClick={() => navigate('/infodoc/upload-file/new')}>
+            Adicionar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </React.Fragment>
   );
 };
 
