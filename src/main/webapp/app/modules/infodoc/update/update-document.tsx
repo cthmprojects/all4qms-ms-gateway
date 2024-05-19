@@ -24,7 +24,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { AddCircle } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
-import { RejectDocumentDialog } from './reject-document-dialog';
+import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -127,7 +127,11 @@ export const UpdateDocument = () => {
 
   return (
     <>
-      <RejectDocumentDialog openModal={openRejectModal} handleClose={handleCloseRejectModal}></RejectDocumentDialog>
+      <RejectDocumentDialog
+        open={openRejectModal}
+        handleClose={handleCloseRejectModal}
+        documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+      ></RejectDocumentDialog>
       <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
         <Row className="justify-content-center mt-5">
           <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">

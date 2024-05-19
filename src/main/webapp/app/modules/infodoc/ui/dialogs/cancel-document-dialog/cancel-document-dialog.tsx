@@ -9,22 +9,23 @@ const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicE
   return (
     <React.Fragment>
       <StyledTextarea minRows={5} cols={100} {...props} ref={ref} id={id} />
-      <StyledLabel htmlFor={id}>Justificativa de Reprovação</StyledLabel>
+      <StyledLabel htmlFor={id}>Motivo da solicitação</StyledLabel>
     </React.Fragment>
   );
 });
 
-type RejectDialogProps = {
-  openModal: boolean;
+type CancelDocumentDialogProps = {
+  open: boolean;
   handleClose: () => void;
+  documentTitle: string;
 };
-export const RejectDocumentDialog = ({ openModal, handleClose }: RejectDialogProps) => {
+export const CancelDocumentDialog = ({ open, handleClose, documentTitle }: CancelDocumentDialogProps) => {
   return (
     <React.Fragment>
-      <Dialog open={openModal} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+      <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
         <DialogTitle id="alert-dialog-title">
-          <h1 style={{ fontSize: '1.2rem' }}>Justificar reprovação</h1>
-          <h3 style={{ fontSize: '1rem' }}>Documento ... - 000 </h3>
+          <h1 style={{ fontSize: '1.2rem', textAlign: 'center' }}>Solicitar Cancelamento</h1>
+          <h3 style={{ fontSize: '1rem', textAlign: 'center' }}>{documentTitle}</h3>
         </DialogTitle>
         <DialogContent>
           <Textarea
@@ -35,12 +36,12 @@ export const RejectDocumentDialog = ({ openModal, handleClose }: RejectDialogPro
             name="ncArea"
           />
         </DialogContent>
-        <DialogActions>
-          <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={handleClose}>
+        <DialogActions sx={{ paddingBottom: '20px' }}>
+          <Button className="format-button" onClick={handleClose}>
             Voltar
           </Button>
-          <Button className="ms-3" variant="contained" color="primary" style={{ background: '#A23900', color: '#fff' }}>
-            Reprovar
+          <Button className="ms-3 me-3 format-button" variant="contained" color="primary" style={{ background: '#A23900', color: '#fff' }}>
+            Solicitar
           </Button>
         </DialogActions>
       </Dialog>
