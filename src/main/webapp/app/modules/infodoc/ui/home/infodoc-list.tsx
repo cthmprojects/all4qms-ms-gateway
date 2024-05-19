@@ -48,7 +48,9 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
 import { InfoDoc } from '../../models';
 import { listdocs } from '../../reducers/infodoc.reducer';
-import UploadInfoFile from '../forms/upload-files';
+import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
+import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
+import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -177,6 +179,8 @@ const InfodocList = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
   const [uploadFileModal, setUploadFileModal] = useState(false);
+  const [requestCopyModal, setRequestCopyModal] = useState(false);
+  const [cancelDocumentModal, setCancelDocumentModal] = useState(false);
   const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(listdocs({}));
@@ -211,6 +215,14 @@ const InfodocList = () => {
 
   const handleCloseUploadFileModal = () => {
     setUploadFileModal(false);
+  };
+
+  const handleCloseRequestCopyModal = () => {
+    setRequestCopyModal(false);
+  };
+
+  const handleCancelDocumentModal = () => {
+    setCancelDocumentModal(false);
   };
 
   const formatDateToString = (date: Date) => {
@@ -318,6 +330,16 @@ const InfodocList = () => {
     <div className="padding-container">
       <div className="container-style">
         <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
+        <RequestCopyDialog
+          open={requestCopyModal}
+          handleClose={handleCloseRequestCopyModal}
+          documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+        />
+        <CancelDocumentDialog
+          open={cancelDocumentModal}
+          handleClose={handleCancelDocumentModal}
+          documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+        />
         <Breadcrumbs aria-label="breadcrumb">
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
