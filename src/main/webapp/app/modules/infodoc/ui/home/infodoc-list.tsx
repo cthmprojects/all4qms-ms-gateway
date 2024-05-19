@@ -48,6 +48,7 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
 import { InfoDoc } from '../../models';
 import { listdocs } from '../../reducers/infodoc.reducer';
+import UploadInfoFile from '../forms/upload-files';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -175,6 +176,7 @@ const InfodocList = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
+  const [uploadFileModal, setUploadFileModal] = useState(false);
   const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(listdocs({}));
@@ -206,6 +208,10 @@ const InfodocList = () => {
     'Distribuição',
     'Ações',
   ];
+
+  const handleCloseUploadFileModal = () => {
+    setUploadFileModal(false);
+  };
 
   const formatDateToString = (date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
@@ -311,6 +317,7 @@ const InfodocList = () => {
     //////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
+        <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
         <Breadcrumbs aria-label="breadcrumb">
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
@@ -324,7 +331,7 @@ const InfodocList = () => {
             variant="contained"
             className="primary-button me-2 infodoc-list-form-field"
             style={{ marginRight: '10px', height: '58px' }}
-            onClick={() => navigate('/infodoc/upload-file')}
+            onClick={() => setUploadFileModal(true)}
           >
             NOVO DOCUMENTO
           </Button>
