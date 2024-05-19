@@ -10,6 +10,7 @@ import rncReducer from '../rnc/reducers';
 import infodocReducers from './reducers';
 
 import { ReducersMapObject, combineReducers } from 'redux';
+import UpdateDocument from './update/update-document';
 
 const handleTela = (tela: string) => {
   console.log(tela);
@@ -17,14 +18,14 @@ const handleTela = (tela: string) => {
 
 const InfodocRoutes = () => {
   const store = getStore();
-  store.injectReducer('all4qmsmsgateway', combineReducers(rncReducer as ReducersMapObject));
+  store.injectReducer('all4qmsmsgatewayrnc', combineReducers(rncReducer as ReducersMapObject));
   store.injectReducer('all4qmsmsgateway', combineReducers(infodocReducers as ReducersMapObject));
   return (
     <div>
       <ErrorBoundaryRoutes>
         <Route path="" element={<InfodocList />} />
-        <Route path="upload-file" element={<UploadInfoFile />} />
         <Route path="upload-file/new" element={<NewDocument />} />
+        <Route path="upload-file/update/" element={<UpdateDocument />} />
       </ErrorBoundaryRoutes>
     </div>
   );

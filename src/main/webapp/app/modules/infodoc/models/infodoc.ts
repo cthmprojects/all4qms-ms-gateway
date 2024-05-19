@@ -1,3 +1,17 @@
+enum StatusEnum {
+  EMISSAO = 'Em emissao',
+  VALIDACAO = 'Em validacao',
+  APROVACAO = 'Em aprovacao',
+  REVISAO = 'Em revisao',
+  VALIDAREV = 'Em validacao da revisao',
+  APROVAREV = 'Em aprovacao da revisao',
+  DISTRIBUIDAO = 'Em distribuicao',
+  ASSINATURA = 'Em assinatura',
+  CANCELAMENTO = 'Em cancelamento',
+  APROVACANC = 'Em aprovacao do cancelamento',
+  CONCLUIDO = 'Concluido',
+}
+
 export type InfoDoc = {
   id: number;
   codigo: string;
@@ -19,5 +33,5 @@ export type InfoDoc = {
   emissor?: string;
   areaProcesso?: string;
   distribuicao?: string;
-  status?: string;
+  status?: StatusEnum;
 };

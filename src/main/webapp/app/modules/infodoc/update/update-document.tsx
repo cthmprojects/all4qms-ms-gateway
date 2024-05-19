@@ -24,6 +24,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { AddCircle } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
+import { RejectDocumentDialog } from './reject-document-dialog';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -60,7 +61,7 @@ const getProcesses = async () => {
   return response.data;
 };
 
-export const NewDocument = () => {
+export const UpdateDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -79,6 +80,8 @@ export const NewDocument = () => {
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+
+  const [openRejectModal, setOpenRejectModal] = useState(false);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -116,10 +119,15 @@ export const NewDocument = () => {
     }
   };
 
+  const handleCloseRejectModal = () => {
+    setOpenRejectModal(false);
+  };
+
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
 
   return (
     <>
+      <RejectDocumentDialog openModal={openRejectModal} handleClose={handleCloseRejectModal}></RejectDocumentDialog>
       <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
         <Row className="justify-content-center mt-5">
           <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">
@@ -314,9 +322,17 @@ export const NewDocument = () => {
               Voltar
             </Button>
             <Button>Salvar</Button>
-
+            <Button
+              className="ms-3"
+              variant="contained"
+              color="primary"
+              style={{ background: '#A23900', color: '#fff' }}
+              onClick={() => setOpenRejectModal(true)}
+            >
+              Reprovar
+            </Button>
             <Button className="ms-3" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-              Encaminhar
+              Aprovar
             </Button>
           </div>
         </div>
@@ -325,4 +341,4 @@ export const NewDocument = () => {
   );
 };
 
-export default NewDocument;
+export default UpdateDocument;
