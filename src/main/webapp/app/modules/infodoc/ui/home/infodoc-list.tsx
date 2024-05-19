@@ -3,7 +3,6 @@ import {
   Button,
   FormControl,
   IconButton,
-  InputAdornment,
   InputLabel,
   MenuItem,
   OutlinedInput,
@@ -21,6 +20,7 @@ import {
   Tabs,
   Tab,
   Tooltip,
+  TextField,
 } from '@mui/material';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -46,7 +46,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
-import { InfoDoc } from '../../models';
+import { InfoDoc, Enums, Process } from '../../models';
 import { listdocs } from '../../reducers/infodoc.reducer';
 
 interface TabPanelProps {
@@ -76,38 +76,6 @@ function a11yProps(index: number) {
   };
 }
 
-/*
-const [filters, setFilters] = useState({
-  dtIni: null,
-  dtFim: null,
-  areaProcesso: null,
-  origem: null,
-  situacao: null,
-});
-
- const handleApplyFilters = () => {
-  const { dtIni, dtFim, areaProcesso, origem,situacao } = filters;
-  /* dispatch(
-    listInfoDoc({
-      page: 0,
-      size: pageSize,
-      dtIni: dtIni?.toISOString(),
-      dtFim: dtFim?.toISOString(),
-      areaProcesso,
-      origem,
-      situacao,
-    })
-  ); 
-};*/
-
-/*useEffect(() => {
-  setFilters({ ...filters });
-});*/
-/*
-const clearFilters = () => {
-
-};*/
-
 /* Codigo vai ser removido quando o reducer for implementado a partir do endpoint correto */
 const infodocA = {
   codigo: 'string',
@@ -118,7 +86,7 @@ const infodocA = {
   area_processo: 'string',
   origem: 'string',
   situacao: 'Emissão',
-  status: 'Concluído',
+  /* status: 'Concluído', */
   distribuicao: 'string',
 };
 
@@ -141,7 +109,7 @@ const getSituacaoIcon = situacao => {
   }
 };
 
-const getStatusIcon = status => {
+/* const getStatusIcon = status => {
   switch (status) {
     case 'Em Emissão':
       return { icon: <EditIcon />, text: 'Em Emissão' };
@@ -168,18 +136,81 @@ const getStatusIcon = status => {
     default:
       return { icon: <InfoIcon />, text: 'Indefinido' };
   }
-};
+}; */
 
 const InfodocList = () => {
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [pageSize, setPageSize] = useState<number>(5);
   const [value, setValue] = useState(0);
   const dispatch = useAppDispatch();
+  /* const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities); */
+
   useEffect(() => {
     dispatch(listdocs({}));
   }, []);
   const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
+
+  //---------------------------------------------------------------
+  const [filters, setFilters] = useState({
+    dtIni: null,
+    dtFim: null,
+    idProcesso: null,
+    origem: null,
+    /* status: null, */
+    situacao: null,
+    pesquisa: null,
+  });
+
+  const handleApplyFilters = () => {
+    //const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa, status } = filters;
+    const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa } = filters;
+    dispatch(
+      listdocs({
+        page: 0,
+        size: pageSize,
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
+        origem,
+        idProcesso,
+        situacao,
+        //status,
+        pesquisa,
+      })
+    );
+  };
+
+  useEffect(() => {
+    setFilters({ ...filters });
+  }, [filters]);
+
+  const clearFilters = () => {
+    dispatch(
+      listdocs({
+        page: 0,
+        size: pageSize,
+        dtIni: new Date(),
+        dtFim: '',
+        idProcesso: 0,
+        origem: '',
+        situacao: '',
+        //  status: '',
+        pesquisa: '',
+      })
+    );
+    setFilters({
+      dtIni: null,
+      dtFim: null,
+      idProcesso: null,
+      origem: null,
+      situacao: null,
+      //status: null,
+      pesquisa: null,
+    });
+  };
+
+  //---------------------------------------------------------------
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -191,7 +222,7 @@ const InfodocList = () => {
     } else {
       localStorage.setItem('infodoc', '0');
     }
-  }, []);
+  }, [infodocs]);
 
   const columns = [
     'Código',
@@ -202,7 +233,7 @@ const InfodocList = () => {
     'Área/Processo',
     'Origem',
     'Situação',
-    'Status',
+    // 'Status',
     'Distribuição',
     'Ações',
   ];
@@ -269,7 +300,7 @@ const InfodocList = () => {
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        {getStatusIcon(infodoc.status).icon}
+                        {/* {getStatusIcon(infodoc.status).icon} */}
                         {infodoc.status}
                       </Box>
                     </TableCell>
@@ -319,75 +350,112 @@ const InfodocList = () => {
           <Typography className="link">Consultar Documentos</Typography>
         </Breadcrumbs>
         <h1 className="title">Lista Informações Documentais</h1>
+
         <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
           <Button
             variant="contained"
-            className="primary-button me-2 infodoc-list-form-field"
-            style={{ marginRight: '10px', height: '58px' }}
+            className="primary-button me-2 rnc-list-form-field"
+            style={{ height: '49px' }}
             onClick={() => navigate('/infodoc/upload-file')}
           >
-            NOVO DOCUMENTO
+            Novo Registro
           </Button>
+
           <FormControl className="me-2">
             <DatePicker
-              // locale='pt-BR'
-              selected={startDate}
-              onChange={date => setStartDate(date)}
+              selected={filters.dtIni}
+              onChange={date => setFilters({ ...filters, dtIni: date })}
+              dateFormat="dd/MM/yyyy"
               className="infodoc-list-date-picker mt-4"
+              locale="pt-BR"
+              id="start-date-picker"
+              placeholderText="Data de início"
             />
-            <label htmlFor="" className="infodoc-list-date-label">
-              Ínicio
+            <label htmlFor="start-date-picker" className="infodoc-list-date-label">
+              Início
             </label>
           </FormControl>
-          <FormControl className="me-2">
+          <FormControl className="infodoc-list-form-field me-2">
             <DatePicker
-              // locale='pt-BR'
-              selected={endDate}
-              onChange={date => setEndDate(date)}
+              selected={filters.dtFim}
+              onChange={date => setFilters({ ...filters, dtFim: date })}
+              dateFormat={'dd/MM/yyyy'}
               className="infodoc-list-date-picker mt-4"
+              placeholderText="Data de fim"
             />
             <label htmlFor="" className="infodoc-list-date-label">
               Fim
             </label>
           </FormControl>
           <FormControl className="infodoc-list-form-field me-2">
-            <InputLabel>Área / Processo</InputLabel>
-            <Select label="Selecione" name="">
-              <MenuItem value="1">Produção</MenuItem>
-              <MenuItem value="2">Qualidade</MenuItem>
+            <InputLabel>Processo</InputLabel>
+            <Select value={filters.idProcesso} onChange={e => setFilters({ ...filters, idProcesso: e.target.value })} label="Processo">
+              {/* {processes?.map((process, index) => (
+                    <MenuItem key={index} value={process.id}>
+                      {process.descricao}
+                    </MenuItem>
+                  ))} */}
             </Select>
           </FormControl>
-          <FormControl className="infodoc-list-form-field me-2">
-            <InputLabel>Origem</InputLabel>
-            <Select label="Selecione" name="">
-              <MenuItem value="1">Interna</MenuItem>
-              <MenuItem value="2">Externa</MenuItem>
-            </Select>
-          </FormControl>
+
+          {/* <FormControl className="me-2">
+            <InputLabel>Status</InputLabel>
+                <Select
+                  value={filters.status}
+                  onChange={e => setFilters({ ...filters, status: e.target.value })}
+                  label="Status"
+                >
+                  {enums?.docStatus.map((situacao, index) => (
+                    <MenuItem key={index} value={status.value}>
+                      {status.value}
+                    </MenuItem>
+                  ))}
+                </Select>
+
+          </FormControl> */}
+
           <FormControl className="infodoc-list-form-field me-2">
             <InputLabel>Situação</InputLabel>
-            <Select label="Selecione" name="">
-              <MenuItem value="1">Homologada</MenuItem>
-              <MenuItem value="2">Obsoleto</MenuItem>
-              <MenuItem value="3">Edição</MenuItem>
+            <Select value={filters.situacao} onChange={e => setFilters({ ...filters, situacao: e.target.value })} label="Situação">
+              {/* {enums?.docSituacao.map((situacao, index) => (
+                    <MenuItem key={index} value={situacao.value}>
+                      {situacao.value}
+                    </MenuItem>
+                  ))} */}
             </Select>
           </FormControl>
+
           <FormControl id="search-filter">
-            <InputLabel htmlFor="outlined-adornment-search" className="mui-label-transform">
-              Pesquisar
-            </InputLabel>
-            <OutlinedInput
-              id="outlined-adornment-search"
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton aria-label="toggle password visibility" edge="end">
-                    <Search />
-                  </IconButton>
-                </InputAdornment>
-              }
+            <TextField
+              className="m-2"
+              label="Descrição"
+              onChange={event => {
+                setFilters({ ...filters, pesquisa: event.target.value });
+              }}
+              placeholder="Descrição"
+              value={filters.pesquisa || ''}
             />
           </FormControl>
+
+          <Button
+            variant="contained"
+            className="update-button me-2 rnc-list-form-field"
+            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
+            onClick={handleApplyFilters}
+          >
+            Pesquisar
+          </Button>
+
+          <Button
+            variant="contained"
+            className="secondary-button me-2 rnc-list-form-field"
+            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
+            onClick={clearFilters}
+          >
+            Limpar
+          </Button>
         </div>
+
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
