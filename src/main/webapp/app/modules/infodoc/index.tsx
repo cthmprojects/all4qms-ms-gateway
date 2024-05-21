@@ -4,7 +4,7 @@ import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import InfodocList from './ui/home/infodoc-list';
-import UploadInfoFile from './ui/forms/upload-files';
+import UploadInfoFile from './ui/dialogs/upload-dialog/upload-files';
 import NewDocument from './new/new-document';
 import rncReducer from '../rnc/reducers';
 import infodocReducers from './reducers';

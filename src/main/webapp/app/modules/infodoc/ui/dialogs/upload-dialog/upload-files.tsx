@@ -66,11 +66,15 @@ const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
             </div>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button variant="contained" className="me-2 close-button" onClick={handleClose}>
+        <DialogActions sx={{ paddingBottom: '20px' }}>
+          <Button className="me-2 format-button" onClick={handleClose}>
             Voltar
           </Button>
-          <Button disabled={files.length == 0} className="add-button me-3" onClick={() => navigate('/infodoc/upload-file/new')}>
+          <Button
+            disabled={files.length == 0}
+            className="add-button me-3 format-button"
+            onClick={() => navigate('/infodoc/upload-file/new')}
+          >
             Adicionar
           </Button>
         </DialogActions>
