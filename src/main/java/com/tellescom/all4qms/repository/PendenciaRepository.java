@@ -29,6 +29,9 @@ public interface PendenciaRepository extends ReactiveCrudRepository<Pendencia, L
     @Query("SELECT * FROM pendencia entity WHERE entity.responsavel_id = :id")
     Flux<Pendencia> findByResponsavel(Long id);
 
+    @Query("SELECT * FROM pendencia entity WHERE entity.responsavel_id = :id and entity.status = false")
+    Flux<Pendencia> findByResponsavelPendencias(Long id, Pageable pageable);
+
     @Query("SELECT * FROM pendencia entity WHERE entity.responsavel_id IS NULL")
     Flux<Pendencia> findAllWhereResponsavelIsNull();
 
