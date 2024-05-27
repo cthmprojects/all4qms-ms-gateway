@@ -24,6 +24,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { AddCircle } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
+import downloadFile from '../infodoc-store';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -103,6 +104,13 @@ export const NewDocument = () => {
   const onKeywordAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setKeywordList([...keywordList, keyword]);
     setKeyword('');
+  };
+
+  const onFileClicked = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const downloadUrl = 'http://www.psicologia.pt/artigos/textos/TL0032.PDF'; // await getDownloadUrl(attachment);
+    if (downloadUrl) {
+      window.open(downloadUrl, '_blank', 'noreferrer');
+    }
   };
 
   const onNoValidateChanged = () => {
@@ -236,7 +244,13 @@ export const NewDocument = () => {
               </Select>
             </FormControl>
 
-            <Button className="ms-2" variant="outlined" size="large" style={{ backgroundColor: '#E0E0E0', height: '55px' }}>
+            <Button
+              className="ms-2"
+              variant="outlined"
+              size="large"
+              onClick={event => onFileClicked(event)}
+              style={{ backgroundColor: '#E0E0E0', height: '55px' }}
+            >
               <VisibilityIcon className="pe-1 pb-1" />
               Arquivo
             </Button>
