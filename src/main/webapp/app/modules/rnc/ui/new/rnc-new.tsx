@@ -12,7 +12,7 @@ import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { Enums, GeneralAudit, RawMaterial, Rnc } from '../../models';
+import { Enums, GeneralAudit, Process, RawMaterial, Rnc } from '../../models';
 import { getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
@@ -43,8 +43,6 @@ export const RNCNew = () => {
   const dispatch = useAppDispatch();
   const { id } = useParams();
 
-  const [processOptions, setProcessOptions] = useState([]);
-
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(list({}));
@@ -59,9 +57,7 @@ export const RNCNew = () => {
       setEvidences(['']);
     }
 
-    getProcesses().then(data => {
-      setProcessOptions(data);
-    });
+    dispatch(getProcesses());
   }, []);
 
   const navigate = useNavigate();
@@ -461,6 +457,7 @@ export const RNCNew = () => {
   const rncs: Array<Rnc> = useAppSelector(state => state.all4qmsmsgateway.rnc.entities);
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
 
   useEffect(() => {
     if (rnc) {
@@ -606,7 +603,7 @@ export const RNCNew = () => {
                       setFirstForm({ ...firstForm, processOrigin: { value: event.target.value, error: firstForm.processOrigin.error } })
                     }
                   >
-                    {processOptions.map((process, i) => (
+                    {processes?.map((process, i) => (
                       <MenuItem value={process.id} key={`process-${i}`}>
                         {process.nome}
                       </MenuItem>
@@ -646,7 +643,7 @@ export const RNCNew = () => {
                       setFirstForm({ ...firstForm, processTarget: { value: event.target.value, error: firstForm.processTarget.error } })
                     }
                   >
-                    {processOptions.map((process, i) => (
+                    {processes?.map((process, i) => (
                       <MenuItem value={process.id} key={`process-${i}`}>
                         {process.nome}
                       </MenuItem>

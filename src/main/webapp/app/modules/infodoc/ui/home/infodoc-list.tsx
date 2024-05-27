@@ -1,7 +1,6 @@
 import {
   Breadcrumbs,
   Button,
-  Divider,
   FormControl,
   IconButton,
   InputAdornment,
@@ -16,23 +15,42 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
   Select,
   Box,
   Tabs,
   Tab,
+  Tooltip,
 } from '@mui/material';
 
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PrintIcon from '@mui/icons-material/Print';
+import CancelIcon from '@mui/icons-material/Cancel';
 import DatePicker from 'react-datepicker';
 import React, { useEffect, useState } from 'react';
 import { Card, Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from '@mui/icons-material';
-
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import BlockIcon from '@mui/icons-material/Block';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import HourglassFullIcon from '@mui/icons-material/HourglassFull';
+import PrintDisabledIcon from '@mui/icons-material/PrintDisabled';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
-import infodocStore, { INFODOC } from '../../infodoc-store';
+import { InfoDoc } from '../../models';
+import { listdocs } from '../../reducers/infodoc.reducer';
+import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
+import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
+import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -61,13 +79,113 @@ function a11yProps(index: number) {
   };
 }
 
+/*
+const [filters, setFilters] = useState({
+  dtIni: null,
+  dtFim: null,
+  areaProcesso: null,
+  origem: null,
+  situacao: null,
+});
+
+ const handleApplyFilters = () => {
+  const { dtIni, dtFim, areaProcesso, origem,situacao } = filters;
+  /* dispatch(
+    listInfoDoc({
+      page: 0,
+      size: pageSize,
+      dtIni: dtIni?.toISOString(),
+      dtFim: dtFim?.toISOString(),
+      areaProcesso,
+      origem,
+      situacao,
+    })
+  ); 
+};*/
+
+/*useEffect(() => {
+  setFilters({ ...filters });
+});*/
+/*
+const clearFilters = () => {
+
+};*/
+
+/* Codigo vai ser removido quando o reducer for implementado a partir do endpoint correto */
+const infodocA = {
+  codigo: 'string',
+  titulo: 'string',
+  emissor: 'string',
+  revisao: 'string',
+  data: new Date(),
+  area_processo: 'string',
+  origem: 'string',
+  situacao: 'Emissão',
+  status: 'Concluído',
+  distribuicao: 'string',
+};
+
+/* ----------------------------------------------------------------  */
+
+const getSituacaoIcon = situacao => {
+  switch (situacao) {
+    case 'Emissão':
+      return { icon: <EditIcon />, text: 'Em Emissão' };
+    case 'Homologado':
+      return { icon: <CheckCircleIcon />, text: 'Homologado' };
+    case 'Revisão':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Revisão' };
+    case 'Obsoleto':
+      return { icon: <BlockIcon />, text: 'Obsoleto' };
+    case 'Cancelado':
+      return { icon: <CancelIcon />, text: 'Cancelado' };
+    default:
+      return { icon: <InfoIcon />, text: 'Indefinido' };
+  }
+};
+
+const getStatusIcon = status => {
+  switch (status) {
+    case 'Em Emissão':
+      return { icon: <EditIcon />, text: 'Em Emissão' };
+    case 'Em Validação':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Validação' };
+    case 'Em Aprovação':
+      return { icon: <ThumbUpIcon />, text: 'Em Aprovação' };
+    case 'Em Revisão':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Revisão' };
+    case 'Em Validação da Revisão':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Validação da Revisão' };
+    case 'Em Aprovação da Revisão':
+      return { icon: <ThumbUpIcon />, text: 'Em Aprovação da Revisão' };
+    case 'Em Distribuição':
+      return { icon: <HourglassFullIcon />, text: 'Em Distribuição' };
+    case 'Em Assinatura':
+      return { icon: <AssignmentIndIcon />, text: 'Em Assinatura' };
+    case 'Em Cancelamento':
+      return { icon: <CancelIcon />, text: 'Em Cancelamento' };
+    case 'Em Aprovação do Cancelamento':
+      return { icon: <ThumbDownIcon />, text: 'Em Aprovação do Cancelamento' };
+    case 'Concluído':
+      return { icon: <DoneAllIcon />, text: 'Concluído' };
+    default:
+      return { icon: <InfoIcon />, text: 'Indefinido' };
+  }
+};
+
 const InfodocList = () => {
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [value, setValue] = useState(0);
-
-  const infodocs = infodocStore(state => state.infodocs);
+  const [uploadFileModal, setUploadFileModal] = useState(false);
+  const [requestCopyModal, setRequestCopyModal] = useState(false);
+  const [cancelDocumentModal, setCancelDocumentModal] = useState(false);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(listdocs({}));
+  }, []);
+  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -81,7 +199,31 @@ const InfodocList = () => {
     }
   }, []);
 
-  const columns = ['Código', 'Título', 'Emissor', 'Revisão', 'Data', 'Área/Processo', 'Origem', 'Situação', 'Distribuição', 'Ações'];
+  const columns = [
+    'Código',
+    'Título',
+    'Emissor',
+    'Revisão',
+    'Data',
+    'Área/Processo',
+    'Origem',
+    'Situação',
+    'Status',
+    'Distribuição',
+    'Ações',
+  ];
+
+  const handleCloseUploadFileModal = () => {
+    setUploadFileModal(false);
+  };
+
+  const handleCloseRequestCopyModal = () => {
+    setRequestCopyModal(false);
+  };
+
+  const handleCancelDocumentModal = () => {
+    setCancelDocumentModal(false);
+  };
 
   const formatDateToString = (date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
@@ -91,7 +233,26 @@ const InfodocList = () => {
     return `${day}/${month}/${year}`;
   };
 
-  //////////////////////////////////
+  const onEditClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // navigate(`/somepath/${id}`);
+    alert('Editar Doc - Em Desenvolvimento!');
+  };
+
+  const onViewClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // navigate(`/somepath/${id}`);
+    alert('Visualizar Doc - Em Desenvolvimento!');
+  };
+
+  const onPrintClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // navigate(`/somepath/${id}`);
+    alert('Imprimir Doc - Em Desenvolvimento!');
+  };
+
+  const onCancelClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+    // navigate(`/somepath/${id}`);
+    alert('Cancelar Doc - Em Desenvolvimento!');
+  };
+
   const renderTable = () => {
     if (infodocs?.length > 0) {
       return (
@@ -107,37 +268,46 @@ const InfodocList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {infodocs?.map((infodoc: INFODOC) => (
+                {infodocs?.map((infodoc: InfoDoc) => (
                   <TableRow key={infodoc.codigo}>
-                    <TableCell>{infodoc.codigo}</TableCell>
+                    <Tooltip title={infodoc.titulo}>
+                      <TableCell>{infodoc.codigo}</TableCell>
+                    </Tooltip>
                     <TableCell>{infodoc.titulo}</TableCell>
                     <TableCell>{infodoc.emissor}</TableCell>
                     <TableCell>{infodoc.revisao}</TableCell>
-                    <TableCell>{formatDateToString(infodoc.data)}</TableCell>
-                    <TableCell>{infodoc.area_processo}</TableCell>
+                    <TableCell>{formatDateToString(infodoc.dataCricao)}</TableCell>
+                    <TableCell>{infodoc.areaProcesso}</TableCell>
                     <TableCell>{infodoc.origem}</TableCell>
-                    <TableCell>{infodoc.situacao}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {getSituacaoIcon(infodoc.enumSituacao).icon}
+                        {infodoc.enumSituacao}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {getStatusIcon(infodoc.status).icon}
+                        {infodoc.status}
+                      </Box>
+                    </TableCell>
                     <TableCell>{infodoc.distribuicao}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" aria-label="add to shopping cart">
+                      <IconButton color="primary" onClick={event => onEditClicked(infodoc.codigo, event)}>
                         <EditIcon sx={{ color: '#e6b200' }} />
+                      </IconButton>
+                      <IconButton color="primary" onClick={event => onViewClicked(infodoc.codigo, event)}>
+                        <VisibilityIcon sx={{ color: '#0EBDCE' }} />
+                      </IconButton>
+                      <IconButton color="primary" onClick={event => onPrintClicked(infodoc.codigo, event)}>
+                        <PrintIcon sx={{ color: '#03AC59' }} />
+                      </IconButton>
+                      <IconButton color="primary" onClick={event => onCancelClicked(infodoc.codigo, event)}>
+                        <CancelIcon sx={{ color: '#FF0000' }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
-
-                {/* {rows.map(row => (
-                          <TableRow>
-                            {row.map(item => (
-                              <TableCell>{item}</TableCell>
-                            ))}
-                            <TableCell>
-                              <IconButton color="primary" aria-label="add to shopping cart">
-                                <EditIcon sx={{ color: '#e6b200' }} />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        ))} */}
               </TableBody>
             </Table>
           </TableContainer>
@@ -159,6 +329,17 @@ const InfodocList = () => {
     //////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
+        <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
+        <RequestCopyDialog
+          open={requestCopyModal}
+          handleClose={handleCloseRequestCopyModal}
+          documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+        />
+        <CancelDocumentDialog
+          open={cancelDocumentModal}
+          handleClose={handleCancelDocumentModal}
+          documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+        />
         <Breadcrumbs aria-label="breadcrumb">
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
@@ -172,7 +353,7 @@ const InfodocList = () => {
             variant="contained"
             className="primary-button me-2 infodoc-list-form-field"
             style={{ marginRight: '10px', height: '58px' }}
-            onClick={() => navigate('/infodoc/upload-file')}
+            onClick={() => setUploadFileModal(true)}
           >
             NOVO DOCUMENTO
           </Button>

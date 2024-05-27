@@ -74,3 +74,14 @@
   justify-content: center;
   padding-top: 20px;
 }
+
+.add-button {
+  background: #ebc139;
+  font-weight: 500;
+  color: #384150;
+}
+
+.close-button {
+  background: #d9d9d9;
+  color: #4e4d4d;
+}

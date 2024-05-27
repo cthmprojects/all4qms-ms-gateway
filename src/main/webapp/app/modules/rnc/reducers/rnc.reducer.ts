@@ -60,6 +60,8 @@ interface ListParams {
   dtFim?: string;
   page?: number;
   size?: number;
+  descricao?: string;
+  origemNC?: string;
 }
 
 interface ProductComplaint {
@@ -73,7 +75,7 @@ interface ClientComplaint {
 }
 
 export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
-  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size } = params;
+  const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size, descricao, origemNC } = params;
   const queryParams: string[] = [];
 
   if (statusAtual) {
@@ -102,6 +104,14 @@ export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
 
   if (size !== undefined) {
     queryParams.push(`size=${size}`);
+  }
+
+  if (descricao) {
+    queryParams.push(`descricaoNc=${encodeURI(descricao)}`);
+  }
+
+  if (origemNC) {
+    queryParams.push(`origemNC=${origemNC}`);
   }
 
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
