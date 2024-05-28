@@ -86,6 +86,12 @@ public class PendenciaService {
         return pendenciaRepository.findAllBy(pageable).map(pendenciaMapper::toDto);
     }
 
+    @Transactional(readOnly = true)
+    public Flux<PendenciaDTO> findAllPendenciaResponsavel(Long id, Pageable pageable) {
+        log.debug("Request to get all Pendencias do Responsavel");
+        return pendenciaRepository.findByResponsavelPendencias(id, pageable).map(pendenciaMapper::toDto);
+    }
+
     /**
      * Get all the pendencias with eager load of many-to-many relationships.
      *
