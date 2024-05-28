@@ -1,4 +1,4 @@
-enum StatusEnum {
+export enum StatusEnum {
   EMISSAO = 'Em emissao',
   VALIDACAO = 'Em validacao',
   APROVACAO = 'Em aprovacao',
