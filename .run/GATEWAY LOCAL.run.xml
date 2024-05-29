@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="GATEWAY LOCAL" type="Application" factoryName="Application">
-    <option name="ALTERNATIVE_JRE_PATH" value="C:\Program Files\Java\jdk-11" />
+    <option name="ALTERNATIVE_JRE_PATH" value="17" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="com.tellescom.all4qms.All4QmsMsGatewayApp" />
     <module name="all-4-qms-ms-gateway" />

@@ -237,7 +237,7 @@ const RncList = ({}) => {
     'Emissão',
     'Emissor',
     'Descrição',
-    'Responsável',
+    'Receptor',
     // 'Prazo',
     // 'Ações',
     'Verificação',
@@ -344,14 +344,14 @@ const RncList = ({}) => {
                     <TableRow key={id}>
                       <TableCell>{numNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
-                      <TableCell>{emissorNc?.nome || '-'}</TableCell>
+                      <TableCell>{emissor}</TableCell>
                       <TableCell> {descricao ?? '-'}</TableCell>
-                      <TableCell>{usuarioAtual?.nome || '-'}</TableCell>
+                      <TableCell>{responsavel}</TableCell>
                       {/* <TableCell> {aprovacao ? formatDateToString(new Date(aprovacao?.dataEficacia)) : '-'} </TableCell>
                       <TableCell> {aprovacao ? formatDateToString(new Date(rnc.aprovacao?.dataFechamento)) : '-'} </TableCell> */}
-                      <TableCell> {formatDateToString(new Date(dtNC))} </TableCell>
-                      <TableCell> {eficacia ? formatDateToString(new Date(eficacia)) : '-'} </TableCell>
                       <TableCell> {verificacao ? formatDateToString(new Date(verificacao)) : '-'} </TableCell>
+                      <TableCell> {eficacia ? formatDateToString(new Date(eficacia)) : '-'} </TableCell>
+                      <TableCell> {fechamento ? formatDateToString(new Date(fechamento)) : '-'} </TableCell>
                       <TableCell>{statusAtual}</TableCell>
                       <TableCell>
                         <IconButton onClick={event => onViewClicked(id, event)}>
