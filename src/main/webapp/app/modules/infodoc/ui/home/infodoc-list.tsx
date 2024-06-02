@@ -51,6 +51,7 @@ import { listdocs } from '../../reducers/infodoc.reducer';
 import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
 import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
 import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
+import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -146,6 +147,7 @@ const InfodocList = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [pageSize, setPageSize] = useState<number>(5);
   const [value, setValue] = useState(0);
+  const [distributionModal, setDistributionModal] = useState(false);
   const [uploadFileModal, setUploadFileModal] = useState(false);
   const [requestCopyModal, setRequestCopyModal] = useState(false);
   const [cancelDocumentModal, setCancelDocumentModal] = useState(false);
@@ -246,6 +248,10 @@ const InfodocList = () => {
 
   const handleCancelDocumentModal = () => {
     setCancelDocumentModal(false);
+  };
+
+  const handleDistributionModal = () => {
+    setDistributionModal(false);
   };
 
   const formatDateToString = (date: Date) => {
@@ -352,6 +358,11 @@ const InfodocList = () => {
     //////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
+        <DistributionDialog
+          open={distributionModal}
+          handleClose={handleDistributionModal}
+          documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+        />
         <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
         <RequestCopyDialog
           open={requestCopyModal}
