@@ -1,13 +1,78 @@
-import { Card, CardContent, CardHeader, Stack, TextField, Typography } from '@mui/material';
+import { Card, CardContent, CardHeader, Stack, TextField } from '@mui/material';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { NonConformity } from 'app/modules/rnc/models';
-import React from 'react';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import React, { useEffect, useState } from 'react';
 
 type NonConformitySummaryProps = {
   nonConformity: NonConformity | null;
 };
 
 const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
-  const formatTimestamp = (timestamp: Date): string => {
+  const [emitterName, setEmitterName] = useState<string>('');
+  const [emitterProcessName, setEmitterProcessName] = useState<string>('');
+  const [receiverName, setReceiverName] = useState<string>('');
+  const [receiverProcessName, setReceiverProcessName] = useState<string>('');
+
+  const dispatch = useAppDispatch();
+  const processes = useAppSelector(state => state.all4qmsmsgateway.process.entities);
+  const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
+
+  useEffect(() => {
+    if (!nonConformity) {
+      return;
+    }
+
+    dispatch(getUsers({}));
+    dispatch(getProcesses());
+  }, [nonConformity]);
+
+  useEffect(() => {
+    if (!nonConformity || processes.length <= 0) {
+      return;
+    }
+
+    const emitterProcessId: number = nonConformity.processoEmissor;
+    const emitterProcess = filterProcess(emitterProcessId);
+
+    const receiverProcessId: number = nonConformity.idReceptorNC;
+    const receiverProcess = filterProcess(receiverProcessId);
+
+    setEmitterProcessName(emitterProcess?.nome ?? '');
+    setReceiverProcessName(receiverProcess?.nome ?? '');
+  }, [nonConformity, processes]);
+
+  useEffect(() => {
+    if (!nonConformity || users.length <= 0) {
+      return;
+    }
+
+    const emitterId: number = nonConformity.idEmissorNC;
+    const emitter = filterUser(emitterId);
+
+    const receiverId: number = nonConformity.idReceptorNC;
+    const receiver = filterUser(receiverId);
+
+    setEmitterName(emitter?.nome ?? '');
+    setReceiverName(receiver?.nome ?? '');
+  }, [nonConformity, users]);
+
+  const filterProcess = (id: number) => {
+    const filteredProcesses = processes.filter(process => process.id === id);
+    return filteredProcesses.length > 0 ? filteredProcesses[0] : null;
+  };
+
+  const filterUser = (id: number) => {
+    const filteredUsers = users.filter(user => user.id === id);
+    return filteredUsers.length > 0 ? filteredUsers[0] : null;
+  };
+
+  const formatTimestamp = (timestamp: Date | null): string => {
+    if (!timestamp) {
+      return '';
+    }
+
     const date: Date = new Date(timestamp);
     const year: number = date.getFullYear();
     const month: number = date.getMonth() + 1;
@@ -32,16 +97,16 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
       <CardContent>
         <Stack spacing={2}>
           <Stack direction="row" spacing={2}>
-            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.numNC} />
-            <TextField disabled label="Emitido por" placeholder="Emitido por" value={nonConformity?.idEmissorNC} />
-            <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={nonConformity?.processoEmissor} />
-            <TextField disabled label="Encaminhado para" placeholder="Encaminhado para" value={nonConformity?.idReceptorNC} />
-            <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={nonConformity?.processoNC} />
+            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.numNC ?? ''} />
+            <TextField disabled label="Emitido por" placeholder="Emitido por" value={emitterName} />
+            <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={emitterProcessName} />
+            <TextField disabled label="Encaminhado para" placeholder="Encaminhado para" value={receiverName} />
+            <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={receiverProcessName} />
             <TextField disabled label="Data" placeholder="Data" value={formatTimestamp(nonConformity?.dtNC)} />
           </Stack>
           <Stack direction="row" spacing={2}>
-            <TextField disabled label="Tipo" placeholder="Tipo" value={nonConformity?.tipoNC} />
-            <TextField disabled label="Origem" placeholder="Origem" value={nonConformity?.origemNC} />
+            <TextField disabled label="Tipo" placeholder="Tipo" value={nonConformity?.tipoNC ?? ''} />
+            <TextField disabled label="Origem" placeholder="Origem" value={nonConformity?.origemNC ?? ''} />
           </Stack>
         </Stack>
       </CardContent>

@@ -210,6 +210,30 @@ public class PendenciaResource {
         return ResponseUtil.wrapOrNotFound(pendenciaDTO);
     }
 
+    @GetMapping(value = "/pendencias/usuario/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<List<PendenciaDTO>>> getAllPendenciasResponsavel(
+        @PathVariable("id") Long id,
+        Pageable pageable,
+        ServerHttpRequest request,
+        boolean eagerload
+    ) {
+        log.debug("REST request to get a page of Pendencias do Responsavel");
+        return pendenciaService
+            .countAll()
+            .zipWith(pendenciaService.findAllPendenciaResponsavel(id, pageable).collectList())
+            .map(countWithEntities ->
+                ResponseEntity
+                    .ok()
+                    .headers(
+                        PaginationUtil.generatePaginationHttpHeaders(
+                            UriComponentsBuilder.fromHttpRequest(request),
+                            new PageImpl<>(countWithEntities.getT2(), pageable, countWithEntities.getT1())
+                        )
+                    )
+                    .body(countWithEntities.getT2())
+            );
+    }
+
     /**
      * {@code DELETE  /pendencias/:id} : delete the "id" pendencia.
      *
