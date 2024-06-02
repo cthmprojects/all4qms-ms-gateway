@@ -3,7 +3,7 @@ import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducer
 import axios from 'axios';
 import { DocumentacaoRequest, InfoDoc } from '../models';
 
-const apiDocumentacaoUrl = 'services/all4qmsmsinfodoc/api/documentacaos';
+const apiDocumentacaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/documentos';
 
 // Initial State
 const initialState: EntityState<InfoDoc> = {

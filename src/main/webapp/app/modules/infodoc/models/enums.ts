@@ -5,7 +5,7 @@ export type Option = {
 };
 
 export type Enums = {
-  docOrigem: Array<Option>;
-  docStatus: Array<Option>;
-  docSituacao: Array<Option>;
+  origem: Array<Option>;
+  situacao: Array<Option>;
+  prazo: Array<Option>;
 };
