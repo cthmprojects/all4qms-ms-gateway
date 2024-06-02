@@ -46,7 +46,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
-import { InfoDoc, Enums, Process } from '../../models';
+import { InfoDoc, StatusEnum } from '../../models';
 import { listdocs } from '../../reducers/infodoc.reducer';
 import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
 import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
@@ -152,6 +152,7 @@ const InfodocList = () => {
   const [requestCopyModal, setRequestCopyModal] = useState(false);
   const [cancelDocumentModal, setCancelDocumentModal] = useState(false);
   const dispatch = useAppDispatch();
+  const statusValues = Object.keys(StatusEnum) as Array<keyof typeof StatusEnum>;
   /* const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities); */
 
@@ -165,26 +166,21 @@ const InfodocList = () => {
     dtIni: null,
     dtFim: null,
     idProcesso: null,
-    origem: null,
-    /* status: null, */
     situacao: null,
     pesquisa: null,
   });
 
   const handleApplyFilters = () => {
-    //const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa, status } = filters;
-    const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa } = filters;
+    const { dtIni, dtFim, idProcesso, situacao, pesquisa } = filters;
     dispatch(
       listdocs({
         page: 0,
         size: pageSize,
         dtIni: dtIni?.toISOString(),
         dtFim: dtFim?.toISOString(),
-        origem,
         idProcesso,
-        situacao,
-        //status,
-        pesquisa,
+        situacao: situacao,
+        pesquisa: pesquisa,
       })
     );
   };
@@ -201,9 +197,7 @@ const InfodocList = () => {
         dtIni: new Date(),
         dtFim: '',
         idProcesso: 0,
-        origem: '',
         situacao: '',
-        //  status: '',
         pesquisa: '',
       })
     );
@@ -211,9 +205,7 @@ const InfodocList = () => {
       dtIni: null,
       dtFim: null,
       idProcesso: null,
-      origem: null,
       situacao: null,
-      //status: null,
       pesquisa: null,
     });
   };
@@ -457,11 +449,9 @@ const InfodocList = () => {
           <FormControl className="infodoc-list-form-field me-2">
             <InputLabel>Situação</InputLabel>
             <Select value={filters.situacao} onChange={e => setFilters({ ...filters, situacao: e.target.value })} label="Situação">
-              {/* {enums?.docSituacao.map((situacao, index) => (
-                    <MenuItem key={index} value={situacao.value}>
-                      {situacao.value}
-                    </MenuItem>
-                  ))} */}
+              {statusValues.map(key => (
+                <MenuItem value={key}>{StatusEnum[key]}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 
