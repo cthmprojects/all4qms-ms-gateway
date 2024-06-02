@@ -84,12 +84,12 @@ export const NewDocument = () => {
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
 
-    getProcesses().then(data => {
-      setProcesses(data);
-      if (data.length > 0) {
-        setSelectedProcess(data[0].id);
-      }
-    });
+    // getProcesses().then(data => {
+    //   setProcesses(data);
+    //   if (data.length > 0) {
+    //     setSelectedProcess(data[0].id);
+    //   }
+    // });
   }, []);
 
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {

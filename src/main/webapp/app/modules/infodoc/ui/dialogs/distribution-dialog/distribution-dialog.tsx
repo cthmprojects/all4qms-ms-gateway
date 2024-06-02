@@ -46,7 +46,7 @@ export const DistributionDialog = ({ open, handleClose, documentTitle }: Distrib
         setSelectedProcess(data[0].id);
       }
     });
-  });
+  }, []);
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth={'lg'}>
