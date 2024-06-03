@@ -329,11 +329,9 @@ export const saveDescription = createAsyncThunk('rnc/description/save', async (d
   formData.append('evidenciaObjetiva', description.evidence);
   formData.append('naoConformidade', description.rncId.toString());
 
-  // Convert the array of File objects to a Blob object
   for (let i = 0; i < description.anexos.length; i++) {
     const anexo = description.anexos[i];
-    // const blob = new Blob(anexo);
-    formData.append(`anexos[${i}]`, anexo);
+    formData.append('anexos', anexo);
   }
 
   const response = await axios.post(descriptionApiUrl, formData, {
