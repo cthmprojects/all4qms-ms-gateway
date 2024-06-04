@@ -24,7 +24,7 @@ const NonConformityDescriptionSummary = ({ description }: NonConformityDescripti
               <Stack>
                 <TextField disabled label="Evidência objetiva" placeholder="Evidência objetiva" value={evidence.evidencia ?? ''} />
                 {evidence.nomeAnexo && evidence.idAnexo && (
-                  <Link href={`/api/nao-conformidades/download/${evidence.idAnexo}`}>{evidence.nomeAnexo}</Link>
+                  <Link href={`services/all4qmsmsrnc/api/nao-conformidades/download/${evidence.idAnexo}`}>{evidence.nomeAnexo}</Link>
                 )}
               </Stack>
             ))}
