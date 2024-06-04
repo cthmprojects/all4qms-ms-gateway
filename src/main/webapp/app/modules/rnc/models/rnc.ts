@@ -296,9 +296,22 @@ export type NonConformityOrigin = {
   mpprod: NonConformityRawMaterial;
 };
 
+export type NonConformityEvidence = {
+  evidencia: string;
+  nomeAnexo: string;
+  idAnexo: number;
+};
+
+export type NonConformitySummarizedDescription = {
+  detalhesNaoConformidade: string;
+  requisitoDescumprido: string;
+  evidencias: Array<NonConformityEvidence>;
+};
+
 export type CompleteNc = {
   naoConformidade: NonConformity;
   descricaoNC: Array<NonConformityDescription>;
+  descricaoNCv2: NonConformitySummarizedDescription;
   origem: NonConformityOrigin;
   abrangencia: NonConformityCoverage;
   acaoImediata: Array<NonConformityImmediateAction>;
