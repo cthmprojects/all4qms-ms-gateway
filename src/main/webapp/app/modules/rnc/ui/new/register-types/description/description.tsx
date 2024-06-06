@@ -1,7 +1,7 @@
 import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
 import { useAppDispatch } from 'app/config/store';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './description.css';
 
 type RncDescriptionProps = {
@@ -73,8 +73,6 @@ export const DescriptionRnc = ({
 
   const renderEvidences = () => {
     if (evidences.length > 0) {
-      console.log(evidences);
-
       return (
         <>
           {evidences.map((evidencia, index) => (
