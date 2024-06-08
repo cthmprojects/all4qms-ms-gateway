@@ -27,7 +27,7 @@ import axios from 'axios';
 import downloadFile from '../infodoc-store';
 import { listEnums } from '../reducers/enums.reducer';
 import { createInfoDoc } from '../reducers/infodoc.reducer';
-import { InfoDoc } from '../models';
+import { InfoDoc, Doc } from '../models';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -134,7 +134,7 @@ export const NewDocument = () => {
   };
 
   const saveDocument = () => {
-    let newInfoDoc: InfoDoc = {
+    const newInfoDoc: Doc = {
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
       descricaoDoc: documentDescription,

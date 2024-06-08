@@ -84,22 +84,6 @@ function a11yProps(index: number) {
   };
 }
 
-/* Codigo vai ser removido quando o reducer for implementado a partir do endpoint correto */
-const infodocA = {
-  codigo: 'string',
-  titulo: 'string',
-  emissor: 'string',
-  revisao: 'string',
-  data: new Date(),
-  area_processo: 'string',
-  origem: 'string',
-  situacao: 'Emissão',
-  /* status: 'Concluído', */
-  distribuicao: 'string',
-};
-
-/* ----------------------------------------------------------------  */
-
 const getSituacaoIcon = situacao => {
   switch (situacao) {
     case 'Emissão':
@@ -117,7 +101,7 @@ const getSituacaoIcon = situacao => {
   }
 };
 
-/* const getStatusIcon = status => {
+const getStatusIcon = status => {
   switch (status) {
     case 'Em Emissão':
       return { icon: <EditIcon />, text: 'Em Emissão' };
@@ -144,7 +128,7 @@ const getSituacaoIcon = situacao => {
     default:
       return { icon: <InfoIcon />, text: 'Indefinido' };
   }
-}; */
+};
 
 const InfodocList = () => {
   const navigate = useNavigate();
@@ -234,6 +218,7 @@ const InfodocList = () => {
   useEffect(() => {
     if (infodocs?.length > 0) {
       localStorage.setItem('infodoc', infodocs.length.toString());
+      console.log(infodocs);
     } else {
       localStorage.setItem('infodoc', '0');
     }
@@ -325,40 +310,34 @@ const InfodocList = () => {
               </TableHead>
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
-                  <TableRow key={infodoc.codigo}>
-                    <Tooltip title={infodoc.titulo}>
-                      <TableCell>{infodoc.codigo}</TableCell>
+                  <TableRow key={infodoc.doc.codigo}>
+                    <Tooltip title={infodoc.doc.titulo}>
+                      <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
-                    <TableCell>{infodoc.titulo}</TableCell>
-                    <TableCell>{infodoc.emissor}</TableCell>
-                    <TableCell>{infodoc.revisao}</TableCell>
-                    <TableCell>a{/* {formatDateToString(infodoc.dataCricao)} */}</TableCell>
-                    <TableCell>{infodoc.areaProcesso}</TableCell>
-                    <TableCell>{infodoc.origem}</TableCell>
+                    <TableCell>{infodoc.doc.titulo}</TableCell>
+                    <TableCell>{infodoc.doc.emissor}</TableCell>
+                    <TableCell>{infodoc.doc.revisao}</TableCell>
+                    <TableCell>{infodoc.doc.dataCricao.toString()}</TableCell>
+                    <TableCell>{infodoc.doc.idProcesso}</TableCell>
+                    <TableCell>{infodoc.doc.origem}</TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        {getSituacaoIcon(infodoc.enumSituacao).icon}
-                        {infodoc.enumSituacao}
-                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(infodoc.doc.enumSituacao).icon}</Box>
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        {/* {getStatusIcon(infodoc.status).icon} */}
-                        {infodoc.status}
-                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
                     </TableCell>
-                    <TableCell>{infodoc.distribuicao}</TableCell>
+                    <TableCell>{infodoc.doc.distribuicao}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" onClick={event => onEditClicked(infodoc.codigo, event)}>
+                      <IconButton color="primary" onClick={event => onEditClicked(infodoc.doc.codigo, event)}>
                         <EditIcon sx={{ color: '#e6b200' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onViewClicked(infodoc.codigo, event)}>
+                      <IconButton color="primary" onClick={event => onViewClicked(infodoc.doc.codigo, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onPrintClicked(infodoc.codigo, event)}>
+                      <IconButton color="primary" onClick={event => onPrintClicked(infodoc.doc.codigo, event)}>
                         <PrintIcon sx={{ color: '#03AC59' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onCancelClicked(infodoc.codigo, event)}>
+                      <IconButton color="primary" onClick={event => onCancelClicked(infodoc.doc.codigo, event)}>
                         <CancelIcon sx={{ color: '#FF0000' }} />
                       </IconButton>
                     </TableCell>

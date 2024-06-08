@@ -19,12 +19,12 @@ const initialState: EntityState<Permissao> = {
   totalItems: 0,
 };
 
-export const permissaolist = createAsyncThunk('permissao/list', async () => {
+export const getPermissaolist = createAsyncThunk('permissao/list', async () => {
   const url = apiPermissaoListUrl;
   return axios.get<Array<Permissao>>(url);
 });
 
-export const permissaoById = createAsyncThunk('permissao/id', async (id: number) => {
+export const getPermissaoById = createAsyncThunk('permissao/id', async (id: number) => {
   const url = `${apiPermissaoByIdUrl}/${id}`;
   const response = await axios.get(url);
   return response;
@@ -35,10 +35,10 @@ const PermissaoSlice = createEntitySlice({
   initialState,
   extraReducers(builder) {
     builder
-      .addMatcher(isPending(permissaolist), (state, action) => {
+      .addMatcher(isPending(getPermissaolist), (state, action) => {
         state.loading = true;
       })
-      .addMatcher(isFulfilled(permissaolist), (state, action) => {
+      .addMatcher(isFulfilled(getPermissaolist), (state, action) => {
         const { data, headers } = action.payload;
 
         return {
@@ -49,7 +49,7 @@ const PermissaoSlice = createEntitySlice({
           totalItems: parseInt(headers['x-total-count'], 10),
         };
       })
-      .addMatcher(isFulfilled(permissaoById), (state, action) => {
+      .addMatcher(isFulfilled(getPermissaoById), (state, action) => {
         const { data } = action.payload;
         state.updating = false;
         state.loading = false;

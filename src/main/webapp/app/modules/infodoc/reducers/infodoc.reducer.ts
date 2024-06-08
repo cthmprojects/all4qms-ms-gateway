@@ -1,7 +1,7 @@
 import { createAsyncThunk, isFulfilled, isPending } from '@reduxjs/toolkit';
 import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
-import { DocumentacaoRequest, InfoDoc } from '../models';
+import { Doc, DocumentacaoRequest, InfoDoc } from '../models';
 
 const apiDocumentacaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/documentos';
 
@@ -43,7 +43,7 @@ export const listdocs = createAsyncThunk('docs/list', async (params: ListParams)
   return axios.get<Array<InfoDoc>>(url);
 });
 
-export const createInfoDoc = createAsyncThunk('docs/create', async (data: InfoDoc) => {
+export const createInfoDoc = createAsyncThunk('docs/create', async (data: Doc) => {
   return await axios.post<InfoDoc>(apiDocumentacaoUrl, data);
 });
 

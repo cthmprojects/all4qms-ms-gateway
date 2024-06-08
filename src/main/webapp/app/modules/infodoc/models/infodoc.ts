@@ -1,3 +1,5 @@
+import { Permissao } from './permissao';
+
 export enum StatusEnum {
   EMISSAO = 'Em emissao',
   VALIDACAO = 'Em validacao',
@@ -13,6 +15,11 @@ export enum StatusEnum {
 }
 
 export type InfoDoc = {
+  doc: Doc;
+  permissaodoc: Permissao[];
+};
+
+export type Doc = {
   id?: number;
   codigo: string;
   titulo: string;
