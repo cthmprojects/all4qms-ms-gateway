@@ -129,6 +129,10 @@ export const NewDocument = () => {
     }
   };
 
+  const validateFields = () => {
+    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+  };
+
   const saveDocument = () => {
     let newInfoDoc: InfoDoc = {
       idUsuarioCriacao: parseInt(emitter),
@@ -249,7 +253,7 @@ export const NewDocument = () => {
             <TextField
               label="Código"
               name="number"
-              className="me-2"
+              className="m-2 ms-0"
               autoComplete="off"
               value={code}
               onChange={e => setCode(e.target.value)}
@@ -258,13 +262,13 @@ export const NewDocument = () => {
               sx={{ width: '30%' }}
               label="Título"
               name="number"
-              className="me-2 ms-2"
+              className="m-2"
               autoComplete="off"
               value={title}
               onChange={e => setTitle(e.target.value)}
             />
 
-            <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
+            <FormControl sx={{ width: '15%' }} className="m-2">
               <InputLabel>Origem</InputLabel>
               <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
                 {originList?.map(e => (
@@ -273,7 +277,7 @@ export const NewDocument = () => {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
+            <FormControl sx={{ width: '25%' }} className="m-2 me-3">
               <InputLabel>Área / Processo</InputLabel>
               <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
                 {processes.map((process, i) => (
@@ -285,7 +289,7 @@ export const NewDocument = () => {
             </FormControl>
 
             <Button
-              className="ms-2"
+              className="m-2 ms-0"
               variant="outlined"
               size="large"
               onClick={event => onFileClicked(event)}
@@ -343,7 +347,7 @@ export const NewDocument = () => {
           <div className="mt-4">
             <TextField
               id="text-field-keyword"
-              label="Escreva aqui..."
+              label="Documentos relacionados"
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
@@ -367,9 +371,16 @@ export const NewDocument = () => {
             >
               Voltar
             </Button>
-            <Button onClick={() => saveDocument()}>Salvar</Button>
-
-            <Button className="ms-3" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
+              Salvar
+            </Button>
+            <Button
+              disabled={!validateFields()}
+              className="ms-3"
+              variant="contained"
+              color="primary"
+              style={{ background: '#e6b200', color: '#4e4d4d' }}
+            >
               Encaminhar
             </Button>
           </div>
