@@ -1,3 +1,5 @@
+/* eslint-disable radix */
+/* eslint-disable no-console */
 import {
   Breadcrumbs,
   Button,
@@ -52,6 +54,8 @@ import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
 import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
 import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
 import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
+import { Storage } from 'react-jhipster';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -156,20 +160,30 @@ const InfodocList = () => {
   /* const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities); */
 
-  const [filters, setFilters] = useState({
-    dtIni: new Date(),
-    dtFim: new Date(),
-    idProcesso: 0,
-    situacao: '',
-    pesquisa: '',
-  });
+  const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
 
   useEffect(() => {
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listdocs({}));
   }, []);
   const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
 
+  const filterUser = (id: number) => {
+    if (!users || users.length <= 0) {
+      return null;
+    }
+    return users.find(user => user.id === id);
+  };
+
   //---------------------------------------------------------------
+  const [filters, setFilters] = useState({
+    dtIni: null,
+    dtFim: null,
+    idProcesso: null,
+    situacao: '',
+    pesquisa: '',
+  });
 
   const handleApplyFilters = () => {
     const { dtIni, dtFim, idProcesso, situacao, pesquisa } = filters;
@@ -286,6 +300,14 @@ const InfodocList = () => {
     alert('Cancelar Doc - Em Desenvolvimento!');
   };
 
+  const onOpenUploadFileModal = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    const userLogin = filterUser(userLoginID);
+    console.log(userLogin);
+    setUploadFileModal(true);
+    // TEM O USUARIO, MAS NAO VEM AS PERMISSOES.
+    // TODO:  PEGAR A LISTA DE PROCESSOS E PEDIR AS PERMISSOES PARA PODER VALIDAR AS ACOES DO USUARIO
+  };
+
   const renderTable = () => {
     if (infodocs?.length > 0) {
       return (
@@ -392,7 +414,7 @@ const InfodocList = () => {
             variant="contained"
             className="primary-button me-2 infodoc-list-form-field"
             style={{ marginRight: '10px', height: '58px' }}
-            onClick={() => setUploadFileModal(true)}
+            onClick={event => onOpenUploadFileModal(event)}
           >
             Novo Registro
           </Button>

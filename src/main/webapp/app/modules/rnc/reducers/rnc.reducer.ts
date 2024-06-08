@@ -329,14 +329,44 @@ export const saveDescription = createAsyncThunk('rnc/description/save', async (d
   formData.append('evidenciaObjetiva', description.evidence);
   formData.append('naoConformidade', description.rncId.toString());
 
-  // Convert the array of File objects to a Blob object
-  const blobAnexos = new Blob(description.anexos);
-  formData.append('anexos', blobAnexos);
+  if (description.anexos && description.anexos.length > 0) {
+    for (let i = 0; i < description.anexos.length; i++) {
+      const anexo = description.anexos[i];
+      formData.append('anexos', anexo);
+    }
+  }
 
   const response = await axios.post(descriptionApiUrl, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+  });
+  return response;
+});
+
+export const updateDescription = createAsyncThunk('rnc/description/update', async (description: RncDescription) => {
+  if (!description.id) {
+    return null;
+  }
+
+  const formData = new FormData();
+  formData.append('detalhesNaoConformidade', description.details);
+  formData.append('requisitoDescumprido', description.requirement);
+  formData.append('evidenciaObjetiva', description.evidence);
+  formData.append('naoConformidade', description.rncId.toString());
+
+  // for (let i = 0; i < description.anexos.length; i++) {
+  //   const anexo = description.anexos[i];
+  //   formData.append('anexos', anexo);
+  // }
+
+  const url = `${descriptionApiUrl}/${description.id}`;
+  const response = await axios.patch(url, {
+    id: description.id,
+    detalhesNaoConformidade: description.details,
+    requisitoDescumprido: description.requirement,
+    evidenciaObjetiva: description.evidence,
+    naoConformidade: description.rncId,
   });
   return response;
 });
@@ -619,6 +649,11 @@ const RncSlice = createEntitySlice({
         state.entity = data;
       })
       .addMatcher(isFulfilled(deleteRnc), (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
+      })
+      .addMatcher(isFulfilled(updateDescription), (state, action) => {
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;

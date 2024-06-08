@@ -63,9 +63,7 @@ const RncDetails = () => {
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Stack spacing={2}>
-                {nonConformity?.descricaoNC.map((d, index) => (
-                  <NonConformityDescriptionSummary key={index} description={d} />
-                ))}
+                <NonConformityDescriptionSummary description={nonConformity?.descricaoNCv2} />
               </Stack>
             </Box>
 

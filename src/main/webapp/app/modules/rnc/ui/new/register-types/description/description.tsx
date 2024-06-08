@@ -1,6 +1,6 @@
-import { Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
 import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
+import { useAppDispatch } from 'app/config/store';
 import React, { useEffect, useRef, useState } from 'react';
 import './description.css';
 
@@ -45,10 +45,13 @@ export const DescriptionRnc = ({
 
   const onFileChanged = event => {
     const files = event.target.files;
-    if (!files) return;
 
-    setFiles([...descFiles, files]);
-    onDescriptionsEvidencesChanged([...descFiles, files]);
+    if (!files || files.length <= 0) return;
+
+    const file = files[0];
+
+    setFiles([...descFiles, file]);
+    onDescriptionsEvidencesChanged([...descFiles, file]);
   };
 
   const removeSelectedFile = (index: number) => {
@@ -70,8 +73,6 @@ export const DescriptionRnc = ({
 
   const renderEvidences = () => {
     if (evidences.length > 0) {
-      console.log(evidences);
-
       return (
         <>
           {evidences.map((evidencia, index) => (

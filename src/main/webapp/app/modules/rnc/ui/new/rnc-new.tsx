@@ -28,6 +28,7 @@ import {
   saveDescription,
   saveProductComplaint,
   update,
+  updateDescription,
 } from '../../reducers/rnc.reducer';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
@@ -397,15 +398,36 @@ export const RNCNew = () => {
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
 
-      dispatch(
-        saveDescription({
-          details: description,
-          evidence: evidence,
-          requirement: requirement,
-          rncId: stateRnc.id,
-          anexos: descriptionEvidences,
-        })
-      );
+      console.log('erickson', evidence);
+
+      if (i < descriptions.length) {
+        const descriptionId: number = descriptions[i].id;
+
+        dispatch(
+          updateDescription({
+            details: description,
+            evidence: evidence,
+            id: descriptionId,
+            requirement: requirement,
+            rncId: stateRnc.id,
+            anexos: descriptionEvidences,
+          })
+        );
+      } else {
+        dispatch(
+          saveDescription({
+            details: description,
+            evidence: evidence,
+            requirement: requirement,
+            rncId: stateRnc.id,
+            anexos: descriptionEvidences,
+          })
+        );
+
+        if (id) {
+          dispatch(getDescriptionByRNCId(id));
+        }
+      }
     }
 
     dispatch(
@@ -429,15 +451,35 @@ export const RNCNew = () => {
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
 
-      dispatch(
-        saveDescription({
-          details: description,
-          evidence: evidence,
-          requirement: requirement,
-          rncId: stateRnc.id,
-          anexos: descriptionEvidences,
-        })
-      );
+      if (i < descriptions.length) {
+        const descriptionId: number = descriptions[i].id;
+
+        dispatch(
+          updateDescription({
+            details: description,
+            evidence: evidence,
+            id: descriptionId,
+            requirement: requirement,
+            rncId: stateRnc.id,
+            anexos: descriptionEvidences,
+          })
+        );
+      } else {
+        dispatch(
+          saveDescription({
+            details: description,
+            evidence: evidence,
+            requirement: requirement,
+            rncId: stateRnc.id,
+            anexos: descriptionEvidences,
+          })
+        );
+
+        if (id) {
+          dispatch(getDescriptionByRNCId(id));
+        }
+      }
+
       dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })).then(() => {
         navigate('/rnc');
       });
@@ -458,6 +500,7 @@ export const RNCNew = () => {
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
+  const descriptions = useAppSelector(state => state.all4qmsmsgateway.description.entities);
 
   useEffect(() => {
     if (rnc) {
@@ -482,14 +525,19 @@ export const RNCNew = () => {
         setSecondForm(true);
 
         getDescription(rnc.id).then(response => {
-          const descriptionEntity = response.data;
+          const savedDescriptions = response.data;
 
-          if (descriptionEntity) {
-            descriptionEntity.map(e => {
-              onDescriptionChanged(e.detalhesNaoConformidade || '');
-              onRequirementChanged(e.requisitoDescumprido || '');
-              setEvidences([...evidences, e.evidenciaObjetiva]);
-            });
+          if (savedDescriptions) {
+            const allEvidences: Array<string> = [];
+
+            for (let i = 0; i < savedDescriptions.length; i++) {
+              const description = savedDescriptions[i];
+              onDescriptionChanged(description.detalhesNaoConformidade || '');
+              onRequirementChanged(description.requisitoDescumprido || '');
+              allEvidences.push(description.evidenciaObjetiva);
+            }
+
+            setEvidences(allEvidences);
           }
         });
 
