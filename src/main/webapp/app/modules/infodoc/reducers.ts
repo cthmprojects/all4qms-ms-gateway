@@ -1,9 +1,9 @@
-import enumsReducer from '../rnc/reducers/enums.reducer';
+import enums from './reducers/enums.reducer';
 import infodoc from './reducers/infodoc.reducer';
 
 const infodocReducers = {
   infodoc,
-  enumsReducer,
+  enums,
 };
 
 export default infodocReducers;

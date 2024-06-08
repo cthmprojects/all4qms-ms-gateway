@@ -21,7 +21,7 @@ interface ListParams {
   situacao?: string;
   origem?: string;
   dtIni?: Date;
-  dtFim?: string;
+  dtFim?: Date;
   page?: number;
   size?: number;
   pesquisa?: string;
@@ -43,6 +43,10 @@ export const listdocs = createAsyncThunk('docs/list', async (params: ListParams)
   return axios.get<Array<InfoDoc>>(url);
 });
 
+export const createInfoDoc = createAsyncThunk('docs/create', async (data: InfoDoc) => {
+  return await axios.post<InfoDoc>(apiDocumentacaoUrl, data);
+});
+
 const InfoDocSlice = createEntitySlice({
   name: 'infodoc',
   initialState,
@@ -61,6 +65,9 @@ const InfoDocSlice = createEntitySlice({
           entity: null,
           totalItems: parseInt(headers['x-total-count'], 10),
         };
+      })
+      .addMatcher(isFulfilled(createInfoDoc), (state, action) => {
+        state.loading = false;
       });
   },
 });
