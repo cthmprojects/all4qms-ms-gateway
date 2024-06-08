@@ -13,7 +13,7 @@ export enum StatusEnum {
 }
 
 export type InfoDoc = {
-  id: number;
+  id?: number;
   codigo: string;
   titulo: string;
   revisao?: number;

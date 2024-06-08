@@ -191,8 +191,8 @@ const InfodocList = () => {
       listdocs({
         page: 0,
         size: pageSize,
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
+        dtIni: dtIni,
+        dtFim: dtFim,
         idProcesso,
         situacao: situacao,
         pesquisa: pesquisa,
@@ -210,7 +210,7 @@ const InfodocList = () => {
         page: 0,
         size: pageSize,
         dtIni: new Date(),
-        dtFim: '',
+        dtFim: new Date(),
         idProcesso: 0,
         situacao: '',
         pesquisa: '',
@@ -270,11 +270,14 @@ const InfodocList = () => {
   };
 
   const formatDateToString = (date: Date) => {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear().toString();
+    console.log(date);
 
-    return `${day}/${month}/${year}`;
+    return '';
+    // const day = date.getDate().toString().padStart(2, '0');
+    // const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    // const year = date.getFullYear().toString();
+
+    // return `${day}/${month}/${year}`;
   };
 
   const onEditClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -328,7 +331,7 @@ const InfodocList = () => {
                     <TableCell>{infodoc.titulo}</TableCell>
                     <TableCell>{infodoc.emissor}</TableCell>
                     <TableCell>{infodoc.revisao}</TableCell>
-                    <TableCell>{formatDateToString(infodoc.dataCricao)}</TableCell>
+                    <TableCell>a{/* {formatDateToString(infodoc.dataCricao)} */}</TableCell>
                     <TableCell>{infodoc.areaProcesso}</TableCell>
                     <TableCell>{infodoc.origem}</TableCell>
                     <TableCell>
@@ -444,7 +447,11 @@ const InfodocList = () => {
           </FormControl>
           <FormControl className="infodoc-list-form-field me-2">
             <InputLabel>Processo</InputLabel>
-            <Select value={filters.idProcesso} onChange={e => setFilters({ ...filters, idProcesso: e.target.value })} label="Processo">
+            <Select
+              value={filters.idProcesso}
+              onChange={e => setFilters({ ...filters, idProcesso: parseInt(e.target.value.toString()) })}
+              label="Processo"
+            >
               {/* {processes?.map((process, index) => (
                     <MenuItem key={index} value={process.id}>
                       {process.descricao}

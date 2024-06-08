@@ -20,8 +20,7 @@ export const listEnums = createAsyncThunk('infodoc/enums/all', async () => {
   if (response.status !== 200) {
     return null;
   }
-
-  return response.data;
+  return response;
 });
 
 const EnumsSlice = createSlice({
@@ -44,3 +43,5 @@ const EnumsSlice = createSlice({
       });
   },
 });
+
+export default EnumsSlice.reducer;

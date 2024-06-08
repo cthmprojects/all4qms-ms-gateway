@@ -25,6 +25,9 @@ import { AddCircle } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import downloadFile from '../infodoc-store';
+import { listEnums } from '../reducers/enums.reducer';
+import { createInfoDoc } from '../reducers/infodoc.reducer';
+import { InfoDoc } from '../models';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -71,6 +74,7 @@ export const NewDocument = () => {
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
   const [origin, setOrigin] = useState('externa');
+  const [originList, setOriginList] = useState([]);
   const [processes, setProcesses] = useState([]);
   const [selectedProcess, setSelectedProcess] = useState('');
   const [noValidate, setNoValidate] = useState(false);
@@ -83,6 +87,7 @@ export const NewDocument = () => {
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(listEnums());
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -124,7 +129,43 @@ export const NewDocument = () => {
     }
   };
 
+  const saveDocument = () => {
+    let newInfoDoc: InfoDoc = {
+      idUsuarioCriacao: parseInt(emitter),
+      dataCricao: emittedDate,
+      descricaoDoc: documentDescription,
+      codigo: code,
+      titulo: title,
+      origem: 'I',
+      idProcesso: parseInt(selectedProcess),
+      idArquivo: 0,
+      ignorarValidade: true,
+      enumSituacao: 'E',
+      tipoDoc: 'MA',
+    };
+
+    if (!noValidate) {
+      newInfoDoc.ignorarValidade = false;
+      newInfoDoc.dataValidade = validDate;
+    }
+
+    dispatch(createInfoDoc(newInfoDoc))
+      .then(() => {
+        navigate('/infodoc');
+      })
+      .catch(() => {});
+  };
+
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+
+  useEffect(() => {
+    setOriginList(enums?.origem);
+
+    if (enums?.origem.length > 0) {
+      setOrigin(enums.origem[0].nome);
+    }
+  }, [enums]);
 
   return (
     <>
@@ -150,7 +191,7 @@ export const NewDocument = () => {
               <InputLabel>Emissor</InputLabel>
               <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
-                  <MenuItem value={user.nome} key={`user-${i}`}>
+                  <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
                   </MenuItem>
                 ))}
@@ -159,10 +200,9 @@ export const NewDocument = () => {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h3 className="p-0 m-0" style={{ fontSize: '15px' }}>
-                  Status:{' '}
+                  Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  {' '}
                   em emissão
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
@@ -170,10 +210,9 @@ export const NewDocument = () => {
 
               <div style={{ display: 'flex', alignItems: 'center' }} className="ms-2">
                 <h3 className="p-0 m-0" style={{ fontSize: '15px' }}>
-                  Situação:{' '}
+                  Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  {' '}
                   Edição
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
@@ -228,8 +267,9 @@ export const NewDocument = () => {
             <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
               <InputLabel>Origem</InputLabel>
               <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                <MenuItem value="externa">Externa</MenuItem>
-                <MenuItem value="interna">interna</MenuItem>
+                {originList?.map(e => (
+                  <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                ))}
               </Select>
             </FormControl>
 
@@ -327,7 +367,7 @@ export const NewDocument = () => {
             >
               Voltar
             </Button>
-            <Button>Salvar</Button>
+            <Button onClick={() => saveDocument()}>Salvar</Button>
 
             <Button className="ms-3" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
               Encaminhar
