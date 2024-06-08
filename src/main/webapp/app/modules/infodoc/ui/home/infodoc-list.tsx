@@ -251,6 +251,7 @@ const InfodocList = () => {
     // 'Status',
     'Distribuição',
     'Ações',
+    '',
   ];
 
   const handleCloseUploadFileModal = () => {
