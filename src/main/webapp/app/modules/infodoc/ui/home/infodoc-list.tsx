@@ -224,6 +224,8 @@ const InfodocList = () => {
     }
   }, [infodocs]);
 
+  let currentInfodoc = infodocs[0];
+
   const columns = [
     'Código',
     'Título',
@@ -266,24 +268,29 @@ const InfodocList = () => {
     // return `${day}/${month}/${year}`;
   };
 
-  const onEditClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+  const onEditClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
+    currentInfodoc = infodocEvent;
     alert('Editar Doc - Em Desenvolvimento!');
   };
 
-  const onViewClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+  const onViewClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
+    currentInfodoc = infodocEvent;
     alert('Visualizar Doc - Em Desenvolvimento!');
   };
 
-  const onPrintClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+  const onPrintClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
+    currentInfodoc = infodocEvent;
     alert('Imprimir Doc - Em Desenvolvimento!');
   };
 
-  const onCancelClicked = (id: string, event: React.MouseEvent<HTMLButtonElement>): void => {
+  const onCancelClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
-    alert('Cancelar Doc - Em Desenvolvimento!');
+    // alert('Cancelar Doc - Em Desenvolvimento!');
+    currentInfodoc = infodocEvent;
+    setCancelDocumentModal(true);
   };
 
   const onOpenUploadFileModal = (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -328,16 +335,16 @@ const InfodocList = () => {
                     </TableCell>
                     <TableCell>{infodoc.doc.distribuicao}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" onClick={event => onEditClicked(infodoc.doc.codigo, event)}>
+                      <IconButton color="primary" onClick={event => onEditClicked(infodoc, event)}>
                         <EditIcon sx={{ color: '#e6b200' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onViewClicked(infodoc.doc.codigo, event)}>
+                      <IconButton color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onPrintClicked(infodoc.doc.codigo, event)}>
+                      <IconButton color="primary" onClick={event => onPrintClicked(infodoc, event)}>
                         <PrintIcon sx={{ color: '#03AC59' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onCancelClicked(infodoc.doc.codigo, event)}>
+                      <IconButton color="primary" onClick={event => onCancelClicked(infodoc, event)}>
                         <CancelIcon sx={{ color: '#FF0000' }} />
                       </IconButton>
                     </TableCell>
@@ -364,21 +371,13 @@ const InfodocList = () => {
     //////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
-        <DistributionDialog
-          open={distributionModal}
-          handleClose={handleDistributionModal}
-          documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
-        />
+        <DistributionDialog open={distributionModal} handleClose={handleDistributionModal} documentTitle={currentInfodoc?.doc?.titulo} />
         <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
-        <RequestCopyDialog
-          open={requestCopyModal}
-          handleClose={handleCloseRequestCopyModal}
-          documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
-        />
+        <RequestCopyDialog open={requestCopyModal} handleClose={handleCloseRequestCopyModal} documentTitle={currentInfodoc?.doc?.titulo} />
         <CancelDocumentDialog
           open={cancelDocumentModal}
           handleClose={handleCancelDocumentModal}
-          documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+          documentTitle={currentInfodoc?.doc?.titulo}
         />
         <Breadcrumbs aria-label="breadcrumb">
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
