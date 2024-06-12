@@ -378,6 +378,7 @@ const InfodocList = () => {
           open={cancelDocumentModal}
           handleClose={handleCancelDocumentModal}
           documentTitle={currentInfodoc?.doc?.titulo}
+          infodoc={currentInfodoc}
         />
         <Breadcrumbs aria-label="breadcrumb">
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
