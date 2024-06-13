@@ -73,6 +73,7 @@ export const NewDocument = () => {
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
+  const [revision, setRevision] = useState(0);
   const [origin, setOrigin] = useState('externa');
   const [originList, setOriginList] = useState([]);
   const [processes, setProcesses] = useState([]);
@@ -130,7 +131,7 @@ export const NewDocument = () => {
   };
 
   const validateFields = () => {
-    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+    return emitter && emittedDate && documentDescription && code && title && revision && selectedProcess;
   };
 
   const saveDocument = () => {
@@ -140,6 +141,7 @@ export const NewDocument = () => {
       descricaoDoc: documentDescription,
       codigo: code,
       titulo: title,
+      revisao: revision,
       origem: 'I',
       idProcesso: parseInt(selectedProcess),
       idArquivo: 0,
@@ -266,6 +268,14 @@ export const NewDocument = () => {
               autoComplete="off"
               value={title}
               onChange={e => setTitle(e.target.value)}
+            />
+            <TextField
+              label="Revisão"
+              name="number"
+              className="m-2 ms-0"
+              autoComplete="off"
+              value={revision}
+              onChange={e => setRevision(e.target.value)}
             />
 
             <FormControl sx={{ width: '15%' }} className="m-2">
