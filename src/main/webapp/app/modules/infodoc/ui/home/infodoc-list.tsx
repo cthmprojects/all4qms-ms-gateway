@@ -50,6 +50,7 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
 import { InfoDoc, StatusEnum } from '../../models';
 import { listdocs } from '../../reducers/infodoc.reducer';
+import { downloadAnexo } from '../../reducers/anexo.reducer';
 import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
 import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
 import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
@@ -259,8 +260,7 @@ const InfodocList = () => {
 
   const formatDateToString = (date: Date) => {
     console.log(date);
-
-    return '';
+    return date.toString();
     // const day = date.getDate().toString().padStart(2, '0');
     // const month = (date.getMonth() + 1).toString().padStart(2, '0');
     // const year = date.getFullYear().toString();
@@ -324,7 +324,7 @@ const InfodocList = () => {
                     <TableCell>{infodoc.doc.titulo}</TableCell>
                     <TableCell>{infodoc.doc.emissor}</TableCell>
                     <TableCell>{infodoc.doc.revisao}</TableCell>
-                    <TableCell>{infodoc.doc.dataCricao.toString()}</TableCell>
+                    <TableCell>{formatDateToString(infodoc.doc.dataCricao)}</TableCell>
                     <TableCell>{infodoc.doc.idProcesso}</TableCell>
                     <TableCell>{infodoc.doc.origem}</TableCell>
                     <TableCell>
