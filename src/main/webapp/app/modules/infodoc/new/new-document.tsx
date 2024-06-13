@@ -275,7 +275,13 @@ export const NewDocument = () => {
               className="m-2 ms-0"
               autoComplete="off"
               value={revision}
-              onChange={e => setRevision(e.target.value)}
+              onChange={e => {
+                const input = e.target.value;
+                // Use regular expression to remove non-numeric characters
+                const numericInput = input.replace(/\D/g, '');
+                // Update the state with the parsed number
+                setRevision(parseInt(numericInput, 10));
+              }}
             />
 
             <FormControl sx={{ width: '15%' }} className="m-2">
