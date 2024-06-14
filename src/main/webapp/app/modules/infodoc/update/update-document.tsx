@@ -12,19 +12,20 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import { IUsuario } from 'app/shared/model/usuario.model';
 import DatePicker from 'react-datepicker';
 import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { AddCircle } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
+import { listEnums } from '../reducers/enums.reducer';
+import { Doc } from '../models';
+import { createInfoDoc } from '../reducers/infodoc.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -61,9 +62,15 @@ const getProcesses = async () => {
   return response.data;
 };
 
+const getDocById = async (id: any) => {
+  const { data } = await axios.get<Doc>(`services/all4qmsmsinfodoc/api/infodoc/documentos/${id}`);
+  return data;
+};
+
 export const UpdateDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [emitter, setEmitter] = useState('');
   const [emittedDate, setEmittedDate] = useState(new Date());
@@ -77,6 +84,7 @@ export const UpdateDocument = () => {
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
+  const [originList, setOriginList] = useState([]);
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
@@ -85,6 +93,12 @@ export const UpdateDocument = () => {
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(listEnums());
+    getDocById(id).then(response => {
+      if (response) {
+        setCode(response.codigo);
+      }
+    });
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -123,7 +137,48 @@ export const UpdateDocument = () => {
     setOpenRejectModal(false);
   };
 
+  const validateFields = () => {
+    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+  };
+
+  const saveDocument = () => {
+    const newInfoDoc: Doc = {
+      idUsuarioCriacao: parseInt(emitter),
+      dataCricao: emittedDate,
+      descricaoDoc: documentDescription,
+      codigo: code,
+      titulo: title,
+      origem: origin,
+      idProcesso: parseInt(selectedProcess),
+      idArquivo: 0,
+      ignorarValidade: true,
+      enumSituacao: 'E',
+      tipoDoc: 'MA',
+      idDocumentacaoAnterior: parseInt(id),
+    };
+
+    if (!noValidate) {
+      newInfoDoc.ignorarValidade = false;
+      newInfoDoc.dataValidade = validDate;
+    }
+
+    dispatch(createInfoDoc(newInfoDoc))
+      .then(() => {
+        navigate('/infodoc');
+      })
+      .catch(() => {});
+  };
+
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+
+  useEffect(() => {
+    setOriginList(enums?.origem);
+
+    if (enums?.origem.length > 0) {
+      setOrigin(enums.origem[0].nome);
+    }
+  }, [enums]);
 
   return (
     <>
@@ -142,7 +197,7 @@ export const UpdateDocument = () => {
               Informações documentadas
             </Link>
             <Link to={'/infodoc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Emitir
+              Editar
             </Link>
             {/* <Typography style={{ color: '#606060' }}>Ficha de estoque</Typography> */}
           </Breadcrumbs>
@@ -163,21 +218,19 @@ export const UpdateDocument = () => {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h3 className="p-0 m-0" style={{ fontSize: '15px' }}>
-                  Status:{' '}
+                  Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  {' '}
-                  em emissão
+                  em revisão
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center' }} className="ms-2">
                 <h3 className="p-0 m-0" style={{ fontSize: '15px' }}>
-                  Situação:{' '}
+                  Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  {' '}
                   Edição
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
@@ -217,6 +270,7 @@ export const UpdateDocument = () => {
               className="me-2"
               autoComplete="off"
               value={code}
+              disabled
               onChange={e => setCode(e.target.value)}
             />
             <TextField
@@ -232,8 +286,9 @@ export const UpdateDocument = () => {
             <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
               <InputLabel>Origem</InputLabel>
               <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                <MenuItem value="externa">Externa</MenuItem>
-                <MenuItem value="interna">interna</MenuItem>
+                {originList?.map(e => (
+                  <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                ))}
               </Select>
             </FormControl>
 
@@ -323,6 +378,26 @@ export const UpdateDocument = () => {
               style={{ background: '#d9d9d9', color: '#4e4d4d' }}
               onClick={() => navigate('/infodoc')}
             >
+              VOLTAR
+            </Button>
+            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
+              SALVAR
+            </Button>
+            <Button
+              className="ms-3"
+              variant="contained"
+              color="primary"
+              disabled={!validateFields()}
+              style={{ background: '#e6b200', color: '#4e4d4d' }}
+            >
+              ENCAMINHAR
+            </Button>
+            {/* <Button
+              variant="contained"
+              className="me-3"
+              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+              onClick={() => navigate('/infodoc')}
+            >
               Voltar
             </Button>
             <Button>Salvar</Button>
@@ -337,7 +412,7 @@ export const UpdateDocument = () => {
             </Button>
             <Button className="ms-3" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
               Aprovar
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
