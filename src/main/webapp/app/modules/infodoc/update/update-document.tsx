@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {
   Breadcrumbs,
   Checkbox,
@@ -139,6 +140,32 @@ export const UpdateDocument = () => {
 
   const validateFields = () => {
     return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+  };
+
+  const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    // const { data } = await axios.get<string>(`services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`);
+    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`; // await getDownloadUrl(attachment);
+
+    await axios
+      .request({
+        responseType: 'arraybuffer',
+        url: downloadUrl,
+        method: 'get',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+      })
+      .then(result => {
+        console.log(result.headers);
+        console.log(result.headers['content-disposition']);
+        console.log(result.headers['content-disposition'].split('=')[1]);
+        const file = new Blob([result.data], { type: 'application/octet-stream' });
+
+        const fileURL = URL.createObjectURL(file);
+
+        const fileWindow = window.open();
+        fileWindow.location.href = fileURL;
+      });
   };
 
   const saveDocument = () => {
@@ -303,7 +330,13 @@ export const UpdateDocument = () => {
               </Select>
             </FormControl>
 
-            <Button className="ms-2" variant="outlined" size="large" style={{ backgroundColor: '#E0E0E0', height: '55px' }}>
+            <Button
+              className="ms-2"
+              variant="outlined"
+              size="large"
+              style={{ backgroundColor: '#E0E0E0', height: '55px' }}
+              onClick={event => onFileClicked(event)}
+            >
               <VisibilityIcon className="pe-1 pb-1" />
               Arquivo
             </Button>
