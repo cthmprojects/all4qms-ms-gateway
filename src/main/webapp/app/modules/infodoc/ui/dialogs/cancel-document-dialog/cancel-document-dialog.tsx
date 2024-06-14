@@ -1,5 +1,6 @@
 import { Textarea } from '@mui/joy';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { InfoDoc } from 'app/modules/infodoc/models';
 import { StyledLabel, StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import React from 'react';
 import { Button } from 'reactstrap';
@@ -18,8 +19,15 @@ type CancelDocumentDialogProps = {
   open: boolean;
   handleClose: () => void;
   documentTitle: string;
+  infodoc: InfoDoc;
 };
-export const CancelDocumentDialog = ({ open, handleClose, documentTitle }: CancelDocumentDialogProps) => {
+
+const requestCancelInfoDoc = (infodoc: InfoDoc) => {
+  alert('Cancelamento Requisitado para o infodoc: ' + infodoc.doc.codigo);
+  // TODO Implementar a chamada para cancelamento desse documento.
+};
+
+export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc }: CancelDocumentDialogProps) => {
   return (
     <React.Fragment>
       <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
@@ -40,7 +48,13 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle }: Cance
           <Button className="format-button" onClick={handleClose}>
             Voltar
           </Button>
-          <Button className="ms-3 me-3 format-button" variant="contained" color="primary" style={{ background: '#A23900', color: '#fff' }}>
+          <Button
+            className="ms-3 me-3 format-button"
+            variant="contained"
+            color="primary"
+            style={{ background: '#A23900', color: '#fff' }}
+            onClick={() => requestCancelInfoDoc(infodoc)}
+          >
             Solicitar
           </Button>
         </DialogActions>

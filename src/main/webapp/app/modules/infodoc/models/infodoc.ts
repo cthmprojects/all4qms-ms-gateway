@@ -42,3 +42,12 @@ export type Doc = {
   distribuicao?: string;
   status?: StatusEnum;
 };
+
+export type DocAttachment = {
+  id: number;
+  extensao: string;
+  titulo: string;
+  caminho: string;
+  dataCriacao: Date;
+  idDocumentacao: number;
+};
