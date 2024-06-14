@@ -268,10 +268,8 @@ const InfodocList = () => {
     // return `${day}/${month}/${year}`;
   };
 
-  const onEditClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    // navigate(`/somepath/${id}`);
-    currentInfodoc = infodocEvent;
-    alert('Editar Doc - Em Desenvolvimento!');
+  const onEditClicked = (id: number, event: React.MouseEvent<HTMLButtonElement>): void => {
+    navigate(`upload-file/update/${id}`);
   };
 
   const onViewClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -335,7 +333,7 @@ const InfodocList = () => {
                     </TableCell>
                     <TableCell>{infodoc.doc.distribuicao}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" onClick={event => onEditClicked(infodoc, event)}>
+                      <IconButton color="primary" onClick={event => onEditClicked(infodoc.doc.id, event)}>
                         <EditIcon sx={{ color: '#e6b200' }} />
                       </IconButton>
                       <IconButton color="primary" onClick={event => onViewClicked(infodoc, event)}>

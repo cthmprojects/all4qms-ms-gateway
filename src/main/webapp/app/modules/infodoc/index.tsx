@@ -25,7 +25,7 @@ const InfodocRoutes = () => {
       <ErrorBoundaryRoutes>
         <Route path="" element={<InfodocList />} />
         <Route path="upload-file/new" element={<NewDocument />} />
-        <Route path="upload-file/update/" element={<UpdateDocument />} />
+        <Route path="upload-file/update/:id" element={<UpdateDocument />} />
       </ErrorBoundaryRoutes>
     </div>
   );
