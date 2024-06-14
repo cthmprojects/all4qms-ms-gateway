@@ -68,7 +68,7 @@ export const UsuarioUpdate = () => {
     managerProfile: '',
     sector: '',
     role: '',
-    processes: '',
+    processes: [],
   });
 
   const [formError, setFormError] = useState({
@@ -93,7 +93,8 @@ export const UsuarioUpdate = () => {
       target: { value },
     } = event;
 
-    setProcesses(typeof value === 'string' ? value.split(',') : value);
+    // setProcesses(typeof value === 'string' ? value.split(',') : value);
+    setFormData({ ...formData, processes: typeof value === 'string' ? value.split(',') : value });
   };
 
   const handleChangeProfiles = event => {
@@ -172,22 +173,6 @@ export const UsuarioUpdate = () => {
       setFormError(prevError => ({ ...prevError, profile: true }));
       return false;
     }
-    // if (formData.managerProfile === '') {
-    //   setFormError(prevError => ({ ...prevError, managerProfile: true }));
-    //   return false;
-    // }
-    // if (formData.sector === '') {
-    //   setFormError(prevError => ({ ...prevError, sector: true }));
-    //   return false;
-    // }
-    // if (formData.role === '') {
-    //   setFormError(prevError => ({ ...prevError, role: true }));
-    //   return false;
-    // }
-    // if (processes.length === 0) {
-    //   setFormError(prevError => ({ ...prevError, processes: true }));
-    //   return false;
-    // }
 
     setFormError({
       email: false,
@@ -230,7 +215,7 @@ export const UsuarioUpdate = () => {
         const setor = formData.sector ? setors.find(it => it.id.toString() === formData.sector.toString()) : null;
         let process = [];
 
-        processes.map(p => {
+        formData.processes.map(p => {
           process.push(processos.find(it => it.nome.toString() === p.toString()));
         });
 
@@ -256,7 +241,7 @@ export const UsuarioUpdate = () => {
       const setor = formData.sector ? setors.find(it => it.id.toString() === formData.sector.toString()) : null;
       let process = [];
 
-      processes.map(p => {
+      formData.processes.map(p => {
         process.push(processos.find(it => it.nome.toString() === p.toString()));
       });
 
@@ -309,7 +294,7 @@ export const UsuarioUpdate = () => {
   const handleSubmit = event => {
     event.preventDefault();
   };
-
+  console.log(formData);
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
       <Row className="justify-content-center mt-5">
@@ -458,18 +443,18 @@ export const UsuarioUpdate = () => {
           <InputLabel>Processos</InputLabel>
           <Select
             multiple
-            value={processes}
             label="Processos"
             name="processos"
+            error={formError.processes}
+            value={formData.processes}
             onChange={handleChangeProcesses}
             input={<OutlinedInput label="Processos" />}
             renderValue={selected => selected.join(', ')}
-            error={formError.processes}
           >
             {processos
               ? processos.map(otherEntity => (
                   <MenuItem value={otherEntity.nome} key={otherEntity.id}>
-                    <Checkbox checked={processes.indexOf(otherEntity.nome) > -1} />
+                    <Checkbox checked={formData.processes.indexOf(otherEntity.nome) > -1} />
                     <ListItemText primary={otherEntity.nome}></ListItemText>
                   </MenuItem>
                 ))
