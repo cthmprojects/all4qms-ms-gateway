@@ -143,8 +143,7 @@ export const UpdateDocument = () => {
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    // const { data } = await axios.get<string>(`services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`);
-    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`; // await getDownloadUrl(attachment);
+    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
 
     await axios
       .request({
