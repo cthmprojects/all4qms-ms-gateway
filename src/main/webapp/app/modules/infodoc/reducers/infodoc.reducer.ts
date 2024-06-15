@@ -29,18 +29,48 @@ interface ListParams {
 }
 
 export const listdocs = createAsyncThunk('docs/list', async (params: ListParams) => {
-  const { situacao, origem, idProcesso, dtIni, pesquisa, page, size } = params;
-  const requestDoc: DocumentacaoRequest = {
-    dtIni,
-    idProcesso,
-    origem,
-    situacao,
-    pesquisa,
-  };
+  const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa, page, size } = params;
 
-  const url = apiDocumentacaoUrl;
+  const queryParams: string[] = [];
 
-  return axios.get<Array<InfoDoc>>(url);
+  queryParams.push('sort=desc');
+
+  if (dtIni) {
+    queryParams.push(`dtIni=${dtIni}`);
+  }
+
+  if (dtFim) {
+    queryParams.push(`dtFim=${dtFim}`);
+  }
+
+  if (idProcesso) {
+    queryParams.push(`idProcesso=${idProcesso}`);
+  }
+
+  if (origem) {
+    queryParams.push(`origem=${origem}`);
+  }
+
+  if (situacao) {
+    queryParams.push(`situacao=${situacao}`);
+  }
+
+  if (pesquisa) {
+    queryParams.push(`pesquisa=${pesquisa}`);
+  }
+
+  if (page) {
+    queryParams.push(`page=${page}`);
+  }
+
+  if (size) {
+    queryParams.push(`size${size}`);
+  }
+
+  queryParams.push(`cacheBuster=${new Date().getTime()}`);
+  const queryString = queryParams.join('&');
+
+  return axios.get<Array<InfoDoc>>(`${apiDocumentacaoUrl}${queryString ? `?${queryString}` : ''}`);
 });
 
 export const createInfoDoc = createAsyncThunk('docs/create', async (data: Doc) => {
