@@ -23,6 +23,7 @@ import {
   Tab,
   Tooltip,
   TextField,
+  TablePagination,
 } from '@mui/material';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -57,6 +58,9 @@ import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-d
 import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
 import { Storage } from 'react-jhipster';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { Process } from 'app/modules/rnc/models';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import { listEnums } from '../../reducers/enums.reducer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -87,15 +91,15 @@ function a11yProps(index: number) {
 
 const getSituacaoIcon = situacao => {
   switch (situacao) {
-    case 'Emissão':
+    case 'E':
       return { icon: <EditIcon />, text: 'Em Emissão' };
-    case 'Homologado':
+    case 'H':
       return { icon: <CheckCircleIcon />, text: 'Homologado' };
-    case 'Revisão':
+    case 'R':
       return { icon: <HourglassEmptyIcon />, text: 'Em Revisão' };
-    case 'Obsoleto':
+    case 'O':
       return { icon: <BlockIcon />, text: 'Obsoleto' };
-    case 'Cancelado':
+    case 'C':
       return { icon: <CancelIcon />, text: 'Cancelado' };
     default:
       return { icon: <InfoIcon />, text: 'Indefinido' };
@@ -134,7 +138,6 @@ const getStatusIcon = status => {
 const InfodocList = () => {
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
-  const [pageSize, setPageSize] = useState<number>(5);
   const [value, setValue] = useState(0);
   const [distributionModal, setDistributionModal] = useState(false);
   const [uploadFileModal, setUploadFileModal] = useState(false);
@@ -142,72 +145,110 @@ const InfodocList = () => {
   const [cancelDocumentModal, setCancelDocumentModal] = useState(false);
   const dispatch = useAppDispatch();
   const statusValues = Object.keys(StatusEnum) as Array<keyof typeof StatusEnum>;
-  /* const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
-  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities); */
-
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
-  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
 
-  useEffect(() => {
-    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    dispatch(listdocs({}));
-  }, []);
-  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
-
-  const filterUser = (id: number) => {
-    if (!users || users.length <= 0) {
-      return null;
-    }
-    return users.find(user => user.id === id);
-  };
-
-  //---------------------------------------------------------------
+  /**
+   * Filters
+   */
   const [filters, setFilters] = useState({
     dtIni: null,
     dtFim: null,
-    idProcesso: null,
-    situacao: '',
-    pesquisa: '',
+    idProcesso: 0,
+    origem: null,
+    situacao: null,
+    pesquisa: null,
   });
 
-  const handleApplyFilters = () => {
-    const { dtIni, dtFim, idProcesso, situacao, pesquisa } = filters;
-    dispatch(
-      listdocs({
-        page: 0,
-        size: pageSize,
-        dtIni: dtIni,
-        dtFim: dtFim,
-        idProcesso,
-        situacao: situacao,
-        pesquisa: pesquisa,
-      })
-    );
+  /**
+   * Pagination
+   */
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState<number>(5);
+  const [totalItems, setTotalItems] = useState(10);
+
+  function displayedRowsLabel({ from, to, count }) {
+    return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
+  }
+
+  const onPageChanged = (event: React.ChangeEvent<unknown>, page: number) => {
+    setPage(page);
+  };
+
+  const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setPageSize(parseInt(event.target.value, 10));
+    setPage(1);
   };
 
   useEffect(() => {
-    setFilters({ ...filters });
-  }, [filters]);
+    if (page <= 0) {
+      return;
+    }
 
-  const clearFilters = () => {
+    handleApplyFilters();
+  }, [page]);
+
+  useEffect(() => {
+    const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
     dispatch(
       listdocs({
-        page: 0,
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
+        idProcesso,
+        origem,
+        situacao,
         size: pageSize,
-        dtIni: new Date(),
-        dtFim: new Date(),
-        idProcesso: 0,
-        situacao: '',
-        pesquisa: '',
+        page: 0,
       })
     );
-    setFilters({
-      dtIni: null,
-      dtFim: null,
-      idProcesso: null,
-      situacao: null,
-      pesquisa: null,
-    });
+
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    dispatch(getProcesses());
+    dispatch(listEnums());
+  }, []);
+
+  useEffect(() => {
+    handleApplyFilters();
+  }, [filters]);
+
+  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+
+  const filterUser = (id: number) => {
+    if (!users || users.length <= 0) {
+      return '-';
+    }
+
+    if (id) {
+      return users.find(user => user.id === id);
+    }
+
+    return '-';
+  };
+
+  const filterProcess = (id: number) => {
+    if (!processes || processes.length <= 0) {
+      return '-';
+    }
+
+    if (id) {
+      return processes.find(process => process.id === id).nome;
+    }
+
+    return '-';
+  };
+
+  const filterOrigin = (type: string) => {
+    if (!enums || enums.origem.length <= 0) {
+      return '-';
+    }
+
+    if (type) {
+      return enums.origem.find(o => o.nome === type).valor;
+    }
+
+    return '-';
   };
 
   //---------------------------------------------------------------
@@ -215,15 +256,6 @@ const InfodocList = () => {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-
-  useEffect(() => {
-    if (infodocs?.length > 0) {
-      localStorage.setItem('infodoc', infodocs.length.toString());
-      console.log(infodocs);
-    } else {
-      localStorage.setItem('infodoc', '0');
-    }
-  }, [infodocs]);
 
   let currentInfodoc = infodocs[0];
 
@@ -239,7 +271,6 @@ const InfodocList = () => {
     // 'Status',
     'Distribuição',
     'Ações',
-    '',
   ];
 
   const handleCloseUploadFileModal = () => {
@@ -259,13 +290,15 @@ const InfodocList = () => {
   };
 
   const formatDateToString = (date: Date) => {
-    console.log(date);
-    return date.toString();
-    // const day = date.getDate().toString().padStart(2, '0');
-    // const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    // const year = date.getFullYear().toString();
+    if (!date) {
+      return '';
+    }
 
-    // return `${day}/${month}/${year}`;
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString();
+
+    return `${day}/${month}/${year}`;
   };
 
   const onEditClicked = (id: number, event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -299,6 +332,34 @@ const InfodocList = () => {
     // TODO:  PEGAR A LISTA DE PROCESSOS E PEDIR AS PERMISSOES PARA PODER VALIDAR AS ACOES DO USUARIO
   };
 
+  const handleApplyFilters = () => {
+    const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa } = filters;
+
+    dispatch(
+      listdocs({
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
+        idProcesso,
+        origem,
+        situacao,
+        size: pageSize,
+        pesquisa,
+        page: page,
+      })
+    );
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      dtIni: null,
+      dtFim: null,
+      idProcesso: 0,
+      origem: null,
+      situacao: null,
+      pesquisa: null,
+    });
+  };
+
   const renderTable = () => {
     if (infodocs?.length > 0) {
       return (
@@ -315,34 +376,33 @@ const InfodocList = () => {
               </TableHead>
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
-                  <TableRow key={infodoc.doc.codigo}>
+                  <TableRow key={infodoc.doc.id}>
                     <Tooltip title={infodoc.doc.titulo}>
                       <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
                     <TableCell>{infodoc.doc.titulo}</TableCell>
-                    <TableCell>{infodoc.doc.emissor}</TableCell>
-                    <TableCell>{infodoc.doc.revisao}</TableCell>
-                    <TableCell>{formatDateToString(infodoc.doc.dataCricao)}</TableCell>
-                    <TableCell>{infodoc.doc.idProcesso}</TableCell>
-                    <TableCell>{infodoc.doc.origem}</TableCell>
+                    <TableCell>{filterUser(infodoc.doc.idUsuarioCriacao)?.nome}</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>{infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}</TableCell>
+                    <TableCell>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
+                    <TableCell>{filterOrigin(infodoc.doc.origem)}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(infodoc.doc.enumSituacao).icon}</Box>
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
                     </TableCell>
-                    <TableCell>{infodoc.doc.distribuicao}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" onClick={event => onEditClicked(infodoc.doc.id, event)}>
+                      <IconButton title="Editar" color="primary" onClick={event => onEditClicked(infodoc.doc.id, event)}>
                         <EditIcon sx={{ color: '#e6b200' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onViewClicked(infodoc, event)}>
+                      <IconButton title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onPrintClicked(infodoc, event)}>
+                      <IconButton title="Imprimir" color="primary" onClick={event => onPrintClicked(infodoc, event)}>
                         <PrintIcon sx={{ color: '#03AC59' }} />
                       </IconButton>
-                      <IconButton color="primary" onClick={event => onCancelClicked(infodoc, event)}>
+                      <IconButton title="Cancelar" color="primary" onClick={event => onCancelClicked(infodoc, event)}>
                         <CancelIcon sx={{ color: '#FF0000' }} />
                       </IconButton>
                     </TableCell>
@@ -351,8 +411,20 @@ const InfodocList = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <Row className="justify-content-center mt-5">
-            <Pagination count={10} style={{ width: '370px' }} />
+          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
+            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
+            <TablePagination
+              component="div"
+              count={totalItems}
+              labelDisplayedRows={displayedRowsLabel}
+              labelRowsPerPage="Itens por página:"
+              onPageChange={onPageChanged}
+              onRowsPerPageChange={onRowsPerPageChanged}
+              page={page}
+              rowsPerPage={pageSize}
+              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
+            />
           </Row>
         </>
       );
@@ -393,6 +465,7 @@ const InfodocList = () => {
             className="primary-button me-2 infodoc-list-form-field"
             style={{ marginRight: '10px', height: '58px' }}
             onClick={event => onOpenUploadFileModal(event)}
+            title="Novo Registro"
           >
             Novo Registro
           </Button>
@@ -403,7 +476,6 @@ const InfodocList = () => {
               onChange={date => setFilters({ ...filters, dtIni: date })}
               dateFormat="dd/MM/yyyy"
               className="infodoc-list-date-picker mt-4"
-              locale="pt-BR"
               id="start-date-picker"
               placeholderText="Data de início"
             />
@@ -430,43 +502,19 @@ const InfodocList = () => {
               onChange={e => setFilters({ ...filters, idProcesso: parseInt(e.target.value.toString()) })}
               label="Processo"
             >
-              {/* {processes?.map((process, index) => (
-                    <MenuItem key={index} value={process.id}>
-                      {process.descricao}
-                    </MenuItem>
-                  ))} */}
-            </Select>
-          </FormControl>
-
-          {/* <FormControl className="me-2">
-            <InputLabel>Status</InputLabel>
-                <Select
-                  value={filters.status}
-                  onChange={e => setFilters({ ...filters, status: e.target.value })}
-                  label="Status"
-                >
-                  {enums?.docStatus.map((situacao, index) => (
-                    <MenuItem key={index} value={status.value}>
-                      {status.value}
-                    </MenuItem>
-                  ))}
-                </Select>
-
-          </FormControl> */}
-
-          <FormControl className="infodoc-list-form-field me-2">
-            <InputLabel>Situação</InputLabel>
-            <Select value={filters.situacao} onChange={e => setFilters({ ...filters, situacao: e.target.value })} label="Situação">
-              {statusValues.map(key => (
-                <MenuItem value={key}>{StatusEnum[key]}</MenuItem>
+              <MenuItem value={0}>Selecionar</MenuItem>
+              {processes?.map((process, index) => (
+                <MenuItem key={index} value={process.id}>
+                  {process.nome}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <FormControl id="search-filter">
+          <FormControl>
             <TextField
-              className="m-2"
-              label="Descrição"
+              label="Pesquisa"
+              style={{ minWidth: '20vw' }}
               onChange={event => {
                 setFilters({ ...filters, pesquisa: event.target.value });
               }}
@@ -477,18 +525,10 @@ const InfodocList = () => {
 
           <Button
             variant="contained"
-            className="update-button me-2 rnc-list-form-field"
-            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
-            onClick={handleApplyFilters}
-          >
-            Pesquisar
-          </Button>
-
-          <Button
-            variant="contained"
             className="secondary-button me-2 rnc-list-form-field"
             style={{ height: '49px', width: '60px', marginLeft: '7px' }}
             onClick={clearFilters}
+            title="Limpar"
           >
             Limpar
           </Button>
@@ -498,15 +538,15 @@ const InfodocList = () => {
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
               <Tab label="Formulários" {...a11yProps(0)} />
-              <Tab label="Processo" {...a11yProps(1)} />
+              {/* <Tab label="Processo" {...a11yProps(1)} />
               <Tab label="Instrução" {...a11yProps(2)} />
-              <Tab label="Distribuição" {...a11yProps(3)} />
+              <Tab label="Distribuição" {...a11yProps(3)} /> */}
             </Tabs>
           </Box>
           <CustomTabPanel value={value} index={0}>
             {renderTable()}
           </CustomTabPanel>
-          <CustomTabPanel value={value} index={1}>
+          {/* <CustomTabPanel value={value} index={1}>
             {renderTable()}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
@@ -514,7 +554,7 @@ const InfodocList = () => {
           </CustomTabPanel>
           <CustomTabPanel value={value} index={3}>
             {renderTable()}
-          </CustomTabPanel>
+          </CustomTabPanel> */}
         </Box>
       </div>
     </div>
