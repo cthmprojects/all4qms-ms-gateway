@@ -92,6 +92,11 @@ public class PendenciaService {
         return pendenciaRepository.findByResponsavelPendencias(id, pageable).map(pendenciaMapper::toDto);
     }
 
+    public Flux<Integer> countPendenciasByResponsavel(Long id) {
+        log.debug("Request to count Pendencias do Responsavel {}", id);
+        return pendenciaRepository.findByResponsavelCount(id);
+    }
+
     /**
      * Get all the pendencias with eager load of many-to-many relationships.
      *
