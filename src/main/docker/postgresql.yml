@@ -3,13 +3,11 @@ version: '3.8'
 services:
   all4qmsmsgateway-postgresql:
     image: postgres:14.5
-    # volumes:
-    #   - ~/volumes/jhipster/all4qmsMsGateway/postgresql/:/var/lib/postgresql/data/
+    volumes:
+      - ~/volumes/jhipster/all4qmsMsGateway/postgresql/:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=all4qmsMsGateway
       - POSTGRES_PASSWORD=
       - POSTGRES_HOST_AUTH_METHOD=trust
-    # If you want to expose these ports outside your dev PC,
-    # remove the "127.0.0.1:" prefix
     ports:
-      - 127.0.0.1:5432:5432
+      - 5432:5432
