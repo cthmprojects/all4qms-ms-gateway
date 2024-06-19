@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { Action, ActionPlan, IshikawaInvestigation, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
+import { Action, ActionPlan, IshikawaInvestigation, Plan, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
 import {
   saveEffectCause,
   saveImmediateAction,
@@ -36,7 +36,7 @@ import { CauseInvestigation, ImmediateActions, PlannedActions, ProductDecision, 
 import './general-register.css';
 import { listEnums } from '../../../../reducers/enums.reducer';
 import { Enums } from '../../../../models';
-import { savePlan } from 'app/modules/rnc/reducers/plan.reducer';
+import { savePlan, updatePlan } from 'app/modules/rnc/reducers/plan.reducer';
 import { rangeList } from 'app/modules/rnc/reducers/range.reducer';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Storage } from 'react-jhipster';
@@ -194,6 +194,7 @@ export const GeneralRegister = () => {
 
   const [responsaveisMP, setResponsaveisMP] = useState<Array<string>>([]);
   const [responsaveis, setResponsaveis] = useState([]);
+  const [plans, setPlans] = useState<Array<Plan>>([]);
   const [listaAcoesCorretivas, setListaAcoesCorretivas] = useState<Array<ActionPlan>>([]);
   const [checkedIshikawa, setCheckedIshikawa] = useState(false);
   const [checkedFiveWhy, setCheckedFiveWhy] = useState(false);
@@ -246,10 +247,14 @@ export const GeneralRegister = () => {
       getPlanoByRnc(id).then(res => {
         if (res.length > 0) {
           setShowPlanoAcaoCorretiva(true);
+          console.log('plans', res);
           const actionPlans = res;
           const newActions = [];
+          const newPlans = [];
           for (let i = 0; i < actionPlans.length; i++) {
             const actions = actionPlans[i].acoes;
+            const plan = actionPlans[i].plano;
+            newPlans.push(plan);
             for (let j = 0; j < actions.length; j++) {
               const action = actions[j];
               newActions.push({
@@ -269,6 +274,7 @@ export const GeneralRegister = () => {
               });
             }
           }
+          setPlans(newPlans);
           setListaAcoesCorretivas(newActions);
         }
       });
@@ -612,19 +618,29 @@ export const GeneralRegister = () => {
       // );
       toast.success('RNC atualizada com sucesso!');
     } else if (_rnc && showPlanoAcaoCorretiva) {
-      dispatch(
-        savePlan({
-          actionPlans: listaAcoesCorretivas,
-          plan: {
-            dtConclusaoPlano: new Date(),
-            idNaoConformidade: _rnc.id,
-            percentualPlano: 0,
-            qtdAcoes: listaAcoesCorretivas.length,
-            qtdAcoesConcluidas: 0,
-            statusPlano: 'ABERTO',
-          },
-        })
-      );
+      if (plans.length > 0) {
+        console.log('plan', plans[0]);
+        dispatch(
+          updatePlan({
+            actionPlans: listaAcoesCorretivas,
+            plan: plans[0],
+          })
+        );
+      } else {
+        dispatch(
+          savePlan({
+            actionPlans: listaAcoesCorretivas,
+            plan: {
+              dtConclusaoPlano: new Date(),
+              idNaoConformidade: _rnc.id,
+              percentualPlano: 0,
+              qtdAcoes: listaAcoesCorretivas.length,
+              qtdAcoesConcluidas: 0,
+              statusPlano: 'ABERTO',
+            },
+          })
+        );
+      }
       navigate('/rnc');
     }
   };
