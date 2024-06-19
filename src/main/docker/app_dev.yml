@@ -42,7 +42,7 @@ services:
   all4qmsmsgateway-postgresql:
     image: postgres:14.5
     volumes:
-      - ~/volumes/jhipster/all4qmsMsGateway/postgresql/:/var/lib/postgresql/data/
+      - ~/volumes/all4qmsMsGateway/postgresql/:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=all4qmsMsGateway
       - POSTGRES_PASSWORD=
