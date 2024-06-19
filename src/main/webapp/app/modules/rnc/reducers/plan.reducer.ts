@@ -66,13 +66,60 @@ export const savePlan = createAsyncThunk('/plan/save', async ({ actionPlans, pla
       descricaoAcao: actionPlan.descricaoAcao,
       prazoAcao: formatDate(actionPlan.prazoAcao, true),
       idResponsavelAcao: actionPlan.idResponsavelAcao,
-      statusAcao: actionPlan.statusAcao,
+      statusAcao: !actionPlan.dataVerificao ? actionPlan.statusAcao : 'VISTO',
       dataVerificao: formatDate(actionPlan.dataVerificao, true),
       idResponsavelVerificaoAcao: actionPlan.idResponsavelVerificaoAcao,
       idAnexosExecucao: actionPlan.idAnexosExecucao,
       dataConclusaoAcao: formatDate(actionPlan.dataConclusaoAcao),
       planoId: savedPlan.id,
     });
+  }
+});
+
+export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans, plan }: Payload) => {
+  const planResponse = await axios.patch<Plan>(`${apiUrl}/${plan.id}`, {
+    id: plan.id,
+    statusPlano: plan.statusPlano,
+    qtdAcoes: plan.qtdAcoes,
+    qtdAcoesConcluidas: plan.qtdAcoesConcluidas,
+    percentualPlano: plan.percentualPlano,
+    dtConclusaoPlano: formatDate(new Date(plan.dtConclusaoPlano)),
+    idNaoConformidade: plan.idNaoConformidade,
+  });
+
+  const savedPlan: Plan = planResponse.data;
+
+  for (let i = 0; i < actionPlans.length; i++) {
+    const actionPlan: ActionPlan = actionPlans[i];
+
+    if (actionPlan.id) {
+      const response = await axios.patch(`${actionPlanApiUrl}/${actionPlan.id}`, {
+        id: actionPlan.id,
+        idPlano: savedPlan.id,
+        descricaoAcao: actionPlan.descricaoAcao,
+        prazoAcao: formatDate(new Date(actionPlan.prazoAcao), true),
+        idResponsavelAcao: actionPlan.idResponsavelAcao,
+        statusAcao: actionPlan.statusAcao,
+        dataVerificao: formatDate(new Date(actionPlan.dataVerificao), true),
+        idResponsavelVerificaoAcao: actionPlan.idResponsavelVerificaoAcao,
+        idAnexosExecucao: actionPlan.idAnexosExecucao,
+        dataConclusaoAcao: formatDate(new Date(actionPlan.dataConclusaoAcao)),
+        planoId: savedPlan.id,
+      });
+    } else {
+      const response = await axios.post(actionPlanApiUrl, {
+        idPlano: savedPlan.id,
+        descricaoAcao: actionPlan.descricaoAcao,
+        prazoAcao: formatDate(actionPlan.prazoAcao, true),
+        idResponsavelAcao: actionPlan.idResponsavelAcao,
+        statusAcao: !actionPlan.dataVerificao ? actionPlan.statusAcao : 'VISTO',
+        dataVerificao: formatDate(actionPlan.dataVerificao, true),
+        idResponsavelVerificaoAcao: actionPlan.idResponsavelVerificaoAcao,
+        idAnexosExecucao: actionPlan.idAnexosExecucao,
+        dataConclusaoAcao: formatDate(actionPlan.dataConclusaoAcao),
+        planoId: savedPlan.id,
+      });
+    }
   }
 });
 
@@ -93,6 +140,15 @@ const rncPlanSlice = createEntitySlice({
         state.loading = true;
       })
       .addMatcher(isFulfilled(savePlan), (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        state.updateSuccess = true;
+      })
+      .addMatcher(isPending(updatePlan), (state, action) => {
+        state.loading = true;
+        state.updating = true;
+      })
+      .addMatcher(isFulfilled(updatePlan), (state, action) => {
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;

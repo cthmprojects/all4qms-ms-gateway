@@ -129,7 +129,7 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
                 ))}
               </Select>
             </FormControl>
-            <FormControl className="rnc-form-field m-2">
+            {/* <FormControl className="rnc-form-field m-2">
               <InputLabel>Status</InputLabel>
               <Select label="Status" name="forwarded" value={status} onChange={onStatusChanged} disabled={readonly}>
                 {enums?.immediateActionTypes.map((type, idx) => (
@@ -138,7 +138,7 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
+            </FormControl> */}
             {/* <TextField
               className="m-2 rnc-form-field"
               disabled={readonly}
