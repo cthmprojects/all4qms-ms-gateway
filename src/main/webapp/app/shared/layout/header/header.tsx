@@ -6,7 +6,7 @@ import { Navbar, Nav, NavbarToggler } from 'reactstrap';
 import LoadingBar from 'react-redux-loading-bar';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
-import { Brand, MenuItensSettings } from './header-components';
+import { Brand, MenuItensPendencias, MenuItensSettings } from './header-components';
 import { IconButton, Menu } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -20,7 +20,8 @@ import MenuItem from '@mui/material/MenuItem';
 import { Build } from '@mui/icons-material';
 import { Storage } from 'react-jhipster';
 import { IPendencia } from '../../model/pendencia.model';
-import { getEntitiesById } from '../../../entities/pendencia/pendencia.reducer';
+import { getEntitiesById as getPendenciasByUser, getPendenciasCount } from '../../../entities/pendencia/pendencia.reducer';
+import { AxiosResponse } from 'axios';
 
 export interface IHeaderProps {
   isAuthenticated: boolean;
@@ -65,39 +66,46 @@ const Header = (props: IHeaderProps) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorAdm, setAnchorAdm] = React.useState(null);
   const [anchorUser, setAnchorUser] = React.useState(null);
+  const [anchorNotify, setAnchorNotify] = React.useState(null);
+  const [pendenciasList, setPendenciasList] = React.useState<IPendencia[]>([]);
+  const [coutPendencias, setCoutPendencias] = React.useState(0);
 
   const location = useLocation();
   const dispatch = useAppDispatch();
   const logoutUrl = useAppSelector(state => state.authentication.logoutUrl);
-  const isAuthenticated = useAppSelector(state => state.authentication.isAuthenticated);
-  const pendenciaList: IPendencia[] = useAppSelector(state => state?.all4qmsmsgateway?.pendencia?.entities);
+  const userQms = useAppSelector(state => state.authentication.accountQms);
   // const totalItems = useAppSelector(state => state.all4qmsmsgateway.pendencia.totalItems);
   // const totalItems = useAppSelector(state => state.all4qmsmsgateway.pendencia.totalItems);
 
-  const getAllEntities = async () => {
-    const pendencias = await dispatch(
-      getEntitiesById({
-        page: 1,
-        size: 10,
-        sort: `id,desc`,
-        idUser: Storage.session.get('ID_USUARIO'),
-      })
-    );
-    console.log('pendencias ->', await pendencias);
-    console.log('pendenciaList ->', pendenciaList);
+  const getAllPendencias = async () => {
+    try {
+      const user = userQms?.id ? userQms : JSON.parse(await Storage.session.get('USUARIO_QMS'));
+      const resPendencias = await dispatch(
+        getPendenciasByUser({
+          page: 1,
+          size: 10,
+          sort: `id,desc`,
+          idUser: user.id,
+        })
+      );
+      const resCountPend = await dispatch(getPendenciasCount(user.id));
+      const pendencias: IPendencia[] = (resPendencias.payload as AxiosResponse).data;
+
+      setPendenciasList(pendencias.filter((pend: IPendencia) => !pend.status));
+      setCoutPendencias((resCountPend.payload as AxiosResponse).data);
+    } catch (err) {
+      console.error('header getAllEntities: ', err);
+    }
   };
   useEffect(() => {
-    console.log('useEffect disparado. isAuthenticated ->', isAuthenticated);
     (async () => {
       try {
-        const token = await Storage.session.get('jhi-authenticationToken');
-        console.log('Executando useEffect token', token);
-        getAllEntities();
+        getAllPendencias();
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     })();
-  }, [isAuthenticated]);
+  }, []);
   // const sortEntities = () => {
   //   getAllEntities();
   //   const endURL = `?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`;
@@ -108,6 +116,7 @@ const Header = (props: IHeaderProps) => {
   const userMenuOpen = Boolean(anchorEl);
   const admMenuOpen = Boolean(anchorAdm);
   const profileMenuOpen = Boolean(anchorUser);
+  const notifyMenuOpen = Boolean(anchorNotify);
 
   const handleOpenAdmMenu = event => {
     setAnchorAdm(event.currentTarget);
@@ -119,6 +128,10 @@ const Header = (props: IHeaderProps) => {
 
   const handleOpenProfileMenu = event => {
     setAnchorUser(event.currentTarget);
+  };
+
+  const handleOpenNotifyMenu = event => {
+    setAnchorNotify(event.currentTarget);
   };
 
   const handleCloseProfileMenu = () => {
@@ -168,9 +181,17 @@ const Header = (props: IHeaderProps) => {
               ) : (
                 <></>
               )}
-              <Badge badgeContent={0} color="primary" sx={{ marginRight: '13px' }}>
-                <NotifyIcon color="action" />
-              </Badge>
+              <IconButton onClick={handleOpenNotifyMenu}>
+                <Badge badgeContent={coutPendencias} color="primary" sx={{ marginRight: '13px' }}>
+                  <NotifyIcon color="action" />
+                </Badge>
+              </IconButton>
+              <MenuItensPendencias
+                notifyMenuOpen={notifyMenuOpen}
+                anchorNotify={anchorNotify}
+                handleCloseMenu={() => setAnchorNotify(null)}
+                pendenciasList={pendenciasList}
+              />
               <IconButton onClick={handleOpenUserMenu}>
                 <SettingsIcon />
               </IconButton>

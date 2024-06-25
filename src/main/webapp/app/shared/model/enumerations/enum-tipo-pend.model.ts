@@ -1,5 +1,5 @@
 export enum EnumTipoPend {
-  Atividade = 'Atividade',
+  ATIVIDADE = 'Atividade',
 
-  Notificacao = 'Notificacao',
+  NOTIFICACAO = 'Notificacao',
 }

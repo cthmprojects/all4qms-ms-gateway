@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { NavItem, NavLink, NavbarBrand } from 'reactstrap';
-import { NavLink as Link } from 'react-router-dom';
+import { NavLink as Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Menu, MenuItem } from '@mui/material';
 
@@ -37,3 +37,16 @@ export const MenuItensSettings = ({ admMenuOpen, anchorAdm, handleCloseAdmMenu, 
     ))}
   </Menu>
 );
+
+export const MenuItensPendencias = ({ notifyMenuOpen, anchorNotify, handleCloseMenu, pendenciasList }) => {
+  const navigate = useNavigate();
+  return (
+    <Menu open={notifyMenuOpen} anchorEl={anchorNotify} onClose={handleCloseMenu}>
+      {pendenciasList.map((item, index) => (
+        <MenuItem key={index} onClick={() => navigate('/pendencia')}>
+          {item.nome}
+        </MenuItem>
+      ))}
+    </Menu>
+  );
+};
