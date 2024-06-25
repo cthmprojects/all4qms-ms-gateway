@@ -3,6 +3,7 @@ import React from 'react';
 import { NavItem, NavLink, NavbarBrand } from 'reactstrap';
 import { NavLink as Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Menu, MenuItem } from '@mui/material';
 
 export const BrandIcon = props => (
   <div {...props} className="brand-icon">
@@ -23,4 +24,16 @@ export const Home = () => (
       <FontAwesomeIcon icon="home" />
     </NavLink>
   </NavItem>
+);
+
+export const MenuItensSettings = ({ admMenuOpen, anchorAdm, handleCloseAdmMenu, listMenuItens }) => (
+  <Menu open={admMenuOpen} anchorEl={anchorAdm} onClose={handleCloseAdmMenu}>
+    {listMenuItens.map((item, index) => (
+      <MenuItem key={index}>
+        <Link to={item.navigate} target="_blank">
+          {item.name}
+        </Link>
+      </MenuItem>
+    ))}
+  </Menu>
 );

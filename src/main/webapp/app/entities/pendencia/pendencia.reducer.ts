@@ -13,15 +13,26 @@ const initialState: EntityState<IPendencia> = {
   totalItems: 0,
   updateSuccess: false,
 };
-
+export type IQueryParamsPendencia = { query?: string; page?: number; size?: number; sort?: string; idUser?: number };
 const apiUrl = 'api/pendencias';
+const apiPendenciaByUserUrl = 'api/pendencias/usuario';
 
 // Actions
 
-export const getEntities = createAsyncThunk('pendencia/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
-  const requestUrl = `${apiUrl}?${sort ? `page=${page}&size=${size}&sort=${sort}&` : ''}cacheBuster=${new Date().getTime()}`;
-  return axios.get<IPendencia[]>(requestUrl);
-});
+// export const getEntities = createAsyncThunk('pendencia/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
+//   const requestUrl = `${apiUrl}?${sort ? `page=${page}&size=${size}&sort=${sort}&` : ''}cacheBuster=${new Date().getTime()}`;
+//   return axios.get<IPendencia[]>(requestUrl);
+// });
+
+export const getEntitiesById = createAsyncThunk(
+  'pendencia/fetch_entity_list_by_id',
+  async ({ page, size, sort, idUser }: IQueryParamsPendencia) => {
+    const requestUrl = `${apiUrl}/usuario/${idUser}?${
+      sort ? `page=${page}&size=${size}&sort=${sort}&` : ''
+    }cacheBuster=${new Date().getTime()}`;
+    return axios.get<IPendencia[]>(requestUrl);
+  }
+);
 
 export const getEntity = createAsyncThunk(
   'pendencia/fetch_entity',
@@ -36,7 +47,7 @@ export const createEntity = createAsyncThunk(
   'pendencia/create_entity',
   async (entity: IPendencia, thunkAPI) => {
     const result = await axios.post<IPendencia>(apiUrl, cleanEntity(entity));
-    thunkAPI.dispatch(getEntities({}));
+    thunkAPI.dispatch(getEntitiesById({}));
     return result;
   },
   { serializeError: serializeAxiosError }
@@ -46,7 +57,7 @@ export const updateEntity = createAsyncThunk(
   'pendencia/update_entity',
   async (entity: IPendencia, thunkAPI) => {
     const result = await axios.put<IPendencia>(`${apiUrl}/${entity.id}`, cleanEntity(entity));
-    thunkAPI.dispatch(getEntities({}));
+    thunkAPI.dispatch(getEntitiesById({}));
     return result;
   },
   { serializeError: serializeAxiosError }
@@ -56,7 +67,7 @@ export const partialUpdateEntity = createAsyncThunk(
   'pendencia/partial_update_entity',
   async (entity: IPendencia, thunkAPI) => {
     const result = await axios.patch<IPendencia>(`${apiUrl}/${entity.id}`, cleanEntity(entity));
-    thunkAPI.dispatch(getEntities({}));
+    thunkAPI.dispatch(getEntitiesById({}));
     return result;
   },
   { serializeError: serializeAxiosError }
@@ -67,7 +78,7 @@ export const deleteEntity = createAsyncThunk(
   async (id: string | number, thunkAPI) => {
     const requestUrl = `${apiUrl}/${id}`;
     const result = await axios.delete<IPendencia>(requestUrl);
-    thunkAPI.dispatch(getEntities({}));
+    thunkAPI.dispatch(getEntitiesById({}));
     return result;
   },
   { serializeError: serializeAxiosError }
@@ -89,7 +100,7 @@ export const PendenciaSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = {};
       })
-      .addMatcher(isFulfilled(getEntities), (state, action) => {
+      .addMatcher(isFulfilled(getEntitiesById), (state, action) => {
         const { data, headers } = action.payload;
 
         return {
@@ -105,7 +116,7 @@ export const PendenciaSlice = createEntitySlice({
         state.updateSuccess = true;
         state.entity = action.payload.data;
       })
-      .addMatcher(isPending(getEntities, getEntity), state => {
+      .addMatcher(isPending(getEntitiesById, getEntity), state => {
         state.errorMessage = null;
         state.updateSuccess = false;
         state.loading = true;

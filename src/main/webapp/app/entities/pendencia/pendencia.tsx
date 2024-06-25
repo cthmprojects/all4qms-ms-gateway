@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Table } from 'reactstrap';
-import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
+import { Button, Row, Table } from 'reactstrap';
+import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount, Storage } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-
-import { IPendencia } from 'app/shared/model/pendencia.model';
-import { getEntities } from './pendencia.reducer';
+import {
+  Box,
+  Breadcrumbs,
+  CircularProgress,
+  Divider,
+  Paper,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
+import { IPendencia } from '../../shared/model/pendencia.model';
+import { getEntitiesById } from './pendencia.reducer';
+import { PendenciaOptions } from './pendencia-options';
 
 export const Pendencia = () => {
   const dispatch = useAppDispatch();
@@ -18,20 +31,22 @@ export const Pendencia = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [userRole, setUserRole] = useState<Array<String>>(Storage.local.get('ROLE'));
   const [paginationState, setPaginationState] = useState(
     overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
 
-  const pendenciaList = useAppSelector(state => state.all4qmsmsgateway.pendencia.entities);
-  const loading = useAppSelector(state => state.all4qmsmsgateway.pendencia.loading);
+  const pendenciaList: IPendencia[] = useAppSelector(state => state.all4qmsmsgateway.pendencia.entities);
+  // const loading = useAppSelector(state => state.all4qmsmsgateway.pendencia.loading);
   const totalItems = useAppSelector(state => state.all4qmsmsgateway.pendencia.totalItems);
 
   const getAllEntities = () => {
     dispatch(
-      getEntities({
+      getEntitiesById({
         page: paginationState.activePage - 1,
         size: paginationState.itemsPerPage,
         sort: `${paginationState.sort},${paginationState.order}`,
+        idUser: Storage.session.get('ID_USUARIO'),
       })
     );
   };
@@ -63,14 +78,6 @@ export const Pendencia = () => {
     }
   }, [location.search]);
 
-  const sort = p => () => {
-    setPaginationState({
-      ...paginationState,
-      order: paginationState.order === ASC ? DESC : ASC,
-      sort: p,
-    });
-  };
-
   const handlePagination = currentPage =>
     setPaginationState({
       ...paginationState,
@@ -80,122 +87,48 @@ export const Pendencia = () => {
   const handleSyncList = () => {
     sortEntities();
   };
+  const handleDeleteUser = (loginJhUser: any, idRncUser: any) => {
+    // dispatch(deleteRNCUser(idRncUser.toString())).then(() => {
+    //   dispatch(deleteJhipsterUser(loginJhUser.toString())).then(() => {
+    //     sortEntities();
+    //   });
+    // });
+  };
 
-  return (
-    <div>
-      <h2 id="pendencia-heading" data-cy="PendenciaHeading">
-        Pendencias
-        <div className="d-flex justify-content-end">
-          <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
-            <FontAwesomeIcon icon="sync" spin={loading} /> Atualizar lista
-          </Button>
-          <Link to="/pendencia/new" className="btn btn-primary jh-create-entity" id="jh-create-entity" data-cy="entityCreateButton">
-            <FontAwesomeIcon icon="plus" />
-            &nbsp; Criar novo Pendencia
-          </Link>
-        </div>
-      </h2>
-      <div className="table-responsive">
-        {pendenciaList && pendenciaList.length > 0 ? (
-          <Table responsive>
-            <thead>
-              <tr>
-                <th className="hand" onClick={sort('id')}>
-                  ID <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('nome')}>
-                  Nome <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('status')}>
-                  Status <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('lidaEm')}>
-                  Lida Em <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('link')}>
-                  Link <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('tipo')}>
-                  Tipo <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('criadoEm')}>
-                  Criado Em <FontAwesomeIcon icon="sort" />
-                </th>
-                <th>
-                  Responsavel <FontAwesomeIcon icon="sort" />
-                </th>
-                <th>
-                  Criado Por <FontAwesomeIcon icon="sort" />
-                </th>
-                <th>
-                  Atualizado Por <FontAwesomeIcon icon="sort" />
-                </th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {pendenciaList.map((pendencia, i) => (
-                <tr key={`entity-${i}`} data-cy="entityTable">
-                  <td>
-                    <Button tag={Link} to={`/pendencia/${pendencia.id}`} color="link" size="sm">
-                      {pendencia.id}
-                    </Button>
-                  </td>
-                  <td>{pendencia.nome}</td>
-                  <td>{pendencia.status ? 'true' : 'false'}</td>
-                  <td>{pendencia.lidaEm ? <TextFormat type="date" value={pendencia.lidaEm} format={APP_DATE_FORMAT} /> : null}</td>
-                  <td>{pendencia.link}</td>
-                  <td>{pendencia.tipo}</td>
-                  <td>{pendencia.criadoEm ? <TextFormat type="date" value={pendencia.criadoEm} format={APP_DATE_FORMAT} /> : null}</td>
-                  <td>
-                    {pendencia.responsavel ? <Link to={`/usuario/${pendencia.responsavel.id}`}>{pendencia.responsavel.nome}</Link> : ''}
-                  </td>
-                  <td>{pendencia.criadoPor ? <Link to={`/usuario/${pendencia.criadoPor.id}`}>{pendencia.criadoPor.nome}</Link> : ''}</td>
-                  <td>
-                    {pendencia.atualizadoPor ? (
-                      <Link to={`/usuario/${pendencia.atualizadoPor.id}`}>{pendencia.atualizadoPor.nome}</Link>
-                    ) : (
-                      ''
-                    )}
-                  </td>
-                  <td className="text-end">
-                    <div className="btn-group flex-btn-group-container">
-                      <Button tag={Link} to={`/pendencia/${pendencia.id}`} color="info" size="sm" data-cy="entityDetailsButton">
-                        <FontAwesomeIcon icon="eye" /> <span className="d-none d-md-inline">Visualizar</span>
-                      </Button>
-                      <Button
-                        tag={Link}
-                        to={`/pendencia/${pendencia.id}/edit?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`}
-                        color="primary"
-                        size="sm"
-                        data-cy="entityEditButton"
-                      >
-                        <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
-                      </Button>
-                      <Button
-                        tag={Link}
-                        to={`/pendencia/${pendencia.id}/delete?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`}
-                        color="danger"
-                        size="sm"
-                        data-cy="entityDeleteButton"
-                      >
-                        <FontAwesomeIcon icon="trash" /> <span className="d-none d-md-inline">Excluir</span>
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        ) : (
-          !loading && <div className="alert alert-warning">Nenhum Pendencia encontrado</div>
-        )}
-      </div>
-      {totalItems ? (
-        <div className={pendenciaList && pendenciaList.length > 0 ? '' : 'd-none'}>
-          <div className="justify-content-center d-flex">
-            <JhiItemCount page={paginationState.activePage} total={totalItems} itemsPerPage={paginationState.itemsPerPage} />
-          </div>
+  const columns = ['Nome', 'Status', 'Lida Em', 'Link', 'Tipo', 'Criado Por', 'Ações'];
+
+  const renderTable = () => {
+    if (columns.length > 0 && pendenciaList.length > 0) {
+      return (
+        <>
+          <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
+            <Table sx={{ width: '100%' }}>
+              <TableHead>
+                <TableRow>
+                  {columns.map(col => (
+                    <TableCell align="left">{col}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {pendenciaList.map((pendencia, i) => (
+                  <TableRow>
+                    <TableCell>{pendencia.nome}</TableCell>
+                    <TableCell>{pendencia.status ? 'true' : 'false'}</TableCell>
+                    <TableCell>{pendencia.lidaEm}</TableCell>
+                    <TableCell>{pendencia.link}</TableCell>
+                    <TableCell>{pendencia.tipo?.toString()}</TableCell>
+                    <TableCell>
+                      {pendencia.responsavel ? <Link to={`/usuario/${pendencia.responsavel.id}`}>{pendencia.responsavel.nome}</Link> : ''}
+                    </TableCell>
+                    <TableCell>
+                      <PendenciaOptions userRole={userRole} pendencia={pendencia} deleteUser={handleDeleteUser} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
           <div className="justify-content-center d-flex">
             <JhiPagination
               activePage={paginationState.activePage}
@@ -205,11 +138,62 @@ export const Pendencia = () => {
               totalItems={totalItems}
             />
           </div>
-        </div>
+        </>
+      );
+    } else {
+      return (
+        <Row className="justify-content-center mt-5">
+          <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
+        </Row>
+      );
+    }
+  };
+
+  return (
+    <>
+      {pendenciaList.length < 1 ? (
+        <Box
+          sx={{
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
       ) : (
-        ''
+        <div className="padding-container">
+          <div className="container-style">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }} to={'/'}>
+                Home
+              </Link>
+              <Typography className="link">Usuários</Typography>
+            </Breadcrumbs>
+            <h1 className="title">Pendências</h1>
+            <div style={{ paddingBottom: '30px' }}>
+              <Button
+                variant="contained"
+                className="primary-button"
+                style={{ marginRight: '10px' }}
+                onClick={() => navigate('/pendencia/new')}
+              >
+                CADASTRAR
+              </Button>
+              <Button variant="contained" className="update-button" onClick={() => getAllEntities()}>
+                ATUALIZAR
+              </Button>
+            </div>
+            <Divider sx={{ borderColor: '#7d7d7d' }}></Divider>
+            {renderTable()}
+          </div>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
