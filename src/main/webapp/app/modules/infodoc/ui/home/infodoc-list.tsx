@@ -61,6 +61,8 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
+import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
+import axios from 'axios';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -146,6 +148,8 @@ const InfodocList = () => {
   const dispatch = useAppDispatch();
   const statusValues = Object.keys(StatusEnum) as Array<keyof typeof StatusEnum>;
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
+  const [uploadFileUpdate, setUploadFileUpdate] = useState(false);
+  const [idDocUpdating, setIdDocUpdating] = useState(0);
 
   /**
    * Filters
@@ -302,13 +306,13 @@ const InfodocList = () => {
   };
 
   const onEditClicked = (id: number, event: React.MouseEvent<HTMLButtonElement>): void => {
-    navigate(`upload-file/update/${id}`);
+    // navigate(`upload-file/update/${id}`);
+    setIdDocUpdating(id);
+    setUploadFileUpdate(true);
   };
 
   const onViewClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    // navigate(`/somepath/${id}`);
-    currentInfodoc = infodocEvent;
-    alert('Visualizar Doc - Em Desenvolvimento!');
+    downloadDocument(infodocEvent.doc?.idArquivo);
   };
 
   const onPrintClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -324,9 +328,37 @@ const InfodocList = () => {
     setCancelDocumentModal(true);
   };
 
+  const handleCloseUpdateModal = () => {
+    setUploadFileUpdate(false);
+  };
+
+  const downloadDocument = async (id: number) => {
+    if (id) {
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+
+      await axios
+        .request({
+          responseType: 'arraybuffer',
+          url: downloadUrl,
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          },
+        })
+        .then(result => {
+          var fileDownload = require('js-file-download');
+          let fileName = result.headers['content-disposition'].split(';')[1];
+          fileName = fileName.split('=')[1];
+
+          const file = new Blob([result.data], { type: 'application/octet-stream' });
+
+          fileDownload(file, `${fileName}.pdf`);
+        });
+    }
+  };
+
   const onOpenUploadFileModal = (event: React.MouseEvent<HTMLButtonElement>): void => {
     const userLogin = filterUser(userLoginID);
-    console.log(userLogin);
     setUploadFileModal(true);
     // TEM O USUARIO, MAS NAO VEM AS PERMISSOES.
     // TODO:  PEGAR A LISTA DE PROCESSOS E PEDIR AS PERMISSOES PARA PODER VALIDAR AS ACOES DO USUARIO
@@ -441,6 +473,7 @@ const InfodocList = () => {
     //////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
+        <UploadInfoFileUpdate open={uploadFileUpdate} handleClose={handleCloseUpdateModal} id={idDocUpdating} />
         <DistributionDialog open={distributionModal} handleClose={handleDistributionModal} documentTitle={currentInfodoc?.doc?.titulo} />
         <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
         <RequestCopyDialog open={requestCopyModal} handleClose={handleCloseRequestCopyModal} documentTitle={currentInfodoc?.doc?.titulo} />

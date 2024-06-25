@@ -20,13 +20,13 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import DatePicker from 'react-datepicker';
 import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
-import { AddCircle } from '@mui/icons-material';
+import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
 import { Doc } from '../models';
-import { createInfoDoc } from '../reducers/infodoc.reducer';
+import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -71,7 +71,7 @@ const getDocById = async (id: any) => {
 export const UpdateDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, idFile } = useParams();
 
   const [emitter, setEmitter] = useState('');
   const [emittedDate, setEmittedDate] = useState(new Date());
@@ -86,6 +86,7 @@ export const UpdateDocument = () => {
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [originList, setOriginList] = useState([]);
+  const [idNewFile, setIdNewFile] = useState<number>();
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
@@ -95,11 +96,7 @@ export const UpdateDocument = () => {
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
-    getDocById(id).then(response => {
-      if (response) {
-        setCode(response.codigo);
-      }
-    });
+    dispatch(getInfoDocById(id));
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -143,28 +140,28 @@ export const UpdateDocument = () => {
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+    if (actualInfoDoc) {
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc.idArquivo}`;
 
-    await axios
-      .request({
-        responseType: 'arraybuffer',
-        url: downloadUrl,
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/octet-stream',
-        },
-      })
-      .then(result => {
-        console.log(result.headers);
-        console.log(result.headers['content-disposition']);
-        console.log(result.headers['content-disposition'].split('=')[1]);
-        const file = new Blob([result.data], { type: 'application/octet-stream' });
+      await axios
+        .request({
+          responseType: 'arraybuffer',
+          url: downloadUrl,
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          },
+        })
+        .then(result => {
+          var fileDownload = require('js-file-download');
+          let fileName = result.headers['content-disposition'].split(';')[1];
+          fileName = fileName.split('=')[1];
 
-        const fileURL = URL.createObjectURL(file);
+          const file = new Blob([result.data], { type: 'application/octet-stream' });
 
-        const fileWindow = window.open();
-        fileWindow.location.href = fileURL;
-      });
+          fileDownload(file, `${fileName}.pdf`);
+        });
+    }
   };
 
   const saveDocument = () => {
@@ -175,8 +172,8 @@ export const UpdateDocument = () => {
       codigo: code,
       titulo: title,
       origem: origin,
+      idArquivo: parseInt(idFile),
       idProcesso: parseInt(selectedProcess),
-      idArquivo: 0,
       ignorarValidade: true,
       enumSituacao: 'E',
       tipoDoc: 'MA',
@@ -195,8 +192,20 @@ export const UpdateDocument = () => {
       .catch(() => {});
   };
 
+  const cancelUpdate = () => {
+    dispatch(deleteInfoDoc(idFile));
+    navigate('/infodoc');
+  };
+
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  const actualInfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
+
+  useEffect(() => {
+    if (actualInfoDoc) {
+      setCode(actualInfoDoc.doc?.codigo);
+    }
+  }, [actualInfoDoc]);
 
   useEffect(() => {
     setOriginList(enums?.origem);
@@ -333,7 +342,7 @@ export const UpdateDocument = () => {
               className="ms-2"
               variant="outlined"
               size="large"
-              style={{ backgroundColor: '#E0E0E0', height: '55px' }}
+              style={{ backgroundColor: idNewFile ? '#e6b200' : '#E0E0E0', color: '#4e4d4d', height: '55px' }}
               onClick={event => onFileClicked(event)}
             >
               <VisibilityIcon className="pe-1 pb-1" />
@@ -404,12 +413,7 @@ export const UpdateDocument = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
-            <Button
-              variant="contained"
-              className="me-3"
-              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => navigate('/infodoc')}
-            >
+            <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
               VOLTAR
             </Button>
             <Button disabled={!validateFields()} onClick={() => saveDocument()}>
@@ -419,6 +423,7 @@ export const UpdateDocument = () => {
               className="ms-3"
               variant="contained"
               color="primary"
+              onClick={() => saveDocument()}
               disabled={!validateFields()}
               style={{ background: '#e6b200', color: '#4e4d4d' }}
             >
