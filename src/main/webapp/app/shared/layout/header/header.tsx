@@ -60,6 +60,8 @@ const menuItensSettings = [
     navigate: '/admin/docs',
   },
 ];
+const interval = 30000; // 30 segundos em milissegundos
+
 const Header = (props: IHeaderProps) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -99,9 +101,12 @@ const Header = (props: IHeaderProps) => {
   };
   useEffect(() => {
     (async () => {
+      let intervalId;
       try {
         getAllPendencias();
+        intervalId = setInterval(getAllPendencias, interval);
       } catch (error) {
+        clearInterval(intervalId);
         console.error('Error fetching data:', error);
       }
     })();
