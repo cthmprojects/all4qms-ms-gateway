@@ -229,7 +229,7 @@ public class PendenciaResource {
             );
     }
 
-    @GetMapping(value = "/pendencias/usuario/countPendencias/{id}")
+    @GetMapping(value = "/pendencias/countbyuser/{id}")
     public Mono<Integer> countPendenciasByResponsavel(@PathVariable("id") Long id) {
         log.debug("REST request to count Pendencias do Responsavel {}", id);
         return pendenciaService.countPendenciasByResponsavel(id).next();

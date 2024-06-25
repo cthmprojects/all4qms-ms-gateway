@@ -5,15 +5,17 @@ import { Button } from 'reactstrap';
 import './upload-files.css';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from 'app/config/store';
-import { UploadAnexo } from 'app/modules/infodoc/models';
+import { createInfoDoc, deleteInfoDoc } from 'app/modules/infodoc/reducers/infodoc.reducer';
+import { Doc, UploadAnexo } from 'app/modules/infodoc/models';
 import { uploadAnexo } from 'app/modules/infodoc/reducers/anexo.reducer';
 
 type UploadFileModalProps = {
   open: boolean;
   handleClose: () => void;
+  id: number;
 };
 
-const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
+const UploadInfoFileUpdate = ({ open, handleClose, id }: UploadFileModalProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [files, setFiles] = useState<Array<File>>([]);
@@ -37,23 +39,18 @@ const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
       arquivo: files[0],
     };
 
-    dispatch(uploadAnexo(newFile)).then(
-      (response: any) => {
-        if (response?.error) {
-          handleClose();
-          return;
-        }
-
-        if (response.payload?.data?.id) {
-          navigate(`/infodoc/upload-file/new/${response.payload?.data?.id}`);
-        }
-
+    dispatch(uploadAnexo(newFile)).then((response: any) => {
+      if (response?.error) {
         handleClose();
-      },
-      err => {
         return;
       }
-    );
+
+      if (response.payload?.data?.id) {
+        navigate(`/infodoc/upload-file/update/${id}/${response.payload?.data?.id}`);
+      }
+
+      handleClose();
+    });
   };
 
   return (
@@ -109,4 +106,4 @@ const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
   );
 };
 
-export default UploadInfoFile;
+export default UploadInfoFileUpdate;
