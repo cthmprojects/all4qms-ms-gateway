@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
@@ -26,8 +26,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import downloadFile from '../infodoc-store';
 import { listEnums } from '../reducers/enums.reducer';
-import { createInfoDoc } from '../reducers/infodoc.reducer';
+import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { InfoDoc, Doc } from '../models';
+import { downloadAnexo } from '../reducers/anexo.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -67,6 +68,7 @@ const getProcesses = async () => {
 export const NewDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [emitter, setEmitter] = useState('');
   const [emittedDate, setEmittedDate] = useState(new Date());
@@ -88,6 +90,7 @@ export const NewDocument = () => {
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
+    // dispatch(getInfoDocById(id));
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -111,11 +114,34 @@ export const NewDocument = () => {
     setKeyword('');
   };
 
-  const onFileClicked = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const downloadUrl = 'http://www.psicologia.pt/artigos/textos/TL0032.PDF'; // await getDownloadUrl(attachment);
-    if (downloadUrl) {
-      window.open(downloadUrl, '_blank', 'noreferrer');
+  const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (id) {
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+
+      await axios
+        .request({
+          responseType: 'arraybuffer',
+          url: downloadUrl,
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          },
+        })
+        .then(result => {
+          var fileDownload = require('js-file-download');
+          let fileName = result.headers['content-disposition'].split(';')[1];
+          fileName = fileName.split('=')[1];
+
+          const file = new Blob([result.data], { type: 'application/octet-stream' });
+
+          fileDownload(file, `${fileName}.pdf`);
+        });
     }
+  };
+
+  const cancelDocument = () => {
+    dispatch(deleteInfoDoc(id));
+    navigate('/infodoc');
   };
 
   const onNoValidateChanged = () => {
@@ -142,7 +168,7 @@ export const NewDocument = () => {
       titulo: title,
       origem: 'I',
       idProcesso: parseInt(selectedProcess),
-      idArquivo: 0,
+      idArquivo: parseInt(id),
       ignorarValidade: true,
       enumSituacao: 'E',
       tipoDoc: 'MA',
@@ -367,7 +393,7 @@ export const NewDocument = () => {
               variant="contained"
               className="me-3"
               style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => navigate('/infodoc')}
+              onClick={() => cancelDocument()}
             >
               Voltar
             </Button>
@@ -376,6 +402,7 @@ export const NewDocument = () => {
             </Button>
             <Button
               disabled={!validateFields()}
+              onClick={() => saveDocument()}
               className="ms-3"
               variant="contained"
               color="primary"
