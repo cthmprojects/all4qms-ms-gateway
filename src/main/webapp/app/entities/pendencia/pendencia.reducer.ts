@@ -34,6 +34,10 @@ export const getEntitiesById = createAsyncThunk(
   }
 );
 
+export const getPendenciasCount = createAsyncThunk('pendencia/fetch_entity_count_by_users', async (idUser: number) => {
+  const requestUrl = `${apiUrl}/countbyuser/${idUser}`;
+  return axios.get<number>(requestUrl);
+});
 export const getEntity = createAsyncThunk(
   'pendencia/fetch_entity',
   async (id: string | number) => {

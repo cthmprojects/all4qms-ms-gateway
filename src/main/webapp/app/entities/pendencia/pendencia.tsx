@@ -22,8 +22,10 @@ import {
   Typography,
 } from '@mui/material';
 import { IPendencia } from '../../shared/model/pendencia.model';
-import { getEntitiesById } from './pendencia.reducer';
+import { getEntitiesById as getPendenciasByUser } from './pendencia.reducer';
+import { getEntity as getUsuario } from '../usuario/usuario.reducer';
 import { PendenciaOptions } from './pendencia-options';
+import { AxiosResponse } from 'axios';
 
 export const Pendencia = () => {
   const dispatch = useAppDispatch();
@@ -31,35 +33,50 @@ export const Pendencia = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const jhipsterId = parseInt(Storage.session.get('ID_USUARIO'));
   const [userRole, setUserRole] = useState<Array<String>>(Storage.local.get('ROLE'));
   const [paginationState, setPaginationState] = useState(
     overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
+  const [pendenciasList, setPendenciasList] = React.useState<IPendencia[]>([]);
 
-  const pendenciaList: IPendencia[] = useAppSelector(state => state.all4qmsmsgateway.pendencia.entities);
+  // const pendenciaList: IPendencia[] = useAppSelector(state => state.all4qmsmsgateway.pendencia.entities);
   // const loading = useAppSelector(state => state.all4qmsmsgateway.pendencia.loading);
   const totalItems = useAppSelector(state => state.all4qmsmsgateway.pendencia.totalItems);
+  const userQms = useAppSelector(state => state.authentication.accountQms);
 
-  const getAllEntities = () => {
-    dispatch(
-      getEntitiesById({
-        page: paginationState.activePage - 1,
-        size: paginationState.itemsPerPage,
-        sort: `${paginationState.sort},${paginationState.order}`,
-        idUser: Storage.session.get('ID_USUARIO'),
-      })
-    );
+  const getAllPendencias = async () => {
+    try {
+      const user = userQms?.id ? userQms : JSON.parse(await Storage.session.get('USUARIO_QMS'));
+      const resPendencias = await dispatch(
+        getPendenciasByUser({
+          page: 1,
+          size: 10,
+          sort: `id,desc`,
+          idUser: user.id,
+        })
+      );
+      const pendencias: IPendencia[] = (resPendencias.payload as AxiosResponse).data;
+      setPendenciasList(pendencias);
+    } catch (err) {
+      console.error('header getAllEntities: ', err);
+    }
   };
 
   const sortEntities = () => {
-    getAllEntities();
+    getAllPendencias();
     const endURL = `?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`;
     if (location.search !== endURL) {
       navigate(`${location.pathname}${endURL}`);
     }
   };
 
+  // useEffect(() => {
+  //   dispatch(getUsuario(jhipsterId));
+  // }, []);
+
   useEffect(() => {
+    // dispatch(getUsuario(jhipsterId));
     sortEntities();
   }, [paginationState.activePage, paginationState.order, paginationState.sort]);
 
@@ -98,7 +115,7 @@ export const Pendencia = () => {
   const columns = ['Nome', 'Status', 'Lida Em', 'Link', 'Tipo', 'Criado Por', 'Ações'];
 
   const renderTable = () => {
-    if (columns.length > 0 && pendenciaList.length > 0) {
+    if (columns.length > 0 && pendenciasList.length > 0) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -111,7 +128,7 @@ export const Pendencia = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {pendenciaList.map((pendencia, i) => (
+                {pendenciasList.map((pendencia, i) => (
                   <TableRow>
                     <TableCell>{pendencia.nome}</TableCell>
                     <TableCell>{pendencia.status ? 'true' : 'false'}</TableCell>
@@ -119,7 +136,7 @@ export const Pendencia = () => {
                     <TableCell>{pendencia.link}</TableCell>
                     <TableCell>{pendencia.tipo?.toString()}</TableCell>
                     <TableCell>
-                      {pendencia.responsavel ? <Link to={`/usuario/${pendencia.responsavel.id}`}>{pendencia.responsavel.nome}</Link> : ''}
+                      {pendencia.criadoPor ? <Link to={`/usuario/${pendencia.criadoPor.id}`}>{pendencia.criadoPor.nome}</Link> : ''}
                     </TableCell>
                     <TableCell>
                       <PendenciaOptions userRole={userRole} pendencia={pendencia} deleteUser={handleDeleteUser} />
@@ -151,7 +168,7 @@ export const Pendencia = () => {
 
   return (
     <>
-      {pendenciaList.length < 1 ? (
+      {pendenciasList.length < 1 ? (
         <Box
           sx={{
             display: 'flex',
@@ -184,7 +201,7 @@ export const Pendencia = () => {
               >
                 CADASTRAR
               </Button>
-              <Button variant="contained" className="update-button" onClick={() => getAllEntities()}>
+              <Button variant="contained" className="update-button" onClick={() => getAllPendencias()}>
                 ATUALIZAR
               </Button>
             </div>
