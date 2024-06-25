@@ -25,7 +25,7 @@ export type Doc = {
   titulo: string;
   revisao?: number;
   descricaoDoc?: string;
-  idArquivo: number;
+  idArquivo?: number;
   enumSituacao?: string;
   origem?: string;
   tipoDoc?: string;
@@ -50,4 +50,10 @@ export type DocAttachment = {
   caminho: string;
   dataCriacao: Date;
   idDocumentacao: number;
+};
+
+export type UploadAnexo = {
+  id?: number;
+  arquivo: File;
+  idDocumentacao?: number;
 };

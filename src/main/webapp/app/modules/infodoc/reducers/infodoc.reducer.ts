@@ -77,6 +77,29 @@ export const createInfoDoc = createAsyncThunk('docs/create', async (data: Doc) =
   return await axios.post<InfoDoc>(apiDocumentacaoUrl, data);
 });
 
+interface updateParams {
+  id: number | string;
+  data: Doc;
+}
+export const updateInfoDoc = createAsyncThunk('docs/update', async ({ data, id }: updateParams) => {
+  return await axios.patch(`${apiDocumentacaoUrl}/${id}`, data);
+});
+
+export const deleteInfoDoc = createAsyncThunk('docs/delete', async (id: number | string) => {
+  return await axios.delete(`${apiDocumentacaoUrl}/${id}`);
+});
+
+export const getInfoDocById = createAsyncThunk('docs/get', async (id: number | string) => {
+  const { data } = await axios.get<Doc>(`${apiDocumentacaoUrl}/${id}`);
+
+  const newResponse: InfoDoc = {
+    doc: data,
+    permissaodoc: [],
+  };
+
+  return newResponse;
+});
+
 const InfoDocSlice = createEntitySlice({
   name: 'infodoc',
   initialState,
@@ -98,6 +121,19 @@ const InfoDocSlice = createEntitySlice({
       })
       .addMatcher(isFulfilled(createInfoDoc), (state, action) => {
         state.loading = false;
+      })
+      .addMatcher(isFulfilled(deleteInfoDoc), (state, action) => {
+        state.loading = false;
+      })
+      .addMatcher(isFulfilled(updateInfoDoc), (state, action) => {
+        state.loading = false;
+      })
+      .addMatcher(isFulfilled(getInfoDocById), (state, action) => {
+        return {
+          ...state,
+          loading: false,
+          entity: action.payload,
+        };
       });
   },
 });
