@@ -21,8 +21,8 @@ const ButtonList = () => {
     <div className="button-list">
       {buttons.map((button, index) => (
         // eslint-disable-next-line react/jsx-key
-        <div className="container">
-          <a key={index} className={button.disabled ? 'button-disabled' : 'button'} onClick={() => navigate(button.link)} aria-disabled>
+        <div key={index} className="container">
+          <a className={button.disabled ? 'button-disabled' : 'button'} onClick={() => navigate(button.link)} aria-disabled>
             {button.icon}
           </a>
           <span>{button.legenda}</span>

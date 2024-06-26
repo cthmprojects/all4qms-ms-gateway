@@ -6,6 +6,7 @@ import { serializeAxiosError } from './reducer.utils';
 import { AppThunk } from 'app/config/store';
 
 const AUTH_TOKEN_KEY = 'jhi-authenticationToken';
+const USUARIO_QMS = 'USUARIO_QMS';
 
 export const initialState = {
   loading: false,
@@ -14,6 +15,7 @@ export const initialState = {
   loginError: false, // Errors returned from server side
   showModalLogin: false,
   account: {} as any,
+  accountQms: {} as any,
   errorMessage: null as unknown as string, // Errors returned from server side
   redirectMessage: null as unknown as string,
   sessionHasBeenFetched: false,
@@ -33,6 +35,13 @@ export const getSession = (): AppThunk => (dispatch, getState) => {
 export const getAccount = createAsyncThunk('authentication/get_account', async () => axios.get<any>('api/account'), {
   serializeError: serializeAxiosError,
 });
+export const getAccountQms = createAsyncThunk(
+  'authentication/get_account_qms',
+  async (idUsuario: number) => axios.get<any>(`api/usuarios/byuserid/${idUsuario}`),
+  {
+    serializeError: serializeAxiosError,
+  }
+);
 
 interface IAuthParams {
   username: string;
@@ -62,7 +71,18 @@ export const login: (username: string, password: string, rememberMe?: boolean) =
         Storage.session.set(AUTH_TOKEN_KEY, jwt);
       }
     }
-    dispatch(getSession());
+    // dispatch(getSession());
+
+    const resAccountJhisp = await dispatch(getAccount());
+    const responseAccount = resAccountJhisp.payload as AxiosResponse;
+    const resAccountQms = await dispatch(getAccountQms(responseAccount.data.id));
+    const responseAccountQms = resAccountQms.payload as AxiosResponse;
+    // console.log('resAccountQms', resAccountQms);
+    if (rememberMe) {
+      Storage.local.set(USUARIO_QMS, JSON.stringify(responseAccountQms.data));
+    } else {
+      Storage.session.set(USUARIO_QMS, JSON.stringify(responseAccountQms.data));
+    }
   };
 
 export const clearAuthToken = () => {
@@ -151,6 +171,15 @@ export const AuthenticationSlice = createSlice({
           loading: false,
           sessionHasBeenFetched: true,
           account: action.payload.data,
+        };
+      })
+      .addCase(getAccountQms.fulfilled, (state, action) => {
+        const usuarioQms = action.payload.data;
+        return {
+          ...state,
+          loading: false,
+          sessionHasBeenFetched: true,
+          accountQms: usuarioQms,
         };
       })
       .addCase(authenticate.pending, state => {
