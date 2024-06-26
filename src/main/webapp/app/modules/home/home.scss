@@ -1,10 +1,73 @@
 /* ==========================================================================
 Main page styles
 ========================================================================== */
-.hipster {
-  display: inline-block;
-  width: 100%;
-  height: 497px;
-  background: url('../../../content/images/jhipster_family_member_2.svg') no-repeat center top;
-  background-size: contain;
+
+.fatherDiv {
+  display: flex;
+}
+
+.leftDiv {
+  flex: 40%;
+  height: 100vh;
+  background-color: #f2f2f2;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.textField {
+  margin-bottom: 10px;
+}
+
+.leftDiv-buttonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leftDiv-button {
+  border-style: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  background-color: #ebc139;
+  text-transform: uppercase;
+  color: #524f4f;
+}
+
+.leftDiv-checkBoxContainer {
+  padding: 20px;
+}
+
+.leftDiv-checkBox {
+  margin-right: 5px;
+}
+
+.leftDiv-checkBoxLabel {
+  margin-right: 60px;
+}
+
+.esqueciSenha {
+  font-size: 14px;
+  margin-left: 15px;
+  text-transform: uppercase;
+}
+
+.rightDiv {
+  flex: 60%;
+  height: 100vh;
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+.main {
+  margin-top: 10em;
+}
+
+.container {
+  width: 30%;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
 }

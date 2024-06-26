@@ -34,8 +34,8 @@ eureka:
     instance-info-replication-interval-seconds: 10
     registry-fetch-interval-seconds: 10
   instance:
-    appname: msgateway
-    instanceId: msgateway:${spring.application.instance-id:${random.value}}
+    appname: all4qmsmsgateway
+    instanceId: all4qmsmsgateway:${spring.application.instance-id:${random.value}}
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 10
     status-page-url-path: ${management.endpoints.web.base-path}/info
@@ -76,7 +76,6 @@ management:
             'loggers',
             'prometheus',
             'threaddump',
-            'caches',
             'liquibase',
           ]
   endpoint:
@@ -127,7 +126,7 @@ management:
 
 spring:
   application:
-    name: msGateway
+    name: all4qmsMsGateway
   cloud:
     gateway:
       default-filters:
@@ -167,13 +166,13 @@ spring:
     allow-bean-definition-overriding: true
   task:
     execution:
-      thread-name-prefix: ms-gateway-task-
+      thread-name-prefix: all-4-qms-ms-gateway-task-
       pool:
         core-size: 2
         max-size: 50
         queue-capacity: 10000
     scheduling:
-      thread-name-prefix: ms-gateway-scheduling-
+      thread-name-prefix: all-4-qms-ms-gateway-scheduling-
       pool:
         size: 2
   thymeleaf:
@@ -204,7 +203,7 @@ info:
 
 jhipster:
   clientApp:
-    name: 'msGatewayApp'
+    name: 'all4QmsMsGatewayApp'
   # By default CORS is disabled. Uncomment to enable.
   # cors:
   #   allowed-origins: "http://localhost:8100,http://localhost:9000"
@@ -214,12 +213,12 @@ jhipster:
   #   allow-credentials: true
   #   max-age: 1800
   mail:
-    from: msGateway@localhost
+    from: all4qmsMsGateway@localhost
   api-docs:
     default-include-pattern: ${server.servlet.context-path:}/api/**
     management-include-pattern: ${server.servlet.context-path:}/management/**
-    title: Ms Gateway API
-    description: Ms Gateway API documentation
+    title: All 4 Qms Ms Gateway API
+    description: All 4 Qms Ms Gateway API documentation
     version: 0.0.1
     terms-of-service-url:
     contact-name:
@@ -228,7 +227,7 @@ jhipster:
     license: unlicensed
     license-url:
   security:
-    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com data:"
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class

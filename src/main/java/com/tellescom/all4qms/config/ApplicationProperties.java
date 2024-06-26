@@ -3,7 +3,7 @@ package com.tellescom.all4qms.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Properties specific to Ms Gateway.
+ * Properties specific to All 4 Qms Ms Gateway.
  * <p>
  * Properties are configured in the {@code application.yml} file.
  * See {@link tech.jhipster.config.JHipsterProperties} for a good example.

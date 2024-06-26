@@ -1,0 +1,76 @@
+/* ==========================================================================
+Main page styles
+========================================================================== */
+
+.fatherDiv {
+  display: flex;
+}
+
+.leftDiv {
+  height: 100vh;
+  background-color: #ffffff !important;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.textField {
+  margin-bottom: 10px !important;
+  width: 300px;
+}
+
+.leftDiv-buttonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between !important;
+  width: 300px;
+  padding: 0px !important;
+}
+
+.leftDiv-button {
+  border-style: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  background-color: #ebc139;
+  text-transform: uppercase;
+  color: #524f4f;
+}
+
+.leftDiv-checkBoxContainer {
+  width: 300px;
+  padding: 0px !important;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.leftDiv-checkBox {
+  margin-right: 5px;
+}
+
+.leftDiv-checkBoxLabel {
+  margin-right: 60px;
+}
+
+.esqueciSenha {
+  font-size: 14px;
+  margin-left: 15px;
+  text-transform: uppercase;
+}
+
+.rightDiv {
+  width: 100%;
+  height: 100%;
+  padding: 0px !important;
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .rightDiv {
+    display: none;
+  }
+}

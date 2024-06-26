@@ -1,0 +1,44 @@
+#outlined-adornment-search {
+  height: 36px !important;
+}
+
+#search-filter {
+  /* 200px search buttons + 8px margin */
+  width: calc(100% / 7) !important;
+  height: 77px;
+  min-width: 200px;
+  /* max-width: ; */
+}
+
+.mui-label-transform {
+  margin-top: 10px;
+  background-color: #fff;
+  /* transform: translate(14px, 25px) scale(1) !important; */
+}
+
+.rnc-list-form-field {
+  width: 100%;
+  max-width: calc(100% / 7 - 0.5rem);
+  min-width: 150px !important;
+}
+
+.rnc-list-date-picker {
+  border: 1px solid #c6c6c6;
+  border-radius: 5px;
+  padding: 17px;
+  width: 140px;
+}
+
+.rnc-list-date-label {
+  color: rgba(0, 0, 0, 0.6);
+  transform: translate(7px, -70px) scale(0.75);
+  font-size: 1rem;
+  line-height: 1.4375rem;
+  font-weight: 400;
+  width: 50px;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: #fff;
+  outline: none;
+  z-index: 100;
+  padding-left: 4px;
+}

@@ -1,0 +1,61 @@
+.date-picker {
+  border: 1px solid #c6c6c6;
+  border-radius: 5px;
+  padding: 17px;
+  width: 100%;
+}
+
+.date-picker[disabled] {
+  background-color: #fff;
+  border: 1px solid rgb(0 0 0 / 27%);
+}
+
+.form-field {
+  width: 200px;
+  height: 60px;
+}
+
+.rnc-form-field {
+  width: 100%;
+  max-width: calc(12.5% - 0.5rem);
+  height: 60px;
+  min-width: 150px !important;
+}
+
+.rnc-date-label {
+  color: rgba(0, 0, 0, 0.6);
+  transform: translate(7px, -70px) scale(0.75);
+  font-size: 1rem;
+  line-height: 1.4375rem;
+  font-weight: 400;
+  width: 40px;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: #fff;
+  outline: none;
+  z-index: 100;
+  padding-left: 3px;
+}
+
+#rnc-text-field {
+  height: 26px;
+}
+
+#mui-component-select-forwarded {
+  height: 27px !important;
+}
+
+#mui-component-select-processOrigin {
+  height: 27px !important;
+}
+
+#mui-component-select-processTarget {
+  height: 27px !important;
+}
+
+#mui-component-select-type {
+  height: 27px !important;
+}
+
+#mui-component-select-origin {
+  height: 27px !important;
+}

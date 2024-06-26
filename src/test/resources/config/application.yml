@@ -17,12 +17,12 @@ eureka:
   client:
     enabled: false
   instance:
-    appname: msGateway
-    instanceId: msGateway:${spring.application.instance-id:${random.value}}
+    appname: all4qmsMsGateway
+    instanceId: all4qmsMsGateway:${spring.application.instance-id:${random.value}}
 
 spring:
   application:
-    name: msGateway
+    name: all4qmsMsGateway
   autoconfigure:
     exclude:
       - org.springframework.cloud.gateway.config.GatewayMetricsAutoConfiguration
@@ -43,13 +43,13 @@ spring:
     basename: i18n/messages
   task:
     execution:
-      thread-name-prefix: ms-gateway-task-
+      thread-name-prefix: all-4-qms-ms-gateway-task-
       pool:
         core-size: 1
         max-size: 50
         queue-capacity: 10000
     scheduling:
-      thread-name-prefix: ms-gateway-scheduling-
+      thread-name-prefix: all-4-qms-ms-gateway-scheduling-
       pool:
         size: 20
   thymeleaf:
@@ -66,9 +66,9 @@ server:
 # ===================================================================
 jhipster:
   clientApp:
-    name: 'msGatewayApp'
+    name: 'all4QmsMsGatewayApp'
   mail:
-    from: msGateway@localhost.com
+    from: all4qmsMsGateway@localhost.com
     base-url: http://127.0.0.1:8080
   logging:
     # To test json console appender
@@ -82,7 +82,7 @@ jhipster:
     authentication:
       jwt:
         # This token must be encoded using Base64 (you can type `echo 'secret-key'|base64` on your command line)
-        base64-secret: YjkwZTk0YjdkNWFlY2QzMTQ3OTljNjFjNzEzNDFjZTIyOWY4MDAyYTg4MjkyNWNjZjI2Yzc3MTJmMmFlYWQ4NDczZTg2NTAwY2ExYWIxODk3NTk5MmZlZWIzZDY0NzllNzg4NDg5MmFjNWE1MTJhOWJiOWMzY2ZiZDk1ODEwYzA=
+        base64-secret: ZWJmM2M1MTYzMTdhYTY2MmY2NTc3MjViZDA3ZjdjMTgxYWI0YWIxNTcyOWEyNTgyYmM2NWI0NTM1ZTYwMTc1MDU0Yjk4NDFiNzM4NWJjZjM2OWY2YzgzYTllZDVjNGFjNzY2NTE0ZjYxNzU3YTE2MTcwMTk3YmM0NzVjY2ViYmM=
         # Token is valid 24 hours
         token-validity-in-seconds: 86400
 

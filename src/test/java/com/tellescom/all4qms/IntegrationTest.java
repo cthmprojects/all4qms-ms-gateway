@@ -1,6 +1,6 @@
 package com.tellescom.all4qms;
 
-import com.tellescom.all4qms.MsGatewayApp;
+import com.tellescom.all4qms.All4QmsMsGatewayApp;
 import com.tellescom.all4qms.config.AsyncSyncConfiguration;
 import com.tellescom.all4qms.config.EmbeddedSQL;
 import java.lang.annotation.ElementType;
@@ -15,7 +15,7 @@ import org.springframework.test.annotation.DirtiesContext;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@SpringBootTest(classes = { MsGatewayApp.class, AsyncSyncConfiguration.class })
+@SpringBootTest(classes = { All4QmsMsGatewayApp.class, AsyncSyncConfiguration.class })
 @EmbeddedSQL
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public @interface IntegrationTest {

@@ -1,0 +1,37 @@
+{
+  "changelogDate": "20231116010253",
+  "databaseType": "sql",
+  "dto": "mapstruct",
+  "entityTableName": "parametro",
+  "fields": [
+    {
+      "fieldName": "chave",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique"]
+    },
+    {
+      "fieldName": "descricao",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "valor",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "atualizadoEm",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "atualizadoPor",
+      "fieldType": "Long"
+    }
+  ],
+  "jpaMetamodelFiltering": false,
+  "name": "Parametro",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass",
+  "skipClient": true
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <!--
+        Added the entity Processo.
+    -->
+    <changeSet id="20230704185509-1" author="jhipster">
+        <createTable tableName="processo">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="numero" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="nome" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="descricao" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="setor" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="responsavel" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="setor_responsavel" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="criado_em" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="atualizado_em" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="criado_por_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="atualizado_por_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+        </createTable>
+        <dropDefaultValue tableName="processo" columnName="criado_em" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="processo" columnName="atualizado_em" columnDataType="${datetimeType}"/>
+    </changeSet>
+</databaseChangeLog>
