@@ -22,7 +22,7 @@ import {
   Typography,
 } from '@mui/material';
 import { IPendencia } from '../../shared/model/pendencia.model';
-import { getEntitiesById as getPendenciasByUser } from './pendencia.reducer';
+import { getEntitiesById as getPendenciasByUser, deleteEntity as deletePendenciaId } from './pendencia.reducer';
 import { getEntity as getUsuario } from '../usuario/usuario.reducer';
 import { PendenciaOptions } from './pendencia-options';
 import { AxiosResponse } from 'axios';
@@ -50,8 +50,8 @@ export const Pendencia = () => {
       const user = userQms?.id ? userQms : JSON.parse(await Storage.session.get('USUARIO_QMS'));
       const resPendencias = await dispatch(
         getPendenciasByUser({
-          page: 1,
-          size: 10,
+          page: paginationState.activePage,
+          size: 5,
           sort: `id,desc`,
           idUser: user.id,
         })
@@ -104,15 +104,13 @@ export const Pendencia = () => {
   const handleSyncList = () => {
     sortEntities();
   };
-  const handleDeleteUser = (loginJhUser: any, idRncUser: any) => {
-    // dispatch(deleteRNCUser(idRncUser.toString())).then(() => {
-    //   dispatch(deleteJhipsterUser(loginJhUser.toString())).then(() => {
-    //     sortEntities();
-    //   });
-    // });
+  const deletePendencia = (id: any) => {
+    dispatch(deletePendenciaId(id.toString())).then(() => {
+      sortEntities();
+    });
   };
 
-  const columns = ['Nome', 'Status', 'Lida Em', 'Link', 'Tipo', 'Criado Por', 'Ações'];
+  const columns = ['ID', 'Nome', 'Status', 'Lida Em', 'Link', 'Tipo', 'Criado Por', 'Ações'];
 
   const renderTable = () => {
     if (columns.length > 0 && pendenciasList.length > 0) {
@@ -130,6 +128,7 @@ export const Pendencia = () => {
               <TableBody>
                 {pendenciasList.map((pendencia, i) => (
                   <TableRow>
+                    <TableCell>{pendencia.id}</TableCell>
                     <TableCell>{pendencia.nome}</TableCell>
                     <TableCell>{pendencia.status ? 'true' : 'false'}</TableCell>
                     <TableCell>{pendencia.lidaEm}</TableCell>
@@ -139,7 +138,7 @@ export const Pendencia = () => {
                       {pendencia.criadoPor ? <Link to={`/usuario/${pendencia.criadoPor.id}`}>{pendencia.criadoPor.nome}</Link> : ''}
                     </TableCell>
                     <TableCell>
-                      <PendenciaOptions userRole={userRole} pendencia={pendencia} deleteUser={handleDeleteUser} />
+                      <PendenciaOptions userRole={userRole} pendencia={pendencia} deletePendencia={deletePendencia} />
                     </TableCell>
                   </TableRow>
                 ))}

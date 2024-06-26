@@ -16,7 +16,7 @@ export const PendenciaDetail = () => {
 
   useEffect(() => {
     dispatch(getEntity(id));
-  }, []);
+  }, [id]);
 
   const pendenciaEntity = useAppSelector(state => state.all4qmsmsgateway.pendencia.entity);
   return (

@@ -196,6 +196,7 @@ const Header = (props: IHeaderProps) => {
                 anchorNotify={anchorNotify}
                 handleCloseMenu={() => setAnchorNotify(null)}
                 pendenciasList={pendenciasList}
+                navigate={navigate}
               />
               <IconButton onClick={handleOpenUserMenu}>
                 <SettingsIcon />
