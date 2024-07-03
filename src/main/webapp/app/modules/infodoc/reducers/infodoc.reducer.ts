@@ -100,6 +100,24 @@ export const getInfoDocById = createAsyncThunk('docs/get', async (id: number | s
   return newResponse;
 });
 
+interface cancelDocParams {
+  id: number;
+  userLoginID: number;
+  justify: string;
+}
+
+export const cancelDocument = createAsyncThunk('docs/cancel', async ({ id, userLoginID, justify }: cancelDocParams) => {
+  if (id) {
+    const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;
+    const data = {
+      idDocumento: id,
+      idUsuario: userLoginID,
+      justificativa: justify,
+    };
+    return await axios.put(reproveUrl, data);
+  }
+});
+
 const InfoDocSlice = createEntitySlice({
   name: 'infodoc',
   initialState,
@@ -126,6 +144,9 @@ const InfoDocSlice = createEntitySlice({
         state.loading = false;
       })
       .addMatcher(isFulfilled(updateInfoDoc), (state, action) => {
+        state.loading = false;
+      })
+      .addMatcher(isFulfilled(cancelDocument), (state, action) => {
         state.loading = false;
       })
       .addMatcher(isFulfilled(getInfoDocById), (state, action) => {
