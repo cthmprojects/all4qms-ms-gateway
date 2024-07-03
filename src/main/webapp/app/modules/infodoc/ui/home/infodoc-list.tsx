@@ -305,10 +305,18 @@ const InfodocList = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const onEditClicked = (id: number, event: React.MouseEvent<HTMLButtonElement>): void => {
-    // navigate(`upload-file/update/${id}`);
-    setIdDocUpdating(id);
-    setUploadFileUpdate(true);
+  const onEditClicked = (infodoc: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
+    if (infodoc.doc?.enumSituacao == 'E') {
+      setIdDocUpdating(infodoc.doc.id);
+      setUploadFileUpdate(true);
+    } else if (infodoc.doc?.enumSituacao == 'R') {
+      navigate(`/infodoc/validation/${infodoc.doc.id}`);
+    }
+
+    // H - homolog
+    // R - revisão
+    // O - obsoleto
+    // C - cancelado
   };
 
   const onViewClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -425,7 +433,7 @@ const InfodocList = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
                     </TableCell>
                     <TableCell>
-                      <IconButton title="Editar" color="primary" onClick={event => onEditClicked(infodoc.doc.id, event)}>
+                      <IconButton title="Editar" color="primary" onClick={event => onEditClicked(infodoc, event)}>
                         <EditIcon sx={{ color: '#e6b200' }} />
                       </IconButton>
                       <IconButton title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
