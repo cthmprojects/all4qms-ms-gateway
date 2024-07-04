@@ -72,9 +72,9 @@ const Header = (props: IHeaderProps) => {
   const [pendenciasList, setPendenciasList] = React.useState<IPendencia[]>([]);
   const [coutPendencias, setCoutPendencias] = React.useState(0);
 
-  const location = useLocation();
+  // const location = useLocation();
   const dispatch = useAppDispatch();
-  const logoutUrl = useAppSelector(state => state.authentication.logoutUrl);
+  // const logoutUrl = useAppSelector(state => state.authentication.logoutUrl);
   const userQms = useAppSelector(state => state.authentication.accountQms);
   // const totalItems = useAppSelector(state => state.all4qmsmsgateway.pendencia.totalItems);
   // const totalItems = useAppSelector(state => state.all4qmsmsgateway.pendencia.totalItems);

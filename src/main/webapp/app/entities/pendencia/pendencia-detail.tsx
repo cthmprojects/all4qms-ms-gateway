@@ -1,27 +1,45 @@
 import React, { useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
 import { Translate, TextFormat } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { partialUpdateEntity as updatePendencias } from './pendencia.reducer';
 
+import { convertDateTimeToServer } from 'app/shared/util/date-utils';
 import { getEntity } from './pendencia.reducer';
-
-export const PendenciaDetail = () => {
+import { Box, Typography } from '@mui/material';
+interface PropsPendencia {
+  id?: number;
+  handleClose?: () => void;
+}
+export const PendenciaDetail = ({ id, handleClose }: PropsPendencia) => {
   const dispatch = useAppDispatch();
-
-  const { id } = useParams<'id'>();
+  const navigate = useNavigate();
+  // const { id } = useParams<'id'>();
+  const pendenciaEntity = useAppSelector(state => state.all4qmsmsgateway.pendencia.entity);
 
   useEffect(() => {
-    dispatch(getEntity(id));
+    id && dispatch(getEntity(id));
   }, [id]);
 
-  const pendenciaEntity = useAppSelector(state => state.all4qmsmsgateway.pendencia.entity);
+  const handleOk = async () => {
+    const resUpdPend = await dispatch(
+      updatePendencias({
+        id: pendenciaEntity.id,
+        status: true,
+        lidaEm: Date.now().toString(),
+      })
+    );
+    navigate('/pendencia');
+    handleClose && handleClose();
+  };
+
   return (
-    <Row>
-      <Col md="8">
+    <Box padding={2}>
+      {/* <Col md="8">
         <h2 data-cy="pendenciaDetailsHeading">
           <Translate contentKey="all4QmsMsGatewayApp.pendencia.detail.title">Pendencia</Translate>
         </h2>
@@ -94,8 +112,34 @@ export const PendenciaDetail = () => {
             <Translate contentKey="entity.action.edit">Edit</Translate>
           </span>
         </Button>
-      </Col>
-    </Row>
+      </Col> */}
+      <Typography component="h3" variant="h6" fontWeight={600} data-cy="pendenciaDetailsHeading">
+        {String(pendenciaEntity.tipo).toUpperCase()}
+      </Typography>
+      <Box padding={2} sx={{ border: '2px solid grey', borderRadius: 2 }}>
+        <Typography fontSize={'16px'} whiteSpace={'nowrap'} textOverflow={'ellipsis'}>
+          <b>CRIADO EM: </b>
+          {new Date(pendenciaEntity.criadoEm).toLocaleDateString()}
+        </Typography>
+        <Typography fontSize={'16px'} whiteSpace={'nowrap'} textOverflow={'ellipsis'} marginTop={1}>
+          <b>DESCRIÇÃO: </b>
+          {String(pendenciaEntity?.nome).toUpperCase()}
+        </Typography>
+        <Typography fontSize={'16px'} whiteSpace={'nowrap'} textOverflow={'ellipsis'} marginTop={1}>
+          <b>LINK: </b>
+          {String(pendenciaEntity?.link).toUpperCase()}
+        </Typography>
+        <Typography fontSize={'16px'} whiteSpace={'nowrap'} textOverflow={'ellipsis'} marginTop={1}>
+          <b>CRIADO POR: </b>
+          {pendenciaEntity.criadoPor ? <Link to={`/usuario/${pendenciaEntity.criadoPor.id}`}>{pendenciaEntity.criadoPor.nome}</Link> : ''}
+        </Typography>
+        <Box justifyContent={'right'} display={'flex'}>
+          <Button variant="contained" className="update-button" data-cy="entityDetailsBackButton" onClick={handleOk}>
+            OK
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

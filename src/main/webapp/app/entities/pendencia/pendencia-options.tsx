@@ -7,7 +7,7 @@ import { useAppDispatch } from 'app/config/store';
 // import { deleteEntity as deletePendencia } from './pendencia.reducer';
 // import { deleteUser as deleteJhipsterUser } from 'app/modules/administration/user-management/user-management.reducer';
 
-export const PendenciaOptions = ({ userRole, pendencia, deletePendencia }) => {
+export const PendenciaOptions = ({ userRole, pendencia, deletePendencia, setIdPendenciaSelect, setIsOpenModal }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -41,10 +41,17 @@ export const PendenciaOptions = ({ userRole, pendencia, deletePendencia }) => {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={() => navigate(`${pendencia.id}`)}>Visualizar</MenuItem>
+        <MenuItem
+          onClick={() => {
+            setIsOpenModal(true);
+            setIdPendenciaSelect(pendencia.id);
+          }}
+        >
+          Visualizar
+        </MenuItem>
         {userRole.includes('ROLE_ADMIN') && (
           <>
-            <MenuItem onClick={() => navigate(`${pendencia.id}/edit`)}>Editar</MenuItem>
+            {/* <MenuItem onClick={() => navigate(`${pendencia.id}/edit`)}>Editar</MenuItem> */}
             <MenuItem onClick={() => navigate(`${pendencia.id}/delete`)}>
               Deletar
               <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />

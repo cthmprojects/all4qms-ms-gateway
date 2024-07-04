@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row, Table } from 'reactstrap';
 import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount, Storage } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,6 +7,7 @@ import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
+import { Modal } from 'app/shared/components-form/Modal';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import {
   Box,
@@ -25,10 +26,12 @@ import { IPendencia } from '../../shared/model/pendencia.model';
 import { getEntitiesById as getPendenciasByUser, deleteEntity as deletePendenciaId } from './pendencia.reducer';
 import { getEntity as getUsuario } from '../usuario/usuario.reducer';
 import { PendenciaOptions } from './pendencia-options';
+import { PendenciaDetail } from './pendencia-detail';
 import { AxiosResponse } from 'axios';
 
 export const Pendencia = () => {
   const dispatch = useAppDispatch();
+  const { id } = useParams<'id'>();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,6 +42,8 @@ export const Pendencia = () => {
     overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
   const [pendenciasList, setPendenciasList] = React.useState<IPendencia[]>([]);
+  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false);
+  const [idPendenciaSelect, setIdPendenciaSelect] = React.useState<number>(-1);
 
   // const pendenciaList: IPendencia[] = useAppSelector(state => state.all4qmsmsgateway.pendencia.entities);
   // const loading = useAppSelector(state => state.all4qmsmsgateway.pendencia.loading);
@@ -71,14 +76,17 @@ export const Pendencia = () => {
     }
   };
 
-  // useEffect(() => {
-  //   dispatch(getUsuario(jhipsterId));
-  // }, []);
+  useEffect(() => {
+    if (id) {
+      setIdPendenciaSelect(Number(id));
+      setIsOpenModal(true);
+    }
+  }, [id]);
 
   useEffect(() => {
     // dispatch(getUsuario(jhipsterId));
     sortEntities();
-  }, [paginationState.activePage, paginationState.order, paginationState.sort]);
+  }, [paginationState.activePage, paginationState.order, paginationState.sort, isOpenModal]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -88,6 +96,7 @@ export const Pendencia = () => {
       const sortSplit = sort.split(',');
       setPaginationState({
         ...paginationState,
+        itemsPerPage: 5,
         activePage: +page,
         sort: sortSplit[0],
         order: sortSplit[1],
@@ -110,7 +119,7 @@ export const Pendencia = () => {
     });
   };
 
-  const columns = ['ID', 'Nome', 'Status', 'Lida Em', 'Link', 'Tipo', 'Criado Por', 'Ações'];
+  const columns = ['Tipo', 'Descrição', 'Link', 'status', 'Criado Em', 'Ações'];
 
   const renderTable = () => {
     if (columns.length > 0 && pendenciasList.length > 0) {
@@ -128,17 +137,23 @@ export const Pendencia = () => {
               <TableBody>
                 {pendenciasList.map((pendencia, i) => (
                   <TableRow>
-                    <TableCell>{pendencia.id}</TableCell>
+                    {/* <TableCell>{pendencia.id}</TableCell> */}
+                    <TableCell width={120}>{pendencia.tipo?.toString()}</TableCell>
                     <TableCell>{pendencia.nome}</TableCell>
-                    <TableCell>{pendencia.status ? 'true' : 'false'}</TableCell>
-                    <TableCell>{pendencia.lidaEm}</TableCell>
                     <TableCell>{pendencia.link}</TableCell>
-                    <TableCell>{pendencia.tipo?.toString()}</TableCell>
-                    <TableCell>
+                    <TableCell>{pendencia.status ? 'true' : 'false'}</TableCell>
+                    <TableCell width={120}>{new Date(String(pendencia.lidaEm)).toLocaleDateString()}</TableCell>
+                    {/* <TableCell>
                       {pendencia.criadoPor ? <Link to={`/usuario/${pendencia.criadoPor.id}`}>{pendencia.criadoPor.nome}</Link> : ''}
-                    </TableCell>
-                    <TableCell>
-                      <PendenciaOptions userRole={userRole} pendencia={pendencia} deletePendencia={deletePendencia} />
+                    </TableCell> */}
+                    <TableCell width={100}>
+                      <PendenciaOptions
+                        userRole={userRole}
+                        pendencia={pendencia}
+                        deletePendencia={deletePendencia}
+                        setIdPendenciaSelect={setIdPendenciaSelect}
+                        setIsOpenModal={setIsOpenModal}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -209,6 +224,17 @@ export const Pendencia = () => {
           </div>
         </div>
       )}
+      <Modal
+        backgroundColor="#839AC4"
+        open={isOpenModal}
+        // handleClose={() => setIsOpenModal(false)}
+        maxWidth={'sm'}
+        fullWidth={true}
+        color="#fff"
+        colorIcon="#fff"
+      >
+        <PendenciaDetail id={idPendenciaSelect} handleClose={() => setIsOpenModal(false)} />
+      </Modal>
     </>
   );
 };
