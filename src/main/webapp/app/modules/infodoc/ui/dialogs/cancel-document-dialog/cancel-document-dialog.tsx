@@ -2,7 +2,7 @@ import { Textarea } from '@mui/joy';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { InfoDoc } from 'app/modules/infodoc/models';
 import { StyledLabel, StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from 'reactstrap';
 import { cancelDocument } from 'app/modules/infodoc/reducers/infodoc.reducer';
 import { useAppDispatch } from 'app/config/store';
@@ -28,7 +28,7 @@ type CancelDocumentDialogProps = {
 
 export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc, userId }: CancelDocumentDialogProps) => {
   const dispatch = useAppDispatch();
-
+  const [justifyValue, setJustifyValue] = useState('');
   const requestCancelInfoDoc = (justify: string) => {
     const params = { id: infodoc.doc.id, userLoginID: userId, justify };
 
@@ -62,6 +62,8 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
             slotProps={{ textarea: { placeholder: '' } }}
             sx={{ borderRadius: '6px' }}
             name="ncArea"
+            value={justifyValue || ''}
+            onChange={e => setJustifyValue(e.target.value)}
           />
         </DialogContent>
         <DialogActions sx={{ paddingBottom: '20px' }}>
@@ -73,7 +75,7 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
             variant="contained"
             color="primary"
             style={{ background: '#A23900', color: '#fff' }}
-            onClick={() => requestCancelInfoDoc('sem justificativa aparente')}
+            onClick={() => requestCancelInfoDoc(justifyValue)}
           >
             Solicitar
           </Button>

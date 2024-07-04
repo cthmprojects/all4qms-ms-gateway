@@ -53,8 +53,8 @@ export const uploadAnexo = createAsyncThunk('anexos/post', async (anexo: UploadA
   return response;
 });
 
-const InfoDocSlice = createEntitySlice({
-  name: 'infodoc',
+const Anexo = createEntitySlice({
+  name: 'anexo',
   initialState,
   extraReducers(builder) {
     builder
@@ -90,7 +90,7 @@ const InfoDocSlice = createEntitySlice({
   },
 });
 
-export const { reset } = InfoDocSlice.actions;
+export const { reset } = Anexo.actions;
 
 // Reducers
-export default InfoDocSlice.reducer;
+export default Anexo.reducer;

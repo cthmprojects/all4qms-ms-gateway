@@ -27,7 +27,7 @@ import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/rejec
 import { listEnums } from '../reducers/enums.reducer';
 import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../models';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
-import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
+import { cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 
 const StyledLabel = styled('label')(({ theme }) => ({
@@ -70,7 +70,7 @@ const getDocById = async (id: any) => {
   return data;
 };
 
-export const UpdateDocument = () => {
+export const ValidationDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { id, idFile } = useParams();
@@ -94,12 +94,12 @@ export const UpdateDocument = () => {
   const [keyword, setKeyword] = useState<string>('');
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
+  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
     dispatch(getInfoDocById(id));
-
     getProcesses().then(data => {
       setProcesses(data);
       if (data.length > 0) {
@@ -143,7 +143,7 @@ export const UpdateDocument = () => {
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (actualInfoDoc) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc.idArquivo}`;
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc?.idArquivo}`;
 
       await axios
         .request({
@@ -166,58 +166,6 @@ export const UpdateDocument = () => {
     }
   };
 
-  const saveDoc = (): Doc => {
-    const newInfoDoc: Doc = {
-      idUsuarioCriacao: parseInt(emitter),
-      dataCricao: emittedDate,
-      descricaoDoc: documentDescription,
-      codigo: code,
-      titulo: title,
-      origem: origin,
-      idArquivo: parseInt(idFile),
-      idProcesso: parseInt(selectedProcess),
-      ignorarValidade: true,
-      enumSituacao: 'E',
-      tipoDoc: 'MA',
-      idDocumentacaoAnterior: parseInt(id),
-    };
-
-    if (!noValidate) {
-      newInfoDoc.ignorarValidade = false;
-      newInfoDoc.dataValidade = validDate;
-    }
-
-    return newInfoDoc;
-  };
-
-  const saveDocument = () => {
-    const newInfoDoc = saveDoc();
-
-    dispatch(createInfoDoc(newInfoDoc))
-      .then(() => {
-        navigate('/infodoc');
-      })
-      .catch(() => {});
-  };
-
-  const fowardDocument = () => {
-    const newInfoDoc = saveDoc();
-    newInfoDoc.enumSituacao = 'R';
-
-    dispatch(createInfoDoc(newInfoDoc))
-      .then((response: any) => {
-        const newStatus: Movimentacao = {
-          enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
-          idDocumentacao: response.payload?.data?.id,
-          enumStatus: EnumStatusDoc.REVISAO,
-          idUsuarioCriacao: 0,
-        };
-        dispatch(cadastrarMovimentacao(newStatus));
-      })
-      .catch(() => {});
-    navigate('/infodoc');
-  };
-
   const cancelUpdate = () => {
     dispatch(deleteInfoDoc(idFile));
     navigate('/infodoc');
@@ -230,8 +178,39 @@ export const UpdateDocument = () => {
   useEffect(() => {
     if (actualInfoDoc) {
       setCode(actualInfoDoc.doc?.codigo);
+      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+      setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
+      setDocumentDescription(actualInfoDoc.doc?.descricaoDoc);
+      setTitle(actualInfoDoc.doc?.titulo);
+      setOrigin(actualInfoDoc.doc?.origem);
+      setSelectedProcess(actualInfoDoc.doc?.idProcesso);
+
+      if (actualInfoDoc.doc?.dataValidade) {
+        setNoValidate(false);
+        setValidDate(new Date(actualInfoDoc.doc.dataValidade));
+      } else {
+        setNoValidate(true);
+        setValidDate(new Date(2999, 11, 31));
+        setNotificationPreviousDate('0');
+      }
     }
   }, [actualInfoDoc]);
+
+  const approveDocument = () => {
+    let movimentacao: Movimentacao = {
+      enumTipoMovDoc: EnumTipoMovDoc.DISTRIBUIR,
+      enumStatus: EnumStatusDoc.DISTRIBUIDAO,
+      idDocumentacao: parseInt(id),
+      // idUsuarioCriacao: 1,
+      idUsuarioCriacao: currentUser ? parseInt(currentUser.id) : 0,
+      dataAprovacao: new Date(),
+      idUsuarioAprovacao: currentUser ? parseInt(currentUser.id) : 0,
+    };
+
+    dispatch(cadastrarMovimentacao(movimentacao)).then(() => {
+      navigate('/infodoc');
+    });
+  };
 
   useEffect(() => {
     setOriginList(enums?.origem);
@@ -243,6 +222,13 @@ export const UpdateDocument = () => {
 
   return (
     <>
+      <RejectDocumentDialog
+        open={openRejectModal}
+        handleClose={handleCloseRejectModal}
+        currentUser={currentUser}
+        currentDocument={actualInfoDoc}
+        documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+      ></RejectDocumentDialog>
       <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
         <Row className="justify-content-center mt-5">
           <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">
@@ -253,7 +239,7 @@ export const UpdateDocument = () => {
               Informações documentadas
             </Link>
             <Link to={'/infodoc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Editar
+              Validação
             </Link>
             {/* <Typography style={{ color: '#606060' }}>Ficha de estoque</Typography> */}
           </Breadcrumbs>
@@ -263,7 +249,7 @@ export const UpdateDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.nome} key={`user-${i}`}>
                     {user.nome}
@@ -287,7 +273,7 @@ export const UpdateDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Edição
+                  Validação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -298,6 +284,7 @@ export const UpdateDocument = () => {
                   onChange={date => setEmittedDate(date)}
                   className="date-picker"
                   dateFormat={'dd/MM/yyyy'}
+                  disabled
                 />
                 <label htmlFor="" className="rnc-date-label">
                   Data
@@ -311,6 +298,7 @@ export const UpdateDocument = () => {
               sx={{ borderRadius: '6px' }}
               name="ncArea"
               value={description || ''}
+              disabled
               onChange={e => setDescription(e.target.value)}
             />
           </div>
@@ -336,12 +324,13 @@ export const UpdateDocument = () => {
               className="me-2 ms-2"
               autoComplete="off"
               value={title}
+              disabled
               onChange={e => setTitle(e.target.value)}
             />
 
             <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
               <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
+              <Select label="Origem" value={origin} disabled onChange={event => setOrigin(event.target.value)}>
                 {originList?.map(e => (
                   <MenuItem value={e.nome}>{e.valor}</MenuItem>
                 ))}
@@ -350,7 +339,7 @@ export const UpdateDocument = () => {
 
             <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+              <Select label="Área / Processo" value={selectedProcess} disabled onChange={event => setSelectedProcess(event.target.value)}>
                 {processes.map((process, i) => (
                   <MenuItem value={process.id} key={`process-${i}`}>
                     {process.nome}
@@ -375,6 +364,7 @@ export const UpdateDocument = () => {
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
+              disabled
             />
             <FormControl className="me-2 ms-2 mt-4">
               <DatePicker
@@ -382,7 +372,7 @@ export const UpdateDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled={noValidate}
+                disabled
               />
               <label htmlFor="" className="rnc-date-label">
                 Validade
@@ -395,7 +385,7 @@ export const UpdateDocument = () => {
                 label="Notificar:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled={noValidate}
+                disabled
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -412,6 +402,7 @@ export const UpdateDocument = () => {
             sx={{ borderRadius: '6px' }}
             name="ncArea"
             value={documentDescription || ''}
+            disabled
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
@@ -422,8 +413,9 @@ export const UpdateDocument = () => {
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
+              disabled
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>
@@ -437,28 +429,6 @@ export const UpdateDocument = () => {
             <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
               VOLTAR
             </Button>
-            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
-              SALVAR
-            </Button>
-            <Button
-              className="ms-3"
-              variant="contained"
-              color="primary"
-              onClick={() => fowardDocument()}
-              disabled={!validateFields()}
-              style={{ background: '#e6b200', color: '#4e4d4d' }}
-            >
-              ENCAMINHAR
-            </Button>
-            {/* <Button
-              variant="contained"
-              className="me-3"
-              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => navigate('/infodoc')}
-            >
-              Voltar
-            </Button>
-            <Button>Salvar</Button>
             <Button
               className="ms-3"
               variant="contained"
@@ -468,9 +438,15 @@ export const UpdateDocument = () => {
             >
               Reprovar
             </Button>
-            <Button className="ms-3" variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+            <Button
+              className="ms-3"
+              variant="contained"
+              color="primary"
+              onClick={() => approveDocument()}
+              style={{ background: '#e6b200', color: '#4e4d4d' }}
+            >
               Aprovar
-            </Button> */}
+            </Button>
           </div>
         </div>
       </div>
@@ -478,4 +454,4 @@ export const UpdateDocument = () => {
   );
 };
 
-export default UpdateDocument;
+export default ValidationDocument;
