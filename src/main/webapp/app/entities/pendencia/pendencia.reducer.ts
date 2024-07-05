@@ -3,6 +3,7 @@ import { createAsyncThunk, isFulfilled, isPending, isRejected } from '@reduxjs/t
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { IQueryParams, createEntitySlice, EntityState, serializeAxiosError } from 'app/shared/reducers/reducer.utils';
 import { IPendencia, defaultValue } from 'app/shared/model/pendencia.model';
+import { Storage } from 'react-jhipster';
 
 const initialState: EntityState<IPendencia> = {
   loading: false,
@@ -27,7 +28,8 @@ const apiPendenciaByUserUrl = 'api/pendencias/usuario';
 export const getEntitiesById = createAsyncThunk(
   'pendencia/fetch_entity_list_by_id',
   async ({ page, size, sort, idUser }: IQueryParamsPendencia) => {
-    const requestUrl = `${apiUrl}/usuario/${idUser}?${
+    const user = JSON.parse(await Storage.session.get('USUARIO_QMS'));
+    const requestUrl = `${apiUrl}/usuario/${idUser ?? user.id}?${
       sort ? `page=${page}&size=${size}&sort=${sort}&` : ''
     }cacheBuster=${new Date().getTime()}`;
     return axios.get<IPendencia[]>(requestUrl);
