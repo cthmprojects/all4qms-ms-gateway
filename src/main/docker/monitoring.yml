@@ -1,7 +1,7 @@
 # This configuration is intended for development purpose, it's **your** responsibility to harden it for production
 version: '3.8'
 services:
-  msgateway-prometheus:
+  all4qmsmsgateway-prometheus:
     image: prom/prometheus:v2.38.0
     volumes:
       - ./prometheus/:/etc/prometheus/
@@ -14,7 +14,7 @@ services:
     # On MacOS, remove next line and replace localhost by host.docker.internal in prometheus/prometheus.yml and
     # grafana/provisioning/datasources/datasource.yml
     network_mode: 'host' # to test locally running service
-  msgateway-grafana:
+  all4qmsmsgateway-grafana:
     image: grafana/grafana:9.1.0
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning/

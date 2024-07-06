@@ -157,3 +157,5 @@ Desktop.ini
 ######################
 /coverage/
 /.nyc_output/
+
+.vscode/settings.json

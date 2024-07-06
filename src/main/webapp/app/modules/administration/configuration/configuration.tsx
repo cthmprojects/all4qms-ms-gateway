@@ -39,15 +39,15 @@ export const ConfigurationPage = () => {
   return (
     <div>
       <h2 id="configuration-page-heading" data-cy="configurationPageHeading">
-        Configuration
+        Configuração
       </h2>
-      <span>Filter (by prefix)</span> <Input type="search" value={filter} onChange={changeFilter} name="search" id="search" />
+      <span>Filtro (por prefixo)</span> <Input type="search" value={filter} onChange={changeFilter} name="search" id="search" />
       <label>Spring configuration</label>
       <Table className="table table-striped table-bordered table-responsive d-table">
         <thead>
           <tr>
-            <th onClick={changeReversePrefix}>Prefix</th>
-            <th onClick={changeReverseProperties}>Properties</th>
+            <th onClick={changeReversePrefix}>Prefixo</th>
+            <th onClick={changeReverseProperties}>Propriedades</th>
           </tr>
         </thead>
         <tbody>

@@ -5,7 +5,7 @@ import { Alert } from 'reactstrap';
 const PageNotFound = () => {
   return (
     <div>
-      <Alert color="danger">The page does not exist.</Alert>
+      <Alert color="danger">A página não existe.</Alert>
     </div>
   );
 };

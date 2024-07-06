@@ -50,7 +50,7 @@ export const UserManagementUpdate = () => {
     <div>
       <Row className="justify-content-center">
         <Col md="8">
-          <h1>Create or edit a user</h1>
+          <h1>Criar ou editar usuário</h1>
         </Col>
       </Row>
       <Row className="justify-content-center">
@@ -59,7 +59,7 @@ export const UserManagementUpdate = () => {
             <p>Loading...</p>
           ) : (
             <ValidatedForm onSubmit={saveUser} defaultValues={user}>
-              {user.id ? <ValidatedField type="text" name="id" required readOnly label="ID" validate={{ required: true }} /> : null}
+              {user.id ? <ValidatedField type="text" name="id" required readOnly label="Código" validate={{ required: true }} /> : null}
               <ValidatedField
                 type="text"
                 name="login"
@@ -67,7 +67,7 @@ export const UserManagementUpdate = () => {
                 validate={{
                   required: {
                     value: true,
-                    message: 'Your username is required.',
+                    message: 'O usuário é obrigatório.',
                   },
                   pattern: {
                     value: /^[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$|^[_.@A-Za-z0-9-]+$/,
@@ -75,60 +75,60 @@ export const UserManagementUpdate = () => {
                   },
                   minLength: {
                     value: 1,
-                    message: 'Your username is required to be at least 1 character.',
+                    message: 'O usuário deve ter pelo menos 1 caractere.',
                   },
                   maxLength: {
                     value: 50,
-                    message: 'Your username cannot be longer than 50 characters.',
+                    message: 'O usuário não pode ter mais de 50 caracteres.',
                   },
                 }}
               />
               <ValidatedField
                 type="text"
                 name="firstName"
-                label="First name"
+                label="Nome"
                 validate={{
                   maxLength: {
                     value: 50,
-                    message: 'This field cannot be longer than 50 characters.',
+                    message: 'Este campo não pode ter mais de 50 caracteres.',
                   },
                 }}
               />
               <ValidatedField
                 type="text"
                 name="lastName"
-                label="Last name"
+                label="Sobrenome"
                 validate={{
                   maxLength: {
                     value: 50,
-                    message: 'This field cannot be longer than 50 characters.',
+                    message: 'Este campo não pode ter mais de 50 caracteres.',
                   },
                 }}
               />
               <FormText>This field cannot be longer than 50 characters.</FormText>
               <ValidatedField
                 name="email"
-                label="Email"
-                placeholder="Your email"
+                label="E-mail"
+                placeholder="Seu e-mail"
                 type="email"
                 validate={{
                   required: {
                     value: true,
-                    message: 'Your email is required.',
+                    message: 'O e-mail é obrigatório.',
                   },
                   minLength: {
                     value: 5,
-                    message: 'Your email is required to be at least 5 characters.',
+                    message: 'O e-mail deve ter pelo menos 5 caracteres',
                   },
                   maxLength: {
                     value: 254,
-                    message: 'Your email cannot be longer than 50 characters.',
+                    message: 'O e-mail não pode ter mais de 50 caracteres',
                   },
-                  validate: v => isEmail(v) || 'Your email is invalid.',
+                  validate: v => isEmail(v) || 'E-mail inválido.',
                 }}
               />
-              <ValidatedField type="checkbox" name="activated" check value={true} disabled={!user.id} label="Activated" />
-              <ValidatedField type="select" name="authorities" multiple label="Profiles">
+              <ValidatedField type="checkbox" name="activated" check value={true} disabled={!user.id} label="Ativo" />
+              <ValidatedField type="select" name="authorities" multiple label="Perfis">
                 {authorities.map(role => (
                   <option value={role} key={role}>
                     {role}
@@ -138,12 +138,12 @@ export const UserManagementUpdate = () => {
               <Button tag={Link} to="/admin/user-management" replace color="info">
                 <FontAwesomeIcon icon="arrow-left" />
                 &nbsp;
-                <span className="d-none d-md-inline">Back</span>
+                <span className="d-none d-md-inline">Voltar</span>
               </Button>
               &nbsp;
               <Button color="primary" type="submit" disabled={isInvalid || updating}>
                 <FontAwesomeIcon icon="save" />
-                &nbsp; Save
+                &nbsp; Salvar
               </Button>
             </ValidatedForm>
           )}

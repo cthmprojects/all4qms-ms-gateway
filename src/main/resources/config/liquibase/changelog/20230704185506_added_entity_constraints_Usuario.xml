@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <!--
+        Added the constraints for entity Usuario.
+    -->
+    <changeSet id="20230704185506-2" author="jhipster">
+
+        <addForeignKeyConstraint baseColumnNames="funcao_id"
+                                 baseTableName="usuario"
+                                 constraintName="fk_usuario__funcao_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="funcao"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="gestor_id"
+                                 baseTableName="usuario"
+                                 constraintName="fk_usuario__gestor_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="usuario"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="setor_id"
+                                 baseTableName="usuario"
+                                 constraintName="fk_usuario__setor_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="setor"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="usuario"
+                                 constraintName="fk_usuario__user_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="criado_por_id"
+                                 baseTableName="usuario"
+                                 constraintName="fk_usuario__criado_por_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="usuario"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="atualizado_por_id"
+                                 baseTableName="usuario"
+                                 constraintName="fk_usuario__atualizado_por_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="usuario"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="usuario_id"
+                                 baseTableName="rel_usuario__processos"
+                                 constraintName="fk_rel_usuario__processos__usuario_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="usuario"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="processos_id"
+                                 baseTableName="rel_usuario__processos"
+                                 constraintName="fk_rel_usuario__processos__processos_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="processo"
+                                 />
+    </changeSet>
+</databaseChangeLog>

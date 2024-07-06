@@ -23,34 +23,34 @@ export const UserManagementDetail = () => {
   return (
     <div>
       <h2>
-        User [<strong>{user.login}</strong>]
+        Usuário [<strong>{user.login}</strong>]
       </h2>
       <Row size="md">
         <dl className="jh-entity-details">
           <dt>Login</dt>
           <dd>
             <span>{user.login}</span>&nbsp;
-            {user.activated ? <Badge color="success">Activated</Badge> : <Badge color="danger">Deactivated</Badge>}
+            {user.activated ? <Badge color="success">Ativo</Badge> : <Badge color="danger">Inativo</Badge>}
           </dd>
-          <dt>First name</dt>
+          <dt>Nome</dt>
           <dd>{user.firstName}</dd>
-          <dt>Last name</dt>
+          <dt>Sobrenome</dt>
           <dd>{user.lastName}</dd>
-          <dt>Email</dt>
+          <dt>E-mail</dt>
           <dd>{user.email}</dd>
-          <dt>Created by</dt>
+          <dt>Criado por</dt>
           <dd>{user.createdBy}</dd>
-          <dt>Created date</dt>
+          <dt>Criado em</dt>
           <dd>{user.createdDate ? <TextFormat value={user.createdDate} type="date" format={APP_DATE_FORMAT} blankOnInvalid /> : null}</dd>
-          <dt>Modified by</dt>
+          <dt>Modificado por</dt>
           <dd>{user.lastModifiedBy}</dd>
-          <dt>Modified date</dt>
+          <dt>Modificado em</dt>
           <dd>
             {user.lastModifiedDate ? (
               <TextFormat value={user.lastModifiedDate} type="date" format={APP_DATE_FORMAT} blankOnInvalid />
             ) : null}
           </dd>
-          <dt>Profiles</dt>
+          <dt>Perfis</dt>
           <dd>
             <ul className="list-unstyled">
               {user.authorities
@@ -65,7 +65,7 @@ export const UserManagementDetail = () => {
         </dl>
       </Row>
       <Button tag={Link} to="/admin/user-management" replace color="info">
-        <FontAwesomeIcon icon="arrow-left" /> <span className="d-none d-md-inline">Back</span>
+        <FontAwesomeIcon icon="arrow-left" /> <span className="d-none d-md-inline">Voltar</span>
       </Button>
     </div>
   );

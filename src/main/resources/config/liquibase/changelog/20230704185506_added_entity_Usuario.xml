@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <!--
+        Added the entity Usuario.
+    -->
+    <changeSet id="20230704185506-1" author="jhipster">
+        <createTable tableName="usuario">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nome" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="is_gestor" type="boolean">
+                <constraints nullable="true" />
+            </column>
+            <column name="criado_em" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="atualizado_em" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="funcao_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="gestor_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <column name="setor_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="true" unique="true" uniqueConstraintName="ux_usuario__user_id" />
+            </column>
+            <column name="criado_por_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <column name="atualizado_por_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+        </createTable>
+        <dropDefaultValue tableName="usuario" columnName="criado_em" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="usuario" columnName="atualizado_em" columnDataType="${datetimeType}"/>
+    </changeSet>
+
+    <changeSet id="20230704185506-1-relations" author="jhipster">
+
+        <createTable tableName="rel_usuario__processos">
+            <column name="processos_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="usuario_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="usuario_id, processos_id" tableName="rel_usuario__processos"/>
+    </changeSet>
+</databaseChangeLog>

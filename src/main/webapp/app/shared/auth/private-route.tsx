@@ -31,7 +31,7 @@ export const PrivateRoute = ({ children, hasAnyAuthorities = [], ...rest }: IOwn
 
     return (
       <div className="insufficient-authority">
-        <div className="alert alert-danger">You are not authorized to access this page.</div>
+        <div className="alert alert-danger">Você não tem autorização para acessar esta página.</div>
       </div>
     );
   }

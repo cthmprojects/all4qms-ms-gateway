@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -70,18 +69,9 @@ class UserResourceIT {
     private EntityManager em;
 
     @Autowired
-    private CacheManager cacheManager;
-
-    @Autowired
     private WebTestClient webTestClient;
 
     private User user;
-
-    @BeforeEach
-    public void setup() {
-        cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).clear();
-        cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE).clear();
-    }
 
     /**
      * Create a User.
@@ -303,8 +293,6 @@ class UserResourceIT {
             .flatMap(authority -> userRepository.saveUserAuthority(user.getId(), authority.getName()))
             .block();
 
-        assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNull();
-
         // Get the user
         webTestClient
             .get()
@@ -329,8 +317,6 @@ class UserResourceIT {
             .isEqualTo(DEFAULT_LANGKEY)
             .jsonPath("$.authorities")
             .isEqualTo(AuthoritiesConstants.USER);
-
-        assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNotNull();
     }
 
     @Test
@@ -537,8 +523,6 @@ class UserResourceIT {
             .exchange()
             .expectStatus()
             .isNoContent();
-
-        assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNull();
 
         // Validate the database is empty
         assertPersistedUsers(users -> assertThat(users).hasSize(databaseSizeBeforeDelete - 1));

@@ -1,0 +1,7 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "terminal.explorerKind": "integrated",
+    "terminal.integrated.automationProfile.linux": {},
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

@@ -9,7 +9,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
-@AnalyzeClasses(packagesOf = MsGatewayApp.class, importOptions = DoNotIncludeTests.class)
+@AnalyzeClasses(packagesOf = All4QmsMsGatewayApp.class, importOptions = DoNotIncludeTests.class)
 class TechnicalStructureTest {
 
     // prettier-ignore
@@ -29,7 +29,7 @@ class TechnicalStructureTest {
         .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service", "Security", "Web", "Config")
         .whereLayer("Domain").mayOnlyBeAccessedByLayers("Persistence", "Service", "Security", "Web", "Config")
 
-        .ignoreDependency(belongToAnyOf(MsGatewayApp.class), alwaysTrue())
+        .ignoreDependency(belongToAnyOf(All4QmsMsGatewayApp.class), alwaysTrue())
         .ignoreDependency(alwaysTrue(), belongToAnyOf(
             com.tellescom.all4qms.config.Constants.class,
             com.tellescom.all4qms.config.ApplicationProperties.class
