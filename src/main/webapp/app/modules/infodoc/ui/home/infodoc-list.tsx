@@ -180,7 +180,7 @@ const InfodocList = () => {
 
   const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setPageSize(parseInt(event.target.value, 10));
-    setPage(1);
+    // setPage(1);
   };
 
   useEffect(() => {
@@ -212,7 +212,7 @@ const InfodocList = () => {
 
   useEffect(() => {
     handleApplyFilters();
-  }, [filters]);
+  }, [filters, page, pageSize]);
 
   const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -470,9 +470,26 @@ const InfodocList = () => {
       );
     } else {
       return (
-        <Row className="justify-content-center mt-5">
-          <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
-        </Row>
+        <>
+          <Row className="justify-content-center mt-5">
+            <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
+          </Row>
+          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
+            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
+            <TablePagination
+              component="div"
+              count={totalItems}
+              labelDisplayedRows={displayedRowsLabel}
+              labelRowsPerPage="Itens por página:"
+              onPageChange={onPageChanged}
+              onRowsPerPageChange={onRowsPerPageChanged}
+              page={page}
+              rowsPerPage={pageSize}
+              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
+            />
+          </Row>
+        </>
       );
     }
   };
