@@ -38,12 +38,17 @@ export const MenuItensSettings = ({ admMenuOpen, anchorAdm, handleCloseAdmMenu, 
   </Menu>
 );
 
-export const MenuItensPendencias = ({ notifyMenuOpen, anchorNotify, handleCloseMenu, pendenciasList }) => {
-  const navigate = useNavigate();
+export const MenuItensPendencias = ({ notifyMenuOpen, anchorNotify, handleCloseMenu, pendenciasList, navigate }) => {
   return (
     <Menu open={notifyMenuOpen} anchorEl={anchorNotify} onClose={handleCloseMenu}>
       {pendenciasList.map((item, index) => (
-        <MenuItem key={index} onClick={() => navigate('/pendencia')}>
+        <MenuItem
+          key={index}
+          onClick={() => {
+            handleCloseMenu();
+            navigate(`pendencia/${item.id}`);
+          }}
+        >
           {item.nome}
         </MenuItem>
       ))}

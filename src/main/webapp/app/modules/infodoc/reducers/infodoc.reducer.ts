@@ -64,7 +64,7 @@ export const listdocs = createAsyncThunk('docs/list', async (params: ListParams)
   }
 
   if (size) {
-    queryParams.push(`size${size}`);
+    queryParams.push(`size=${size}`);
   }
 
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
