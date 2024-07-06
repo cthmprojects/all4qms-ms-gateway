@@ -168,7 +168,6 @@ const InfodocList = () => {
    */
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<number>(5);
-  const [totalItems, setTotalItems] = useState(10);
 
   function displayedRowsLabel({ from, to, count }) {
     return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
@@ -218,7 +217,7 @@ const InfodocList = () => {
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
-
+  const totalItems = useAppSelector(state => state.all4qmsmsgateway.infodoc.totalItems);
   const filterUser = (id: number) => {
     if (!users || users.length <= 0) {
       return '-';

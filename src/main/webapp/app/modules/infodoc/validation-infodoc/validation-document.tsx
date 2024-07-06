@@ -180,7 +180,7 @@ export const ValidationDocument = () => {
       setCode(actualInfoDoc.doc?.codigo);
       setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
-      setDocumentDescription(actualInfoDoc.doc?.descricaoDoc);
+      setDescription(actualInfoDoc.doc?.descricaoDoc);
       setTitle(actualInfoDoc.doc?.titulo);
       setOrigin(actualInfoDoc.doc?.origem);
       setSelectedProcess(actualInfoDoc.doc?.idProcesso);
@@ -251,7 +251,7 @@ export const ValidationDocument = () => {
               <InputLabel>Emissor</InputLabel>
               <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
-                  <MenuItem value={user.nome} key={`user-${i}`}>
+                  <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
                   </MenuItem>
                 ))}
