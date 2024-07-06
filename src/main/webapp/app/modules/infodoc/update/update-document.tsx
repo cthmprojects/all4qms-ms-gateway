@@ -92,6 +92,7 @@ export const UpdateDocument = () => {
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
 
@@ -210,7 +211,7 @@ export const UpdateDocument = () => {
           enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
           idDocumentacao: response.payload?.data?.id,
           enumStatus: EnumStatusDoc.REVISAO,
-          idUsuarioCriacao: 0,
+          idUsuarioCriacao: currentUser ? parseInt(currentUser.id) : 0,
         };
         dispatch(cadastrarMovimentacao(newStatus));
       })
@@ -230,8 +231,28 @@ export const UpdateDocument = () => {
   useEffect(() => {
     if (actualInfoDoc) {
       setCode(actualInfoDoc.doc?.codigo);
+      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+      setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
+      setDescription(actualInfoDoc.doc?.descricaoDoc);
+      setTitle(actualInfoDoc.doc?.titulo);
+      setOrigin(actualInfoDoc.doc?.origem);
+      setSelectedProcess(actualInfoDoc.doc?.idProcesso);
+      if (actualInfoDoc.doc?.dataValidade) {
+        setNoValidate(false);
+        setValidDate(new Date(actualInfoDoc.doc.dataValidade));
+      } else {
+        setNoValidate(true);
+        setValidDate(new Date(2999, 11, 31));
+        setNotificationPreviousDate('0');
+      }
     }
   }, [actualInfoDoc]);
+
+  useEffect(() => {
+    if (users && actualInfoDoc) {
+      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+    }
+  }, [users]);
 
   useEffect(() => {
     setOriginList(enums?.origem);
@@ -265,7 +286,7 @@ export const UpdateDocument = () => {
               <InputLabel>Emissor</InputLabel>
               <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
-                  <MenuItem value={user.nome} key={`user-${i}`}>
+                  <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
                   </MenuItem>
                 ))}

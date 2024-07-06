@@ -27,8 +27,10 @@ import axios from 'axios';
 import downloadFile from '../infodoc-store';
 import { listEnums } from '../reducers/enums.reducer';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
-import { InfoDoc, Doc } from '../models';
+import { InfoDoc, Doc, Movimentacao, EnumTipoMovDoc, EnumStatusDoc } from '../models';
 import { downloadAnexo } from '../reducers/anexo.reducer';
+import { cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
+import { Storage } from 'react-jhipster';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -83,6 +85,7 @@ export const NewDocument = () => {
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
+  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
@@ -184,6 +187,35 @@ export const NewDocument = () => {
         navigate('/infodoc');
       })
       .catch(() => {});
+  };
+
+  const fowardDocument = () => {
+    const newInfoDoc: Doc = {
+      idUsuarioCriacao: parseInt(emitter),
+      dataCricao: emittedDate,
+      descricaoDoc: documentDescription,
+      codigo: code,
+      titulo: title,
+      origem: 'I',
+      idProcesso: parseInt(selectedProcess),
+      idArquivo: parseInt(id),
+      ignorarValidade: true,
+      enumSituacao: 'R',
+      tipoDoc: 'MA',
+    };
+
+    dispatch(createInfoDoc(newInfoDoc))
+      .then((response: any) => {
+        const newStatus: Movimentacao = {
+          enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
+          idDocumentacao: response.payload?.data?.id,
+          enumStatus: EnumStatusDoc.REVISAO,
+          idUsuarioCriacao: currentUser ? parseInt(currentUser.id) : 0,
+        };
+        dispatch(cadastrarMovimentacao(newStatus));
+      })
+      .catch(() => {});
+    navigate('/infodoc');
   };
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -402,7 +434,7 @@ export const NewDocument = () => {
             </Button>
             <Button
               disabled={!validateFields()}
-              onClick={() => saveDocument()}
+              onClick={() => fowardDocument()}
               className="ms-3"
               variant="contained"
               color="primary"
