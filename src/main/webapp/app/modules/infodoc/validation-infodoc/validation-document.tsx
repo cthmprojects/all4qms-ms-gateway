@@ -199,7 +199,7 @@ export const ValidationDocument = () => {
   const approveDocument = () => {
     let movimentacao: Movimentacao = {
       enumTipoMovDoc: EnumTipoMovDoc.DISTRIBUIR,
-      enumStatus: EnumStatusDoc.DISTRIBUIDAO,
+      enumStatus: EnumStatusDoc.DISTRIBUICAO,
       idDocumentacao: parseInt(id),
       // idUsuarioCriacao: 1,
       idUsuarioCriacao: currentUser ? parseInt(currentUser.id) : 0,
