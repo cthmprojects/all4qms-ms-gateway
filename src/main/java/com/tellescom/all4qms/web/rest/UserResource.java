@@ -7,6 +7,7 @@ import com.tellescom.all4qms.security.AuthoritiesConstants;
 import com.tellescom.all4qms.service.MailService;
 import com.tellescom.all4qms.service.UserService;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
+import com.tellescom.all4qms.service.dto.UserDTO;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
 import com.tellescom.all4qms.web.rest.errors.EmailAlreadyUsedException;
 import com.tellescom.all4qms.web.rest.errors.LoginAlreadyUsedException;
@@ -196,7 +197,7 @@ public class UserResource {
     /**
      * {@code GET /admin/users} : get all users with all the details - calling this are only allowed for the administrators.
      *
-     * @param request a {@link ServerHttpRequest} request.
+     * @param request  a {@link ServerHttpRequest} request.
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body all users.
      */
@@ -258,5 +259,22 @@ public class UserResource {
                         .build()
                 )
             );
+    }
+
+    /**
+     * {@code GET /admin/users-by-authority} : get all users of the given authority with all the details - calling this are only allowed for the administrators.
+     *
+     * @param role a valid Authority.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body all users.
+     */
+    @GetMapping("/users-by-authority")
+    @PreAuthorize("hasAnyRole(\"" + AuthoritiesConstants.ADMIN + "\", \"ROLE_SGQ\")")
+    public Mono<ResponseEntity<Flux<UserDTO>>> getAllUsersByAuthority(@RequestParam(required = true) String role) {
+        log.debug("REST request to get all User for an admin");
+        if (role == null || role.isBlank()) {
+            throw new BadRequestAlertException("O parametro role é obrigatório", "user", "emptyparam");
+        }
+
+        return userService.countManagedUsers().map(headers -> ResponseEntity.ok().body(userService.getUsersByAuthority(role)));
     }
 }
