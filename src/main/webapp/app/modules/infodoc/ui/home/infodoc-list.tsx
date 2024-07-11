@@ -150,8 +150,9 @@ const InfodocList = () => {
   const statusValues = Object.keys(StatusEnum) as Array<keyof typeof StatusEnum>;
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   const [uploadFileUpdate, setUploadFileUpdate] = useState(false);
-  const [idDocUpdating, setIdDocUpdating] = useState(0);
   const [usersSGQ, setUsersSGQ] = useState<[]>([]);
+  const [idDocUpdating, setIdDocUpdating] = useState(0);
+  const [currentInfodoc, setCurrentInfodoc] = useState<InfoDoc>();
 
   const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -228,7 +229,7 @@ const InfodocList = () => {
 
   useEffect(() => {
     handleApplyFilters();
-  }, [filters, page, pageSize]);
+  }, [filters, page, pageSize, cancelDocumentModal]);
 
   const filterUser = (id: number) => {
     if (!users || users.length <= 0) {
@@ -271,8 +272,6 @@ const InfodocList = () => {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-
-  let currentInfodoc = infodocs[0];
 
   const columns = [
     'Código',
@@ -336,14 +335,14 @@ const InfodocList = () => {
 
   const onPrintClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
-    currentInfodoc = infodocEvent;
+    setCurrentInfodoc(infodocEvent);
     alert('Imprimir Doc - Em Desenvolvimento!');
   };
 
   const onCancelClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
     // alert('Cancelar Doc - Em Desenvolvimento!');
-    currentInfodoc = infodocEvent;
+    setCurrentInfodoc(infodocEvent);
     setCancelDocumentModal(true);
   };
 
