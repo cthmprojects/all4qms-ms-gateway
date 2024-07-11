@@ -58,11 +58,12 @@ import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-d
 import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
 import { Storage } from 'react-jhipster';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsersAsAdminSGQ } from 'app/modules/administration/user-management/user-management.reducer';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -150,6 +151,13 @@ const InfodocList = () => {
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   const [uploadFileUpdate, setUploadFileUpdate] = useState(false);
   const [idDocUpdating, setIdDocUpdating] = useState(0);
+  const [usersSGQ, setUsersSGQ] = useState<[]>([]);
+
+  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  const totalItems = useAppSelector(state => state.all4qmsmsgateway.infodoc.totalItems);
 
   /**
    * Filters
@@ -190,6 +198,14 @@ const InfodocList = () => {
     handleApplyFilters();
   }, [page]);
 
+  const getUsersSGQ = async () => {
+    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+    const users_ = (resUsers.payload as AxiosResponse).data || [];
+
+    const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
+    setUsersSGQ(filteredUser);
+  };
+
   useEffect(() => {
     const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
     dispatch(
@@ -205,6 +221,7 @@ const InfodocList = () => {
     );
 
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    getUsersSGQ();
     dispatch(getProcesses());
     dispatch(listEnums());
   }, []);
@@ -213,11 +230,6 @@ const InfodocList = () => {
     handleApplyFilters();
   }, [filters, page, pageSize]);
 
-  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
-  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
-  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
-  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
-  const totalItems = useAppSelector(state => state.all4qmsmsgateway.infodoc.totalItems);
   const filterUser = (id: number) => {
     if (!users || users.length <= 0) {
       return '-';
@@ -507,6 +519,7 @@ const InfodocList = () => {
           documentTitle={currentInfodoc?.doc?.titulo}
           infodoc={currentInfodoc}
           userId={userLoginID}
+          usersSGQ={usersSGQ}
         />
         <Breadcrumbs aria-label="breadcrumb">
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
