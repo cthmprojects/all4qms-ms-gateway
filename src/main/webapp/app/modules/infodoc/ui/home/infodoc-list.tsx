@@ -443,8 +443,13 @@ const InfodocList = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
                     </TableCell>
                     <TableCell>
-                      <IconButton title="Editar" color="primary" onClick={event => onEditClicked(infodoc, event)}>
-                        <EditIcon sx={{ color: '#e6b200' }} />
+                      <IconButton
+                        title="Editar"
+                        color="primary"
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                        onClick={event => onEditClicked(infodoc, event)}
+                      >
+                        <EditIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
                       <IconButton title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
@@ -452,8 +457,13 @@ const InfodocList = () => {
                       <IconButton title="Imprimir" color="primary" onClick={event => onPrintClicked(infodoc, event)}>
                         <PrintIcon sx={{ color: '#03AC59' }} />
                       </IconButton>
-                      <IconButton title="Cancelar" color="primary" onClick={event => onCancelClicked(infodoc, event)}>
-                        <CancelIcon sx={{ color: '#FF0000' }} />
+                      <IconButton
+                        title="Cancelar"
+                        color="primary"
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                        onClick={event => onCancelClicked(infodoc, event)}
+                      >
+                        <CancelIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#FF0000' }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>
