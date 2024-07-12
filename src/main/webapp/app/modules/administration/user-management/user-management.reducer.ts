@@ -17,6 +17,7 @@ const initialState = {
 
 const apiUrl = 'api/users';
 const adminUrl = 'api/admin/users';
+const adminUrlSGQ = 'api/admin/users-by-role';
 
 // Async Actions
 
@@ -27,6 +28,11 @@ export const getUsers = createAsyncThunk('userManagement/fetch_users', async ({ 
 
 export const getUsersAsAdmin = createAsyncThunk('userManagement/fetch_users_as_admin', async ({ page, size, sort }: IQueryParams) => {
   const requestUrl = `${adminUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}` : ''}`;
+  return axios.get<IUser[]>(requestUrl);
+});
+
+export const getUsersAsAdminSGQ = createAsyncThunk('userManagement/fetch_users_as_admin_sgq', async (role: any) => {
+  const requestUrl = `${adminUrlSGQ}${role ? `?role=${role}` : ''}`;
   return axios.get<IUser[]>(requestUrl);
 });
 
