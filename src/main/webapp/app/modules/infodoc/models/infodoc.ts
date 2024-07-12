@@ -1,3 +1,4 @@
+import { Movimentacao } from './movimentacao';
 import { Permissao } from './permissao';
 
 export enum StatusEnum {
@@ -17,6 +18,7 @@ export enum StatusEnum {
 export type InfoDoc = {
   doc: Doc;
   permissaodoc: Permissao[];
+  movimentacao?: Movimentacao;
 };
 
 export type Doc = {

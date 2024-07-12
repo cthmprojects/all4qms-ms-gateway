@@ -283,7 +283,7 @@ const InfodocList = () => {
     'Origem',
     'Situação',
     // 'Status',
-    'Distribuição',
+    // 'Distribuição',
     'Ações',
   ];
 
@@ -437,11 +437,12 @@ const InfodocList = () => {
                     <TableCell>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
                     <TableCell>{filterOrigin(infodoc.doc.origem)}</TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(infodoc.doc.enumSituacao).icon}</Box>
+                      {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(infodoc.doc.enumSituacao).icon}</Box> */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{infodoc?.movimentacao?.enumStatus}</Box>
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       <IconButton
                         title="Editar"
@@ -454,8 +455,13 @@ const InfodocList = () => {
                       <IconButton title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
                       </IconButton>
-                      <IconButton title="Imprimir" color="primary" onClick={event => onPrintClicked(infodoc, event)}>
-                        <PrintIcon sx={{ color: '#03AC59' }} />
+                      <IconButton
+                        title="Imprimir"
+                        color="primary"
+                        onClick={event => onPrintClicked(infodoc, event)}
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                      >
+                        <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} />
                       </IconButton>
                       <IconButton
                         title="Cancelar"
