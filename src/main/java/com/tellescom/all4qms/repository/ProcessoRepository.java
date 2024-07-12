@@ -56,9 +56,14 @@ public interface ProcessoRepository extends ReactiveCrudRepository<Processo, Lon
     Flux<Processo> buscarProcessosPorIds(List<Long> processoIds);
 
     @Query(
-        "SELECT entity.* FROM usuario entity JOIN rel_usuario__processos joinTable ON entity.id = joinTable.processos_id WHERE joinTable.processos_id = :id"
+        "SELECT entity.* FROM usuario entity JOIN rel_usuario__processos joinTable ON entity.id = joinTable.usuario_id WHERE joinTable.processos_id = :id"
     )
     Flux<Usuario> findByProcessos(Long id);
+
+    @Query(
+        "SELECT entity.id FROM usuario entity JOIN rel_usuario__processos joinTable ON entity.id = joinTable.usuario_id WHERE joinTable.processos_id = :id"
+    )
+    Flux<Long> findUserIdByProcessos(Long id);
 
     @Query(
         "SELECT processo.* FROM processo JOIN rel_usuario__processos joinTable ON processo.id = joinTable.processos_id WHERE joinTable.usuario_id = :id"
