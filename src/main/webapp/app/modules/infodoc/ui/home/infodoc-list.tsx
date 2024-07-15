@@ -58,11 +58,12 @@ import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-d
 import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
 import { Storage } from 'react-jhipster';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsersAsAdminSGQ } from 'app/modules/administration/user-management/user-management.reducer';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -149,7 +150,15 @@ const InfodocList = () => {
   const statusValues = Object.keys(StatusEnum) as Array<keyof typeof StatusEnum>;
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   const [uploadFileUpdate, setUploadFileUpdate] = useState(false);
+  const [usersSGQ, setUsersSGQ] = useState<[]>([]);
   const [idDocUpdating, setIdDocUpdating] = useState(0);
+  const [currentInfodoc, setCurrentInfodoc] = useState<InfoDoc>();
+
+  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  const totalItems = useAppSelector(state => state.all4qmsmsgateway.infodoc.totalItems);
 
   /**
    * Filters
@@ -168,7 +177,6 @@ const InfodocList = () => {
    */
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<number>(5);
-  const [totalItems, setTotalItems] = useState(10);
 
   function displayedRowsLabel({ from, to, count }) {
     return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
@@ -191,6 +199,14 @@ const InfodocList = () => {
     handleApplyFilters();
   }, [page]);
 
+  const getUsersSGQ = async () => {
+    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+    const users_ = (resUsers.payload as AxiosResponse).data || [];
+
+    const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
+    setUsersSGQ(filteredUser);
+  };
+
   useEffect(() => {
     const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
     dispatch(
@@ -206,18 +222,14 @@ const InfodocList = () => {
     );
 
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    getUsersSGQ();
     dispatch(getProcesses());
     dispatch(listEnums());
   }, []);
 
   useEffect(() => {
     handleApplyFilters();
-  }, [filters, page, pageSize]);
-
-  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
-  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
-  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
-  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  }, [filters, page, pageSize, cancelDocumentModal]);
 
   const filterUser = (id: number) => {
     if (!users || users.length <= 0) {
@@ -261,8 +273,6 @@ const InfodocList = () => {
     setValue(newValue);
   };
 
-  let currentInfodoc = infodocs[0];
-
   const columns = [
     'Código',
     'Título',
@@ -273,7 +283,7 @@ const InfodocList = () => {
     'Origem',
     'Situação',
     // 'Status',
-    'Distribuição',
+    // 'Distribuição',
     'Ações',
   ];
 
@@ -325,14 +335,14 @@ const InfodocList = () => {
 
   const onPrintClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
-    currentInfodoc = infodocEvent;
+    setCurrentInfodoc(infodocEvent);
     alert('Imprimir Doc - Em Desenvolvimento!');
   };
 
   const onCancelClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
     // alert('Cancelar Doc - Em Desenvolvimento!');
-    currentInfodoc = infodocEvent;
+    setCurrentInfodoc(infodocEvent);
     setCancelDocumentModal(true);
   };
 
@@ -427,23 +437,39 @@ const InfodocList = () => {
                     <TableCell>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
                     <TableCell>{filterOrigin(infodoc.doc.origem)}</TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(infodoc.doc.enumSituacao).icon}</Box>
+                      {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(infodoc.doc.enumSituacao).icon}</Box> */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{infodoc?.movimentacao?.enumStatus}</Box>
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
-                      <IconButton title="Editar" color="primary" onClick={event => onEditClicked(infodoc, event)}>
-                        <EditIcon sx={{ color: '#e6b200' }} />
+                      <IconButton
+                        title="Editar"
+                        color="primary"
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                        onClick={event => onEditClicked(infodoc, event)}
+                      >
+                        <EditIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
                       <IconButton title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
                       </IconButton>
-                      <IconButton title="Imprimir" color="primary" onClick={event => onPrintClicked(infodoc, event)}>
-                        <PrintIcon sx={{ color: '#03AC59' }} />
+                      <IconButton
+                        title="Imprimir"
+                        color="primary"
+                        onClick={event => onPrintClicked(infodoc, event)}
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                      >
+                        <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} />
                       </IconButton>
-                      <IconButton title="Cancelar" color="primary" onClick={event => onCancelClicked(infodoc, event)}>
-                        <CancelIcon sx={{ color: '#FF0000' }} />
+                      <IconButton
+                        title="Cancelar"
+                        color="primary"
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                        onClick={event => onCancelClicked(infodoc, event)}
+                      >
+                        <CancelIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#FF0000' }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -508,6 +534,7 @@ const InfodocList = () => {
           documentTitle={currentInfodoc?.doc?.titulo}
           infodoc={currentInfodoc}
           userId={userLoginID}
+          usersSGQ={usersSGQ}
         />
         <Breadcrumbs aria-label="breadcrumb">
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>

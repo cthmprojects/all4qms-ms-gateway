@@ -6,20 +6,16 @@ import static org.springframework.data.relational.core.query.Query.query;
 import com.tellescom.all4qms.domain.Authority;
 import com.tellescom.all4qms.domain.User;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.beanutils.BeanComparator;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
-import org.springframework.data.relational.core.sql.Column;
-import org.springframework.data.relational.core.sql.Expression;
-import org.springframework.data.relational.core.sql.Table;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -56,6 +52,9 @@ public interface UserRepository extends R2dbcRepository<User, Long>, UserReposit
 
     @Query("DELETE FROM jhi_user_authority WHERE user_id = :userId")
     Mono<Void> deleteUserAuthorities(Long userId);
+
+    @Query("SELECT * FROM jhi_user u " + "LEFT JOIN jhi_user_authority ua ON u.id=ua.user_id " + "WHERE ua.authority_name = :authority")
+    Flux<User> findAllUsersByAuthority(String authority);
 }
 
 interface DeleteExtended<T> {

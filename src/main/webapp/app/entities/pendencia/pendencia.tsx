@@ -142,7 +142,7 @@ export const Pendencia = () => {
                     <TableCell>{pendencia.nome}</TableCell>
                     <TableCell>{pendencia.link}</TableCell>
                     <TableCell>{pendencia.status ? 'true' : 'false'}</TableCell>
-                    <TableCell width={120}>{new Date(String(pendencia.lidaEm)).toLocaleDateString()}</TableCell>
+                    <TableCell width={120}>{new Date(String(pendencia.criadoEm)).toLocaleDateString()}</TableCell>
                     {/* <TableCell>
                       {pendencia.criadoPor ? <Link to={`/usuario/${pendencia.criadoPor.id}`}>{pendencia.criadoPor.nome}</Link> : ''}
                     </TableCell> */}

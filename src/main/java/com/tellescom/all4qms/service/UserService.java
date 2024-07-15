@@ -9,6 +9,7 @@ import com.tellescom.all4qms.security.AuthoritiesConstants;
 import com.tellescom.all4qms.security.SecurityUtils;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
 import com.tellescom.all4qms.service.dto.UserDTO;
+import com.tellescom.all4qms.service.mapper.UserMapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -344,5 +345,15 @@ public class UserService {
     @Transactional(readOnly = true)
     public Flux<String> getAuthorities() {
         return authorityRepository.findAll().map(Authority::getName);
+    }
+
+    /**
+     * Gets a list of all users of the given authority.
+     * @return a list of all users of the given authority.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UserDTO> getUsersByAuthority(String authority) {
+        UserMapper userMapper = new UserMapper();
+        return userRepository.findAllUsersByAuthority(authority).map(userMapper::userToUserDTO);
     }
 }
