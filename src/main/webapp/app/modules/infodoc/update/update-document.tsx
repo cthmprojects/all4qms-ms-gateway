@@ -93,6 +93,8 @@ export const UpdateDocument = () => {
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const [infoDocId, setInfoDocId] = useState(0);
+  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
 
@@ -171,15 +173,17 @@ export const UpdateDocument = () => {
     const newInfoDoc: Doc = {
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
-      descricaoDoc: documentDescription,
+      descricaoDoc: description,
+      justificativa: documentDescription,
       codigo: code,
       titulo: title,
       origem: origin,
       idArquivo: parseInt(idFile),
       idProcesso: parseInt(selectedProcess),
       ignorarValidade: true,
-      enumSituacao: 'E',
+      enumSituacao: 'R',
       tipoDoc: 'MA',
+      revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
       idDocumentacaoAnterior: parseInt(id),
     };
 
@@ -194,29 +198,22 @@ export const UpdateDocument = () => {
   const saveDocument = () => {
     const newInfoDoc = saveDoc();
 
-    dispatch(createInfoDoc(newInfoDoc))
-      .then(() => {
-        navigate('/infodoc');
-      })
-      .catch(() => {});
+    dispatch(createInfoDoc(newInfoDoc)).then((res: any) => {
+      setInfoDocId(parseInt(res.payload.data?.doc?.id));
+      setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
+    });
   };
 
   const fowardDocument = () => {
-    const newInfoDoc = saveDoc();
-    newInfoDoc.enumSituacao = 'R';
+    const novaMovimentacao: Movimentacao = {
+      id: infoDocMovimentacao,
+      enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
+      enumStatus: EnumStatusDoc.VALIDAREV,
+      idDocumentacao: infoDocId,
+      idUsuarioCriacao: currentUser.id,
+    };
 
-    dispatch(createInfoDoc(newInfoDoc))
-      .then((response: any) => {
-        const newStatus: Movimentacao = {
-          enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
-          idDocumentacao: response.payload?.data?.id,
-          enumStatus: EnumStatusDoc.REVISAO,
-          idUsuarioCriacao: currentUser ? parseInt(currentUser.id) : 0,
-        };
-        dispatch(cadastrarMovimentacao(newStatus));
-      })
-      .catch(() => {});
-    navigate('/infodoc');
+    dispatch(atualizarMovimentacao(novaMovimentacao));
   };
 
   const cancelUpdate = () => {
@@ -234,6 +231,7 @@ export const UpdateDocument = () => {
       setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
       setDescription(actualInfoDoc.doc?.descricaoDoc);
+      setDocumentDescription(actualInfoDoc.doc?.justificativa);
       setTitle(actualInfoDoc.doc?.titulo);
       setOrigin(actualInfoDoc.doc?.origem);
       setSelectedProcess(actualInfoDoc.doc?.idProcesso);
@@ -284,7 +282,7 @@ export const UpdateDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -462,11 +460,11 @@ export const UpdateDocument = () => {
               SALVAR
             </Button>
             <Button
+              disabled={infoDocId <= 0}
               className="ms-3"
               variant="contained"
               color="primary"
               onClick={() => fowardDocument()}
-              disabled={!validateFields()}
               style={{ background: '#e6b200', color: '#4e4d4d' }}
             >
               ENCAMINHAR

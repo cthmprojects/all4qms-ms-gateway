@@ -7,8 +7,6 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
-  OutlinedInput,
-  Pagination,
   Paper,
   Table,
   TableBody,
@@ -31,27 +29,20 @@ import PrintIcon from '@mui/icons-material/Print';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DatePicker from 'react-datepicker';
 import React, { useEffect, useState } from 'react';
-import { Card, Row } from 'reactstrap';
+import { Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search } from '@mui/icons-material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import BlockIcon from '@mui/icons-material/Block';
-import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import HourglassFullIcon from '@mui/icons-material/HourglassFull';
-import PrintDisabledIcon from '@mui/icons-material/PrintDisabled';
-import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
-import { InfoDoc, StatusEnum } from '../../models';
+import { EnumStatusDoc, InfoDoc, StatusEnum } from '../../models';
 import { listdocs } from '../../reducers/infodoc.reducer';
-import { downloadAnexo } from '../../reducers/anexo.reducer';
 import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
 import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
 import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
@@ -91,23 +82,6 @@ function a11yProps(index: number) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-
-const getSituacaoIcon = situacao => {
-  switch (situacao) {
-    case 'E':
-      return { icon: <EditIcon />, text: 'Em Emissão' };
-    case 'H':
-      return { icon: <CheckCircleIcon />, text: 'Homologado' };
-    case 'R':
-      return { icon: <HourglassEmptyIcon />, text: 'Em Revisão' };
-    case 'O':
-      return { icon: <BlockIcon />, text: 'Obsoleto' };
-    case 'C':
-      return { icon: <CancelIcon />, text: 'Cancelado' };
-    default:
-      return { icon: <InfoIcon />, text: 'Indefinido' };
-  }
-};
 
 const getStatusIcon = status => {
   switch (status) {
@@ -316,17 +290,26 @@ const InfodocList = () => {
   };
 
   const onEditClicked = (infodoc: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    if (infodoc.doc?.enumSituacao == 'E') {
+    if (infodoc.doc?.enumSituacao == 'E' || infodoc.doc?.enumSituacao == 'R') {
       setIdDocUpdating(infodoc.doc.id);
       setUploadFileUpdate(true);
-    } else if (infodoc.doc?.enumSituacao == 'R') {
-      navigate(`/infodoc/validation/${infodoc.doc.id}`);
     }
 
     // H - homolog
     // R - revisão
     // O - obsoleto
     // C - cancelado
+  };
+
+  const openDocToValidation = (event, infodoc: InfoDoc) => {
+    if (infodoc?.movimentacao?.enumStatus == EnumStatusDoc.VALIDACAO || infodoc?.movimentacao?.enumStatus == EnumStatusDoc.VALIDAREV) {
+      navigate(`/infodoc/validation/${infodoc.doc.id}`);
+    } else if (
+      infodoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVACAO ||
+      infodoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVAREV
+    ) {
+      navigate(`/infodoc/approval/${infodoc.doc.id}`);
+    }
   };
 
   const onViewClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -426,23 +409,27 @@ const InfodocList = () => {
               </TableHead>
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
-                  <TableRow key={infodoc.doc.id}>
-                    <Tooltip title={infodoc.doc.titulo}>
+                  <TableRow className="table-row" key={infodoc.doc.id}>
+                    <Tooltip onClick={event => openDocToValidation(event, infodoc)} title={infodoc.doc.titulo}>
                       <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
-                    <TableCell>{infodoc.doc.titulo}</TableCell>
-                    <TableCell>{filterUser(infodoc.doc.idUsuarioCriacao)?.nome}</TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell>{infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}</TableCell>
-                    <TableCell>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
-                    <TableCell>{filterOrigin(infodoc.doc.origem)}</TableCell>
-                    <TableCell>
-                      {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(infodoc.doc.enumSituacao).icon}</Box> */}
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.titulo}</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>
+                      {' '}
+                      {filterUser(infodoc.doc.idUsuarioCriacao)?.nome}
+                    </TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>-</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>
+                      {infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}
+                    </TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{filterOrigin(infodoc.doc.origem)}</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{infodoc?.movimentacao?.enumStatus}</Box>
                     </TableCell>
-                    {/* <TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
-                    </TableCell> */}
+                    </TableCell>
                     <TableCell>
                       <IconButton
                         title="Editar"
@@ -452,10 +439,11 @@ const InfodocList = () => {
                       >
                         <EditIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
-                      <IconButton title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
+                      <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
                       </IconButton>
                       <IconButton
+                        id="btn-print"
                         title="Imprimir"
                         color="primary"
                         onClick={event => onPrintClicked(infodoc, event)}
@@ -464,10 +452,11 @@ const InfodocList = () => {
                         <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} />
                       </IconButton>
                       <IconButton
+                        id="btn-cancel"
                         title="Cancelar"
                         color="primary"
-                        disabled={infodoc.doc.enumSituacao == 'C'}
                         onClick={event => onCancelClicked(infodoc, event)}
+                        disabled={infodoc.doc.enumSituacao == 'C'}
                       >
                         <CancelIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#FF0000' }} />
                       </IconButton>

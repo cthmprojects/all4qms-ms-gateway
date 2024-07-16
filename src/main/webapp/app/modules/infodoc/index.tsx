@@ -12,6 +12,7 @@ import infodocReducers from './reducers';
 import { ReducersMapObject, combineReducers } from 'redux';
 import UpdateDocument from './update/update-document';
 import ValidationDocument from './validation-infodoc/validation-document';
+import ApprovalDocument from './ui/approval-infodoc/approval-infodoc';
 
 const InfodocRoutes = () => {
   const store = getStore();
@@ -24,6 +25,7 @@ const InfodocRoutes = () => {
         <Route path="upload-file/new/:id" element={<NewDocument />} />
         <Route path="upload-file/update/:id/:idFile" element={<UpdateDocument />} />
         <Route path="validation/:id" element={<ValidationDocument />} />
+        <Route path="approval/:id" element={<ApprovalDocument />} />
       </ErrorBoundaryRoutes>
     </div>
   );

@@ -43,6 +43,7 @@ export type Doc = {
   areaProcesso?: string;
   distribuicao?: string;
   status?: StatusEnum;
+  justificativa?: string;
 };
 
 export type DocAttachment = {
