@@ -108,7 +108,8 @@ interface cancelDocParams {
 
 export const cancelDocument = createAsyncThunk('docs/cancel', async ({ id, userLoginID, justify }: cancelDocParams) => {
   if (id) {
-    const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;
+    // const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;
+    const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/cancelar/${id}`;
     const data = {
       idDocumento: id,
       idUsuario: userLoginID,
