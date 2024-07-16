@@ -29,7 +29,7 @@ import { listEnums } from '../reducers/enums.reducer';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { InfoDoc, Doc, Movimentacao, EnumTipoMovDoc, EnumStatusDoc } from '../models';
 import { downloadAnexo } from '../reducers/anexo.reducer';
-import { cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
+import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 
 const StyledLabel = styled('label')(({ theme }) => ({
@@ -86,7 +86,8 @@ export const NewDocument = () => {
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
-
+  const [infoDocId, setInfoDocId] = useState(0);
+  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
 
@@ -166,7 +167,8 @@ export const NewDocument = () => {
     const newInfoDoc: Doc = {
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
-      descricaoDoc: documentDescription,
+      descricaoDoc: description,
+      justificativa: documentDescription,
       codigo: code,
       titulo: title,
       origem: 'I',
@@ -182,40 +184,22 @@ export const NewDocument = () => {
       newInfoDoc.dataValidade = validDate;
     }
 
-    dispatch(createInfoDoc(newInfoDoc))
-      .then(() => {
-        navigate('/infodoc');
-      })
-      .catch(() => {});
+    dispatch(createInfoDoc(newInfoDoc)).then((res: any) => {
+      setInfoDocId(parseInt(res.payload.data?.doc?.id));
+      setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
+    });
   };
 
   const fowardDocument = () => {
-    const newInfoDoc: Doc = {
-      idUsuarioCriacao: parseInt(emitter),
-      dataCricao: emittedDate,
-      descricaoDoc: documentDescription,
-      codigo: code,
-      titulo: title,
-      origem: 'I',
-      idProcesso: parseInt(selectedProcess),
-      idArquivo: parseInt(id),
-      ignorarValidade: true,
-      enumSituacao: 'R',
-      tipoDoc: 'MA',
+    const novaMovimentacao: Movimentacao = {
+      id: infoDocMovimentacao,
+      enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
+      enumStatus: EnumStatusDoc.VALIDACAO,
+      idDocumentacao: infoDocId,
+      idUsuarioCriacao: currentUser.id,
     };
 
-    dispatch(createInfoDoc(newInfoDoc))
-      .then((response: any) => {
-        const newStatus: Movimentacao = {
-          enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
-          idDocumentacao: response.payload?.data?.id,
-          enumStatus: EnumStatusDoc.REVISAO,
-          idUsuarioCriacao: currentUser ? parseInt(currentUser.id) : 0,
-        };
-        dispatch(cadastrarMovimentacao(newStatus));
-      })
-      .catch(() => {});
-    navigate('/infodoc');
+    dispatch(atualizarMovimentacao(novaMovimentacao));
   };
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -433,7 +417,7 @@ export const NewDocument = () => {
               Salvar
             </Button>
             <Button
-              disabled={!validateFields()}
+              disabled={infoDocId <= 0}
               onClick={() => fowardDocument()}
               className="ms-3"
               variant="contained"

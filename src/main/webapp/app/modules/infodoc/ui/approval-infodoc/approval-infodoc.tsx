@@ -23,11 +23,11 @@ import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-re
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
-import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
-import { listEnums } from '../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../models';
-import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
-import { cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
+import { RejectDocumentDialog } from '../dialogs/reject-document-dialog/reject-document-dialog';
+import { listEnums } from '../../reducers/enums.reducer';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../../models';
+import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../../reducers/infodoc.reducer';
+import { cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 
@@ -71,7 +71,7 @@ const getDocById = async (id: any) => {
   return data;
 };
 
-export const ValidationDocument = () => {
+export const ApprovalDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { id, idFile } = useParams();
@@ -182,7 +182,6 @@ export const ValidationDocument = () => {
       setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
       setDescription(actualInfoDoc.doc?.descricaoDoc);
-      setDocumentDescription(actualInfoDoc.doc?.justificativa);
       setTitle(actualInfoDoc.doc?.titulo);
       setOrigin(actualInfoDoc.doc?.origem);
       setSelectedProcess(actualInfoDoc.doc?.idProcesso);
@@ -200,7 +199,7 @@ export const ValidationDocument = () => {
 
   const approveDocument = async () => {
     await axios
-      .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/aprovacao-sgq/${id}`, {
+      .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/homologacao/${id}`, {
         idDocumento: id,
         idUsuario: currentUser.id,
       })
@@ -240,7 +239,7 @@ export const ValidationDocument = () => {
               Informações documentadas
             </Link>
             <Link to={'/infodoc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Validação
+              Aprovação
             </Link>
             {/* <Typography style={{ color: '#606060' }}>Ficha de estoque</Typography> */}
           </Breadcrumbs>
@@ -264,7 +263,7 @@ export const ValidationDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Validação
+                  Aprovação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -274,7 +273,7 @@ export const ValidationDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em validação
+                  Em aprovação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -455,4 +454,4 @@ export const ValidationDocument = () => {
   );
 };
 
-export default ValidationDocument;
+export default ApprovalDocument;
