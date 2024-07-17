@@ -214,6 +214,7 @@ export const UpdateDocument = () => {
     };
 
     dispatch(atualizarMovimentacao(novaMovimentacao));
+    navigate('/infodoc');
   };
 
   const cancelUpdate = () => {

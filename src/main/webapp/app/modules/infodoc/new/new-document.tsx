@@ -200,6 +200,7 @@ export const NewDocument = () => {
     };
 
     dispatch(atualizarMovimentacao(novaMovimentacao));
+    navigate('/infodoc');
   };
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
