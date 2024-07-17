@@ -31,6 +31,8 @@ import DatePicker from 'react-datepicker';
 import React, { useEffect, useState } from 'react';
 import { Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import BlockIcon from '@mui/icons-material/Block';
 import { Link, useNavigate } from 'react-router-dom';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
@@ -82,6 +84,24 @@ function a11yProps(index: number) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
+
+const getSituacaoIcon = situacao => {
+  switch (situacao) {
+    case 'E':
+      // return { icon: <EditIcon />, text: 'Em Emissão' };
+      return { icon: <EditIcon />, text: 'Em Edição' };
+    case 'H':
+      return { icon: <CheckCircleIcon />, text: 'Homologado' };
+    case 'R':
+      return { icon: <HourglassEmptyIcon />, text: 'Em Revisão' };
+    case 'O':
+      return { icon: <BlockIcon />, text: 'Obsoleto' };
+    case 'C':
+      return { icon: <CancelIcon />, text: 'Cancelado' };
+    default:
+      return { icon: <InfoIcon />, text: 'Indefinido' };
+  }
+};
 
 const getStatusIcon = status => {
   switch (status) {
@@ -407,7 +427,7 @@ const InfodocList = () => {
                 <TableRow>
                   {columns.map(col => (
                     // eslint-disable-next-line react/jsx-key
-                    <TableCell align="left">{col}</TableCell>
+                    <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
                   ))}
                 </TableRow>
               </TableHead>
@@ -429,12 +449,14 @@ const InfodocList = () => {
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>{filterOrigin(infodoc.doc.origem)}</TableCell>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{infodoc?.movimentacao?.enumStatus}</Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {getSituacaoIcon(infodoc?.doc.enumSituacao).text}
+                      </Box>
                     </TableCell>
-                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>
+                    {/* <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
-                    </TableCell>
-                    <TableCell>
+                    </TableCell> */}
+                    <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                       <IconButton
                         title="Editar"
                         color="primary"
