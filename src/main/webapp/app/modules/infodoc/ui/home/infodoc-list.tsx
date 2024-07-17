@@ -161,8 +161,12 @@ const InfodocList = () => {
   };
 
   const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setPageSize(parseInt(event.target.value, 10));
-    // setPage(1);
+    if (parseInt(event.target.value, 10) > totalItems) {
+      setPageSize(parseInt(event.target.value, 10));
+      setPage(0);
+    } else {
+      setPageSize(parseInt(event.target.value, 10));
+    }
   };
 
   useEffect(() => {
