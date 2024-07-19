@@ -1,9 +1,12 @@
 package com.tellescom.all4qms.service;
 
 import com.tellescom.all4qms.domain.Processo;
+import com.tellescom.all4qms.domain.Usuario;
 import com.tellescom.all4qms.repository.ProcessoRepository;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
+import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.ProcessoMapper;
+import com.tellescom.all4qms.service.mapper.UsuarioMapper;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
 import java.time.Instant;
 import java.util.List;
@@ -28,9 +31,12 @@ public class ProcessoService {
 
     private final ProcessoMapper processoMapper;
 
-    public ProcessoService(ProcessoRepository processoRepository, ProcessoMapper processoMapper) {
+    private final UsuarioMapper usuarioMapper;
+
+    public ProcessoService(ProcessoRepository processoRepository, ProcessoMapper processoMapper, UsuarioMapper usuarioMapper) {
         this.processoRepository = processoRepository;
         this.processoMapper = processoMapper;
+        this.usuarioMapper = usuarioMapper;
     }
 
     /**
@@ -165,5 +171,14 @@ public class ProcessoService {
     public Flux<ProcessoDTO> buscarProcessosPorIdUsuario(Long id) {
         log.debug("Request to findAll Processos by usuario id : {}", id);
         return processoRepository.findAllByUsuarioId(id).map(processoMapper::toDto);
+    }
+
+    public Flux<UsuarioDTO> buscarUsuariosPorIdProcesso(Long id) {
+        log.debug("Request to findAll Usuarios by Processo id : {}", id);
+        return processoRepository.findByProcessos(id).map(usuarioMapper::toDto);
+    }
+
+    public Flux<Long> buscarIdUserByIdProcesso(Long id) {
+        return processoRepository.findUserIdByProcessos(id);
     }
 }

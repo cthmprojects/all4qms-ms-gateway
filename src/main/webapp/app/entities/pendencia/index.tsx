@@ -13,7 +13,7 @@ const PendenciaRoutes = () => (
     <Route index element={<Pendencia />} />
     <Route path="new" element={<PendenciaUpdate />} />
     <Route path=":id">
-      <Route index element={<PendenciaDetail />} />
+      <Route index element={<Pendencia />} />
       <Route path="edit" element={<PendenciaUpdate />} />
       <Route path="delete" element={<PendenciaDeleteDialog />} />
     </Route>

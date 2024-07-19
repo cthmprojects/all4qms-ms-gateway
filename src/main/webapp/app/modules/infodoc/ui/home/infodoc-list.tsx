@@ -7,8 +7,6 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
-  OutlinedInput,
-  Pagination,
   Paper,
   Table,
   TableBody,
@@ -31,36 +29,34 @@ import PrintIcon from '@mui/icons-material/Print';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DatePicker from 'react-datepicker';
 import React, { useEffect, useState } from 'react';
-import { Card, Row } from 'reactstrap';
+import { Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search } from '@mui/icons-material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
-import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import { Link, useNavigate } from 'react-router-dom';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import HourglassFullIcon from '@mui/icons-material/HourglassFull';
-import PrintDisabledIcon from '@mui/icons-material/PrintDisabled';
-import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
-import { InfoDoc, StatusEnum } from '../../models';
+import { EnumStatusDoc, InfoDoc, StatusEnum } from '../../models';
 import { listdocs } from '../../reducers/infodoc.reducer';
-import { downloadAnexo } from '../../reducers/anexo.reducer';
 import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
 import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
 import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
 import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
 import { Storage } from 'react-jhipster';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsersAsAdminSGQ } from 'app/modules/administration/user-management/user-management.reducer';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
+import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
+import axios, { AxiosResponse } from 'axios';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -92,7 +88,8 @@ function a11yProps(index: number) {
 const getSituacaoIcon = situacao => {
   switch (situacao) {
     case 'E':
-      return { icon: <EditIcon />, text: 'Em Emissão' };
+      // return { icon: <EditIcon />, text: 'Em Emissão' };
+      return { icon: <EditIcon />, text: 'Em Edição' };
     case 'H':
       return { icon: <CheckCircleIcon />, text: 'Homologado' };
     case 'R':
@@ -146,6 +143,16 @@ const InfodocList = () => {
   const dispatch = useAppDispatch();
   const statusValues = Object.keys(StatusEnum) as Array<keyof typeof StatusEnum>;
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
+  const [uploadFileUpdate, setUploadFileUpdate] = useState(false);
+  const [usersSGQ, setUsersSGQ] = useState<[]>([]);
+  const [idDocUpdating, setIdDocUpdating] = useState(0);
+  const [currentInfodoc, setCurrentInfodoc] = useState<InfoDoc>();
+
+  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  const totalItems = useAppSelector(state => state.all4qmsmsgateway.infodoc.totalItems);
 
   /**
    * Filters
@@ -164,7 +171,6 @@ const InfodocList = () => {
    */
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<number>(5);
-  const [totalItems, setTotalItems] = useState(10);
 
   function displayedRowsLabel({ from, to, count }) {
     return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
@@ -175,8 +181,12 @@ const InfodocList = () => {
   };
 
   const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setPageSize(parseInt(event.target.value, 10));
-    setPage(1);
+    if (parseInt(event.target.value, 10) > totalItems) {
+      setPageSize(parseInt(event.target.value, 10));
+      setPage(0);
+    } else {
+      setPageSize(parseInt(event.target.value, 10));
+    }
   };
 
   useEffect(() => {
@@ -186,6 +196,14 @@ const InfodocList = () => {
 
     handleApplyFilters();
   }, [page]);
+
+  const getUsersSGQ = async () => {
+    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+    const users_ = (resUsers.payload as AxiosResponse).data || [];
+
+    const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
+    setUsersSGQ(filteredUser);
+  };
 
   useEffect(() => {
     const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
@@ -202,18 +220,14 @@ const InfodocList = () => {
     );
 
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
+    getUsersSGQ();
     dispatch(getProcesses());
     dispatch(listEnums());
   }, []);
 
   useEffect(() => {
     handleApplyFilters();
-  }, [filters]);
-
-  const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
-  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
-  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
-  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  }, [filters, page, pageSize, cancelDocumentModal]);
 
   const filterUser = (id: number) => {
     if (!users || users.length <= 0) {
@@ -257,8 +271,6 @@ const InfodocList = () => {
     setValue(newValue);
   };
 
-  let currentInfodoc = infodocs[0];
-
   const columns = [
     'Código',
     'Título',
@@ -269,7 +281,7 @@ const InfodocList = () => {
     'Origem',
     'Situação',
     // 'Status',
-    'Distribuição',
+    // 'Distribuição',
     'Ações',
   ];
 
@@ -301,32 +313,77 @@ const InfodocList = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const onEditClicked = (id: number, event: React.MouseEvent<HTMLButtonElement>): void => {
-    navigate(`upload-file/update/${id}`);
+  const onEditClicked = (infodoc: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
+    if (infodoc.doc?.enumSituacao == 'E' || infodoc.doc?.enumSituacao == 'R') {
+      setIdDocUpdating(infodoc.doc.id);
+      setUploadFileUpdate(true);
+    }
+
+    // H - homolog
+    // R - revisão
+    // O - obsoleto
+    // C - cancelado
+  };
+
+  const openDocToValidation = (event, infodoc: InfoDoc) => {
+    if (infodoc?.movimentacao?.enumStatus == EnumStatusDoc.VALIDACAO || infodoc?.movimentacao?.enumStatus == EnumStatusDoc.VALIDAREV) {
+      navigate(`/infodoc/validation/${infodoc.doc.id}`);
+    } else if (
+      infodoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVACAO ||
+      infodoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVAREV
+    ) {
+      navigate(`/infodoc/approval/${infodoc.doc.id}`);
+    }
   };
 
   const onViewClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    // navigate(`/somepath/${id}`);
-    currentInfodoc = infodocEvent;
-    alert('Visualizar Doc - Em Desenvolvimento!');
+    downloadDocument(infodocEvent.doc?.idArquivo);
   };
 
   const onPrintClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
-    currentInfodoc = infodocEvent;
+    setCurrentInfodoc(infodocEvent);
     alert('Imprimir Doc - Em Desenvolvimento!');
   };
 
   const onCancelClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
     // alert('Cancelar Doc - Em Desenvolvimento!');
-    currentInfodoc = infodocEvent;
+    setCurrentInfodoc(infodocEvent);
     setCancelDocumentModal(true);
+  };
+
+  const handleCloseUpdateModal = () => {
+    setUploadFileUpdate(false);
+  };
+
+  const downloadDocument = async (id: number) => {
+    if (id) {
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+
+      await axios
+        .request({
+          responseType: 'arraybuffer',
+          url: downloadUrl,
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          },
+        })
+        .then(result => {
+          var fileDownload = require('js-file-download');
+          let fileName = result.headers['content-disposition'].split(';')[1];
+          fileName = fileName.split('=')[1];
+
+          const file = new Blob([result.data], { type: 'application/octet-stream' });
+
+          fileDownload(file, `${fileName}.pdf`);
+        });
+    }
   };
 
   const onOpenUploadFileModal = (event: React.MouseEvent<HTMLButtonElement>): void => {
     const userLogin = filterUser(userLoginID);
-    console.log(userLogin);
     setUploadFileModal(true);
     // TEM O USUARIO, MAS NAO VEM AS PERMISSOES.
     // TODO:  PEGAR A LISTA DE PROCESSOS E PEDIR AS PERMISSOES PARA PODER VALIDAR AS ACOES DO USUARIO
@@ -370,40 +427,64 @@ const InfodocList = () => {
                 <TableRow>
                   {columns.map(col => (
                     // eslint-disable-next-line react/jsx-key
-                    <TableCell align="left">{col}</TableCell>
+                    <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
-                  <TableRow key={infodoc.doc.id}>
-                    <Tooltip title={infodoc.doc.titulo}>
+                  <TableRow className="table-row" key={infodoc.doc.id}>
+                    <Tooltip onClick={event => openDocToValidation(event, infodoc)} title={infodoc.doc.titulo}>
                       <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
-                    <TableCell>{infodoc.doc.titulo}</TableCell>
-                    <TableCell>{filterUser(infodoc.doc.idUsuarioCriacao)?.nome}</TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell>{infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}</TableCell>
-                    <TableCell>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
-                    <TableCell>{filterOrigin(infodoc.doc.origem)}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(infodoc.doc.enumSituacao).icon}</Box>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.titulo}</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>
+                      {' '}
+                      {filterUser(infodoc.doc.idUsuarioCriacao)?.nome}
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>-</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>
+                      {infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}
+                    </TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{filterOrigin(infodoc.doc.origem)}</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {getSituacaoIcon(infodoc?.doc.enumSituacao).text}
+                      </Box>
+                    </TableCell>
+                    {/* <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
-                    </TableCell>
-                    <TableCell>
-                      <IconButton title="Editar" color="primary" onClick={event => onEditClicked(infodoc.doc.id, event)}>
-                        <EditIcon sx={{ color: '#e6b200' }} />
+                    </TableCell> */}
+                    <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
+                      <IconButton
+                        title="Editar"
+                        color="primary"
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                        onClick={event => onEditClicked(infodoc, event)}
+                      >
+                        <EditIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
-                      <IconButton title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
+                      <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
                       </IconButton>
-                      <IconButton title="Imprimir" color="primary" onClick={event => onPrintClicked(infodoc, event)}>
-                        <PrintIcon sx={{ color: '#03AC59' }} />
+                      <IconButton
+                        id="btn-print"
+                        title="Imprimir"
+                        color="primary"
+                        onClick={event => onPrintClicked(infodoc, event)}
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                      >
+                        <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} />
                       </IconButton>
-                      <IconButton title="Cancelar" color="primary" onClick={event => onCancelClicked(infodoc, event)}>
-                        <CancelIcon sx={{ color: '#FF0000' }} />
+                      <IconButton
+                        id="btn-cancel"
+                        title="Cancelar"
+                        color="primary"
+                        onClick={event => onCancelClicked(infodoc, event)}
+                        disabled={infodoc.doc.enumSituacao == 'C'}
+                      >
+                        <CancelIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#FF0000' }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -430,9 +511,26 @@ const InfodocList = () => {
       );
     } else {
       return (
-        <Row className="justify-content-center mt-5">
-          <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
-        </Row>
+        <>
+          <Row className="justify-content-center mt-5">
+            <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
+          </Row>
+          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
+            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
+            <TablePagination
+              component="div"
+              count={totalItems}
+              labelDisplayedRows={displayedRowsLabel}
+              labelRowsPerPage="Itens por página:"
+              onPageChange={onPageChanged}
+              onRowsPerPageChange={onRowsPerPageChanged}
+              page={page}
+              rowsPerPage={pageSize}
+              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
+            />
+          </Row>
+        </>
       );
     }
   };
@@ -441,6 +539,7 @@ const InfodocList = () => {
     //////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
+        <UploadInfoFileUpdate open={uploadFileUpdate} handleClose={handleCloseUpdateModal} id={idDocUpdating} />
         <DistributionDialog open={distributionModal} handleClose={handleDistributionModal} documentTitle={currentInfodoc?.doc?.titulo} />
         <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
         <RequestCopyDialog open={requestCopyModal} handleClose={handleCloseRequestCopyModal} documentTitle={currentInfodoc?.doc?.titulo} />
@@ -449,6 +548,8 @@ const InfodocList = () => {
           handleClose={handleCancelDocumentModal}
           documentTitle={currentInfodoc?.doc?.titulo}
           infodoc={currentInfodoc}
+          userId={userLoginID}
+          usersSGQ={usersSGQ}
         />
         <Breadcrumbs aria-label="breadcrumb">
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>

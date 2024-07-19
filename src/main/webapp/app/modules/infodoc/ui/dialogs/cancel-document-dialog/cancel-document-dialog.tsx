@@ -1,12 +1,18 @@
+import React, { useState } from 'react';
 import { Textarea } from '@mui/joy';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { InfoDoc } from 'app/modules/infodoc/models';
 import { StyledLabel, StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
-import React from 'react';
 import { Button } from 'reactstrap';
+import { cancelDocument } from 'app/modules/infodoc/reducers/infodoc.reducer';
+import { useAppDispatch } from 'app/config/store';
+import { Storage } from 'react-jhipster';
+import { AxiosResponse } from 'axios';
+import { createEntity as createPendencia } from 'app/entities/pendencia/pendencia.reducer';
 
 const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
   const id = React.useId();
+
   return (
     <React.Fragment>
       <StyledTextarea minRows={5} cols={100} {...props} ref={ref} id={id} />
@@ -20,14 +26,54 @@ type CancelDocumentDialogProps = {
   handleClose: () => void;
   documentTitle: string;
   infodoc: InfoDoc;
+  userId: number;
+  usersSGQ: [];
 };
+export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc, userId, usersSGQ }: CancelDocumentDialogProps) => {
+  const dispatch = useAppDispatch();
+  const [justifyValue, setJustifyValue] = useState('');
 
-const requestCancelInfoDoc = (infodoc: InfoDoc) => {
-  alert('Cancelamento Requisitado para o infodoc: ' + infodoc.doc.codigo);
-  // TODO Implementar a chamada para cancelamento desse documento.
-};
+  const sendPendenciasSGQ = async user => {
+    try {
+      const userLoged = JSON.parse(await Storage.session.get('USUARIO_QMS'));
+      const resPendencias = await dispatch(
+        createPendencia({
+          nome: `CANCELAMENTO - ${justifyValue}`,
+          status: false,
+          tipo: 'ATIVIDADE',
+          criadoEm: new Date(Date.now()).toISOString(),
+          responsavel: user,
+          criadoPor: userLoged,
+          atualizadoPor: userLoged,
+        })
+      );
+      const reponse = (resPendencias?.payload as AxiosResponse).data;
+    } catch (err) {
+      console.error('CancelDocumentDialog -> sendPendenciasSGQ: ', err);
+    }
+  };
 
-export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc }: CancelDocumentDialogProps) => {
+  const requestCancelInfoDoc = (justify: string) => {
+    const params = { id: infodoc.doc.id, userLoginID: userId, justify };
+
+    dispatch(cancelDocument(params)).then(
+      (response: any) => {
+        if (response?.error) {
+          console.error('requestCancelInfoDoc:', response?.error);
+          handleClose();
+          return;
+        }
+
+        usersSGQ.map(user => sendPendenciasSGQ(user));
+
+        handleClose();
+      },
+      err => {
+        return;
+      }
+    );
+  };
+
   return (
     <React.Fragment>
       <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
@@ -37,11 +83,14 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
         </DialogTitle>
         <DialogContent>
           <Textarea
+            id="justify"
             className="w-100"
             slots={{ textarea: DocumentDescription }}
             slotProps={{ textarea: { placeholder: '' } }}
             sx={{ borderRadius: '6px' }}
             name="ncArea"
+            value={justifyValue || ''}
+            onChange={e => setJustifyValue(e.target.value)}
           />
         </DialogContent>
         <DialogActions sx={{ paddingBottom: '20px' }}>
@@ -53,7 +102,7 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
             variant="contained"
             color="primary"
             style={{ background: '#A23900', color: '#fff' }}
-            onClick={() => requestCancelInfoDoc(infodoc)}
+            onClick={() => requestCancelInfoDoc(justifyValue)}
           >
             Solicitar
           </Button>

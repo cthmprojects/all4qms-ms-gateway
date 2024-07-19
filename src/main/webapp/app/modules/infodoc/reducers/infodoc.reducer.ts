@@ -64,7 +64,7 @@ export const listdocs = createAsyncThunk('docs/list', async (params: ListParams)
   }
 
   if (size) {
-    queryParams.push(`size${size}`);
+    queryParams.push(`size=${size}`);
   }
 
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
@@ -75,6 +75,48 @@ export const listdocs = createAsyncThunk('docs/list', async (params: ListParams)
 
 export const createInfoDoc = createAsyncThunk('docs/create', async (data: Doc) => {
   return await axios.post<InfoDoc>(apiDocumentacaoUrl, data);
+});
+
+interface updateParams {
+  id: number | string;
+  data: Doc;
+}
+export const updateInfoDoc = createAsyncThunk('docs/update', async ({ data, id }: updateParams) => {
+  return await axios.patch(`${apiDocumentacaoUrl}/${id}`, data);
+});
+
+export const deleteInfoDoc = createAsyncThunk('docs/delete', async (id: number | string) => {
+  return await axios.delete(`${apiDocumentacaoUrl}/${id}`);
+});
+
+export const getInfoDocById = createAsyncThunk('docs/get', async (id: number | string) => {
+  const { data } = await axios.get<Doc>(`${apiDocumentacaoUrl}/${id}`);
+
+  const newResponse: InfoDoc = {
+    doc: data,
+    permissaodoc: [],
+  };
+
+  return newResponse;
+});
+
+interface cancelDocParams {
+  id: number;
+  userLoginID: number;
+  justify: string;
+}
+
+export const cancelDocument = createAsyncThunk('docs/cancel', async ({ id, userLoginID, justify }: cancelDocParams) => {
+  if (id) {
+    // const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;
+    const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/cancelar/${id}`;
+    const data = {
+      idDocumento: id,
+      idUsuario: userLoginID,
+      justificativa: justify,
+    };
+    return await axios.put(reproveUrl, data);
+  }
 });
 
 const InfoDocSlice = createEntitySlice({
@@ -98,6 +140,22 @@ const InfoDocSlice = createEntitySlice({
       })
       .addMatcher(isFulfilled(createInfoDoc), (state, action) => {
         state.loading = false;
+      })
+      .addMatcher(isFulfilled(deleteInfoDoc), (state, action) => {
+        state.loading = false;
+      })
+      .addMatcher(isFulfilled(updateInfoDoc), (state, action) => {
+        state.loading = false;
+      })
+      .addMatcher(isFulfilled(cancelDocument), (state, action) => {
+        state.loading = false;
+      })
+      .addMatcher(isFulfilled(getInfoDocById), (state, action) => {
+        return {
+          ...state,
+          loading: false,
+          entity: action.payload,
+        };
       });
   },
 });

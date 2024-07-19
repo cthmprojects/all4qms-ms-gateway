@@ -243,4 +243,25 @@ public class UsuarioService {
         log.debug("Request to get all Usuarios");
         return usuarioRepository.findByUser(id).flatMap(usuario -> findOne(usuario.getId()));
     }
+
+    public Flux<UsuarioDTO> processarUsuariosPorIdProcesso(Long processoId) {
+        return processoService.buscarIdUserByIdProcesso(processoId).collectList().flatMapMany(ids -> findMany(Flux.fromIterable(ids)));
+    }
+
+    public Flux<UsuarioDTO> findMany(Flux<Long> idFlux) {
+        return idFlux.flatMap(id ->
+            processoService
+                .buscarProcessosPorIdUsuario(id)
+                .collect(Collectors.toSet())
+                .flatMap(processos ->
+                    usuarioRepository
+                        .findById(id)
+                        .map(usuario -> {
+                            UsuarioDTO usuarioDTO = usuarioMapper.toDto(usuario);
+                            usuarioDTO.setProcessos(processos);
+                            return usuarioDTO;
+                        })
+                )
+        );
+    }
 }

@@ -42,23 +42,27 @@ export const PendenciaDeleteDialog = () => {
   return (
     <Modal isOpen toggle={handleClose}>
       <ModalHeader toggle={handleClose} data-cy="pendenciaDeleteDialogHeading">
-        <Translate contentKey="entity.delete.title">Confirm delete operation</Translate>
+        {/* <Translate contentKey="entity.delete.title">Confirm delete operation</Translate> */}
+        Confirmar
       </ModalHeader>
       <ModalBody id="all4QmsMsGatewayApp.pendencia.delete.question">
-        <Translate contentKey="all4QmsMsGatewayApp.pendencia.delete.question" interpolate={{ id: pendenciaEntity.id }}>
+        Você deseja remover esta Pendencia?
+        {/* <Translate contentKey="all4QmsMsGatewayApp.pendencia.delete.question" interpolate={{ id: pendenciaEntity.id }}>
           Are you sure you want to delete this Pendencia?
-        </Translate>
+        </Translate> */}
       </ModalBody>
       <ModalFooter>
         <Button color="secondary" onClick={handleClose}>
           <FontAwesomeIcon icon="ban" />
           &nbsp;
-          <Translate contentKey="entity.action.cancel">Cancel</Translate>
+          {/* <Translate contentKey="entity.action.cancel">Cancel</Translate> */}
+          Cancelar
         </Button>
         <Button id="jhi-confirm-delete-pendencia" data-cy="entityConfirmDeleteButton" color="danger" onClick={confirmDelete}>
           <FontAwesomeIcon icon="trash" />
           &nbsp;
-          <Translate contentKey="entity.action.delete">Delete</Translate>
+          {/* <Translate contentKey="entity.action.delete">Delete</Translate> */}
+          Deletar
         </Button>
       </ModalFooter>
     </Modal>

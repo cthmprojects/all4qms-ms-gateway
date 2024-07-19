@@ -289,4 +289,9 @@ public class UsuarioResource {
     public Mono<ResponseEntity<UsuarioDTO>> getByUserJhId(@PathVariable("id") Long id) {
         return usuarioService.findAllByUserJhId(id).map(ResponseEntity::ok);
     }
+
+    @GetMapping("/byprocesso/{id}")
+    public Flux<UsuarioDTO> getByProcessoId(@PathVariable("id") Long id) {
+        return usuarioService.processarUsuariosPorIdProcesso(id);
+    }
 }

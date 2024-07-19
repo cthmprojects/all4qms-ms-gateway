@@ -11,10 +11,8 @@ import infodocReducers from './reducers';
 
 import { ReducersMapObject, combineReducers } from 'redux';
 import UpdateDocument from './update/update-document';
-
-const handleTela = (tela: string) => {
-  console.log(tela);
-};
+import ValidationDocument from './validation-infodoc/validation-document';
+import ApprovalDocument from './ui/approval-infodoc/approval-infodoc';
 
 const InfodocRoutes = () => {
   const store = getStore();
@@ -24,8 +22,10 @@ const InfodocRoutes = () => {
     <div>
       <ErrorBoundaryRoutes>
         <Route path="" element={<InfodocList />} />
-        <Route path="upload-file/new" element={<NewDocument />} />
-        <Route path="upload-file/update/:id" element={<UpdateDocument />} />
+        <Route path="upload-file/new/:id" element={<NewDocument />} />
+        <Route path="upload-file/update/:id/:idFile" element={<UpdateDocument />} />
+        <Route path="validation/:id" element={<ValidationDocument />} />
+        <Route path="approval/:id" element={<ApprovalDocument />} />
       </ErrorBoundaryRoutes>
     </div>
   );

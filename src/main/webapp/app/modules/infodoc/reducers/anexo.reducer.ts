@@ -1,7 +1,7 @@
 import { createAsyncThunk, isFulfilled, isPending } from '@reduxjs/toolkit';
 import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
-import { Doc, DocAttachment, DocumentacaoRequest, InfoDoc } from '../models';
+import { Doc, DocAttachment, DocumentacaoRequest, InfoDoc, UploadAnexo } from '../models';
 
 const apiAttachmentUrl = 'services/all4qmsmsinfodoc/api/infodoc/anexos';
 const apiAttachmentDownloadUrl = 'services/all4qmsmsinfodoc/api/infodoc/anexos/download/';
@@ -34,8 +34,27 @@ export const getById = createAsyncThunk('anexos/get', async (id: number) => {
   return axios.get<DocAttachment>(url);
 });
 
-const InfoDocSlice = createEntitySlice({
-  name: 'infodoc',
+export const uploadAnexo = createAsyncThunk('anexos/post', async (anexo: UploadAnexo) => {
+  if (!anexo.arquivo) {
+    return null;
+  }
+
+  const formData = new FormData();
+
+  formData.append('arquivo', anexo.arquivo);
+  // formData.append('idDocumentacao', String(anexo.idDocumentacao));
+
+  const response = await axios.post(apiAttachmentUrl, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response;
+});
+
+const Anexo = createEntitySlice({
+  name: 'anexo',
   initialState,
   extraReducers(builder) {
     builder
@@ -63,11 +82,15 @@ const InfoDocSlice = createEntitySlice({
         state.updating = false;
         state.loading = false;
         state.links = data;
+      })
+      .addMatcher(isFulfilled(uploadAnexo), (state, action) => {
+        state.updating = false;
+        state.loading = false;
       });
   },
 });
 
-export const { reset } = InfoDocSlice.actions;
+export const { reset } = Anexo.actions;
 
 // Reducers
-export default InfoDocSlice.reducer;
+export default Anexo.reducer;

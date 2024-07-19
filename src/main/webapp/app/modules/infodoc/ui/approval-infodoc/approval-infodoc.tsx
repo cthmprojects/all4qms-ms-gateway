@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {
   Breadcrumbs,
   Checkbox,
@@ -16,21 +17,19 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import { IUsuario } from 'app/shared/model/usuario.model';
 import DatePicker from 'react-datepicker';
 import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { AddCircle } from '@mui/icons-material';
+import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
-import downloadFile from '../infodoc-store';
-import { listEnums } from '../reducers/enums.reducer';
-import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
-import { InfoDoc, Doc, Movimentacao, EnumTipoMovDoc, EnumStatusDoc } from '../models';
-import { downloadAnexo } from '../reducers/anexo.reducer';
-import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
+import { RejectDocumentDialog } from '../dialogs/reject-document-dialog/reject-document-dialog';
+import { listEnums } from '../../reducers/enums.reducer';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../../models';
+import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../../reducers/infodoc.reducer';
+import { cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
+import { toast } from 'react-toastify';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -67,36 +66,41 @@ const getProcesses = async () => {
   return response.data;
 };
 
-export const NewDocument = () => {
+const getDocById = async (id: any) => {
+  const { data } = await axios.get<Doc>(`services/all4qmsmsinfodoc/api/infodoc/documentos/${id}`);
+  return data;
+};
+
+export const ApprovalDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, idFile } = useParams();
 
   const [emitter, setEmitter] = useState('');
   const [emittedDate, setEmittedDate] = useState(new Date());
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
-  const [revision, setRevision] = useState(0);
   const [origin, setOrigin] = useState('externa');
-  const [originList, setOriginList] = useState([]);
   const [processes, setProcesses] = useState([]);
   const [selectedProcess, setSelectedProcess] = useState('');
   const [noValidate, setNoValidate] = useState(false);
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
-  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
-  const [infoDocId, setInfoDocId] = useState(0);
-  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
+  const [originList, setOriginList] = useState([]);
+  const [idNewFile, setIdNewFile] = useState<number>();
+
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+
+  const [openRejectModal, setOpenRejectModal] = useState(false);
+  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
-    // dispatch(getInfoDocById(id));
-
+    dispatch(getInfoDocById(id));
     getProcesses().then(data => {
       setProcesses(data);
       if (data.length > 0) {
@@ -119,9 +123,28 @@ export const NewDocument = () => {
     setKeyword('');
   };
 
+  const onNoValidateChanged = () => {
+    if (noValidate) {
+      setNoValidate(false);
+      setValidDate(new Date());
+    } else {
+      setNoValidate(true);
+      setValidDate(new Date(2999, 11, 31));
+      setNotificationPreviousDate('0');
+    }
+  };
+
+  const handleCloseRejectModal = () => {
+    setOpenRejectModal(false);
+  };
+
+  const validateFields = () => {
+    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+  };
+
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (id) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+    if (actualInfoDoc) {
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc?.idArquivo}`;
 
       await axios
         .request({
@@ -144,69 +167,50 @@ export const NewDocument = () => {
     }
   };
 
-  const cancelDocument = () => {
-    dispatch(deleteInfoDoc(id));
-    navigate('/infodoc');
-  };
-
-  const onNoValidateChanged = () => {
-    if (noValidate) {
-      setNoValidate(false);
-      setValidDate(new Date());
-    } else {
-      setNoValidate(true);
-      setValidDate(new Date(2999, 11, 31));
-      setNotificationPreviousDate('0');
-    }
-  };
-
-  const validateFields = () => {
-    return emitter && emittedDate && documentDescription && code && title && revision && selectedProcess;
-  };
-
-  const saveDocument = () => {
-    const newInfoDoc: Doc = {
-      idUsuarioCriacao: parseInt(emitter),
-      dataCricao: emittedDate,
-      descricaoDoc: description,
-      justificativa: documentDescription,
-      codigo: code,
-      titulo: title,
-      revisao: revision,
-      origem: 'I',
-      idProcesso: parseInt(selectedProcess),
-      idArquivo: parseInt(id),
-      ignorarValidade: true,
-      enumSituacao: 'E',
-      tipoDoc: 'MA',
-    };
-
-    if (!noValidate) {
-      newInfoDoc.ignorarValidade = false;
-      newInfoDoc.dataValidade = validDate;
-    }
-
-    dispatch(createInfoDoc(newInfoDoc)).then((res: any) => {
-      setInfoDocId(parseInt(res.payload.data?.doc?.id));
-      setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
-    });
-  };
-
-  const fowardDocument = () => {
-    const novaMovimentacao: Movimentacao = {
-      id: infoDocMovimentacao,
-      enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
-      enumStatus: EnumStatusDoc.VALIDACAO,
-      idDocumentacao: infoDocId,
-      idUsuarioCriacao: currentUser.id,
-    };
-
-    dispatch(atualizarMovimentacao(novaMovimentacao));
+  const cancelUpdate = () => {
+    dispatch(deleteInfoDoc(idFile));
     navigate('/infodoc');
   };
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  const actualInfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
+
+  useEffect(() => {
+    if (actualInfoDoc) {
+      setCode(actualInfoDoc.doc?.codigo);
+      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+      setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
+      setDescription(actualInfoDoc.doc?.descricaoDoc);
+      setTitle(actualInfoDoc.doc?.titulo);
+      setOrigin(actualInfoDoc.doc?.origem);
+      setSelectedProcess(actualInfoDoc.doc?.idProcesso);
+
+      if (actualInfoDoc.doc?.dataValidade) {
+        setNoValidate(false);
+        setValidDate(new Date(actualInfoDoc.doc.dataValidade));
+      } else {
+        setNoValidate(true);
+        setValidDate(new Date(2999, 11, 31));
+        setNotificationPreviousDate('0');
+      }
+    }
+  }, [actualInfoDoc]);
+
+  const approveDocument = async () => {
+    await axios
+      .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/homologacao/${id}`, {
+        idDocumento: id,
+        idUsuario: currentUser.id,
+      })
+      .then(() => {
+        toast.success('Documento aprovado com sucesso!');
+        navigate('/infodoc');
+      })
+      .catch(e => {
+        toast.error('Erro ao aprovar documento.');
+      });
+  };
 
   useEffect(() => {
     setOriginList(enums?.origem);
@@ -218,6 +222,13 @@ export const NewDocument = () => {
 
   return (
     <>
+      <RejectDocumentDialog
+        open={openRejectModal}
+        handleClose={handleCloseRejectModal}
+        currentUser={currentUser}
+        currentDocument={actualInfoDoc}
+        documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+      ></RejectDocumentDialog>
       <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
         <Row className="justify-content-center mt-5">
           <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">
@@ -228,7 +239,7 @@ export const NewDocument = () => {
               Informações documentadas
             </Link>
             <Link to={'/infodoc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Emitir
+              Aprovação
             </Link>
             {/* <Typography style={{ color: '#606060' }}>Ficha de estoque</Typography> */}
           </Breadcrumbs>
@@ -238,7 +249,7 @@ export const NewDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -252,7 +263,7 @@ export const NewDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  em emissão
+                  Aprovação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -262,7 +273,7 @@ export const NewDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Edição
+                  Em aprovação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -273,6 +284,7 @@ export const NewDocument = () => {
                   onChange={date => setEmittedDate(date)}
                   className="date-picker"
                   dateFormat={'dd/MM/yyyy'}
+                  disabled
                 />
                 <label htmlFor="" className="rnc-date-label">
                   Data
@@ -286,6 +298,7 @@ export const NewDocument = () => {
               sx={{ borderRadius: '6px' }}
               name="ncArea"
               value={description || ''}
+              disabled
               onChange={e => setDescription(e.target.value)}
             />
           </div>
@@ -298,47 +311,35 @@ export const NewDocument = () => {
             <TextField
               label="Código"
               name="number"
-              className="m-2 ms-0"
+              className="me-2"
               autoComplete="off"
               value={code}
+              disabled
               onChange={e => setCode(e.target.value)}
             />
             <TextField
               sx={{ width: '30%' }}
               label="Título"
               name="number"
-              className="m-2"
+              className="me-2 ms-2"
               autoComplete="off"
               value={title}
+              disabled
               onChange={e => setTitle(e.target.value)}
             />
-            <TextField
-              label="Revisão"
-              name="number"
-              className="m-2 ms-0"
-              autoComplete="off"
-              value={revision}
-              onChange={e => {
-                const input = e.target.value;
-                // Use regular expression to remove non-numeric characters
-                const numericInput = input.replace(/\D/g, '');
-                // Update the state with the parsed number
-                setRevision(parseInt(numericInput, 10));
-              }}
-            />
 
-            <FormControl sx={{ width: '15%' }} className="m-2">
+            <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
               <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
+              <Select label="Origem" value={origin} disabled onChange={event => setOrigin(event.target.value)}>
                 {originList?.map(e => (
                   <MenuItem value={e.nome}>{e.valor}</MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            <FormControl sx={{ width: '25%' }} className="m-2 me-3">
+            <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+              <Select label="Área / Processo" value={selectedProcess} disabled onChange={event => setSelectedProcess(event.target.value)}>
                 {processes.map((process, i) => (
                   <MenuItem value={process.id} key={`process-${i}`}>
                     {process.nome}
@@ -348,11 +349,11 @@ export const NewDocument = () => {
             </FormControl>
 
             <Button
-              className="m-2 ms-0"
+              className="ms-2"
               variant="outlined"
               size="large"
+              style={{ backgroundColor: idNewFile ? '#e6b200' : '#E0E0E0', color: '#4e4d4d', height: '55px' }}
               onClick={event => onFileClicked(event)}
-              style={{ backgroundColor: '#E0E0E0', height: '55px' }}
             >
               <VisibilityIcon className="pe-1 pb-1" />
               Arquivo
@@ -363,6 +364,7 @@ export const NewDocument = () => {
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
+              disabled
             />
             <FormControl className="me-2 ms-2 mt-4">
               <DatePicker
@@ -370,7 +372,7 @@ export const NewDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled={noValidate}
+                disabled
               />
               <label htmlFor="" className="rnc-date-label">
                 Validade
@@ -383,7 +385,7 @@ export const NewDocument = () => {
                 label="Notificar:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled={noValidate}
+                disabled
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -400,18 +402,20 @@ export const NewDocument = () => {
             sx={{ borderRadius: '6px' }}
             name="ncArea"
             value={documentDescription || ''}
+            disabled
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
           <div className="mt-4">
             <TextField
               id="text-field-keyword"
-              label="Documentos relacionados"
+              label="Escreva aqui..."
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
+              disabled
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>
@@ -422,26 +426,26 @@ export const NewDocument = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
-            <Button
-              variant="contained"
-              className="me-3"
-              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => cancelDocument()}
-            >
-              Voltar
-            </Button>
-            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
-              Salvar
+            <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
+              VOLTAR
             </Button>
             <Button
-              disabled={infoDocId <= 0}
-              onClick={() => fowardDocument()}
               className="ms-3"
               variant="contained"
               color="primary"
+              style={{ background: '#A23900', color: '#fff' }}
+              onClick={() => setOpenRejectModal(true)}
+            >
+              Reprovar
+            </Button>
+            <Button
+              className="ms-3"
+              variant="contained"
+              color="primary"
+              onClick={() => approveDocument()}
               style={{ background: '#e6b200', color: '#4e4d4d' }}
             >
-              Encaminhar
+              Aprovar
             </Button>
           </div>
         </div>
@@ -450,4 +454,4 @@ export const NewDocument = () => {
   );
 };
 
-export default NewDocument;
+export default ApprovalDocument;
