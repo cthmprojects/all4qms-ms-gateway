@@ -77,6 +77,7 @@ export const NewDocument = () => {
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
+  const [revision, setRevision] = useState(0);
   const [origin, setOrigin] = useState('externa');
   const [originList, setOriginList] = useState([]);
   const [processes, setProcesses] = useState([]);
@@ -160,7 +161,7 @@ export const NewDocument = () => {
   };
 
   const validateFields = () => {
-    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+    return emitter && emittedDate && documentDescription && code && title && revision && selectedProcess;
   };
 
   const saveDocument = () => {
@@ -171,6 +172,7 @@ export const NewDocument = () => {
       justificativa: documentDescription,
       codigo: code,
       titulo: title,
+      revisao: revision,
       origem: 'I',
       idProcesso: parseInt(selectedProcess),
       idArquivo: parseInt(id),
@@ -200,6 +202,7 @@ export const NewDocument = () => {
     };
 
     dispatch(atualizarMovimentacao(novaMovimentacao));
+    navigate('/infodoc');
   };
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -308,6 +311,20 @@ export const NewDocument = () => {
               autoComplete="off"
               value={title}
               onChange={e => setTitle(e.target.value)}
+            />
+            <TextField
+              label="Revisão"
+              name="number"
+              className="m-2 ms-0"
+              autoComplete="off"
+              value={revision}
+              onChange={e => {
+                const input = e.target.value;
+                // Use regular expression to remove non-numeric characters
+                const numericInput = input.replace(/\D/g, '');
+                // Update the state with the parsed number
+                setRevision(parseInt(numericInput, 10));
+              }}
             />
 
             <FormControl sx={{ width: '15%' }} className="m-2">
