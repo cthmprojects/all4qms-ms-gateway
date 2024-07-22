@@ -11,7 +11,7 @@ export type ConfigurationsDegreesType = {
   weight: number;
   description: string;
 };
-export type ConfigurationsOpportunitiesType = {
+export type ConfigurationsClassificationType = {
   codigo?: number;
   decision: string;
   description: string;
@@ -19,7 +19,7 @@ export type ConfigurationsOpportunitiesType = {
 
 interface ConfigurationsDegreesProps {
   title: string;
-  configValues: ConfigurationsDegreesType[] | ConfigurationsOpportunitiesType[];
+  configValues: ConfigurationsDegreesType[] | ConfigurationsClassificationType[];
   // setDegreeValues?: React.Dispatch<React.SetStateAction<Degrees>>;
   isDegree?: boolean;
 }
