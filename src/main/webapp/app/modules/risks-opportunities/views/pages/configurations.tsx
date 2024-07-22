@@ -2,7 +2,7 @@ import { Box, Breadcrumbs, Tab, Tabs, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TabsCustom } from '../../../../shared/components/tabs';
-import ConfigurationsTabRisk from '../components/configurations-tab-risk';
+import ConfigurationsTabRisk from '../components/config-tab-risk';
 
 const tabsPanel = [
   {
