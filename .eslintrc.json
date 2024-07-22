@@ -75,6 +75,8 @@
     "complexity": ["error", 40],
     "no-invalid-this": "off",
     "react/prop-types": "off",
-    "react/display-name": "off"
+    "react/display-name": "off",
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off"
   }
 }
