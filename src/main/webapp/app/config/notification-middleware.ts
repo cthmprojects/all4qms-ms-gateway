@@ -22,8 +22,31 @@ export default () => next => action => {
         }
       });
     if (alert) {
-      toast.success(alert);
+      toast.success(translateItemName(alert));
     }
+  }
+
+  function translateItemName(alert) {
+    const words = alert.split(' ');
+    const partOne = words[2];
+    let itemCreated = '';
+    if (partOne === 'all4QmsMsInfodocDocumentacaoAnexo') {
+      itemCreated = 'anexo Infodoc';
+    } else {
+      // Por mapear os nomes dos itens
+      // eslint-disable-next-line no-console
+      console.log(partOne);
+      itemCreated = 'arquivo';
+    }
+    return `O ${itemCreated} foi salvo com sucesso`;
+  }
+
+  function translateFieldName(fieldName) {
+    const fieldNameTranslations = {
+      Username: 'Usuário',
+      Password: 'Senha',
+    };
+    return fieldNameTranslations[fieldName] || fieldName;
   }
 
   if (isRejectedAction(action) && error && error.isAxiosError) {
@@ -39,7 +62,7 @@ export default () => next => action => {
         switch (response.status) {
           // connection refused, server not reachable
           case 0:
-            addErrorAlert('Server not reachable', 'error.server.not.reachable');
+            addErrorAlert('Servidor fora de alcance', 'error.server.not.reachable');
             break;
 
           case 400: {
@@ -65,35 +88,33 @@ export default () => next => action => {
                 // convert 'something[14].other[4].id' to 'something[].other[].id' so translations can be written to it
                 const convertedField = fieldError.field.replace(/\[\d*\]/g, '[]');
                 const fieldName = convertedField.charAt(0).toUpperCase() + convertedField.slice(1);
-                addErrorAlert(`Error on field "${fieldName}"`, `error.${fieldError.message}`, { fieldName });
+                addErrorAlert(`Erro no campo "${translateFieldName(fieldName)}"`, `error.${fieldError.message}`, { fieldName });
               }
             } else if (typeof data === 'string' && data !== '') {
               addErrorAlert(data);
-            } else {
-              toast.error(data?.message || data?.error || data?.title || 'Unknown error!');
             }
             break;
           }
           case 404:
-            addErrorAlert('Not found', 'error.url.not.found');
+            addErrorAlert('Não encontrado', 'error.url.not.found');
             break;
 
           default:
             if (typeof data === 'string' && data !== '') {
               addErrorAlert(data);
             } else {
-              toast.error(data?.message || data?.error || data?.title || 'Unknown error!');
+              toast.error(data?.message || data?.error || data?.title || 'Erro desconhecido!');
             }
         }
       }
     } else if (error.config && error.config.url === 'api/account' && error.config.method === 'get') {
       /* eslint-disable no-console */
-      console.log('Authentication Error: Trying to access url api/account with GET.');
+      console.log('Erro de autenticação: Tentando acessar endereço api/account com método GET.');
     } else {
-      toast.error(error.message || 'Unknown error!');
+      toast.error(error.message || 'Erro desconhecido!');
     }
   } else if (error) {
-    toast.error(error.message || 'Unknown error!');
+    toast.error(error.message || 'Erro desconhecido!');
   }
 
   return next(action);
