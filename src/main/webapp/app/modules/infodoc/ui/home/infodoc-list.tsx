@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable radix */
 /* eslint-disable no-console */
 import {
@@ -371,7 +372,8 @@ const InfodocList = () => {
           },
         })
         .then(result => {
-          var fileDownload = require('js-file-download');
+          // eslint-disable-next-line prefer-const
+          let fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
 
