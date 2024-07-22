@@ -5,31 +5,47 @@ import InputDegreeColor from './input-degree-color';
 import TextDegreeWithBulletColor from './input-degree-color';
 
 export type ConfigurationsDegreesType = {
+  codigo?: number;
   label: string;
   color: string;
   weight: number;
   description: string;
 };
+export type ConfigurationsOpportunitiesType = {
+  codigo?: number;
+  decision: string;
+  description: string;
+};
 
 interface ConfigurationsDegreesProps {
   title: string;
-  degreeValues: ConfigurationsDegreesType[];
+  configValues: ConfigurationsDegreesType[] | ConfigurationsOpportunitiesType[];
   // setDegreeValues?: React.Dispatch<React.SetStateAction<Degrees>>;
+  isDegree?: boolean;
 }
 
 const InputPropsTextFild = { readOnly: true };
 
-const ConfigurationsDegrees = ({ title, degreeValues }: ConfigurationsDegreesProps) => {
+const ConfigurationsDegrees = ({ title, configValues, isDegree }: ConfigurationsDegreesProps) => {
   const [probability, setProbability] = useState<string>('');
 
   return (
     <Paper elevation={3} sx={{ p: 2, display: 'grid', rowGap: 2 }}>
-      <Typography variant="h5">Graus de {title}</Typography>
+      <Typography variant="h5">{isDegree ? `Graus de ${title}` : `Classificação das ${title}`}</Typography>
       <Divider variant="fullWidth" sx={{ bgcolor: 'black', height: 1, marginX: -2 }} />
-      {degreeValues.map(degreeItem => (
+      {configValues.map(degreeItem => (
         <Stack direction="row" spacing={2}>
-          <InputDegreeColor label="Grau" color={degreeItem.color} value={degreeItem.label} InputProps={InputPropsTextFild} />
-          <TextField label="Peso" placeholder="Peso" value={degreeItem.weight} InputProps={InputPropsTextFild} />
+          {isDegree ? (
+            <>
+              <InputDegreeColor label="Grau" color={degreeItem.color} value={degreeItem.label} InputProps={InputPropsTextFild} />
+              <TextField label="Peso" placeholder="Peso" value={degreeItem.weight} InputProps={InputPropsTextFild} />
+            </>
+          ) : (
+            <>
+              <TextField label="Código" placeholder="Código" value={degreeItem.codigo} InputProps={InputPropsTextFild} />
+              <TextField label="Decisão" placeholder="Decisão" value={degreeItem.decision} InputProps={InputPropsTextFild} />
+            </>
+          )}
           <TextField
             label="Descrição"
             placeholder={`Descrição do grau de ${title}`}

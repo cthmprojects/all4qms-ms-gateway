@@ -1,13 +1,12 @@
 import { Stack } from '@mui/material';
 import React from 'react';
-import Analysis from './analysis';
-import ControlAction from './control-action';
-import GeneralInformation from './general-information';
-import ConfigurationsDegrees, { ConfigurationsDegreesType } from './configurations-degrees';
+import ConfigurationsDegrees, { ConfigurationsDegreesType, ConfigurationsOpportunitiesType } from './config-degrees';
+import ConfigComplexityMatrix from './config-complexity-matrix';
 
 type ConfigurationsType = {
   probabilityDegrees: ConfigurationsDegreesType[];
   severityDegrees: ConfigurationsDegreesType[];
+  opportunitiesClassification: ConfigurationsOpportunitiesType[];
 };
 
 const configValuesMock: ConfigurationsType = {
@@ -54,6 +53,26 @@ const configValuesMock: ConfigurationsType = {
         'Os efeitos afetam fora do local de trabalho, externamente incluindo outras partes interessadas ou falha que ocasione recall no produto e/ou preju[izo financeiro significativo.',
     },
   ],
+  opportunitiesClassification: [
+    {
+      codigo: 1,
+      decision: 'Não implementar',
+      description:
+        'Os danos servo local, no processo. Não interferem em outras atividades, em outras partes interessadas ou afeta a performance do produto/ serviço e entrega',
+    },
+    {
+      codigo: 2,
+      decision: 'Avaliar',
+      description:
+        'Os efeitos interferem não só localmente, mas interfere em outras áreas, em outras atividades e em partes interessadas internas ou Produto/serviço ocasionando atraso no processo.',
+    },
+    {
+      codigo: 3,
+      decision: 'Implementar',
+      description:
+        'Os efeitos afetam fora do local de trabalho, externamente incluindo outras partes interessadas ou falha que ocasione recall no produto e/ou preju[izo financeiro significativo.',
+    },
+  ],
 };
 
 type BaseDetailsProps = {
@@ -64,8 +83,10 @@ type BaseDetailsProps = {
 const ConfigurationsTabRisk = ({ isOpportunity, readonly }: BaseDetailsProps) => {
   return (
     <Stack spacing={2} pt={2}>
-      <ConfigurationsDegrees title="Probabilidade" degreeValues={configValuesMock.probabilityDegrees} />
-      <ConfigurationsDegrees title="Severidade" degreeValues={configValuesMock.severityDegrees} />
+      <ConfigurationsDegrees isDegree title="Probabilidade" configValues={configValuesMock.probabilityDegrees} />
+      <ConfigurationsDegrees isDegree title="Severidade" configValues={configValuesMock.severityDegrees} />
+      <ConfigurationsDegrees title="Oportunidades" configValues={configValuesMock.opportunitiesClassification} />
+      <ConfigComplexityMatrix />
     </Stack>
   );
 };
