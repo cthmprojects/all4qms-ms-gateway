@@ -5,14 +5,6 @@ const addErrorAlert = (message, key?, data?) => {
   toast.error(message);
 };
 
-function translateFieldName(fieldName) {
-  const fieldNameTranslations = {
-    Username: 'Usuário',
-    Password: 'Senha',
-  };
-  return fieldNameTranslations[fieldName] || fieldName;
-}
-
 export default () => next => action => {
   const { error, payload } = action;
 
@@ -37,11 +29,18 @@ export default () => next => action => {
         itemCreated = 'anexo Infodoc';
       } else {
         // Por mapear os nomes dos itens
-        // eslint-disable-next-line no-console
         console.log(partOne);
         itemCreated = 'arquivo';
       }
       toast.success(`O ${itemCreated} foi salvo com sucesso`);
+    }
+
+    function translateFieldName(fieldName) {
+      const fieldNameTranslations = {
+        Username: 'Usuário',
+        Password: 'Senha',
+      };
+      return fieldNameTranslations[fieldName] || fieldName;
     }
 
     if (isRejectedAction(action) && error && error.isAxiosError) {
@@ -57,7 +56,7 @@ export default () => next => action => {
           switch (response.status) {
             // connection refused, server not reachable
             case 0:
-              addErrorAlert('Servidor fora de alcance', 'error.server.not.reachable');
+              addErrorAlert('Server not reachable', 'error.server.not.reachable');
               break;
 
             case 400: {
