@@ -1,12 +1,12 @@
-import { Stack } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import React from 'react';
-import ConfigurationsDegrees, { ConfigurationsDegreesType, ConfigurationsOpportunitiesType } from './config-degrees';
+import ConfigurationsDegrees, { ConfigurationsDegreesType, ConfigurationsClassificationType } from './config-degrees';
 import ConfigComplexityMatrix from './config-complexity-matrix';
 
 type ConfigurationsType = {
   probabilityDegrees: ConfigurationsDegreesType[];
   severityDegrees: ConfigurationsDegreesType[];
-  opportunitiesClassification: ConfigurationsOpportunitiesType[];
+  risksClassification: ConfigurationsClassificationType[];
 };
 
 const configValuesMock: ConfigurationsType = {
@@ -53,24 +53,21 @@ const configValuesMock: ConfigurationsType = {
         'Os efeitos afetam fora do local de trabalho, externamente incluindo outras partes interessadas ou falha que ocasione recall no produto e/ou preju[izo financeiro significativo.',
     },
   ],
-  opportunitiesClassification: [
+  risksClassification: [
     {
       codigo: 1,
-      decision: 'Não implementar',
-      description:
-        'Os danos servo local, no processo. Não interferem em outras atividades, em outras partes interessadas ou afeta a performance do produto/ serviço e entrega',
+      decision: 'Aceitar o risco',
+      description: 'Não obrigatório tratativa',
     },
     {
       codigo: 2,
-      decision: 'Avaliar',
-      description:
-        'Os efeitos interferem não só localmente, mas interfere em outras áreas, em outras atividades e em partes interessadas internas ou Produto/serviço ocasionando atraso no processo.',
+      decision: 'Avaliar o risco',
+      description: 'Prioridade 2 - Avaliar custo/ benefício (Tratativa de médio e longo prazo)',
     },
     {
       codigo: 3,
-      decision: 'Implementar',
-      description:
-        'Os efeitos afetam fora do local de trabalho, externamente incluindo outras partes interessadas ou falha que ocasione recall no produto e/ou preju[izo financeiro significativo.',
+      decision: 'Reduzir o risco',
+      description: 'Prioridade 1 (Tratativa imediata - curto prazo ou médio prazo)',
     },
   ],
 };
@@ -85,8 +82,18 @@ const ConfigurationsTabRisk = ({ isOpportunity, readonly }: BaseDetailsProps) =>
     <Stack spacing={2} pt={2}>
       <ConfigurationsDegrees isDegree title="Probabilidade" configValues={configValuesMock.probabilityDegrees} />
       <ConfigurationsDegrees isDegree title="Severidade" configValues={configValuesMock.severityDegrees} />
-      <ConfigurationsDegrees title="Oportunidades" configValues={configValuesMock.opportunitiesClassification} />
-      <ConfigComplexityMatrix />
+      <ConfigurationsDegrees title="Riscos" configValues={configValuesMock.risksClassification} />
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <ConfigComplexityMatrix classifications={configValuesMock.risksClassification} />
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'right', gap: 2, pt: 5, pr: 6 }}>
+        <Button variant="contained" size="large" sx={{ bgcolor: '#E0E0E0', color: 'black' }}>
+          VOLTAR
+        </Button>
+        <Button variant="contained" size="large" sx={{ bgcolor: '#EBC139', color: 'black' }}>
+          SALVAR
+        </Button>
+      </Box>
     </Stack>
   );
 };

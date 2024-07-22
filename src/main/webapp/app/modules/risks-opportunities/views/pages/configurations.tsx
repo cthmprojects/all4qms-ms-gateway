@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TabsCustom } from '../../../../shared/components/tabs';
 import ConfigurationsTabRisk from '../components/config-tab-risk';
+import ConfigurationsTabOpportunity from '../components/config-tab-opportunity';
 
 const tabsPanel = [
   {
@@ -11,7 +12,7 @@ const tabsPanel = [
   },
   {
     label: 'OPORTUNIDADES',
-    children: <ConfigurationsTabRisk />,
+    children: <ConfigurationsTabOpportunity />,
   },
 ];
 const Configurations = () => {
