@@ -13,7 +13,6 @@ export const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  let toastHolder = false;
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -34,11 +33,7 @@ export const Login = () => {
   const handleLoginFormSubmit = event => {
     password === '' ? setPasswordError(true) : setPasswordError(false);
     username === '' ? setUsernameError(true) : setUsernameError(false);
-    if (username.length < 4 || password.length < 4) {
-      toastHolder = true;
-    } else {
-      toastHolder = false;
-    }
+
     event.preventDefault();
     dispatch(login(username, password));
   };
@@ -47,12 +42,8 @@ export const Login = () => {
   const loginError = useAppSelector(state => state.authentication.loginError);
 
   useEffect(() => {
-    if (toastHolder === false) {
-      if (loginError) {
-        toast.error('Usuário ou senha inválidos');
-      }
-    } else {
-      toastHolder = false;
+    if (loginError) {
+      toast.error('Usuário ou senha inválidos');
     }
   }, [loginError]);
 

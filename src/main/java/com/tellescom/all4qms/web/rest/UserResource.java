@@ -140,11 +140,7 @@ public class UserResource {
                     return ResponseEntity
                         .created(new URI("/api/admin/users/" + user.getLogin()))
                         .headers(
-                            HeaderUtil.createAlert(
-                                applicationName,
-                                "Um usuário foi criado com os identifcadores " + user.getLogin(),
-                                user.getLogin()
-                            )
+                            HeaderUtil.createAlert(applicationName, "A user is created with identifier " + user.getLogin(), user.getLogin())
                         )
                         .body(user);
                 } catch (URISyntaxException e) {
@@ -259,7 +255,7 @@ public class UserResource {
                 Mono.just(
                     ResponseEntity
                         .noContent()
-                        .headers(HeaderUtil.createAlert(applicationName, "Um usuário foi deletado com o identificador " + login, login))
+                        .headers(HeaderUtil.createAlert(applicationName, "A user is deleted with identifier " + login, login))
                         .build()
                 )
             );
