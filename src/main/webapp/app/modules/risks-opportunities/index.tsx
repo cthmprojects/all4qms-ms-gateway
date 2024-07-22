@@ -1,7 +1,7 @@
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { AddOpportunity, AddRisk, EditOpportunity, EditRisk, ViewOpportunity, ViewRisk } from './views';
+import { AddOpportunity, AddRisk, EditOpportunity, EditRisk, ViewOpportunity, ViewRisk, Configurations } from './views';
 
 const RisksOpportunitiesRoutes = () => {
   return (
@@ -14,6 +14,8 @@ const RisksOpportunitiesRoutes = () => {
         <Route path="opportunity/:id" element={<EditOpportunity />} />
         <Route path="risk/view/:id" element={<ViewRisk />} />
         <Route path="opportunity/view/:id" element={<ViewOpportunity />} />
+
+        <Route path="configurations" element={<Configurations />} />
       </ErrorBoundaryRoutes>
     </>
   );

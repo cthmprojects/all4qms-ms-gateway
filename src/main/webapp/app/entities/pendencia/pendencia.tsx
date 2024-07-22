@@ -7,7 +7,7 @@ import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
-import { Modal } from 'app/shared/components-form/Modal';
+import { Modal } from 'app/shared/components/Modal';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import {
   Box,
