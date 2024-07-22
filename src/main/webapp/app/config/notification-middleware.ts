@@ -22,23 +22,53 @@ export default () => next => action => {
         }
       });
     if (alert) {
-      toast.success(translateItemName(alert));
+      const msg = translateItemName(alert);
+      if (msg !== 'O usuario foi salvo com sucesso' && msg !== 'O usuario foi excluído com sucesso') {
+        toast.success(msg);
+      }
     }
   }
 
   function translateItemName(alert) {
+    // console.log('>> alerta: ', alert);
     const words = alert.split(' ');
-    const partOne = words[2];
-    let itemCreated = '';
-    if (partOne === 'all4QmsMsInfodocDocumentacaoAnexo') {
-      itemCreated = 'anexo Infodoc';
+    if (words[4] === 'created') {
+      if (words[2] === 'all4QmsMsInfodocDocumentacaoAnexo') {
+        return `O anexo INFODOC foi salvo com sucesso`;
+      } else if (words[2] === 'funcao') {
+        return `A função foi criada com sucesso`;
+      } else if (words[2] === 'all4QmsMsInfodocDocumentacao') {
+        return `O documento INFODOC foi salvo com sucesso`;
+      } else {
+        return `O ${words[2]} foi criado com sucesso`;
+      }
+    } else if (words[3] === 'updated') {
+      if (words[1] === 'funcao') {
+        return `A função foi atualizada com sucesso`;
+      } else if (words[1] === 'all4QmsMsInfodocMovimentacaoDoc') {
+        return `A movimentação foi atualizada com sucesso`;
+      } else if (words[1] === 'all4QmsMsInfodocDocumentacao') {
+        return `O documento INFODOC foi atualizado com sucesso`;
+      } else {
+        return `O ${words[1]} foi atualizado com sucesso`;
+      }
+    } else if (words[3] === 'created') {
+      if (words[1] === 'user') {
+        return `Um usuário foi criado com sucesso`;
+      } else {
+        return `O ${words[1]} foi criado com sucesso`;
+      }
+    } else if (words[3] === 'deleted') {
+      if (words[1] === 'user') {
+        return `O usuário foi excluído com sucesso`;
+      } else if (words[1] === 'funcao') {
+        return `A função foi excluída com sucesso`;
+      } else {
+        return `O ${words[1]} foi excluído com sucesso`;
+      }
     } else {
-      // Por mapear os nomes dos itens
-      // eslint-disable-next-line no-console
-      console.log(partOne);
-      itemCreated = 'arquivo';
+      return `Aviso: ${alert}`;
     }
-    return `O ${itemCreated} foi salvo com sucesso`;
   }
 
   function translateFieldName(fieldName) {
