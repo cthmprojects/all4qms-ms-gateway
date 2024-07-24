@@ -186,6 +186,9 @@ const Home = () => {
                 {process.nome}
               </MenuItem>
             ))} */}
+            <MenuItem value={0}>Alta</MenuItem>
+            <MenuItem value={0}>Média</MenuItem>
+            <MenuItem value={0}>Baixa</MenuItem>
           </Select>
         </FormControl>
 
@@ -198,6 +201,9 @@ const Home = () => {
               {process.nome}
             </MenuItem>
           ))} */}
+            <MenuItem value={0}>Alta</MenuItem>
+            <MenuItem value={0}>Média</MenuItem>
+            <MenuItem value={0}>Baixa</MenuItem>
           </Select>
         </FormControl>
 
@@ -210,6 +216,9 @@ const Home = () => {
               {process.nome}
             </MenuItem>
           ))} */}
+            <MenuItem value={0}>Decisao 1</MenuItem>
+            <MenuItem value={0}>Média</MenuItem>
+            <MenuItem value={0}>Baixa</MenuItem>
           </Select>
         </FormControl>
       </div>

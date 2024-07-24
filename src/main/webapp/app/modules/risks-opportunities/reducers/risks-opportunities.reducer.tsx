@@ -95,8 +95,8 @@ export const getROById = createAsyncThunk('ro/get', async (id: number | string) 
   return data;
 });
 
-const InfoDocSlice = createEntitySlice({
-  name: 'infodoc',
+const ROSlice = createEntitySlice({
+  name: 'ro',
   initialState,
   extraReducers(builder) {
     builder
@@ -133,7 +133,7 @@ const InfoDocSlice = createEntitySlice({
   },
 });
 
-export const { reset } = InfoDocSlice.actions;
+export const { reset } = ROSlice.actions;
 
 // Reducers
-export default InfoDocSlice.reducer;
+export default ROSlice.reducer;
