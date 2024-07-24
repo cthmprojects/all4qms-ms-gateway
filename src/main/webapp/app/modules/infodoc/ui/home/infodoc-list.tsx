@@ -326,6 +326,8 @@ const InfodocList = () => {
   };
 
   const openDocToValidation = (event, infodoc: InfoDoc) => {
+    console.log(infodoc);
+
     if (infodoc?.movimentacao?.enumStatus == EnumStatusDoc.VALIDACAO || infodoc?.movimentacao?.enumStatus == EnumStatusDoc.VALIDAREV) {
       navigate(`/infodoc/validation/${infodoc.doc.id}`);
     } else if (
@@ -460,10 +462,10 @@ const InfodocList = () => {
                       <IconButton
                         title="Editar"
                         color="primary"
-                        disabled={infodoc.doc.enumSituacao == 'C'}
+                        disabled={infodoc.doc.enumSituacao != 'H'}
                         onClick={event => onEditClicked(infodoc, event)}
                       >
-                        <EditIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#e6b200' }} />
+                        <EditIcon sx={{ color: infodoc.doc.enumSituacao != 'H' ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
                       <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
@@ -473,9 +475,11 @@ const InfodocList = () => {
                         title="Imprimir"
                         color="primary"
                         onClick={event => onPrintClicked(infodoc, event)}
-                        disabled={infodoc.doc.enumSituacao == 'C'}
+                        // disabled={infodoc.doc.enumSituacao == 'C'}
+                        disabled
                       >
-                        <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} />
+                        {/* <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} /> */}
+                        <PrintIcon sx={{ color: '#cacaca' }} />
                       </IconButton>
                       <IconButton
                         id="btn-cancel"
@@ -558,7 +562,7 @@ const InfodocList = () => {
           <Typography className="link">Informação Documentada</Typography>
           <Typography className="link">Consultar Documentos</Typography>
         </Breadcrumbs>
-        <h1 className="title">Lista Informações Documentais</h1>
+        <h1 className="title">Lista Informação Documentada</h1>
 
         <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
           <Button
@@ -638,7 +642,7 @@ const InfodocList = () => {
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-              <Tab label="Formulários" {...a11yProps(0)} />
+              <Tab label="Lista Mestra" {...a11yProps(0)} />
               {/* <Tab label="Processo" {...a11yProps(1)} />
               <Tab label="Instrução" {...a11yProps(2)} />
               <Tab label="Distribuição" {...a11yProps(3)} /> */}
