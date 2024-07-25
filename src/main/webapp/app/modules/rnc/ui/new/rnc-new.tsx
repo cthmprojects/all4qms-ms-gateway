@@ -39,6 +39,18 @@ import ProductRegister from './register-types/product-register/product-register'
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
+import axios from 'axios';
+
+const sendNotification = async (title: string, user: any) => {
+  let url = '/api/pendencias';
+  await axios.post(url, {
+    nome: title,
+    status: false,
+    tipo: 'ATIVIDADE',
+    responsavel: user,
+    link: '/rnc',
+  });
+};
 
 export const RNCNew = () => {
   const dispatch = useAppDispatch();
@@ -258,6 +270,11 @@ export const RNCNew = () => {
           vinculoDocAnterior: null,
         })
       );
+
+      sendNotification(
+        'Existe uma pendência no módulo RNC',
+        users.find(user => user.nome == firstForm.forwarded.value)
+      ).then(() => {});
 
       setSecondForm(true);
     }
