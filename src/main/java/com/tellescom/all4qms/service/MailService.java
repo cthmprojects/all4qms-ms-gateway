@@ -1,14 +1,19 @@
 package com.tellescom.all4qms.service;
 
 import com.tellescom.all4qms.domain.User;
+import com.tellescom.all4qms.domain.request.UsuarioRequest;
+import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Locale;
+import java.util.function.Consumer;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -108,5 +113,30 @@ public class MailService {
     public void sendPasswordResetMail(User user) {
         log.debug("Sending password reset email to '{}'", user.getEmail());
         sendEmailFromTemplate(user, "mail/passwordResetEmail", "email.reset.title");
+    }
+
+    @Async
+    public void sendSimpleMessageCreateUser(User user) {
+        //TODO: modificar o LINK para chamar a URL base por
+        String pass = "all4qms" + LocalDate.now().getYear();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("all4qms.mail.teste@gmail.com");
+        message.setTo(user.getEmail());
+        message.setSubject("Acesso ao sistema All4QMS");
+        message.setText(
+            String.format(
+                "Prezado(a) usuário(a) %s,\n\n" +
+                "Seu acesso foi criado com sucesso!\n\n " +
+                "Seja bem vindo ao sistema All4QMS!!\n\n" +
+                "Seu usuário é: %s e sua senha padrão é %s\n\n" +
+                "Ao entrar no sistema pela primeira vez, aconselhamos que troque a senha.\n\n" +
+                "Link: https://all4qms-gateway.cthmprojetos.com/login ",
+                user.getFirstName(),
+                user.getLogin(),
+                pass
+            )
+        );
+        log.debug("Email de nova conta enviado para '{}'", user.getEmail());
+        javaMailSender.send(message);
     }
 }

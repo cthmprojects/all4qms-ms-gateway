@@ -1,26 +1,24 @@
 package com.tellescom.all4qms.service;
 
-import com.tellescom.all4qms.domain.Processo;
 import com.tellescom.all4qms.domain.User;
 import com.tellescom.all4qms.domain.Usuario;
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
-import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.UsuarioMapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,18 +44,22 @@ public class UsuarioService {
 
     private final ProcessoService processoService;
 
+    private final JavaMailSender emailSender;
+
     public UsuarioService(
         UsuarioRepository usuarioRepository,
         UsuarioMapper usuarioMapper,
         PasswordEncoder passwordEncoder,
         UserService userService,
-        ProcessoService processoService
+        ProcessoService processoService,
+        JavaMailSender emailSender
     ) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.processoService = processoService;
+        this.emailSender = emailSender;
     }
 
     /**
