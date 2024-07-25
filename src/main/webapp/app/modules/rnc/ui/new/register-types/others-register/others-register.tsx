@@ -2,11 +2,12 @@ import { TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 type OthersRegisterProps = {
+  initialData: string;
   onChanged: (others: string) => void;
 };
 
-export const OthersRegister = ({ onChanged }: OthersRegisterProps) => {
-  const [others, setOthers] = useState<string>('');
+export const OthersRegister = ({ initialData, onChanged }: OthersRegisterProps) => {
+  const [others, setOthers] = useState<string>(initialData);
 
   useEffect(() => {
     onChanged(others);
