@@ -168,7 +168,6 @@ export const ApprovalDocument = () => {
   };
 
   const cancelUpdate = () => {
-    dispatch(deleteInfoDoc(idFile));
     navigate('/infodoc');
   };
 

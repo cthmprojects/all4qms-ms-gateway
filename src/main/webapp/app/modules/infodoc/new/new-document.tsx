@@ -144,7 +144,6 @@ export const NewDocument = () => {
   };
 
   const cancelDocument = () => {
-    dispatch(deleteInfoDoc(id));
     navigate('/infodoc');
   };
 

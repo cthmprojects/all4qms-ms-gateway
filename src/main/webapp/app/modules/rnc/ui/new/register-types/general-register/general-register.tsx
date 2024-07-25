@@ -45,6 +45,18 @@ import { getInvestigationByRnc, getPlanoByRnc } from 'app/modules/rnc/reducers/i
 import { getDescriptionByRNCId } from 'app/modules/rnc/reducers/description.reducer';
 import { Decision } from 'app/modules/rnc/models/decision';
 import { findDecisionByRnc, saveDecision } from 'app/modules/rnc/reducers/decision.reducer';
+import axios from 'axios';
+
+const sendNotification = async (title: string, user: any) => {
+  let url = '/api/pendencias';
+  await axios.post(url, {
+    nome: title,
+    status: false,
+    tipo: 'ATIVIDADE',
+    responsavel: user,
+    link: '/rnc',
+  });
+};
 
 export const GeneralRegister = () => {
   const dispatch = useAppDispatch();

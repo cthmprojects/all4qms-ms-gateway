@@ -4,7 +4,10 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from 'app/modules/infodoc/models';
 import { cadastrarMovimentacao } from 'app/modules/infodoc/reducers/movimentacao.reducer';
 import { StyledLabel, StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
+import axios from 'axios';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
 
 const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
@@ -25,19 +28,26 @@ type RejectDialogProps = {
   currentDocument: InfoDoc;
 };
 export const RejectDocumentDialog = ({ open, handleClose, documentTitle, currentUser, currentDocument }: RejectDialogProps) => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [description, setDescription] = useState('');
 
-  const reprovalDocument = () => {
-    let movimentacao: Movimentacao = {
-      enumTipoMovDoc: EnumTipoMovDoc.CANCELAR,
-      enumStatus: EnumStatusDoc.CANCELAMENTO,
-      idDocumentacao: currentDocument?.doc?.id,
-      idUsuarioCriacao: currentUser ? parseInt(currentUser.id) : 0,
-      comentarioCancelamento: description,
-    };
+  const reprovalDocument = async () => {
+    await axios
+      .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/cancelar/${currentDocument?.doc?.id}`, {
+        idDocumento: currentDocument?.doc?.id,
+        idUsuario: currentUser ? parseInt(currentUser.id) : 0,
+        justificativa: description,
+      })
+      .then(() => {
+        toast.success('Documento rejeitado!');
+        navigate('/infodoc');
+      })
+      .catch(e => {
+        toast.error('Erro ao rejeitar documento');
+      });
 
-    dispatch(cadastrarMovimentacao(movimentacao));
+    handleClose();
   };
 
   return (

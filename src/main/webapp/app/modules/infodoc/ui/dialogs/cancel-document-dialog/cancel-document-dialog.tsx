@@ -9,6 +9,7 @@ import { useAppDispatch } from 'app/config/store';
 import { Storage } from 'react-jhipster';
 import { AxiosResponse } from 'axios';
 import { createEntity as createPendencia } from 'app/entities/pendencia/pendencia.reducer';
+import { useNavigate } from 'react-router-dom';
 
 const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
   const id = React.useId();
@@ -31,6 +32,7 @@ type CancelDocumentDialogProps = {
 };
 export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc, userId, usersSGQ }: CancelDocumentDialogProps) => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [justifyValue, setJustifyValue] = useState('');
 
   const sendPendenciasSGQ = async user => {
@@ -72,6 +74,7 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
         return;
       }
     );
+    navigate('/infodoc');
   };
 
   return (
