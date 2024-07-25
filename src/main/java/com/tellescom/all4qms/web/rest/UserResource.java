@@ -134,7 +134,7 @@ public class UserResource {
                 }
                 return userService.createUser(userDTO);
             })
-            .doOnSuccess(mailService::sendCreationEmail)
+            .doOnSuccess(mailService::sendSimpleMessageCreateUser)
             .map(user -> {
                 try {
                     return ResponseEntity
