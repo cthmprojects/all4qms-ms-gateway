@@ -1,7 +1,7 @@
-import ro from './reducers/risks-opportunities.reducer';
+import risco from './reducers/risks-opportunities.reducer';
 
 const risksOpportunitiesReducers = {
-  ro,
+  risco,
 };
 
 export default risksOpportunitiesReducers;

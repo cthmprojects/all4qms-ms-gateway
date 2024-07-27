@@ -35,7 +35,7 @@ import { Link } from 'react-router-dom';
 
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
-
+import { listROs, listROFiltro } from '../../reducers/risks-opportunities.reducer';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
 import InfoIcon from '@mui/icons-material/Info';
@@ -43,6 +43,7 @@ import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
+import { RiskOpportunity } from '../../models';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -72,6 +73,7 @@ const columns = ['Fluxo', 'Atividade', 'Descrição', 'Causa', 'Efeito', 'Área/
 const Home = () => {
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+  const rolist: Array<RiskOpportunity> = useAppSelector(state => state.all4qmsmsgateway.risco.entities);
   const [filters, setFilters] = useState({
     idProcesso: null,
     probabilidade: null,
@@ -92,8 +94,22 @@ const Home = () => {
   };
 
   useEffect(() => {
+    const { idProcesso, probabilidade, severidade, decisao } = filters;
+    dispatch(
+      listROs({
+        size: pageSize,
+        page,
+      })
+    );
+
     dispatch(getProcesses());
   }, []);
+
+  /**
+   * Pagination
+   */
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState<number>(5);
 
   const TableRendered = (
     <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -107,14 +123,12 @@ const Home = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {[{ doc: { id: 1 } }]?.map((infodoc: any) => (
-            <TableRow key={infodoc.doc.id}>
-              <Tooltip title={infodoc.doc.titulo}>
-                <TableCell>Fluxo 1</TableCell>
-              </Tooltip>
-              <TableCell>Atividade 1</TableCell>
-              <TableCell>Descrição Longa</TableCell>
-              <TableCell>Causa 1</TableCell>
+          {rolist?.map((ro: RiskOpportunity) => (
+            <TableRow key={ro.id}>
+              <TableCell>{ro.fluxo ? ro.fluxo : 'Fluxo mock'}</TableCell>
+              <TableCell>{ro.atividade ? ro.atividade : 'Atividade 1 mock'}</TableCell>
+              <TableCell>{ro.descricao ? ro.descricao : 'Descrição 1 mock'}</TableCell>
+              <TableCell>{ro.causa ? ro.causa : 'Causa mock'}</TableCell>
               <TableCell>Efeito 1</TableCell>
               <TableCell>Area 1</TableCell>
               <TableCell>
