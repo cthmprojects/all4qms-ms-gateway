@@ -129,13 +129,15 @@ const Home = () => {
               <TableCell>{ro.atividade ? ro.atividade : 'Atividade 1 mock'}</TableCell>
               <TableCell>{ro.descricao ? ro.descricao : 'Descrição 1 mock'}</TableCell>
               <TableCell>{ro.causa ? ro.causa : 'Causa mock'}</TableCell>
-              <TableCell>Efeito 1</TableCell>
-              <TableCell>Area 1</TableCell>
+              <TableCell>{ro.efeito ? ro.efeito : 'Efeito mock'}</TableCell>
+              <TableCell>{ro.areaProcesso ? ro.areaProcesso : 'Area mock'}</TableCell>
               <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Probabilidade</Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {ro.areaProcesso ? ro.areaProcesso : 'Probabilidade mock'}
+                </Box>
               </TableCell>
-              <TableCell>Severidade 1</TableCell>
-              <TableCell>Decisão 1</TableCell>
+              <TableCell>{ro.serveridade ? ro.serveridade : 'Severidade mock'}</TableCell>
+              <TableCell>{ro.decisao ? ro.decisao : 'Decisão mock'}</TableCell>
 
               <TableCell>
                 <IconButton title="Editar" color="primary" onClick={() => {}}>
@@ -173,7 +175,9 @@ const Home = () => {
         variant="contained"
         className="primary-button me-2"
         style={{ marginRight: '10px', height: '42px', width: '185px' }}
-        onClick={() => {}}
+        onClick={() => {
+          alert('Em desenvolvimento');
+        }}
         title="Novo Registro"
       >
         Novo
