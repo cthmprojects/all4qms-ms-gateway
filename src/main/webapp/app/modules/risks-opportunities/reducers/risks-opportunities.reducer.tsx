@@ -3,7 +3,9 @@ import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducer
 import axios from 'axios';
 import { AnalysisSummary, RiskOpportunity } from '../models';
 
-const apiRiscoOportunidadeUrl = 'services/all4qmsmsinfodoc/api/ro/riscos-oportunidades';
+const apiRiscoOportunidadeUrl = 'services/all4qmsmsrisco/api/ro/riscos-oportunidades';
+const apiRiscoOportunidadeTipoROUrl = 'services/all4qmsmsrisco/api/ro/riscos-oportunidades/tipo-ro';
+const apiRiscoOportunidadeFiltroUrl = 'services/all4qmsmsrisco/api/ro/riscos-oportunidades/filtro';
 
 // Initial State
 const initialState: EntityState<RiskOpportunity> = {
@@ -18,41 +20,58 @@ const initialState: EntityState<RiskOpportunity> = {
 };
 
 interface ListParams {
-  probabilidade?: string;
-  severidade?: string;
-  dtIni?: Date;
-  dtFim?: Date;
+  tipoRO?: string;
+  probabilidadeComplexidade?: string;
+  severidadeMelhoria?: string;
   page?: number;
   size?: number;
   decisao?: string;
   idProcesso?: number;
 }
 
-export const listROs = createAsyncThunk('ro/list', async (params: ListParams) => {
-  const { dtIni, dtFim, idProcesso, probabilidade, severidade, decisao, page, size } = params;
+interface ListPagination {
+  page?: number;
+  size?: number;
+}
+
+export const listROs = createAsyncThunk('ro/list', async (params: ListPagination) => {
+  const { page, size } = params;
+  const queryParams: string[] = [];
+  if (page) {
+    queryParams.push(`page=${page}`);
+  }
+
+  if (size) {
+    queryParams.push(`size=${size}`);
+  }
+
+  queryParams.push(`cacheBuster=${new Date().getTime()}`);
+  const queryString = queryParams.join('&');
+
+  return axios.get<Array<RiskOpportunity>>(`${apiRiscoOportunidadeUrl}${queryString ? `?${queryString}` : ''}`);
+});
+
+export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: ListParams) => {
+  const { tipoRO, idProcesso, probabilidadeComplexidade, severidadeMelhoria, decisao, page, size } = params;
 
   const queryParams: string[] = [];
 
   queryParams.push('sort=desc');
 
-  if (dtIni) {
-    queryParams.push(`dtIni=${dtIni}`);
-  }
-
-  if (dtFim) {
-    queryParams.push(`dtFim=${dtFim}`);
+  if (tipoRO) {
+    queryParams.push(`tipoRO=${tipoRO}`);
   }
 
   if (idProcesso) {
     queryParams.push(`idProcesso=${idProcesso}`);
   }
 
-  if (probabilidade) {
-    queryParams.push(`probabilidade=${probabilidade}`);
+  if (probabilidadeComplexidade) {
+    queryParams.push(`probabilidadeComplexidade=${probabilidadeComplexidade}`);
   }
 
-  if (severidade) {
-    queryParams.push(`severidade=${severidade}`);
+  if (severidadeMelhoria) {
+    queryParams.push(`severidade=${severidadeMelhoria}`);
   }
 
   if (decisao) {
@@ -70,7 +89,7 @@ export const listROs = createAsyncThunk('ro/list', async (params: ListParams) =>
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
   const queryString = queryParams.join('&');
 
-  return axios.get<Array<RiskOpportunity>>(`${apiRiscoOportunidadeUrl}${queryString ? `?${queryString}` : ''}`);
+  return axios.get<Array<RiskOpportunity>>(`${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`);
 });
 
 export const createRO = createAsyncThunk('ro/create', async (data: RiskOpportunity) => {
@@ -96,7 +115,7 @@ export const getROById = createAsyncThunk('ro/get', async (id: number | string) 
 });
 
 const ROSlice = createEntitySlice({
-  name: 'ro',
+  name: 'risco',
   initialState,
   extraReducers(builder) {
     builder
@@ -104,6 +123,17 @@ const ROSlice = createEntitySlice({
         state.loading = true;
       })
       .addMatcher(isFulfilled(listROs), (state, action) => {
+        const { data, headers } = action.payload;
+
+        return {
+          ...state,
+          loading: false,
+          entities: data,
+          entity: null,
+          totalItems: parseInt(headers['x-total-count'], 10),
+        };
+      })
+      .addMatcher(isFulfilled(listROFiltro), (state, action) => {
         const { data, headers } = action.payload;
 
         return {
