@@ -73,7 +73,7 @@ const columns = ['Fluxo', 'Atividade', 'Descrição', 'Causa', 'Efeito', 'Área/
 const Home = () => {
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
-  const rolist: Array<RiskOpportunity> = useAppSelector(state => state.all4qmsmsgateway.risco.entities);
+  const rolist: Array<RiskOpportunity> = useAppSelector(state => state.all4qmsmsgatewayro.risco.entities);
   const [filters, setFilters] = useState({
     idProcesso: null,
     probabilidade: null,

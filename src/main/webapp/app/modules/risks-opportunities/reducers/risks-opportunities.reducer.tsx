@@ -3,9 +3,9 @@ import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducer
 import axios from 'axios';
 import { AnalysisSummary, RiskOpportunity } from '../models';
 
-const apiRiscoOportunidadeUrl = 'services/all4qmsmsrisco/api/ro/riscos-oportunidades';
-const apiRiscoOportunidadeTipoROUrl = 'services/all4qmsmsrisco/api/ro/riscos-oportunidades/tipo-ro';
-const apiRiscoOportunidadeFiltroUrl = 'services/all4qmsmsrisco/api/ro/riscos-oportunidades/filtro';
+const apiRiscoOportunidadeUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades';
+const apiRiscoOportunidadeTipoROUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades/tipo-ro';
+const apiRiscoOportunidadeFiltroUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades/filtro';
 
 // Initial State
 const initialState: EntityState<RiskOpportunity> = {
