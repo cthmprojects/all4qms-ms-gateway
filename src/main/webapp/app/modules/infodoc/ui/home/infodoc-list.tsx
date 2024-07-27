@@ -427,7 +427,7 @@ const InfodocList = () => {
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
                   <TableRow key={infodoc.doc.id}>
-                    <Tooltip title={infodoc.doc.titulo}>
+                    <Tooltip title={infodoc.doc.descricaoDoc}>
                       <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
                     <TableCell>{infodoc.doc.titulo}</TableCell>
