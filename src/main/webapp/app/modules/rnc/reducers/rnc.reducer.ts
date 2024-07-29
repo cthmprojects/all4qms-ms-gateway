@@ -361,12 +361,15 @@ export const updateDescription = createAsyncThunk('rnc/description/update', asyn
   // }
 
   const url = `${descriptionApiUrl}/${description.id}`;
+
+  console.log('[url]', url);
+
   const response = await axios.patch(url, {
     id: description.id,
     detalhesNaoConformidade: description.details,
     requisitoDescumprido: description.requirement,
     evidenciaObjetiva: description.evidence,
-    naoConformidade: description.rncId,
+    idNaoConformidade: description.rncId,
   });
   return response;
 });

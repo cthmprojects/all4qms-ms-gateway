@@ -399,7 +399,7 @@ export const RNCNew = () => {
       case 'PRODUTO_ACABADO':
         return <ProductRegister onProductRegisterChange={onProductComplaintChanged} initialData={productComplaintFinal} />;
       case 'PROCEDIMENTO_OUTROS':
-        return <OthersRegister onChanged={onOthersChanged} />;
+        return <OthersRegister initialData={others} onChanged={onOthersChanged} />;
     }
   };
 
@@ -414,8 +414,6 @@ export const RNCNew = () => {
 
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
-
-      console.log('erickson', evidence);
 
       if (i < descriptions.length) {
         const descriptionId: number = descriptions[i].id;
