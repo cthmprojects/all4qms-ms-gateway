@@ -268,6 +268,44 @@ const InfodocList = () => {
   //---------------------------------------------------------------
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    // E - Edição
+    // R - revisão
+    // H - homolog
+    // O - obsoleto
+    // C - cancelado
+
+    let type: string = '';
+    switch (newValue) {
+      case 1:
+        type = 'E';
+        break;
+      case 2:
+        type = 'R';
+        break;
+      case 3:
+        type = 'H';
+        break;
+      case 4:
+        type = 'O';
+        break;
+      case 5:
+        type = 'C';
+        break;
+    }
+
+    const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
+    dispatch(
+      listdocs({
+        dtIni: dtIni?.toISOString(),
+        dtFim: dtFim?.toISOString(),
+        idProcesso,
+        origem,
+        situacao: type,
+        size: pageSize,
+        page: 0,
+      })
+    );
+
     setValue(newValue);
   };
 
@@ -643,15 +681,17 @@ const InfodocList = () => {
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
               <Tab label="Lista Mestra" {...a11yProps(0)} />
-              {/* <Tab label="Processo" {...a11yProps(1)} />
-              <Tab label="Instrução" {...a11yProps(2)} />
-              <Tab label="Distribuição" {...a11yProps(3)} /> */}
+              <Tab label="Edição" {...a11yProps(1)} />
+              <Tab label="Revisão" {...a11yProps(2)} />
+              <Tab label="Homologado" {...a11yProps(3)} />
+              <Tab label="Obsoleto" {...a11yProps(4)} />
+              <Tab label="Cancelado" {...a11yProps(5)} />
             </Tabs>
           </Box>
           <CustomTabPanel value={value} index={0}>
             {renderTable()}
           </CustomTabPanel>
-          {/* <CustomTabPanel value={value} index={1}>
+          <CustomTabPanel value={value} index={1}>
             {renderTable()}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
@@ -659,7 +699,13 @@ const InfodocList = () => {
           </CustomTabPanel>
           <CustomTabPanel value={value} index={3}>
             {renderTable()}
-          </CustomTabPanel> */}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={4}>
+            {renderTable()}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={5}>
+            {renderTable()}
+          </CustomTabPanel>
         </Box>
       </div>
     </div>
