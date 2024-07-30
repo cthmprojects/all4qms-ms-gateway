@@ -30,15 +30,45 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
     requestNumber: 0,
     samples: 0,
     shift: '',
-    traceability: null,
+    traceability: {
+      deliveredAt: new Date(),
+      identifier: '',
+      date: new Date(),
+      rncId: 0,
+    },
   });
 
   useEffect(() => {
     if (!initialData) {
       return;
     }
-
-    setRawMaterial(initialData);
+    setRawMaterial({
+      batch: initialData.batch,
+      batchSize: initialData.batchSize,
+      code: initialData.code,
+      defects: initialData.defects,
+      deliveredAt: new Date(initialData.deliveredAt),
+      description: initialData.description,
+      identifier: initialData.identifier,
+      inspectionRule: initialData.inspectionRule,
+      inspector: initialData.inspector,
+      invoice: initialData.invoice,
+      invoiceDate: new Date(initialData.invoiceDate),
+      line: initialData.line,
+      nqa: initialData.nqa,
+      operator: initialData.operator,
+      opNumber: initialData.opNumber,
+      rejectionRate: initialData.rejectionRate,
+      requestNumber: initialData.requestNumber,
+      samples: initialData.samples,
+      shift: initialData.shift,
+      traceability: {
+        deliveredAt: new Date(initialData.traceability.deliveredAt),
+        identifier: initialData.traceability.identifier,
+        date: new Date(initialData.traceability.date),
+        rncId: initialData.traceability.rncId,
+      },
+    });
   }, [initialData]);
 
   useEffect(() => {

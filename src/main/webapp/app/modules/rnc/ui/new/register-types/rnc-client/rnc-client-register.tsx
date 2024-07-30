@@ -1,95 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Card, Divider, FormControl, IconButton, TextField } from '@mui/material';
-import './rnc-client-register.css';
-import { EditOutlined, UploadFileOutlined } from '@mui/icons-material';
+import { Card, Divider, FormControl, TextField } from '@mui/material';
+import { RncClient } from 'app/modules/rnc/models';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
-import { validateFields } from './fields-validate';
-import { toast } from 'react-toastify';
+import './rnc-client-register.css';
 
 // TODO: Receber os dados do cliente e preencher os campos
 // TODO: Validação de error dos campos
-export const ClientRegister = ({ onClientChange }) => {
-  const [clientForm, setClientForm] = useState({
-    name: {
-      value: '',
-      error: false,
-    },
-    productCode: {
-      value: '',
-      error: false,
-    },
-    productCode2: {
-      value: '',
-      error: false,
-    },
-    productDescription: {
-      value: '',
-      error: false,
-    },
-    lotQuantity: {
-      value: '',
-      error: false,
-    },
-    rejectedQuantity: {
-      value: '',
-      error: false,
-    },
-    defectRate: {
-      value: '',
-      error: false,
-    },
-    lot: {
-      value: '',
-      error: false,
-    },
-    deliveryDate: {
-      value: new Date(),
-      error: false,
-    },
-    receipt: {
-      value: '',
-      error: false,
-    },
-    nfDate: {
-      value: new Date(),
-      error: false,
-    },
-    requestNumber: {
-      value: '',
-      error: false,
-    },
-    opNumber: {
-      value: '',
-      error: false,
+
+type ClientProps = {
+  initialData?: RncClient | null;
+  onChanged: (client: RncClient) => void;
+};
+
+export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
+  const [client, setClient] = useState<RncClient>({
+    batch: '',
+    batchAmount: 0,
+    code: '',
+    defects: 0,
+    description: '',
+    name: '',
+    opNumber: '',
+    order: '',
+    productName: '',
+    rejected: 0,
+    requestNumber: 0,
+    samples: 0,
+    supplier: '',
+    traceability: {
+      deliveredAt: new Date(),
+      identifier: '',
+      date: new Date(),
+      rncId: 0,
     },
   });
 
-  const handleChange = () => {
-    if (validateFields(clientForm, setClientForm)) {
-      onClientChange({
-        name: clientForm.name.value,
-        productCode: clientForm.productCode.value,
-        productCode2: clientForm.productCode2.value,
-        productDescription: clientForm.productDescription.value,
-        lotQuantity: clientForm.lotQuantity.value,
-        rejectedQuantity: clientForm.rejectedQuantity.value,
-        defectRate: clientForm.defectRate.value,
-        lot: clientForm.lot.value,
-        deliveryDate: clientForm.deliveryDate.value,
-        receipt: clientForm.receipt.value,
-        nfDate: clientForm.nfDate.value,
-        requestNumber: clientForm.requestNumber.value,
-        opNumber: clientForm.opNumber.value,
-      });
-      toast.success('Origem salva com sucesso!');
-    }
-  };
-
-  const validateIntLimit = (data, value) => {
-    if (value.target.length > 10) {
+  useEffect(() => {
+    if (!initialData) {
       return;
     }
-  };
+
+    setClient({
+      batch: initialData.batch,
+      batchAmount: initialData.batchAmount,
+      code: initialData.code,
+      defects: initialData.defects,
+      description: initialData.description,
+      name: initialData.name,
+      opNumber: initialData.opNumber,
+      order: initialData.order,
+      productName: initialData.productName,
+      rejected: initialData.rejected,
+      requestNumber: initialData.requestNumber,
+      samples: initialData.samples,
+      supplier: initialData.supplier,
+      traceability: {
+        deliveredAt: new Date(initialData.traceability.deliveredAt),
+        identifier: initialData.traceability.identifier,
+        date: new Date(initialData.traceability.date),
+        rncId: initialData.traceability.rncId,
+      },
+    });
+  }, [initialData]);
+
+  useEffect(() => {
+    onChanged(client);
+  }, [client]);
 
   return (
     <>
@@ -103,14 +79,12 @@ export const ClientRegister = ({ onClientChange }) => {
               name="name"
               className="ms-3 m-2"
               sx={{ width: '70% !important' }}
-              value={clientForm.name.value}
-              error={clientForm.name.error}
-              onChange={e => setClientForm({ ...clientForm, name: { value: e.target.value, error: clientForm.name.error } })}
+              value={client.name}
+              onChange={e => setClient({ ...client, name: e.target.value })}
             />
             <TextField
-              error={clientForm.productCode.error}
-              value={clientForm.productCode.value}
-              onChange={e => setClientForm({ ...clientForm, productCode: { value: e.target.value, error: clientForm.productCode.error } })}
+              value={client.code}
+              onChange={e => setClient({ ...client, code: e.target.value })}
               label="Código do produto"
               name="product-code"
               className="m-2"
@@ -119,33 +93,24 @@ export const ClientRegister = ({ onClientChange }) => {
           </div>
           <div style={{ display: 'flex', width: '100%' }}>
             <TextField
-              error={clientForm.productCode2.error}
-              value={clientForm.productCode2.value}
-              onChange={e =>
-                setClientForm({ ...clientForm, productCode2: { value: e.target.value, error: clientForm.productCode2.error } })
-              }
+              value={client.supplier}
+              onChange={e => setClient({ ...client, supplier: e.target.value })}
               label="Nome do fornecedor"
               name="product-code-2"
               className="ms-3 m-2"
               sx={{ width: '10% !important' }}
             />
             <TextField
-              error={clientForm.productDescription.error}
-              value={clientForm.productDescription.value}
-              onChange={e =>
-                setClientForm({ ...clientForm, productDescription: { value: e.target.value, error: clientForm.productDescription.error } })
-              }
+              value={client.description}
+              onChange={e => setClient({ ...client, description: e.target.value })}
               label="Descrição do produto"
               name="product-description"
               className="m-2"
               sx={{ width: '30% !important' }}
             />
             <TextField
-              error={clientForm.lotQuantity.error}
-              value={clientForm.lotQuantity.value}
-              onChange={e =>
-                setClientForm({ ...clientForm, lotQuantity: { value: e.target.value.slice(0, 10), error: clientForm.lotQuantity.error } })
-              }
+              value={client.batchAmount}
+              onChange={e => setClient({ ...client, batchAmount: parseInt(e.target.value) })}
               label="Quantidade do lote"
               name="lot-quantity"
               type="number"
@@ -153,14 +118,8 @@ export const ClientRegister = ({ onClientChange }) => {
               sx={{ width: '20% !important' }}
             />
             <TextField
-              error={clientForm.rejectedQuantity.error}
-              value={clientForm.rejectedQuantity.value}
-              onChange={e =>
-                setClientForm({
-                  ...clientForm,
-                  rejectedQuantity: { value: e.target.value.slice(0, 10), error: clientForm.rejectedQuantity.error },
-                })
-              }
+              value={client.rejected}
+              onChange={e => setClient({ ...client, rejected: parseInt(e.target.value) })}
               label="Quantidade rejeitada"
               name="rejected-quantity"
               type="number"
@@ -168,33 +127,30 @@ export const ClientRegister = ({ onClientChange }) => {
               sx={{ width: '20% !important' }}
             />
             <TextField
-              error={clientForm.defectRate.error}
-              value={clientForm.defectRate.value}
-              onChange={e =>
-                setClientForm({ ...clientForm, defectRate: { value: e.target.value.slice(0, 10), error: clientForm.defectRate.error } })
-              }
+              value={client.defects}
+              onChange={e => setClient({ ...client, defects: parseInt(e.target.value) })}
               label="% defeito"
               name="defect-rate"
               className="m-2"
               type="number"
               sx={{ width: '10% !important' }}
             />
-            <div style={{ width: '10%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            {/* <div style={{ width: '10%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <IconButton>
                 <UploadFileOutlined></UploadFileOutlined>
               </IconButton>
               <IconButton>
                 <EditOutlined></EditOutlined>
               </IconButton>
-            </div>
+            </div> */}
           </div>
           <div style={{ display: 'flex', width: '100%' }}>
             <TextField label="Lote" name="lot" className="ms-3 m-2" sx={{ width: '20% !important' }} />
             <FormControl className="m-2">
               <DatePicker
                 // locale='pt-BR'
-                selected={clientForm.deliveryDate.value}
-                onChange={date => setClientForm({ ...clientForm, deliveryDate: { value: date, error: clientForm.deliveryDate.error } })}
+                selected={client.traceability.deliveredAt}
+                onChange={date => setClient({ ...client, traceability: { ...client.traceability, deliveredAt: date } })}
                 className="date-picker date-picker-rnc-client"
                 id="date-picker-rnc-client"
                 dateFormat={'dd/MM/yyyy'}
@@ -204,9 +160,8 @@ export const ClientRegister = ({ onClientChange }) => {
               </label>
             </FormControl>
             <TextField
-              value={clientForm.receipt.value}
-              error={clientForm.receipt.error}
-              onChange={e => setClientForm({ ...clientForm, receipt: { value: e.target.value, error: clientForm.receipt.error } })}
+              value={client.traceability.identifier}
+              onChange={e => setClient({ ...client, traceability: { ...client.traceability, identifier: e.target.value } })}
               label="Nota fiscal"
               name="receipt"
               className="m-2"
@@ -215,8 +170,8 @@ export const ClientRegister = ({ onClientChange }) => {
             <FormControl className="m-2">
               <DatePicker
                 // locale='pt-BR'
-                selected={clientForm.nfDate.value}
-                onChange={date => setClientForm({ ...clientForm, nfDate: { value: date, error: clientForm.nfDate.error } })}
+                selected={client.traceability.date}
+                onChange={date => setClient({ ...client, traceability: { ...client.traceability, date: date } })}
                 className="date-picker date-picker-rnc-client"
                 id="date-picker-rnc-client-nf"
                 dateFormat={'dd/MM/yyyy'}
@@ -226,14 +181,8 @@ export const ClientRegister = ({ onClientChange }) => {
               </label>
             </FormControl>
             <TextField
-              value={clientForm.requestNumber.value}
-              error={clientForm.requestNumber.error}
-              onChange={e =>
-                setClientForm({
-                  ...clientForm,
-                  requestNumber: { value: e.target.value.slice(0, 10), error: clientForm.requestNumber.error },
-                })
-              }
+              value={client.requestNumber}
+              onChange={e => setClient({ ...client, requestNumber: parseInt(e.target.value) })}
               label="Número do pedido"
               name="request-number"
               className="m-2"
@@ -241,11 +190,8 @@ export const ClientRegister = ({ onClientChange }) => {
               sx={{ width: '20% !important' }}
             />
             <TextField
-              value={clientForm.opNumber.value}
-              error={clientForm.opNumber.error}
-              onChange={e =>
-                setClientForm({ ...clientForm, opNumber: { value: e.target.value.slice(0, 10), error: clientForm.opNumber.error } })
-              }
+              value={client.opNumber}
+              onChange={e => setClient({ ...client, opNumber: e.target.value })}
               label="Número OP"
               name="op-number"
               type="number"
@@ -253,7 +199,7 @@ export const ClientRegister = ({ onClientChange }) => {
               sx={{ width: '20% !important' }}
             />
           </div>
-          <div className="m-2" style={{ display: 'flex', width: '100%', justifyContent: 'end' }}>
+          {/* <div className="m-2" style={{ display: 'flex', width: '100%', justifyContent: 'end' }}>
             <Button
               className="me-3 mb-3"
               variant="contained"
@@ -263,7 +209,7 @@ export const ClientRegister = ({ onClientChange }) => {
             >
               Salvar
             </Button>
-          </div>
+          </div> */}
         </div>
       </Card>
     </>

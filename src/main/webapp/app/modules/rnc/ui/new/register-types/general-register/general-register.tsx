@@ -58,6 +58,12 @@ const sendNotification = async (title: string, user: any) => {
   });
 };
 
+const getUsersSGQ = () => {
+  let url = '/api/admin/users-by-role?role=ROLE_SGQ';
+
+  return axios.get(url);
+};
+
 export const GeneralRegister = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -259,7 +265,6 @@ export const GeneralRegister = () => {
       getPlanoByRnc(id).then(res => {
         if (res.length > 0) {
           setShowPlanoAcaoCorretiva(true);
-          console.log('plans', res);
           const actionPlans = res;
           const newActions = [];
           const newPlans = [];
@@ -398,8 +403,6 @@ export const GeneralRegister = () => {
   };
 
   const renderListaAcoesCorretivas = () => {
-    console.log('lista', listaAcoesCorretivas);
-
     return (
       <PlannedActions
         actionPlans={listaAcoesCorretivas}
@@ -631,7 +634,6 @@ export const GeneralRegister = () => {
       toast.success('RNC atualizada com sucesso!');
     } else if (_rnc && showPlanoAcaoCorretiva) {
       if (plans.length > 0) {
-        console.log('plan', plans[0]);
         dispatch(
           updatePlan({
             actionPlans: listaAcoesCorretivas,
@@ -677,6 +679,16 @@ export const GeneralRegister = () => {
     decision.rncId = _rnc.id;
 
     dispatch(saveDecision(decision));
+  };
+
+  const sendNotificationToSGQs = async () => {
+    getUsersSGQ().then(r => {
+      let _users = r.data;
+      _users.forEach(element => {
+        let sgq = users.find(user => user.user.id == element.id);
+        sendNotification('Existe uma pendência no módulo RNC', sgq);
+      });
+    });
   };
 
   const users = useAppSelector(state => state.all4qmsmsgateway.users.entities);
@@ -813,19 +825,22 @@ export const GeneralRegister = () => {
                   setShowPlanoAcaoCorretiva(true);
                   updateElaboration();
                 } else {
-                  dispatch(
-                    savePlan({
-                      actionPlans: listaAcoesCorretivas,
-                      plan: {
-                        dtConclusaoPlano: new Date(),
-                        idNaoConformidade: _rnc.id,
-                        percentualPlano: 0,
-                        qtdAcoes: listaAcoesCorretivas.length,
-                        qtdAcoesConcluidas: 0,
-                        statusPlano: 'ABERTO',
-                      },
-                    })
-                  );
+                  sendNotificationToSGQs();
+                  if (plans.length === 0) {
+                    dispatch(
+                      savePlan({
+                        actionPlans: listaAcoesCorretivas,
+                        plan: {
+                          dtConclusaoPlano: new Date(),
+                          idNaoConformidade: _rnc.id,
+                          percentualPlano: 0,
+                          qtdAcoes: listaAcoesCorretivas.length,
+                          qtdAcoesConcluidas: 0,
+                          statusPlano: 'ABERTO',
+                        },
+                      })
+                    );
+                  }
                   updateElaboration();
                   navigate('/rnc');
                 }
