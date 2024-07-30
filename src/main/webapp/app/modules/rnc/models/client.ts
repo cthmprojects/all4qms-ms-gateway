@@ -9,7 +9,9 @@ export type RncClient = {
   name: string;
   opNumber: string;
   order: string;
+  productName: string;
   rejected: number;
+  requestNumber: number;
   samples: number;
   supplier: string;
   traceability: RncTraceability;

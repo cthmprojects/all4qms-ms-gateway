@@ -195,10 +195,12 @@ export const axiosSaveClient = async (client: RncClient, id?: number) => {
     dtEntregaNF: client.traceability.deliveredAt,
     numNF: client.traceability.identifier,
     dtNF: client.traceability.date,
-    idNaoConformidade: client.traceability.rncId,
+    idNaoConformidade: id,
   });
 
-  const complaintResponse = await axios.post(complaintApiUrl, {
+  const complaintUrl: string = id ? `${complaintApiUrl}/${id}` : complaintApiUrl;
+
+  const complaintResponse = await axios.post(complaintUrl, {
     nomeClienteReclamacao: client.name,
   });
 
@@ -206,7 +208,7 @@ export const axiosSaveClient = async (client: RncClient, id?: number) => {
 
   const response = await axios.post(url, {
     codigoProduto: client.code,
-    nomeProduto: client.name,
+    nomeProduto: client.productName,
     nomeFornecedor: client.supplier,
     lote: client.batch,
     qtdLote: client.batchAmount,
@@ -219,7 +221,7 @@ export const axiosSaveClient = async (client: RncClient, id?: number) => {
     idRastreabilidadesRegistro: traceabilityResponse.data.id,
   });
 
-  return response;
+  return complaintResponse;
 };
 
 export const saveOther = createAsyncThunk('rnc/other/save', async () => {
@@ -275,9 +277,17 @@ export const axiosSaveProduct = async (product: RawMaterial, id?: number) => {
 export const axiosGetProduct = async (productId: number) => {
   const product = await axios.get(`${productApiUrl}/${productId}`);
   const traceability = await axios.get(`${traceabilityApiUrl}/${product.data.idRastreabilidadesRegistro}`);
-  const operator = await axios.get(`services/all4qmsmsrnc/api/operador/${product.data.idOperadorOcorrencia}`);
+  const operator = product.data?.idOperadorOcorrencia
+    ? await axios.get(`services/all4qmsmsrnc/api/operador/${product.data.idOperadorOcorrencia}`)
+    : null;
 
-  return { product: product.data, traceability: traceability.data, operator: operator.data };
+  return { product: product.data, traceability: traceability.data, operator: operator?.data };
+};
+
+export const axiosGetClient = async (clientId: number) => {
+  const complaint = await axios.get(`${complaintApiUrl}/${clientId}`);
+
+  return complaint;
 };
 
 export const saveRawMaterial = createAsyncThunk('rnc/raw-material/save', async (rawMaterial: RawMaterial) => {
@@ -362,14 +372,12 @@ export const updateDescription = createAsyncThunk('rnc/description/update', asyn
 
   const url = `${descriptionApiUrl}/${description.id}`;
 
-  console.log('[url]', url);
-
   const response = await axios.patch(url, {
     id: description.id,
     detalhesNaoConformidade: description.details,
     requisitoDescumprido: description.requirement,
     evidenciaObjetiva: description.evidence,
-    idNaoConformidade: description.rncId,
+    naoConformidade: description.rncId,
   });
   return response;
 });
