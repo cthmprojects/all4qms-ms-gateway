@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import './product-register.css';
-import { EditOutlined, UploadFileOutlined } from '@mui/icons-material';
-import DatePicker from 'react-datepicker';
-import { RawMaterial } from 'app/modules/rnc/models';
+import { Card, Divider, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { useAppSelector } from 'app/config/store';
+import { RawMaterial } from 'app/modules/rnc/models';
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import './product-register.css';
 
 // TODO: Receber os dados do cliente e preencher os campos
 // TODO: Validação de error dos campos

@@ -12,13 +12,15 @@ import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { Enums, GeneralAudit, Process, RawMaterial, Rnc } from '../../models';
+import { Enums, GeneralAudit, Process, RawMaterial, Rnc, RncClient } from '../../models';
 import { getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
 import {
+  axiosGetClient,
   axiosGetProduct,
   axiosSaveAudit,
+  axiosSaveClient,
   axiosSaveProduct,
   axiosSaveRawMaterial,
   getById,
@@ -40,6 +42,7 @@ import ClientRegister from './register-types/rnc-client/rnc-client-register';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
 import axios from 'axios';
+import { findAudit } from '../../reducers/audit.reducer';
 
 const sendNotification = async (title: string, user: any) => {
   let url = '/api/pendencias';
@@ -199,6 +202,7 @@ export const RNCNew = () => {
   const [rawMaterial, setRawMaterial] = useState<RawMaterial | null>(null);
   const [productComplaint, setProductComplaint] = useState<RawMaterial | null>(null);
   const [productComplaintFinal, setProductComplaintFinal] = useState<RawMaterial | null>(null);
+  const [clientComplaint, setClientComplaint] = useState<RncClient | null>(null);
   const [clientLink, setClientLink] = useState<number | null>(null);
   const [productLink, setProductLink] = useState<number | null>(null);
 
@@ -300,36 +304,6 @@ export const RNCNew = () => {
     });
   };
 
-  const setClientRegister = async data => {
-    const payload = {
-      batch: data.lot,
-      batchAmount: data.lotQuantity,
-      code: data.productCode,
-      defects: data.defectRate,
-      description: data.productDescription,
-      name: data.name,
-      opNumber: data.opNumber,
-      order: data.requestNumber,
-      rejected: data.rejectedQuantity,
-      samples: data.batchAmount,
-      supplier: data.productCode2,
-      traceability: {
-        date: data.nfDate,
-        deliveredAt: data.deliveryDate,
-        identifier: data.receipt,
-        rncId: rnc.id,
-      },
-    };
-
-    // const response = await axiosSaveClient(payload);
-    // const id = response.data.id;
-    // setClientLink(id);
-
-    const rncId = rnc.id;
-    dispatch(saveClientComplaint({ id: rncId, client: payload }));
-    dispatch(getById(rncId));
-  };
-
   const onInternalAuditChanged = (internalAudit: GeneralAudit): void => {
     setInternalAudit(internalAudit);
   };
@@ -358,19 +332,33 @@ export const RNCNew = () => {
       return null;
     }
 
-    return await axiosSaveRawMaterial({
-      ...rawMaterial,
-      traceability: {
-        date: rawMaterial.invoiceDate,
-        deliveredAt: rawMaterial.deliveredAt,
-        identifier: rawMaterial.invoice,
-        rncId: rnc.id,
+    return await axiosSaveProduct(
+      {
+        ...rawMaterial,
+        traceability: {
+          date: rawMaterial.invoiceDate,
+          deliveredAt: rawMaterial.deliveredAt,
+          identifier: rawMaterial.invoice,
+          rncId: rnc.id,
+        },
       },
-    });
+      stateRnc.id
+    );
+  };
+
+  const saveClient = async () => {
+    if (!clientComplaint) {
+      return null;
+    }
+    return await axiosSaveClient(clientComplaint, stateRnc.id);
   };
 
   const onProductComplaintChanged = (productComplaint: RawMaterial): void => {
     setProductComplaint(productComplaint);
+  };
+
+  const onClientComplaintChanged = (clientComplaint: RncClient): void => {
+    setClientComplaint(clientComplaint);
   };
 
   const setProductRegister = async () => {
@@ -389,13 +377,13 @@ export const RNCNew = () => {
   const renderComponents = () => {
     switch (firstForm.origin.value) {
       case 'AUDITORIA_EXTERNA':
-        return <ExternalAuditRegister onChanged={onExternalAuditChanged} />;
+        return <ExternalAuditRegister audit={audit} onChanged={onExternalAuditChanged} />;
       case 'AUDITORIA_INTERNA':
-        return <InternalAuditRegister onChanged={onInternalAuditChanged} />;
+        return <InternalAuditRegister audit={audit} onChanged={onInternalAuditChanged} />;
       case 'CLIENTE':
-        return <ClientRegister onClientChange={setClientRegister} />;
+        return <ClientRegister onChanged={onClientComplaintChanged} initialData={clientComplaint} />;
       case 'MATERIA_PRIMA_INSUMO':
-        return <MPRegister onChanged={onRawMaterialChanged} />;
+        return <MPRegister onChanged={onRawMaterialChanged} initialData={productComplaint} />;
       case 'PRODUTO_ACABADO':
         return <ProductRegister onProductRegisterChange={onProductComplaintChanged} initialData={productComplaintFinal} />;
       case 'PROCEDIMENTO_OUTROS':
@@ -409,8 +397,14 @@ export const RNCNew = () => {
     const auditLink = internalAuditLink?.id ?? externalAuditLink?.id;
     const rawMaterialLink = (await saveMaterial())?.data;
     const productComplaint = (await setProductRegister())?.data;
+    const clientComplaint = (await saveClient())?.data;
 
     saveOthers();
+
+    if (id || rnc.id) {
+      const currentId: number = (id ? parseInt(id) : null) || rnc.id;
+      dispatch(getDescriptionByRNCId(currentId));
+    }
 
     for (let i = 0; i < evidences.length; i++) {
       const evidence = evidences[i];
@@ -438,10 +432,6 @@ export const RNCNew = () => {
             anexos: descriptionEvidences,
           })
         );
-
-        if (id) {
-          dispatch(getDescriptionByRNCId(id));
-        }
       }
     }
 
@@ -453,7 +443,7 @@ export const RNCNew = () => {
         possuiReincidencia: repetition,
         vinculoDocAnterior: null,
         vinculoAuditoria: auditLink,
-        vinculoCliente: clientLink ?? rnc?.vinculoCliente,
+        vinculoCliente: clientComplaint?.id ?? rnc?.vinculoCliente,
         vinculoProduto: rawMaterialLink?.id ?? rnc?.vinculoProduto,
       })
     );
@@ -490,8 +480,9 @@ export const RNCNew = () => {
           })
         );
 
-        if (id) {
-          dispatch(getDescriptionByRNCId(id));
+        if (id || rnc.id) {
+          const currentId: number = (id ? parseInt(id) : null) || rnc.id;
+          dispatch(getDescriptionByRNCId(currentId));
         }
       }
 
@@ -516,6 +507,7 @@ export const RNCNew = () => {
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
   const descriptions = useAppSelector(state => state.all4qmsmsgateway.description.entities);
+  const audit: GeneralAudit | null = useAppSelector(state => state.all4qmsmsgateway.audit.entity);
 
   useEffect(() => {
     if (rnc) {
@@ -532,6 +524,10 @@ export const RNCNew = () => {
       });
 
       setOthers(rnc.ncOutros);
+
+      if (rnc.vinculoAuditoria && rnc.vinculoAuditoria > 0) {
+        dispatch(findAudit(rnc.vinculoAuditoria));
+      }
 
       setRepetition(rnc.possuiReincidencia || false);
       setSelectedRncIds(rnc.vinculoDocAnterior || []);
@@ -556,7 +552,7 @@ export const RNCNew = () => {
           }
         });
 
-        if (rnc.origemNC === 'PRODUTO_ACABADO') {
+        if (rnc.origemNC === 'PRODUTO_ACABADO' || rnc.origemNC === 'MATERIA_PRIMA_INSUMO' || rnc.origemNC === 'CLIENTE') {
           renderProduct();
         }
       }
@@ -564,8 +560,10 @@ export const RNCNew = () => {
   }, [rnc]);
 
   const renderProduct = async () => {
-    await axiosGetProduct(rnc.vinculoProduto).then(data => {
-      setProductComplaintFinal({
+    const id: number = rnc.vinculoProduto;
+
+    await axiosGetProduct(id).then(async data => {
+      const rawMaterial: RawMaterial = {
         code: data.product?.codigoProduto,
         description: data.product?.nomeProduto,
         identifier: data.product?.identificador,
@@ -591,7 +589,39 @@ export const RNCNew = () => {
           identifier: data.traceability.numNF,
           rncId: rnc.id,
         },
-      });
+      };
+
+      if (rnc.origemNC === 'PRODUTO_ACABADO') {
+        setProductComplaintFinal(rawMaterial);
+      } else if (rnc.origemNC === 'MATERIA_PRIMA_INSUMO') {
+        setProductComplaint(rawMaterial);
+      } else if (rnc.origemNC === 'CLIENTE') {
+        const complaint = await axiosGetClient(rnc.vinculoCliente);
+
+        console.log('data', data.product, complaint);
+
+        setClientComplaint({
+          code: data.product?.codigoProduto,
+          batchAmount: data.product?.qtdLote,
+          name: complaint.data?.nomeClienteReclamacao,
+          order: data.product?.numPedido,
+          productName: data.product?.nome,
+          rejected: data.product?.qtdRejeicao,
+          samples: data.product?.qtdAmostra,
+          supplier: data.product?.nomeFornecedor,
+          description: data.product?.nqa,
+          defects: data.product?.qtdDefeito,
+          batch: data.product?.qtdLote,
+          requestNumber: data.product?.numPedido,
+          opNumber: data.product?.numOP,
+          traceability: {
+            date: data.traceability.dtNF,
+            deliveredAt: data.traceability.dtEntregaNF,
+            identifier: data.traceability.numNF,
+            rncId: rnc.id,
+          },
+        });
+      }
     });
   };
 
