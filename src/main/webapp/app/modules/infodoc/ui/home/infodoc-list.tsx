@@ -373,6 +373,8 @@ const InfodocList = () => {
       infodoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVAREV
     ) {
       navigate(`/infodoc/approval/${infodoc.doc.id}`);
+    } else if (infodoc?.movimentacao?.enumStatus == EnumStatusDoc.EMISSAO) {
+      navigate(`upload-file/update/${infodoc.doc.id}/${infodoc.doc.idArquivo}`);
     }
   };
 
