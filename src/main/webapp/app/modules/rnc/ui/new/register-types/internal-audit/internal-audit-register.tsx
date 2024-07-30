@@ -24,8 +24,6 @@ export const InternalAuditRegister = ({ audit, onChanged }: InternalAuditRegiste
   }, [nc, norm, report, requirement]);
 
   useEffect(() => {
-    console.log('[internal audit]', audit);
-
     if (!audit) {
       return;
     }

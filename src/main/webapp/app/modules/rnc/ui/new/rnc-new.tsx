@@ -598,8 +598,6 @@ export const RNCNew = () => {
       } else if (rnc.origemNC === 'CLIENTE') {
         const complaint = await axiosGetClient(rnc.vinculoCliente);
 
-        console.log('data', data.product, complaint);
-
         setClientComplaint({
           code: data.product?.codigoProduto,
           batchAmount: data.product?.qtdLote,
