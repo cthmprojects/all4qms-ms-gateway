@@ -1,48 +1,43 @@
 /* eslint-disable radix */
 /* eslint-disable no-console */
 import {
+  Box,
   Breadcrumbs,
   Button,
   FormControl,
   IconButton,
   InputLabel,
   MenuItem,
-  OutlinedInput,
-  Pagination,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Select,
-  Box,
-  Tabs,
-  Tab,
-  Tooltip,
   TextField,
-  TablePagination,
+  Typography,
 } from '@mui/material';
 
-import { Visibility, Edit, Check } from '@mui/icons-material';
+import { Check, Visibility } from '@mui/icons-material';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import React, { useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
-
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import { listROs } from '../../reducers/risks-opportunities.reducer';
 
 import InfoIcon from '@mui/icons-material/Info';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
+import { RiskOpportunity } from '../../models';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -72,6 +67,7 @@ const columns = ['Fluxo', 'Atividade', 'Descrição', 'Causa', 'Efeito', 'Área/
 const Home = () => {
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+  const rolist: Array<RiskOpportunity> = useAppSelector(state => state.all4qmsmsgatewayro.risco.entities);
   const [filters, setFilters] = useState({
     idProcesso: null,
     probabilidade: null,
@@ -79,6 +75,7 @@ const Home = () => {
     decisao: null,
     pesquisa: null as string,
   });
+  const navigate = useNavigate();
 
   // Maybe...
   const clearFilters = () => {
@@ -92,8 +89,22 @@ const Home = () => {
   };
 
   useEffect(() => {
+    const { idProcesso, probabilidade, severidade, decisao } = filters;
+    dispatch(
+      listROs({
+        size: pageSize,
+        page,
+      })
+    );
+
     dispatch(getProcesses());
   }, []);
+
+  /**
+   * Pagination
+   */
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState<number>(5);
 
   const TableRendered = (
     <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -107,21 +118,21 @@ const Home = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {[{ doc: { id: 1 } }]?.map((infodoc: any) => (
-            <TableRow key={infodoc.doc.id}>
-              <Tooltip title={infodoc.doc.titulo}>
-                <TableCell>Fluxo 1</TableCell>
-              </Tooltip>
-              <TableCell>Atividade 1</TableCell>
-              <TableCell>Descrição Longa</TableCell>
-              <TableCell>Causa 1</TableCell>
-              <TableCell>Efeito 1</TableCell>
-              <TableCell>Area 1</TableCell>
+          {rolist?.map((ro: RiskOpportunity) => (
+            <TableRow key={ro.id}>
+              <TableCell>{ro.fluxo ? ro.fluxo : 'Fluxo mock'}</TableCell>
+              <TableCell>{ro.atividade ? ro.atividade : 'Atividade 1 mock'}</TableCell>
+              <TableCell>{ro.descricao ? ro.descricao : 'Descrição 1 mock'}</TableCell>
+              <TableCell>{ro.causa ? ro.causa : 'Causa mock'}</TableCell>
+              <TableCell>{ro.efeito ? ro.efeito : 'Efeito mock'}</TableCell>
+              <TableCell>{ro.areaProcesso ? ro.areaProcesso : 'Area mock'}</TableCell>
               <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Probabilidade</Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {ro.areaProcesso ? ro.areaProcesso : 'Probabilidade mock'}
+                </Box>
               </TableCell>
-              <TableCell>Severidade 1</TableCell>
-              <TableCell>Decisão 1</TableCell>
+              <TableCell>{ro.serveridade ? ro.serveridade : 'Severidade mock'}</TableCell>
+              <TableCell>{ro.decisao ? ro.decisao : 'Decisão mock'}</TableCell>
 
               <TableCell>
                 <IconButton title="Editar" color="primary" onClick={() => {}}>
@@ -159,7 +170,9 @@ const Home = () => {
         variant="contained"
         className="primary-button me-2"
         style={{ marginRight: '10px', height: '42px', width: '185px' }}
-        onClick={() => {}}
+        onClick={() => {
+          navigate('/risks-opportunities/risk');
+        }}
         title="Novo Registro"
       >
         Novo
