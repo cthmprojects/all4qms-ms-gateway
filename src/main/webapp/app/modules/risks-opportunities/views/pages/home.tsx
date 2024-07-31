@@ -1,42 +1,36 @@
 /* eslint-disable radix */
 /* eslint-disable no-console */
 import {
+  Box,
   Breadcrumbs,
   Button,
   FormControl,
   IconButton,
   InputLabel,
   MenuItem,
-  OutlinedInput,
-  Pagination,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Select,
-  Box,
-  Tabs,
-  Tab,
-  Tooltip,
   TextField,
-  TablePagination,
+  Typography,
 } from '@mui/material';
 
-import { Visibility, Edit, Check } from '@mui/icons-material';
+import { Check, Visibility } from '@mui/icons-material';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import React, { useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
-import { listROs, listROFiltro } from '../../reducers/risks-opportunities.reducer';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import { listROs } from '../../reducers/risks-opportunities.reducer';
 
 import InfoIcon from '@mui/icons-material/Info';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
@@ -81,6 +75,7 @@ const Home = () => {
     decisao: null,
     pesquisa: null as string,
   });
+  const navigate = useNavigate();
 
   // Maybe...
   const clearFilters = () => {
@@ -176,7 +171,7 @@ const Home = () => {
         className="primary-button me-2"
         style={{ marginRight: '10px', height: '42px', width: '185px' }}
         onClick={() => {
-          alert('Em desenvolvimento');
+          navigate('/risks-opportunities/risk');
         }}
         title="Novo Registro"
       >
