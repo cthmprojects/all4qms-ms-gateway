@@ -120,7 +120,7 @@ const Home = () => {
         <TableBody>
           {rolist?.map((ro: RiskOpportunity) => (
             <TableRow key={ro.id}>
-              <TableCell>{ro.fluxo ? ro.fluxo : 'Fluxo mock'}</TableCell>
+              {/* <TableCell>{ro.fluxo ? ro.fluxo : 'Fluxo mock'}</TableCell>
               <TableCell>{ro.atividade ? ro.atividade : 'Atividade 1 mock'}</TableCell>
               <TableCell>{ro.descricao ? ro.descricao : 'Descrição 1 mock'}</TableCell>
               <TableCell>{ro.causa ? ro.causa : 'Causa mock'}</TableCell>
@@ -132,10 +132,10 @@ const Home = () => {
                 </Box>
               </TableCell>
               <TableCell>{ro.serveridade ? ro.serveridade : 'Severidade mock'}</TableCell>
-              <TableCell>{ro.decisao ? ro.decisao : 'Decisão mock'}</TableCell>
+              <TableCell>{ro.decisao ? ro.decisao : 'Decisão mock'}</TableCell> */}
 
-              <TableCell>
-                <IconButton title="Editar" color="primary" onClick={() => {}}>
+              {/* <TableCell> */}
+              {/* <IconButton title="Editar" color="primary" onClick={() => {}}>
                   <EditIcon sx={{ color: '#e6b200' }} />
                 </IconButton>
                 <IconButton title="Visualizar" color="primary" onClick={() => {}}>
@@ -143,11 +143,11 @@ const Home = () => {
                 </IconButton>
                 <IconButton title="Imprimir" color="primary" onClick={() => {}}>
                   <Check sx={{ color: '#03AC59' }} />
-                </IconButton>
-                {/* <IconButton title="Cancelar" color="primary" onClick={() => {}}>
+                </IconButton> */}
+              {/* <IconButton title="Cancelar" color="primary" onClick={() => {}}>
                   <CancelIcon sx={{ color: '#FF0000' }} />
                 </IconButton> */}
-              </TableCell>
+              {/* </TableCell> */}
             </TableRow>
           ))}
         </TableBody>
