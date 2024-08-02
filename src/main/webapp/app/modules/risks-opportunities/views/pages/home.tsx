@@ -30,7 +30,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { listROs } from '../../reducers/risks-opportunities.reducer';
+import { listROFiltro } from '../../reducers/risks-opportunities.reducer';
 
 import InfoIcon from '@mui/icons-material/Info';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
@@ -71,7 +71,7 @@ const Home = () => {
   const [filters, setFilters] = useState({
     idProcesso: null,
     probabilidade: null,
-    severidade: 0,
+    severidade: null,
     decisao: null,
     pesquisa: null as string,
   });
@@ -82,16 +82,21 @@ const Home = () => {
     setFilters({
       idProcesso: null,
       probabilidade: null,
-      severidade: 0,
+      severidade: null,
       decisao: null,
       pesquisa: null,
     });
   };
 
   useEffect(() => {
-    const { idProcesso, probabilidade, severidade, decisao } = filters;
+    const { idProcesso, probabilidade, severidade, decisao, pesquisa } = filters;
     dispatch(
-      listROs({
+      listROFiltro({
+        idProcesso,
+        probabilidadeComplexidade: probabilidade,
+        severidadeMelhoria: severidade,
+        decisao,
+        pesquisa,
         size: pageSize,
         page,
       })

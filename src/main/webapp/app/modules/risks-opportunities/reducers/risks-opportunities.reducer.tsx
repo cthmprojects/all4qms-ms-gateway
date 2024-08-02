@@ -27,6 +27,7 @@ interface ListParams {
   size?: number;
   decisao?: string;
   idProcesso?: number;
+  pesquisa?: string;
 }
 
 interface ListPagination {
@@ -52,7 +53,7 @@ export const listROs = createAsyncThunk('ro/list', async (params: ListPagination
 });
 
 export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: ListParams) => {
-  const { tipoRO, idProcesso, probabilidadeComplexidade, severidadeMelhoria, decisao, page, size } = params;
+  const { tipoRO, idProcesso, probabilidadeComplexidade, severidadeMelhoria, decisao, pesquisa, page, size } = params;
 
   const queryParams: string[] = [];
 
@@ -76,6 +77,10 @@ export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: Lis
 
   if (decisao) {
     queryParams.push(`decisao=${decisao}`);
+  }
+
+  if (pesquisa) {
+    queryParams.push(`pesquisa=${pesquisa}`);
   }
 
   if (page) {
