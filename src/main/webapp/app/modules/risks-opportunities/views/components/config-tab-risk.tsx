@@ -8,6 +8,19 @@ type ConfigurationsType = {
   severityDegrees: ConfigurationsDegreesType[];
   risksClassification: ConfigurationsClassificationType[];
 };
+// {
+//   "id": 0,
+//   "tipoRO": "R",  "R (Risco),O (Oportunidade)"
+//   "tipoAnaliseRO": "P", "P (Probabilidade),S (Severidade),C (Complexidade),M (Melhoria)"
+//   "grauRO": "A", "A (Alto),M (Medio),B (Baixo)"
+//   "pesoRO": 0,
+//   "decisaoRO": "string",
+//   "descricaoRO": "string",
+//   "criadoPor": 0,
+//   "atualizadoPor": 0,
+//   "criadoEm": "2024-08-01T02:37:27.046Z",
+//   "atualizadoEm": "2024-08-01T02:37:27.046Z"
+// }
 
 const configValuesMock: ConfigurationsType = {
   probabilityDegrees: [
