@@ -1,49 +1,40 @@
 /* eslint-disable radix */
 /* eslint-disable no-console */
+import BlockIcon from '@mui/icons-material/Block';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import InfoIcon from '@mui/icons-material/Info';
 import {
   Box,
   Breadcrumbs,
   Button,
   FormControl,
-  IconButton,
   InputLabel,
   MenuItem,
   Paper,
   Select,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tabs,
   TextField,
   Typography,
 } from '@mui/material';
-
-import { Check, Visibility } from '@mui/icons-material';
-
-import CancelIcon from '@mui/icons-material/Cancel';
-import EditIcon from '@mui/icons-material/Edit';
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-
-import BlockIcon from '@mui/icons-material/Block';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { listROFiltro } from '../../reducers/risks-opportunities.reducer';
-
-import InfoIcon from '@mui/icons-material/Info';
-import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
-
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import { a11yProps, CustomTabPanel } from 'app/shared/components/tabs';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { RiskOpportunity } from '../../models';
+import { listROFiltro } from '../../reducers/risks-opportunities.reducer';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
 // Example
 const getSituacaoIcon = situacao => {
   switch (situacao) {
@@ -68,6 +59,7 @@ const Home = () => {
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
   const rolist: Array<RiskOpportunity> = useAppSelector(state => state.all4qmsmsgatewayro.risco.entities);
+  const [tab, setTab] = useState(0);
   const [filters, setFilters] = useState({
     idProcesso: null,
     probabilidade: null,
@@ -104,6 +96,22 @@ const Home = () => {
 
     dispatch(getProcesses());
   }, []);
+
+  const handleChangeTag = (event: React.SyntheticEvent, newValue: number) => {
+    setTab(newValue);
+    // R - risco
+    // O - oportunidade
+
+    let type = newValue == 1 ? 'R' : 'O';
+
+    dispatch(
+      listROFiltro({
+        tipoRO: type,
+        page,
+        size: pageSize,
+      })
+    );
+  };
 
   /**
    * Pagination
@@ -268,9 +276,22 @@ const Home = () => {
           <Typography className="link">Riscos</Typography>
         </Breadcrumbs>
         {RenderedFilters}
-      </div>
 
-      {TableRendered}
+        <Box sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={tab} onChange={handleChangeTag}>
+              <Tab label="Riscos" {...a11yProps(0)} />
+              <Tab label="Oportunidades" {...a11yProps(1)} />
+            </Tabs>
+          </Box>
+        </Box>
+        <CustomTabPanel value={tab} index={0}>
+          {TableRendered}
+        </CustomTabPanel>
+        <CustomTabPanel value={tab} index={1}>
+          {TableRendered}
+        </CustomTabPanel>
+      </div>
     </div>
   );
 };
