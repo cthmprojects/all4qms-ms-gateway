@@ -20,10 +20,12 @@ export const Footer = (props: IFooterProps) => {
           </Row>
         </div>
       );
+    } else {
+      return <></>;
     }
   };
 
-  return <>{renderFooter}</>;
+  return <>{/* renderFooter() */}</>;
 };
 
 export default Footer;

@@ -1,11 +1,9 @@
-import { Autocomplete, Chip, FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select, Stack, TextField } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { onAutocompleteChanged, onTextChanged } from '../../utils';
 import { AddCircle } from '@mui/icons-material';
-import { useFormContext, useWatch } from 'react-hook-form';
-import { useAppSelector } from 'app/config/store';
+import { Autocomplete, Chip, FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select, Stack, TextField } from '@mui/material';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
-import DatePicker from 'react-datepicker';
+import React, { useEffect, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { onAutocompleteChanged, onTextChanged } from '../../utils';
 
 type GeneralInformationProps = {
   isOpportunity?: boolean;
@@ -14,9 +12,13 @@ type GeneralInformationProps = {
 
 const GeneralInformation = ({ isOpportunity, readonly }: GeneralInformationProps) => {
   const [interestedPart, setInterestedPart] = useState<string>('');
-  const [process, setProcess] = useState<string>('');
-  const [processes, setProcesses] = useState<Array<string>>(['Processo 1', 'Processo 2']);
-  const [type, setType] = useState<string>(!isOpportunity ? 'Risco' : 'Oportunidade');
+  const [interestedParts, setInterestedParts] = useState<Array<string>>(['A', 'B']);
+  const [process, setProcess] = useState<string | null>(null);
+  const [processes, setProcesses] = useState<Array<string>>([]);
+  const [secondAuxiliaryDescription, setSecondAuxiliaryDescription] = useState<string>('');
+  const [sender, setSender] = useState<string | null>(null);
+  const [senders, setSenders] = useState<Array<string>>([]);
+  const [type, setType] = useState<string | null>(null);
   const [types, setTypes] = useState<Array<string>>(['Risco', 'Oportunidade']);
 
   const { register, setValue, formState, control, trigger } = useFormContext();

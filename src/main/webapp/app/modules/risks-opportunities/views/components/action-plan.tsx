@@ -49,6 +49,7 @@ const ActionPlan = ({ readonly }: ActionPlanProps) => {
           />
 
           <Autocomplete
+            disableClearable
             onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setResponsible)}
             options={responsibles}
             renderInput={params => <TextField {...params} label="Responsável" />}
@@ -71,6 +72,7 @@ const ActionPlan = ({ readonly }: ActionPlanProps) => {
           />
 
           <Autocomplete
+            disableClearable
             onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setVerifier)}
             options={verifiers}
             renderInput={params => <TextField {...params} label="Responsável pela verificação" />}

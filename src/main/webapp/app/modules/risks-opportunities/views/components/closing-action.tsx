@@ -53,6 +53,7 @@ const ClosingAction = ({ action, description, readonly }: ClosingActionProps) =>
         />
 
         <Autocomplete
+          disableClearable
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setVerifier)}
           options={verifiers}
           renderInput={params => <TextField {...params} label="Responsável pela verificação" />}

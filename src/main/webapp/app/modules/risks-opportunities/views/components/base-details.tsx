@@ -1,15 +1,18 @@
-import { Stack, Button } from '@mui/material';
+import { Button, Stack } from '@mui/material';
+import { useAppSelector } from 'app/config/store';
 import { useEffect } from 'react';
-// import Analysis from './analysis';
-import ControlAction from './control-action';
-import GeneralInformation from './general-information';
 import { FormProvider, useForm } from 'react-hook-form';
 import { mapRiskOpportunity } from '../../mappers';
-import { useAppSelector } from 'app/config/store';
+import { SummarizedProcess, SummarizedUser } from '../../models';
+import Analysis from './analysis';
+import ControlAction from './control-action';
+import GeneralInformation from './general-information';
 
 type BaseDetailsProps = {
   isOpportunity?: boolean;
+  processes: Array<SummarizedProcess>;
   readonly?: boolean;
+  users: Array<SummarizedUser>;
 };
 
 const BaseDetails = ({ isOpportunity, readonly }: BaseDetailsProps) => {
@@ -30,8 +33,8 @@ const BaseDetails = ({ isOpportunity, readonly }: BaseDetailsProps) => {
     reValidateMode: 'onChange',
   });
 
-  // TODO: Caso precise de formulário no componente de analisys
-  const analisysFormMethods = useForm({
+  // TODO: Caso precise de formulário no componente de analysis
+  const analysisFormMethods = useForm({
     defaultValues: {},
     mode: 'all',
     reValidateMode: 'onChange',
@@ -61,7 +64,7 @@ const BaseDetails = ({ isOpportunity, readonly }: BaseDetailsProps) => {
 
       {!isOpportunity && <ControlAction />}
 
-      {/* <Analysis /> */}
+      <Analysis />
 
       <Stack justifyContent="flex-end" gap="20px" flexDirection="row">
         <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={null}>

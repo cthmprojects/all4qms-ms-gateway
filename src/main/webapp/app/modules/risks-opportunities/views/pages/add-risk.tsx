@@ -1,9 +1,44 @@
 import { Breadcrumbs, Typography } from '@mui/material';
-import React from 'react';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { Process } from 'app/modules/rnc/models';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { SummarizedProcess, SummarizedUser } from '../../models';
 import { BaseDetails } from '../components';
 
 const AddRisk = () => {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(getProcesses());
+    dispatch(getUsers({}));
+  }, []);
+
+  const allUsers = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const allProcesses = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+
+  const getSummarizedProcesses = (): Array<SummarizedProcess> => {
+    if (!allProcesses || allProcesses.length <= 0) {
+      return [];
+    }
+
+    return allProcesses.map(p => {
+      return { id: p.id, name: p.nome };
+    });
+  };
+
+  const getSummarizedUsers = (): Array<SummarizedUser> => {
+    if (!allUsers || allUsers.length <= 0) {
+      return [];
+    }
+
+    return allUsers.map(u => {
+      return { id: u.id, name: u.nome };
+    });
+  };
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -19,7 +54,7 @@ const AddRisk = () => {
 
         <h2 className="title">Risco</h2>
 
-        <BaseDetails />
+        <BaseDetails processes={getSummarizedProcesses()} users={getSummarizedUsers()} />
       </div>
     </div>
   );

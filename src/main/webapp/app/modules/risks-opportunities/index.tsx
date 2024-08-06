@@ -21,7 +21,6 @@ const RisksOpportunitiesRoutes = () => {
         <Route path="opportunity/:id" element={<EditOpportunity />} />
         <Route path="risk/view/:id" element={<ViewRisk />} />
         <Route path="opportunity/view/:id" element={<ViewOpportunity />} />
-
         <Route path="configurations" element={<Configurations />} />
       </ErrorBoundaryRoutes>
     </>
