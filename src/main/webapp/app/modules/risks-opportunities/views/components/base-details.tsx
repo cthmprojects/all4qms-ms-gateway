@@ -3,7 +3,7 @@ import { useAppSelector } from 'app/config/store';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { mapRiskOpportunity } from '../../mappers';
-import { SummarizedProcess, SummarizedUser } from '../../models';
+import { RawRiskOpportunity, SummarizedProcess, SummarizedUser } from '../../models';
 import Analysis from './analysis';
 import ControlAction from './control-action';
 import GeneralInformation from './general-information';
@@ -13,9 +13,11 @@ type BaseDetailsProps = {
   processes: Array<SummarizedProcess>;
   readonly?: boolean;
   users: Array<SummarizedUser>;
+  onBack: () => void;
+  onSave?: (rawRiskOpportunity: RawRiskOpportunity) => void;
 };
 
-const BaseDetails = ({ isOpportunity, readonly }: BaseDetailsProps) => {
+const BaseDetails = ({ isOpportunity, processes, readonly, users, onBack, onSave }: BaseDetailsProps) => {
   let isAdmin = useAppSelector(state => state.authentication.account);
   const generalFormMethods = useForm({
     defaultValues: {
@@ -47,13 +49,23 @@ const BaseDetails = ({ isOpportunity, readonly }: BaseDetailsProps) => {
     generalFormMethods.register('date', { required: true });
   }, []);
 
-  const save = () => {
+  const save = (): void => {
+    if (!onSave) {
+      return;
+    }
+
     const rawFormValue = generalFormMethods.getValues();
     const payload = {
       ...rawFormValue,
       senderId: rawFormValue.sender.id,
     };
-    console.log(mapRiskOpportunity(payload as any));
+
+    const rawRiskOpportunity: RawRiskOpportunity = mapRiskOpportunity(payload as any);
+    onSave(rawRiskOpportunity);
+  };
+
+  const back = (): void => {
+    onBack();
   };
 
   return (
@@ -67,12 +79,14 @@ const BaseDetails = ({ isOpportunity, readonly }: BaseDetailsProps) => {
       <Analysis />
 
       <Stack justifyContent="flex-end" gap="20px" flexDirection="row">
-        <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={null}>
+        <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={back}>
           Voltar
         </Button>
-        <Button type="submit" onClick={save} variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
-          Salvar
-        </Button>
+        {!readonly && (
+          <Button type="submit" onClick={save} variant="contained" color="primary" style={{ background: '#e6b200', color: '#4e4d4d' }}>
+            Salvar
+          </Button>
+        )}
       </Stack>
     </Stack>
   );

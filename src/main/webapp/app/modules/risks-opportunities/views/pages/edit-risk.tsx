@@ -4,13 +4,14 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { SummarizedProcess, SummarizedUser } from '../../models';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { RawRiskOpportunity, SummarizedProcess, SummarizedUser } from '../../models';
 import { BaseDetails } from '../components';
 
 const EditRisk = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getProcesses());
@@ -40,6 +41,14 @@ const EditRisk = () => {
     });
   };
 
+  const onBack = (): void => {
+    navigate('/risks-opportunities/');
+  };
+
+  const onSave = (rawRiskOpportunity: RawRiskOpportunity): void => {
+    // TODO: [PUT] request to backend
+  };
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -55,7 +64,7 @@ const EditRisk = () => {
 
         <h2 className="title">Risco</h2>
 
-        <BaseDetails processes={getSummarizedProcesses()} users={getSummarizedUsers()} />
+        <BaseDetails processes={getSummarizedProcesses()} users={getSummarizedUsers()} onBack={onBack} onSave={onSave} />
       </div>
     </div>
   );
