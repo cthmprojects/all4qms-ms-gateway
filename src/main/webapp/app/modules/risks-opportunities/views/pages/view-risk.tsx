@@ -4,13 +4,14 @@ import { getUsers } from 'app/modules/administration/user-management/user-manage
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { SummarizedProcess, SummarizedUser } from '../../models';
 import { BaseDetails } from '../components';
 
 const ViewRisk = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getProcesses());
@@ -40,6 +41,10 @@ const ViewRisk = () => {
     });
   };
 
+  const onBack = (): void => {
+    navigate('/risks-opportunities/');
+  };
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -55,7 +60,7 @@ const ViewRisk = () => {
 
         <h2 className="title">Risco</h2>
 
-        <BaseDetails readonly processes={getSummarizedProcesses()} users={getSummarizedUsers()} />
+        <BaseDetails readonly processes={getSummarizedProcesses()} users={getSummarizedUsers()} onBack={onBack} />
       </div>
     </div>
   );

@@ -4,12 +4,13 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { SummarizedProcess, SummarizedUser } from '../../models';
+import { Link, useNavigate } from 'react-router-dom';
+import { RawRiskOpportunity, SummarizedProcess, SummarizedUser } from '../../models';
 import { BaseDetails } from '../components';
 
 const AddRisk = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getProcesses());
@@ -39,6 +40,14 @@ const AddRisk = () => {
     });
   };
 
+  const onBack = (): void => {
+    navigate('/risks-opportunities/');
+  };
+
+  const onSave = (rawRiskOpportunity: RawRiskOpportunity): void => {
+    // TODO: [POST] request to backend
+  };
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -54,7 +63,7 @@ const AddRisk = () => {
 
         <h2 className="title">Risco</h2>
 
-        <BaseDetails processes={getSummarizedProcesses()} users={getSummarizedUsers()} />
+        <BaseDetails processes={getSummarizedProcesses()} users={getSummarizedUsers()} onBack={onBack} onSave={onSave} />
       </div>
     </div>
   );
