@@ -184,7 +184,7 @@ const Home = () => {
         className="primary-button me-2"
         style={{ marginRight: '10px', height: '42px', width: '185px' }}
         onClick={() => {
-          navigate('/risks-opportunities/opportunity');
+          navigate(tab === 0 ? '/risks-opportunities/risk' : '/risks-opportunities/opportunity');
         }}
         title="Novo Registro"
       >
