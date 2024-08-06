@@ -1,6 +1,12 @@
 import { RawRiskOpportunity, RiskOpportunity } from '../models';
 
 export const mapRiskOpportunity = (riskOpportunity: RiskOpportunity): RawRiskOpportunity => {
+  // TODO: salvar antes esse objeto no endpoint de parteInteressada
+  const partesInteressadas = {
+    criadoPor: riskOpportunity.senderId,
+    nomeParteInteressada: riskOpportunity.interestedParts.join(','),
+  };
+
   return {
     analiseROS: null,
     atualizadoEm: null,
@@ -19,7 +25,7 @@ export const mapRiskOpportunity = (riskOpportunity: RiskOpportunity): RawRiskOpp
     linhaConfigControle2: null,
     nomeAtividade: riskOpportunity.activity,
     nomeFluxo: riskOpportunity.flow,
-    partesInteressadas: null, // TODO
+    partesInteressadas: null, //TODO: Aqui tem que ser somente o Id do objeto salvo (e tem que salvar o objeto antes desse formulário geral)
     tipoRO: riskOpportunity.type === 'Risco' ? 'R' : 'O',
   };
 };
@@ -32,7 +38,7 @@ export const mapRawRiskOpportunity = (rawRiskOpportunity: RawRiskOpportunity): R
     firstAuxiliaryDescription: rawRiskOpportunity.descricao2,
     flow: rawRiskOpportunity.nomeFluxo,
     id: rawRiskOpportunity.id,
-    interestedParts: [], // TODO
+    interestedParts: rawRiskOpportunity.partesInteressadas.nomeParteInteressada.split(','),
     processId: rawRiskOpportunity.idProcesso,
     secondAuxiliaryDescription: rawRiskOpportunity.descricao3,
     senderId: rawRiskOpportunity.idEmissor,

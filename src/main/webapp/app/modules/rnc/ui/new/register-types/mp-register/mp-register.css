@@ -30,14 +30,14 @@
   width: 66px;
 }
 
-.react-datepicker-popper {
+/* .react-datepicker-popper {
   z-index: 1000 !important;
   transform: translate(-12px, -211px) !important;
 }
 
 .react-datepicker__triangle {
   display: none !important;
-}
+} */
 
 .select-mp {
   width: 30%;
