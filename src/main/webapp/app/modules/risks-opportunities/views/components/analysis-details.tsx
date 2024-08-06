@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { onAutocompleteChanged } from '../../utils';
 
 const AnalysisDetails = () => {
-  const [probability, setProbability] = useState<string>('');
-  const [probabilities, setProbabilities] = useState<Array<string>>(['Alta 1', 'Alta 2', 'Alta 3']);
-  const [severity, setSeverity] = useState<string>('');
-  const [severities, setSeverities] = useState<Array<string>>(['Alta 1', 'Alta 2', 'Alta 3']);
+  const [probability, setProbability] = useState<string | null>(null);
+  const [probabilities, setProbabilities] = useState<Array<string>>(['Baixo', 'Médio', 'Alto']);
+  const [severity, setSeverity] = useState<string | null>(null);
+  const [severities, setSeverities] = useState<Array<string>>(['Baixo', 'Médio', 'Alto']);
 
   useEffect(() => {
     if (probabilities.length <= 0) {
@@ -30,6 +30,7 @@ const AnalysisDetails = () => {
 
       <Stack direction="row" spacing={2}>
         <Autocomplete
+          disableClearable
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setProbability)}
           options={probabilities}
           renderInput={params => <TextField {...params} label="Probabilidade" />}
@@ -37,6 +38,7 @@ const AnalysisDetails = () => {
           value={probability}
         />
         <Autocomplete
+          disableClearable
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setSeverity)}
           options={severities}
           renderInput={params => <TextField {...params} label="Severidade" />}
@@ -47,7 +49,7 @@ const AnalysisDetails = () => {
 
       <Stack direction="row" spacing={2}>
         <TextField label="Significância" placeholder="Significância" />
-        <TextField label="Descrição da decisão" maxRows={5} multiline placeholder="Descrição da decisão" sx={{ flexGrow: 1 }} />
+        <TextField label="Descrição da decisão" multiline placeholder="Descrição da decisão" rows={5} sx={{ flexGrow: 1 }} />
       </Stack>
     </Stack>
   );

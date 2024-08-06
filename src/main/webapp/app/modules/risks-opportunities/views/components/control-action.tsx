@@ -4,10 +4,10 @@ import { onAutocompleteChanged, onTextChanged } from '../../utils';
 
 const ControlAction = () => {
   const [description, setDescription] = useState<string>('');
-  const [probability, setProbability] = useState<string>('');
-  const [probabilities, setProbabilities] = useState<Array<string>>(['Alta 1', 'Alta 2', 'Alta 3']);
-  const [severity, setSeverity] = useState<string>('');
-  const [severities, setSeverities] = useState<Array<string>>(['Alta 1', 'Alta 2', 'Alta 3']);
+  const [probability, setProbability] = useState<string | null>(null);
+  const [probabilities, setProbabilities] = useState<Array<string>>(['Baixo', 'Médio', 'Alto']);
+  const [severity, setSeverity] = useState<string | null>(null);
+  const [severities, setSeverities] = useState<Array<string>>(['Baixo', 'Médio', 'Alto']);
 
   useEffect(() => {
     if (probabilities.length <= 0) {
@@ -32,10 +32,10 @@ const ControlAction = () => {
       <Stack direction="row" spacing={2}>
         <TextField
           label="Descrição do controle"
-          maxRows={5}
           multiline
           onChange={event => onTextChanged(event, setDescription)}
           placeholder="Descrição do controle"
+          rows={5}
           sx={{ flexGrow: 1 }}
           value={description}
         />
@@ -43,6 +43,7 @@ const ControlAction = () => {
 
       <Stack direction="row" spacing={2}>
         <Autocomplete
+          disableClearable
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setProbability)}
           options={probabilities}
           renderInput={params => <TextField {...params} label="Controlar a probabilidade" />}
@@ -50,6 +51,7 @@ const ControlAction = () => {
           value={probability}
         />
         <Autocomplete
+          disableClearable
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setSeverity)}
           options={severities}
           renderInput={params => <TextField {...params} label="Controlar a severidade" />}

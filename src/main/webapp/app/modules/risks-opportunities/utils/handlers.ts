@@ -5,7 +5,7 @@ export const onAutocompleteChanged = (
   value: string,
   reason: AutocompleteChangeReason,
   details: AutocompleteChangeDetails<string>,
-  setter: React.Dispatch<React.SetStateAction<string>>
+  setter: React.Dispatch<React.SetStateAction<string | null>>
 ): void => {
   setter(value);
 };
