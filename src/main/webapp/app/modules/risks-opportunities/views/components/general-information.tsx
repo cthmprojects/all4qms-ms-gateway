@@ -1,8 +1,11 @@
-import { Autocomplete, Chip, IconButton, Stack, TextField } from '@mui/material';
+import { Autocomplete, Chip, FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select, Stack, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import DatePicker from 'react-datepicker';
-import { onAutocompleteChanged, onDateChanged, onTextChanged } from '../../utils';
+import { onAutocompleteChanged, onTextChanged } from '../../utils';
 import { AddCircle } from '@mui/icons-material';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { useAppSelector } from 'app/config/store';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
+import DatePicker from 'react-datepicker';
 
 type GeneralInformationProps = {
   isOpportunity?: boolean;
@@ -10,44 +13,21 @@ type GeneralInformationProps = {
 };
 
 const GeneralInformation = ({ isOpportunity, readonly }: GeneralInformationProps) => {
-  const [activity, setActivity] = useState<string>('');
-  const [date, setDate] = useState<Date>(new Date());
-  const [description, setDescription] = useState<string>('');
-  const [firstAuxiliaryDescription, setFirstAuxiliaryDescription] = useState<string>('');
-  const [flow, setFlow] = useState<string>('');
   const [interestedPart, setInterestedPart] = useState<string>('');
-  const [interestedParts, setInterestedParts] = useState<Array<string>>(['A', 'B']);
   const [process, setProcess] = useState<string>('');
   const [processes, setProcesses] = useState<Array<string>>(['Processo 1', 'Processo 2']);
-  const [secondAuxiliaryDescription, setSecondAuxiliaryDescription] = useState<string>('');
-  const [sender, setSender] = useState<string>('');
-  const [senders, setSenders] = useState<Array<string>>(['Usuário 1', 'Usuário 2']);
-  const [type, setType] = useState<string>('');
+  const [type, setType] = useState<string>(!isOpportunity ? 'Risco' : 'Oportunidade');
   const [types, setTypes] = useState<Array<string>>(['Risco', 'Oportunidade']);
 
-  useEffect(() => {
-    if (processes.length <= 0) {
-      return;
-    }
+  const { register, setValue, formState, control, trigger } = useFormContext();
 
-    setProcess(processes[0]);
-  }, [processes]);
+  const otherDate = useWatch({ control, name: 'date' });
+  const formInterestedParts = useWatch({ control, name: 'interestedParts' });
 
   useEffect(() => {
-    if (senders.length <= 0) {
-      return;
-    }
-
-    setSender(senders[0]);
-  }, [senders]);
-
-  useEffect(() => {
-    if (types.length <= 0) {
-      return;
-    }
-
-    setType(types[0]);
-  }, [types]);
+    // Poderia ser qualquer outro campo registrado
+    trigger('description');
+  }, [formInterestedParts]);
 
   const getFirstAuxiliaryDescriptionLabel = (): string => {
     return !isOpportunity ? 'Causa' : 'Fraqueza';
@@ -58,34 +38,32 @@ const GeneralInformation = ({ isOpportunity, readonly }: GeneralInformationProps
   };
 
   const onInterestedPartAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    setInterestedParts([...interestedParts, interestedPart]);
+    setValue('interestedParts', [...formInterestedParts, interestedPart]);
     setInterestedPart('');
   };
 
   const onInterestedPartDeleted = (index: number): void => {
-    const newInterestedParts: Array<string> = interestedParts.filter((_, idx) => idx !== index);
-    setInterestedParts(newInterestedParts);
+    const newInterestedParts: Array<string> = formInterestedParts.filter((_, idx) => idx !== index);
+    setValue('interestedParts', newInterestedParts, { shouldValidate: true, shouldTouch: true, shouldDirty: true });
   };
+
+  const fieldHook = (fieldName: string) => register(fieldName as any, { required: true });
+
+  const user = useWatch({ control, name: 'sender' });
 
   return (
     <>
       <Stack direction="row" spacing={2}>
-        <Autocomplete
-          disableClearable
-          onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setSender)}
-          options={senders}
-          renderInput={params => <TextField {...params} label="Emitido por" />}
-          sx={{ flexGrow: 1 }}
-          value={sender}
-        />
+        <FormControl sx={{ flexGrow: 1 }}>
+          <InputLabel>Emitido por</InputLabel>
+          <Select value={user} input={<OutlinedInput label="Emitido por" />} disabled>
+            <MenuItem selected value={user}>
+              {user.firstName}
+            </MenuItem>
+          </Select>
+        </FormControl>
 
-        <DatePicker
-          selected={date}
-          disabled={readonly}
-          onChange={newDate => onDateChanged(newDate, setDate)}
-          className="date-picker"
-          dateFormat={'dd/MM/yyyy'}
-        />
+        <MaterialDatepicker label="Data" selected={otherDate} onChange={date => setValue('date', date, { shouldValidate: true })} />
 
         {!isOpportunity && (
           <>
@@ -108,43 +86,30 @@ const GeneralInformation = ({ isOpportunity, readonly }: GeneralInformationProps
       </Stack>
 
       <Stack direction="row" spacing={2}>
-        <TextField label="Fluxo" onChange={event => onTextChanged(event, setFlow)} placeholder="Fluxo" sx={{ flexGrow: 1 }} value={flow} />
-        <TextField label="Atividade" onChange={event => onTextChanged(event, setActivity)} placeholder="Atividade" value={activity} />
+        <TextField label="Fluxo" {...fieldHook('flow')} placeholder="Fluxo" sx={{ flexGrow: 1 }} />
+        <TextField label="Atividade" {...fieldHook('activity')} placeholder="Atividade" />
       </Stack>
 
       <Stack direction="row" spacing={2}>
-        <TextField
-          label="Descrição"
-          maxRows={5}
-          multiline
-          onChange={event => onTextChanged(event, setDescription)}
-          placeholder="Descrição"
-          rows={5}
-          sx={{ flexGrow: 1 }}
-          value={description}
-        />
+        <TextField label="Descrição" multiline placeholder="Descrição" rows={5} sx={{ flexGrow: 1 }} {...fieldHook('description')} />
       </Stack>
 
       <Stack direction="row" spacing={2}>
         <TextField
           label={getFirstAuxiliaryDescriptionLabel()}
-          maxRows={5}
           multiline
-          onChange={event => onTextChanged(event, setFirstAuxiliaryDescription)}
           placeholder={getFirstAuxiliaryDescriptionLabel()}
           rows={5}
           sx={{ flexGrow: 1 }}
-          value={firstAuxiliaryDescription}
+          {...fieldHook('firstAuxiliaryDescription')}
         />
         <TextField
           label={getSecondAuxiliaryDescriptionLabel()}
-          maxRows={5}
           multiline
-          onChange={event => onTextChanged(event, setSecondAuxiliaryDescription)}
           placeholder={getSecondAuxiliaryDescriptionLabel()}
           rows={5}
           sx={{ flexGrow: 1 }}
-          value={secondAuxiliaryDescription}
+          {...fieldHook('secondAuxiliaryDescription')}
         />
       </Stack>
 
@@ -172,7 +137,7 @@ const GeneralInformation = ({ isOpportunity, readonly }: GeneralInformationProps
             value.map((option, index) => <Chip onDelete={_ => onInterestedPartDeleted(index)} label={option} {...props({ index })} />)
           }
           renderInput={params => <TextField {...params} />}
-          value={interestedParts}
+          value={formInterestedParts}
         />
       </Stack>
     </>
