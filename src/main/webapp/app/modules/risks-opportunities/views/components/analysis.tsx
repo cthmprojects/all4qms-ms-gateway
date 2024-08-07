@@ -15,28 +15,49 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Table } from 'reactstrap';
-import { AnalysisSummary } from '../../models';
+import { AnalysisSummary, SummarizedUser } from '../../models';
 import ActionPlan from './action-plan';
 import AnalysisDetails from './analysis-details';
 import CauseInvestigation from './cause-investigation';
 import Closing from './closing';
+import { useFormContext, useWatch } from 'react-hook-form';
 
-const Analysis = () => {
+type AnalysisProps = {
+  users: Array<SummarizedUser>;
+};
+
+const Analysis = ({ users }: AnalysisProps) => {
   const [analysisSummary, setAnalysisSummary] = useState<AnalysisSummary | null>(null);
   const [expanded, setExpanded] = useState<boolean>(false);
 
+  const { register, setValue, formState, control, trigger } = useFormContext();
+  const actionDate = useWatch({ control, name: 'actionDate' });
+  const description = useWatch({ control, name: 'description' });
+  const probability = useWatch({ control, name: 'probability' });
+  const severity = useWatch({ control, name: 'severity' });
+
   useEffect(() => {
     setAnalysisSummary({
-      analysis: 'Descrição da DECISÃO 1',
-      date: new Date(),
+      analysis: description,
+      date: actionDate,
       decision: 'Reduzir',
-      probability: 'Baixo',
-      severity: 'Alto',
+      probability: probability,
+      severity: severity,
     });
-  }, []);
+  }, [actionDate, description, probability, severity]);
 
   const onAccordionChanged = (event: React.SyntheticEvent, expanded: boolean): void => {
     setExpanded(expanded);
+  };
+
+  const getColor = (level: string): string => {
+    if (level === 'Baixo') {
+      return 'lightgreen';
+    } else if (level === 'Médio') {
+      return 'lightgoldenrodyellow';
+    } else {
+      return 'lightsalmon';
+    }
   };
 
   return (
@@ -61,14 +82,14 @@ const Analysis = () => {
                     <TableCell>{analysisSummary.date.toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={2}>
-                        <Circle sx={{ fill: 'lightgreen', marginRight: 50 }} />
+                        <Circle sx={{ fill: getColor(analysisSummary.probability), marginRight: 50 }} />
 
                         {analysisSummary.probability}
                       </Stack>
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={2}>
-                        <Circle sx={{ fill: 'lightsalmon', marginRight: 50 }} />
+                        <Circle sx={{ fill: getColor(analysisSummary.severity), marginRight: 50 }} />
 
                         {analysisSummary.severity}
                       </Stack>
@@ -97,11 +118,11 @@ const Analysis = () => {
 
             <Divider />
 
-            <ActionPlan />
+            <ActionPlan users={users} />
 
             <Divider />
 
-            <Closing />
+            <Closing users={users} />
           </Stack>
         </AccordionDetails>
       </Accordion>

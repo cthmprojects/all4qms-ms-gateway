@@ -5,7 +5,18 @@ import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { RawRiskOpportunity, SummarizedProcess, SummarizedUser } from '../../models';
+import {
+  ActionPlanEfficacy,
+  ActionPlanImplementation,
+  ActionPlanSummary,
+  AnalysisDetails,
+  Ishikawa,
+  RawRiskOpportunity,
+  Reason,
+  SummarizedProcess,
+  SummarizedUser,
+} from '../../models';
+import { saveRiskOpportunity } from '../../reducers/risks-opportunities.reducer';
 import { BaseDetails } from '../components';
 
 const AddRisk = () => {
@@ -44,8 +55,17 @@ const AddRisk = () => {
     navigate('/risks-opportunities/');
   };
 
-  const onSave = (rawRiskOpportunity: RawRiskOpportunity): void => {
+  const onSave = (
+    efficacy: ActionPlanEfficacy,
+    implementation: ActionPlanImplementation,
+    actionPlanSummary: ActionPlanSummary,
+    ishikawa: Ishikawa | null,
+    reasons: Reason | null,
+    details: AnalysisDetails,
+    rawRiskOpportunity: RawRiskOpportunity
+  ): void => {
     // TODO: [POST] request to backend
+    dispatch(saveRiskOpportunity(rawRiskOpportunity));
   };
 
   return (

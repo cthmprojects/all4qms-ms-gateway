@@ -14,81 +14,49 @@ export type RawRiskOpportunity = {
   atualizadoPor: number;
   criadoEm: Date;
   atualizadoEm: Date;
-  partesInteressadas: {
-    id: number;
-    nomeParteInteressada: string;
-    criadoPor: number;
-    atualizadoPor: number;
-    criadoEm: Date;
-    atualizadoEm: Date;
-  };
-  linhaConfigControle1: {
-    id: number;
-    tipoRO: 'R' | 'O';
-    tipoAnaliseRO: 'P';
-    grauRO: 'A';
-    pesoRO: number;
-    decisaoRO: string;
-    descricaoRO: string;
-    criadoPor: number;
-    atualizadoPor: number;
-    criadoEm: Date;
-    atualizadoEm: Date;
-  };
-  linhaConfigControle2: {
-    id: number;
-    tipoRO: 'R' | 'O';
-    tipoAnaliseRO: 'P';
-    grauRO: 'A';
-    pesoRO: number;
-    decisaoRO: string;
-    descricaoRO: string;
-    criadoPor: number;
-    atualizadoPor: number;
-    criadoEm: Date;
-    atualizadoEm: Date;
-  };
-  analiseROS: [
-    {
-      id: number;
-      dataAnalise: Date;
-      decisao: string;
-      descricaoDecisao: string;
-      corDecisao: string;
-      idInvestigacao: number;
-      idPlano: number;
-      idAprovacaoNC: number;
-      criadoPor: number;
-      atualizadoPor: number;
-      criadoEm: Date;
-      atualizadoEm: Date;
-      linhaConfigAnalise1: {
-        id: number;
-        tipoRO: 'R' | 'O';
-        tipoAnaliseRO: 'P';
-        grauRO: 'A';
-        pesoRO: number;
-        decisaoRO: string;
-        descricaoRO: string;
-        criadoPor: number;
-        atualizadoPor: number;
-        criadoEm: Date;
-        atualizadoEm: Date;
-      };
-      linhaConfigAnalise2: {
-        id: number;
-        tipoRO: 'R';
-        tipoAnaliseRO: 'P';
-        grauRO: 'A';
-        pesoRO: number;
-        decisaoRO: string;
-        descricaoRO: string;
-        criadoPor: number;
-        atualizadoPor: number;
-        criadoEm: Date;
-        atualizadoEm: Date;
-      };
-      riscoOportunidade: string;
-    }
-  ];
+  idPartesInteressadas: number;
+  idLinhaConfigControle1: number;
+  idLinhaConfigControle2: number;
+  idsAnaliseROS: Array<number>;
+};
+
+export type RawRiskOpportunityConfiguration = {
+  id: number;
+  tipoRO: 'R';
+  tipoAnaliseRO: 'P';
+  grauRO: 'A';
+  pesoRO: number;
+  decisaoRO: string;
+  descricaoRO: string;
+  criadoPor: number;
+  atualizadoPor: number;
+  criadoEm: Date;
+  atualizadoEm: Date;
+};
+
+export type RawRiskOpportunityAnalysis = {
+  id: number;
+  dataAnalise: Date;
+  decisao: string;
+  descricaoDecisao: string;
+  corDecisao: string;
+  idInvestigacao: number;
+  idPlano: number;
+  idAprovacaoNC: number;
+  criadoPor: number;
+  atualizadoPor: number;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  linhaConfigAnalise1: null; // TODO: Precisa ser ID
+  linhaConfigAnalise2: null; // TODO: Precisa ser ID
+  riscoOportunidade: null; // TODO: Precisa ser ID
+};
+
+export type RawInterestedPart = {
+  id: number;
+  nomeParteInteressada: string;
+  criadoPor: number;
+  atualizadoPor: number;
+  criadoEm: Date;
+  atualizadoEm: Date;
 };

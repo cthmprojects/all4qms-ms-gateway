@@ -1,20 +1,34 @@
 import { Autocomplete, Checkbox, Stack, TextField, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
+import { SummarizedUser } from '../../models';
 import { onAutocompleteChanged, onCheckboxChanged, onDateChanged } from '../../utils';
+import { useFormContext, useWatch } from 'react-hook-form';
 
 type ActionPlanProps = {
+  users: Array<SummarizedUser>;
   readonly?: boolean;
 };
 
-const ActionPlan = ({ readonly }: ActionPlanProps) => {
+const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
   const [deadline, setDeadline] = useState<Date>(new Date());
-  const [responsible, setResponsible] = useState<string>('');
-  const [responsibles, setResponsibles] = useState<Array<string>>(['Usuário 1', 'Usuário 2']);
+  const [responsible, setResponsible] = useState<SummarizedUser | null>(null);
+  const [responsibles, setResponsibles] = useState<Array<SummarizedUser>>([]);
   const [shouldVerify, setShouldVerify] = useState<boolean>(false);
   const [verifiedAt, setVerifiedAt] = useState<Date>(new Date());
-  const [verifiers, setVerifiers] = useState<Array<string>>(['Usuário 1', 'Usuário 2']);
-  const [verifier, setVerifier] = useState<string>('');
+  const [verifiers, setVerifiers] = useState<Array<SummarizedUser>>([]);
+  const [verifier, setVerifier] = useState<SummarizedUser | null>(null);
+
+  const { register, setValue, formState, control, trigger } = useFormContext();
+  const fieldHook = (fieldName: string) => register(fieldName as any, { required: true });
+
+  const actionDate = useWatch({ control, name: 'actionDate' });
+  const actionVerificationDate = useWatch({ control, name: 'actionVerificationDate' });
+
+  useEffect(() => {
+    setResponsibles(users);
+    setVerifiers(users);
+  }, [users]);
 
   useEffect(() => {
     if (responsibles.length <= 0) {
@@ -32,24 +46,37 @@ const ActionPlan = ({ readonly }: ActionPlanProps) => {
     setVerifier(verifiers[0]);
   }, [verifiers]);
 
+  useEffect(() => {
+    setValue('responsibleId', responsible?.id);
+  }, [responsible]);
+
+  useEffect(() => {
+    setValue('verifyAction', shouldVerify);
+  }, [shouldVerify]);
+
+  useEffect(() => {
+    setValue('actionVerifierId', verifier?.id);
+  }, [verifier]);
+
   return (
     <Stack spacing={2}>
       <Typography variant="h6">Plano de ação</Typography>
 
       <Stack spacing={2} sx={{ flexGrow: 1 }}>
-        <TextField label="Descrição da ação" maxRows={5} multiline placeholder="Descrição da ação" />
+        <TextField label="Descrição da ação" maxRows={5} multiline placeholder="Descrição da ação" {...fieldHook('actionDescription')} />
 
         <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
           <DatePicker
-            selected={deadline}
+            selected={actionDate}
             disabled={readonly}
-            onChange={newDate => onDateChanged(newDate, setDeadline)}
+            onChange={newDate => setValue('actionDate', newDate, { shouldValidate: true })}
             className="date-picker"
             dateFormat={'dd/MM/yyyy'}
           />
 
           <Autocomplete
             disableClearable
+            getOptionLabel={option => option.name}
             onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setResponsible)}
             options={responsibles}
             renderInput={params => <TextField {...params} label="Responsável" />}
@@ -64,15 +91,16 @@ const ActionPlan = ({ readonly }: ActionPlanProps) => {
           </Stack>
 
           <DatePicker
-            selected={verifiedAt}
+            selected={actionVerificationDate}
             disabled={readonly}
-            onChange={newDate => onDateChanged(newDate, setVerifiedAt)}
+            onChange={newDate => setValue('actionVerificationDate', newDate, { shouldValidate: true })}
             className="date-picker"
             dateFormat={'dd/MM/yyyy'}
           />
 
           <Autocomplete
             disableClearable
+            getOptionLabel={option => option.name}
             onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setVerifier)}
             options={verifiers}
             renderInput={params => <TextField {...params} label="Responsável pela verificação" />}
