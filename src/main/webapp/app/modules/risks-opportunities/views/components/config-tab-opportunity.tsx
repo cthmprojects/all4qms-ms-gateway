@@ -1,7 +1,8 @@
 import { Box, Button, Stack } from '@mui/material';
 import React from 'react';
-import ConfigurationsDegrees, { ConfigurationsDegreesType, ConfigurationsClassificationType } from './config-degrees';
+import ConfigurationsDegrees from './config-degrees';
 import ConfigComplexityMatrix from './config-complexity-matrix';
+import { ConfigurationsClassificationType, ConfigurationsDegreesType } from '../../models/config-risk-opportunity';
 
 type ConfigurationsType = {
   complexityDegrees: ConfigurationsDegreesType[];

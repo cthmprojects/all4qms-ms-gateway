@@ -1,26 +1,19 @@
 import { Box, Button, Stack } from '@mui/material';
-import React from 'react';
-import ConfigurationsDegrees, { ConfigurationsDegreesType, ConfigurationsClassificationType } from './config-degrees';
+import React, { useState } from 'react';
+import ConfigurationsDegrees from './config-degrees';
 import ConfigComplexityMatrix from './config-complexity-matrix';
+import {
+  ConfigRow,
+  ConfigTipoRos,
+  ConfigurationsClassificationType,
+  ConfigurationsDegreesType,
+} from '../../models/config-risk-opportunity';
 
 type ConfigurationsType = {
   probabilityDegrees: ConfigurationsDegreesType[];
   severityDegrees: ConfigurationsDegreesType[];
   risksClassification: ConfigurationsClassificationType[];
 };
-// {
-//   "id": 0,
-//   "tipoRO": "R",  "R (Risco),O (Oportunidade)"
-//   "tipoAnaliseRO": "P", "P (Probabilidade),S (Severidade),C (Complexidade),M (Melhoria)"
-//   "grauRO": "A", "A (Alto),M (Medio),B (Baixo)"
-//   "pesoRO": 0,
-//   "decisaoRO": "string",
-//   "descricaoRO": "string",
-//   "criadoPor": 0,
-//   "atualizadoPor": 0,
-//   "criadoEm": "2024-08-01T02:37:27.046Z",
-//   "atualizadoEm": "2024-08-01T02:37:27.046Z"
-// }
 
 const configValuesMock: ConfigurationsType = {
   probabilityDegrees: [
@@ -85,17 +78,13 @@ const configValuesMock: ConfigurationsType = {
   ],
 };
 
-type BaseDetailsProps = {
-  isOpportunity?: boolean;
-  readonly?: boolean;
-};
-
-const ConfigurationsTabRisk = ({ isOpportunity, readonly }: BaseDetailsProps) => {
+const ConfigurationsTabRisk = () => {
+  const [riscoConfigs, setRiscoConfig] = useState<ConfigTipoRos>();
   return (
     <Stack spacing={2} pt={2}>
-      <ConfigurationsDegrees isDegree title="Probabilidade" configValues={configValuesMock.probabilityDegrees} />
-      <ConfigurationsDegrees isDegree title="Severidade" configValues={configValuesMock.severityDegrees} />
-      <ConfigurationsDegrees title="Riscos" configValues={configValuesMock.risksClassification} />
+      <ConfigurationsDegrees isDegree title="Probabilidade" configValues={riscoConfigs?.linhaConfig1} setConfigValues={setRiscoConfig} />
+      <ConfigurationsDegrees isDegree title="Severidade" configValues={riscoConfigs?.linhaConfig2} />
+      <ConfigurationsDegrees title="Riscos" configValues={riscoConfigs?.linhaConfigDecisao} />
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <ConfigComplexityMatrix classifications={configValuesMock.risksClassification} />
       </Box>

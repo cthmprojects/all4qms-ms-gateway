@@ -20,6 +20,7 @@ const InputDegreeColor: React.FC<DegreeProps> = ({ label, color, value, InputPro
       label={label}
       variant="outlined"
       value={value}
+      sx={{ width: '140px' }}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">

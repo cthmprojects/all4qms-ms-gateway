@@ -3,53 +3,64 @@ import React, { useEffect, useState } from 'react';
 import { onAutocompleteChanged } from '../../utils';
 import InputDegreeColor from './input-degree-color';
 import TextDegreeWithBulletColor from './input-degree-color';
-
-export type ConfigurationsDegreesType = {
-  codigo?: number;
-  label: string;
-  color: string;
-  weight: number;
-  description: string;
-};
-export type ConfigurationsClassificationType = {
-  codigo?: number;
-  decision: string;
-  description: string;
-};
+import {
+  ConfigRow,
+  ConfigTipoRos,
+  ConfigurationsClassificationType,
+  ConfigurationsDegreesType,
+} from '../../models/config-risk-opportunity';
 
 interface ConfigurationsDegreesProps {
   title: string;
-  configValues: ConfigurationsDegreesType[] | ConfigurationsClassificationType[];
-  // setDegreeValues?: React.Dispatch<React.SetStateAction<Degrees>>;
+  configValues?: ConfigRow[];
+  setConfigValues?: React.Dispatch<React.SetStateAction<ConfigTipoRos>>;
   isDegree?: boolean;
 }
 
 const InputPropsTextFild = { readOnly: true };
 
-const ConfigurationsDegrees = ({ title, configValues, isDegree }: ConfigurationsDegreesProps) => {
+const ConfigurationsDegrees = ({ title, configValues, setConfigValues, isDegree }: ConfigurationsDegreesProps) => {
   const [probability, setProbability] = useState<string>('');
 
   return (
     <Paper elevation={3} sx={{ p: 2, display: 'grid', rowGap: 2 }}>
       <Typography variant="h5">{isDegree ? `Graus de ${title}` : `Classificação das ${title}`}</Typography>
       <Divider variant="fullWidth" sx={{ bgcolor: 'black', height: 1, marginX: -2 }} />
-      {configValues.map(degreeItem => (
+      {configValues.map(configItem => (
         <Stack direction="row" spacing={2}>
           {isDegree ? (
             <>
-              <InputDegreeColor label="Grau" color={degreeItem.color} value={degreeItem.label} InputProps={InputPropsTextFild} />
-              <TextField label="Peso" placeholder="Peso" value={degreeItem.weight} InputProps={InputPropsTextFild} />
+              <InputDegreeColor label="Grau" color={configItem.color} value={configItem.label} InputProps={InputPropsTextFild} />
+              <TextField
+                label="Peso"
+                placeholder="Peso"
+                value={configItem.weight}
+                InputProps={InputPropsTextFild}
+                sx={{ width: '140px' }}
+              />
             </>
           ) : (
             <>
-              <TextField label="Código" placeholder="Código" value={degreeItem.codigo} InputProps={InputPropsTextFild} />
-              <TextField label="Decisão" placeholder="Decisão" value={degreeItem.decision} InputProps={InputPropsTextFild} />
+              <TextField
+                label="Código"
+                placeholder="Código"
+                value={configItem.codigo}
+                InputProps={InputPropsTextFild}
+                sx={{ width: '140px' }}
+              />
+              <TextField
+                label="Decisão"
+                placeholder="Decisão"
+                value={configItem.decision}
+                InputProps={InputPropsTextFild}
+                sx={{ width: '150px' }}
+              />
             </>
           )}
           <TextField
             label="Descrição"
             placeholder={`Descrição do grau de ${title}`}
-            value={degreeItem.description}
+            value={configItem.description}
             InputProps={InputPropsTextFild}
             sx={{ flexGrow: 1 }}
           />

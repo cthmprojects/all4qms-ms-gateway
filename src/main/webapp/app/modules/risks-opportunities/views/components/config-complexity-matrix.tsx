@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
-import { ConfigurationsClassificationType } from './config-degrees';
+import { ConfigurationsClassificationType } from '../../models/config-risk-opportunity';
 
 const riskOptions = {
   'Aceitar o Risco': 'Aceitar o Risco',
