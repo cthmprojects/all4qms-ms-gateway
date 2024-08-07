@@ -248,6 +248,21 @@ const RncList = ({}) => {
     '',
   ];
 
+  const formatStatus = status => {
+    switch (status) {
+      case 'ELABORACAO':
+        return 'PLANO DE AÇÃO';
+      case 'EXECUCAO':
+        return 'VERIFICAÇÃO IMPLEMENTAÇÃO';
+      case 'VERIFICACAO':
+        return 'VERIFICAÇÃO EFICÁCIA';
+      case 'VALIDACAO':
+        return 'FECHAMENTO';
+    }
+
+    return status;
+  };
+
   const formatDateToString = (date: Date | null | undefined) => {
     if (!date) {
       return '';
@@ -352,7 +367,7 @@ const RncList = ({}) => {
                       <TableCell> {verificacao ? formatDateToString(new Date(verificacao)) : '-'} </TableCell>
                       <TableCell> {eficacia ? formatDateToString(new Date(eficacia)) : '-'} </TableCell>
                       <TableCell> {fechamento ? formatDateToString(new Date(fechamento)) : '-'} </TableCell>
-                      <TableCell>{statusAtual}</TableCell>
+                      <TableCell>{formatStatus(statusAtual)}</TableCell>
                       <TableCell>
                         <IconButton onClick={event => onViewClicked(id, event)}>
                           <VisibilityOutlined />
@@ -378,7 +393,7 @@ const RncList = ({}) => {
               page={page}
               rowsPerPage={pageSize}
               rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-              style={{ display: 'flex', alignContent: 'center', width: '370px' }}
+              style={{ display: 'flex', alignContent: 'center', width: '400px' }}
             />
           </Row>
         </>
@@ -446,7 +461,7 @@ const RncList = ({}) => {
               value={filters.statusAtual}
               onChange={event => setFilters({ ...filters, statusAtual: event.target.value as string })}
             >
-              {enums?.nonConformityStatuses.map((type, idx) => (
+              {enums?.nonConformityStatuses?.map((type, idx) => (
                 <MenuItem value={type.name} key={`type-${idx}`}>
                   {type.value}
                 </MenuItem>

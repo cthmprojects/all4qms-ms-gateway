@@ -349,10 +349,8 @@ const InfodocList = () => {
   };
 
   const onEditClicked = (infodoc: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    if (infodoc.doc?.enumSituacao == 'E' || infodoc.doc?.enumSituacao == 'R') {
-      setIdDocUpdating(infodoc.doc.id);
-      setUploadFileUpdate(true);
-    }
+    setIdDocUpdating(infodoc.doc.id);
+    setUploadFileUpdate(true);
 
     // H - homolog
     // R - revisão

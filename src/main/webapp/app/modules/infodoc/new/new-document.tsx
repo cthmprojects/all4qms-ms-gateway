@@ -159,7 +159,7 @@ export const NewDocument = () => {
   };
 
   const validateFields = () => {
-    return emitter && emittedDate && selectedProcess && description && documentDescription;
+    return emitter && emittedDate && selectedProcess && description;
   };
 
   const saveDocument = () => {
@@ -167,8 +167,8 @@ export const NewDocument = () => {
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
       descricaoDoc: description,
-      justificativa: documentDescription,
-      codigo: '-',
+      justificativa: '',
+      codigo: '',
       titulo: '',
       origem: 'I',
       idProcesso: parseInt(selectedProcess),
@@ -176,6 +176,7 @@ export const NewDocument = () => {
       ignorarValidade: true,
       enumSituacao: 'E',
       tipoDoc: 'MA',
+      revisao: 0,
     };
 
     if (!noValidate) {
@@ -235,7 +236,7 @@ export const NewDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -243,7 +244,6 @@ export const NewDocument = () => {
                 ))}
               </Select>
             </FormControl>
-            <TextField label="Setor" name="number" autoComplete="off" value={currentUser.setor?.nome} disabled />
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h3 className="p-0 m-0" style={{ fontSize: '15px' }}>
@@ -386,6 +386,7 @@ export const NewDocument = () => {
             name="ncArea"
             value={documentDescription || ''}
             onChange={e => setDocumentDescription(e.target.value)}
+            disabled
           />
 
           <div className="mt-4">

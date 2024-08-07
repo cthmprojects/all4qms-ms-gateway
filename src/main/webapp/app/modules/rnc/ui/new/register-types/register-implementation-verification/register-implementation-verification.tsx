@@ -18,6 +18,7 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
 import { updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
+import { toast } from 'react-toastify';
 
 export const RegisterImplementationVerification = ({ handleTela, handlePrazoVerificacao }) => {
   const navigate = useNavigate();
@@ -55,15 +56,23 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
           descEficacia: firstForm.description.value,
         })
       );
+      toast.success('RNC Atualizada com sucesso!');
     }
   };
 
   const updateStatus = () => {
     if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'VALIDACAO' }));
-      setTimeout(() => {
-        navigate('/rnc');
-      }, 1000);
+      dispatch(
+        updateApprovalNC({
+          ...verification,
+          possuiEficacia: firstForm.verified.value,
+          dataEficacia: firstForm.date.value,
+          responsavelEficacia: users.find(user => user.nome === firstForm.emitter.value)?.id,
+          descEficacia: firstForm.description.value,
+        })
+      );
+      dispatch(update({ ..._rnc, statusAtual: 'VALIDACAO' })).then(() => navigate('/rnc'));
+      toast.success('RNC Atualizada com sucesso!');
     }
   };
   const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
