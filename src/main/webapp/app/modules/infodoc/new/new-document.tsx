@@ -94,7 +94,7 @@ export const NewDocument = () => {
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
-    // dispatch(getInfoDocById(id));
+    setEmitter(currentUser.id);
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -138,7 +138,7 @@ export const NewDocument = () => {
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
-          fileDownload(file, `${fileName}.pdf`);
+          fileDownload(file, `${fileName}`);
         });
     }
   };
@@ -159,7 +159,7 @@ export const NewDocument = () => {
   };
 
   const validateFields = () => {
-    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+    return emitter && emittedDate && selectedProcess && description && documentDescription;
   };
 
   const saveDocument = () => {
@@ -168,8 +168,8 @@ export const NewDocument = () => {
       dataCricao: emittedDate,
       descricaoDoc: description,
       justificativa: documentDescription,
-      codigo: code,
-      titulo: title,
+      codigo: '-',
+      titulo: '',
       origem: 'I',
       idProcesso: parseInt(selectedProcess),
       idArquivo: parseInt(id),
@@ -235,7 +235,7 @@ export const NewDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -243,6 +243,7 @@ export const NewDocument = () => {
                 ))}
               </Select>
             </FormControl>
+            <TextField label="Setor" name="number" autoComplete="off" value={currentUser.setor?.nome} disabled />
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h3 className="p-0 m-0" style={{ fontSize: '15px' }}>
@@ -298,6 +299,7 @@ export const NewDocument = () => {
               className="m-2 ms-0"
               autoComplete="off"
               value={code}
+              disabled
               onChange={e => setCode(e.target.value)}
             />
             <TextField
@@ -306,6 +308,7 @@ export const NewDocument = () => {
               name="number"
               className="m-2"
               autoComplete="off"
+              disabled
               value={title}
               onChange={e => setTitle(e.target.value)}
             />
@@ -343,7 +346,7 @@ export const NewDocument = () => {
           <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
             <FormControlLabel
               className="me-2"
-              control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
+              control={<Checkbox disabled checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
             />
             <FormControl className="me-2 ms-2 mt-4">
@@ -352,7 +355,7 @@ export const NewDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled={noValidate}
+                disabled
               />
               <label htmlFor="" className="rnc-date-label">
                 Validade
@@ -365,7 +368,7 @@ export const NewDocument = () => {
                 label="Notificar:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled={noValidate}
+                disabled
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>

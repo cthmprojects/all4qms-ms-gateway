@@ -23,8 +23,8 @@ export type InfoDoc = {
 
 export type Doc = {
   id?: number;
-  codigo: string;
-  titulo: string;
+  codigo?: string;
+  titulo?: string;
   revisao?: number;
   descricaoDoc?: string;
   idArquivo?: number;
