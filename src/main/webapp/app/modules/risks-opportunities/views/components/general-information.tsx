@@ -4,17 +4,19 @@ import { MaterialDatepicker } from 'app/shared/components/input/material-datepic
 import React, { useEffect, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { onAutocompleteChanged, onTextChanged } from '../../utils';
+import { SummarizedProcess } from '../../models';
 
 type GeneralInformationProps = {
   isOpportunity?: boolean;
+  summarizedProcesses: Array<SummarizedProcess>;
   readonly?: boolean;
 };
 
-const GeneralInformation = ({ isOpportunity, readonly }: GeneralInformationProps) => {
+const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: GeneralInformationProps) => {
   const [interestedPart, setInterestedPart] = useState<string>('');
   const [interestedParts, setInterestedParts] = useState<Array<string>>(['A', 'B']);
-  const [process, setProcess] = useState<string | null>(null);
-  const [processes, setProcesses] = useState<Array<string>>([]);
+  const [process, setProcess] = useState<SummarizedProcess | null>(null);
+  const [processes, setProcesses] = useState<Array<SummarizedProcess>>([]);
   const [secondAuxiliaryDescription, setSecondAuxiliaryDescription] = useState<string>('');
   const [sender, setSender] = useState<string | null>(null);
   const [senders, setSenders] = useState<Array<string>>([]);
@@ -30,6 +32,10 @@ const GeneralInformation = ({ isOpportunity, readonly }: GeneralInformationProps
     // Poderia ser qualquer outro campo registrado
     trigger('description');
   }, [formInterestedParts]);
+
+  useEffect(() => {
+    setProcesses(summarizedProcesses);
+  }, [summarizedProcesses]);
 
   const getFirstAuxiliaryDescriptionLabel = (): string => {
     return !isOpportunity ? 'Causa' : 'Fraqueza';
@@ -71,15 +77,16 @@ const GeneralInformation = ({ isOpportunity, readonly }: GeneralInformationProps
           <>
             <Autocomplete
               disableClearable
-              onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setType)}
+              onChange={(event, value, reason, details) => setValue('type', value, { shouldValidate: true })}
               options={types}
               renderInput={params => <TextField {...params} label="Tipo" />}
               value={type}
             />
             <Autocomplete
               disableClearable
-              onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setProcess)}
+              onChange={(event, value, reason, details) => setValue('processId', value.id, { shouldValidate: true })}
               options={processes}
+              getOptionLabel={option => option.name}
               renderInput={params => <TextField {...params} label="Processo" />}
               value={process}
             />

@@ -1,11 +1,11 @@
 import { AutocompleteChangeDetails, AutocompleteChangeReason } from '@mui/material';
 
-export const onAutocompleteChanged = (
+export const onAutocompleteChanged = <T>(
   event: React.SyntheticEvent,
-  value: string,
+  value: T,
   reason: AutocompleteChangeReason,
-  details: AutocompleteChangeDetails<string>,
-  setter: React.Dispatch<React.SetStateAction<string | null>>
+  details: AutocompleteChangeDetails<T>,
+  setter: React.Dispatch<React.SetStateAction<T | null>>
 ): void => {
   setter(value);
 };

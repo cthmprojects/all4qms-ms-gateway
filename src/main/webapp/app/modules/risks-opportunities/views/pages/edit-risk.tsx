@@ -5,7 +5,17 @@ import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { RawRiskOpportunity, SummarizedProcess, SummarizedUser } from '../../models';
+import {
+  ActionPlanEfficacy,
+  ActionPlanImplementation,
+  ActionPlanSummary,
+  AnalysisDetails,
+  Ishikawa,
+  RawRiskOpportunity,
+  Reason,
+  SummarizedProcess,
+  SummarizedUser,
+} from '../../models';
 import { BaseDetails } from '../components';
 
 const EditRisk = () => {
@@ -45,7 +55,15 @@ const EditRisk = () => {
     navigate('/risks-opportunities/');
   };
 
-  const onSave = (rawRiskOpportunity: RawRiskOpportunity): void => {
+  const onSave = (
+    efficacy: ActionPlanEfficacy,
+    implementation: ActionPlanImplementation,
+    actionPlanSummary: ActionPlanSummary,
+    ishikawa: Ishikawa | null,
+    reasons: Reason | null,
+    details: AnalysisDetails,
+    rawRiskOpportunity: RawRiskOpportunity
+  ): void => {
     // TODO: [PUT] request to backend
   };
 

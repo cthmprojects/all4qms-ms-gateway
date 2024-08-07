@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Autocomplete, AutocompleteChangeDetails, AutocompleteChangeReason, Stack, TextField, Typography } from '@mui/material';
-import { onAutocompleteChanged, onTextChanged } from '../../utils';
+import { Autocomplete, Stack, TextField, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 
 const ControlAction = () => {
   const [description, setDescription] = useState<string>('');
@@ -8,6 +8,12 @@ const ControlAction = () => {
   const [probabilities, setProbabilities] = useState<Array<string>>(['Baixo', 'Médio', 'Alto']);
   const [severity, setSeverity] = useState<string | null>(null);
   const [severities, setSeverities] = useState<Array<string>>(['Baixo', 'Médio', 'Alto']);
+
+  const { register, setValue, formState, control, trigger } = useFormContext();
+  const fieldHook = (fieldName: string) => register(fieldName as any, { required: true });
+
+  const probabilityForm = useWatch({ control, name: 'probability' });
+  const severityForm = useWatch({ control, name: 'severity' });
 
   useEffect(() => {
     if (probabilities.length <= 0) {
@@ -33,18 +39,17 @@ const ControlAction = () => {
         <TextField
           label="Descrição do controle"
           multiline
-          onChange={event => onTextChanged(event, setDescription)}
           placeholder="Descrição do controle"
           rows={5}
           sx={{ flexGrow: 1 }}
-          value={description}
+          {...fieldHook('description')}
         />
       </Stack>
 
       <Stack direction="row" spacing={2}>
         <Autocomplete
           disableClearable
-          onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setProbability)}
+          onChange={(event, value, reason, details) => setValue('probability', value, { shouldValidate: true })}
           options={probabilities}
           renderInput={params => <TextField {...params} label="Controlar a probabilidade" />}
           sx={{ flexGrow: 1 }}
@@ -52,7 +57,7 @@ const ControlAction = () => {
         />
         <Autocomplete
           disableClearable
-          onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setSeverity)}
+          onChange={(event, value, reason, details) => setValue('severity', value, { shouldValidate: true })}
           options={severities}
           renderInput={params => <TextField {...params} label="Controlar a severidade" />}
           sx={{ flexGrow: 1 }}
