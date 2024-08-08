@@ -62,7 +62,7 @@ const QualityTargets = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElemen
   return (
     <React.Fragment>
       <StyledTextarea minRows={4} cols={30} {...props} ref={ref} id={id} />
-      <StyledLabel htmlFor={id}>Desdobramento da Política de Qualidade</StyledLabel>
+      <StyledLabel htmlFor={id}>Objetivos de Qualidade</StyledLabel>
     </React.Fragment>
   );
 });
