@@ -1,6 +1,8 @@
 import { Add, Delete } from '@mui/icons-material';
 import { Fab, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { useAppDispatch } from 'app/config/store';
 import { ActionPlan, Option } from 'app/modules/rnc/models';
+import { deleteAction } from 'app/modules/rnc/reducers/plan.reducer';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 
@@ -13,8 +15,9 @@ type PlannedActionProps = {
 };
 
 const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: PlannedActionProps) => {
+  const dispatch = useAppDispatch();
   const [deadline, setDeadline] = useState<Date>(new Date());
-  const [verification, setVerification] = useState<Date>(new Date());
+  const [verification, setVerification] = useState<Date>(null);
   const [description, setDescription] = useState<string>('');
   const [responsible, setResponsible] = useState<string>('');
   const [status, setStatus] = useState<string>('');
@@ -22,22 +25,73 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
 
   const onDescription = value => {
     setDescription(value);
-    onChanged({ ...actionPlan, descricaoAcao: value });
+    onChanged({
+      ...actionPlan,
+      descricaoAcao: value,
+      prazoAcao: deadline,
+      dataVerificao: verification,
+      idResponsavelAcao: parseInt(responsible),
+      statusAcao: status,
+      idResponsavelVerificaoAcao: parseInt(verifier),
+    });
   };
 
   const onResponsible = value => {
     setResponsible(value);
-    onChanged({ ...actionPlan, idResponsavelAcao: parseInt(value) });
+    onChanged({
+      ...actionPlan,
+      idResponsavelAcao: parseInt(value),
+      prazoAcao: deadline,
+      dataVerificao: verification,
+      statusAcao: status,
+      idResponsavelVerificaoAcao: parseInt(verifier),
+      descricaoAcao: description,
+    });
   };
 
   const onStatus = value => {
     setStatus(value);
-    onChanged({ ...actionPlan, statusAcao: value });
+    onChanged({
+      ...actionPlan,
+      statusAcao: value,
+      prazoAcao: deadline,
+      dataVerificao: verification,
+      idResponsavelAcao: parseInt(responsible),
+      idResponsavelVerificaoAcao: parseInt(verifier),
+      descricaoAcao: description,
+    });
   };
 
   const onVerifier = value => {
     setVerifier(value);
-    onChanged({ ...actionPlan, idResponsavelVerificaoAcao: parseInt(value) });
+    onChanged({
+      ...actionPlan,
+      idResponsavelVerificaoAcao: parseInt(value),
+      prazoAcao: deadline,
+      dataVerificao: verification,
+      statusAcao: status,
+      idResponsavelAcao: parseInt(responsible),
+      descricaoAcao: description,
+    });
+  };
+
+  const setVerificationDate = (date: Date) => {
+    setVerification(date);
+    setStatus('VISTO');
+    onChanged({
+      ...actionPlan,
+      idResponsavelVerificaoAcao: parseInt(verifier),
+      prazoAcao: deadline,
+      dataVerificao: date,
+      statusAcao: 'VISTO',
+      idResponsavelAcao: parseInt(responsible),
+      descricaoAcao: description,
+    });
+  };
+
+  const removeAction = () => {
+    dispatch(deleteAction(actionPlan.id));
+    onRemoved();
   };
 
   useEffect(() => {
@@ -60,16 +114,35 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
       />
       <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
         <FormControl className="m-2 mt-0 rnc-form-field">
-          <DatePicker
-            // locale='pt-BR'
-            label="Prazo"
-            selected={deadline}
-            onChange={date => setDeadline(date)}
-            value={deadline}
-            className="date-picker"
-            dateFormat={'dd/MM/yyyy'}
-            id="date-picker-rnc-plano-acao-prazo"
-          />
+          <div
+            style={{
+              transform: 'translateY(-19px)',
+            }}
+          >
+            <span
+              style={{
+                top: '12px',
+                position: 'relative',
+                margin: '0px',
+                padding: '0px 3px',
+                width: 'fit-content',
+                zIndex: '99',
+                transform: 'translate(9px, -1px)',
+                background: '#fff',
+                color: '#00000099',
+              }}
+            >
+              Prazo
+            </span>
+            <DatePicker
+              // locale='pt-BR'
+              selected={deadline}
+              onChange={date => setDeadline(date)}
+              className="date-picker"
+              dateFormat={'dd/MM/yyyy'}
+              id="date-picker-rnc-plano-acao-prazo"
+            />
+          </div>
         </FormControl>
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
           <InputLabel>Responsável</InputLabel>
@@ -84,24 +157,42 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
 
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
           <InputLabel>Status</InputLabel>
-          <Select label="Encaminhado para:" name="forwarded" onChange={e => onStatus(e.target.value as string)} value={status}>
-            {statuses.map(e => {
-              return <MenuItem value={e.value}>{e.name}</MenuItem>;
-            })}
+          <Select label="Encaminhado para:" name="forwarded" disabled value={status}>
+            <MenuItem value={'PENDENTE'}>PENDENTE</MenuItem>
+            <MenuItem value={'VISTO'}>VISTO</MenuItem>
           </Select>
         </FormControl>
 
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-          <DatePicker
-            // locale='pt-BR'
-            label="Verificação"
-            selected={verification}
-            onChange={date => setVerification(date)}
-            value={verification}
-            className="date-picker"
-            dateFormat={'dd/MM/yyyy'}
-            id="date-picker-rnc-plano-acao-prazo"
-          />
+          <div
+            style={{
+              transform: 'translateY(-19px)',
+            }}
+          >
+            <span
+              style={{
+                top: '12px',
+                position: 'relative',
+                margin: '0px',
+                padding: '0px 3px',
+                width: 'fit-content',
+                zIndex: '99',
+                transform: 'translate(9px, -1px)',
+                background: '#fff',
+                color: '#00000099',
+              }}
+            >
+              Verificação
+            </span>
+            <DatePicker
+              // locale='pt-BR'
+              selected={verification}
+              onChange={date => setVerificationDate(date)}
+              className="date-picker"
+              dateFormat={'dd/MM/yyyy'}
+              id="date-picker-rnc-plano-acao-prazo"
+            />
+          </div>
         </FormControl>
 
         <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
@@ -114,7 +205,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
             ))}
           </Select>
         </FormControl>
-        <IconButton aria-label="Remover" onClick={_ => onRemoved()}>
+        <IconButton aria-label="Remover" onClick={_ => removeAction()}>
           <Delete fontSize="medium" />
         </IconButton>
       </div>
@@ -135,7 +226,7 @@ const PlannedActions = ({ actionPlans, onUpdated, statuses, users }: PlannedActi
     const newActionPlans: Array<ActionPlan> = [...actionPlans];
     newActionPlans.push({
       dataConclusaoAcao: new Date(),
-      dataVerificao: new Date(),
+      dataVerificao: null,
       descricaoAcao: '',
       idAnexosExecucao: 0,
       idPlano: 0,

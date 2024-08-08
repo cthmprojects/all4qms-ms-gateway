@@ -69,22 +69,22 @@ const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
           Investigação
         </MenuItem>
         <MenuItem disabled={!canAccessElaborationPage({ rnc, userId, userRole })} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
-          Elaboração
+          Plano de Ação
         </MenuItem>
         <MenuItem disabled={!canAccessExecutionPage({ rnc, userRole })} onClick={() => goToPage(`/rnc/general/implementacao/${rnc.id}`)}>
-          Execução
+          Verificação Implementação
         </MenuItem>
         <MenuItem
           disabled={!canAccessVerificationPage({ rnc, userRole })}
           onClick={() => goToPage(`/rnc/general/implementacao/validacao/${rnc.id}`)}
         >
-          Verificação
+          Verificação Eficácia
         </MenuItem>
         <MenuItem
           disabled={!canAccessValidationPage({ rnc, userRole })}
           onClick={() => goToPage(`/rnc/general/implementacao/fechamento/${rnc.id}`)}
         >
-          Validação
+          Fechamento
         </MenuItem>
         <MenuItem onClick={() => deleteRncById(rnc.id)} style={{ display: 'flex', justifyContent: 'space-between' }}>
           Excluir

@@ -162,7 +162,7 @@ const InfodocList = () => {
     dtFim: null,
     idProcesso: 0,
     origem: null,
-    situacao: null,
+    situacao: 'H',
     pesquisa: null,
   });
 
@@ -282,9 +282,6 @@ const InfodocList = () => {
       case 2:
         type = 'R';
         break;
-      case 3:
-        type = 'H';
-        break;
       case 4:
         type = 'O';
         break;
@@ -352,10 +349,8 @@ const InfodocList = () => {
   };
 
   const onEditClicked = (infodoc: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    if (infodoc.doc?.enumSituacao == 'E' || infodoc.doc?.enumSituacao == 'R') {
-      setIdDocUpdating(infodoc.doc.id);
-      setUploadFileUpdate(true);
-    }
+    setIdDocUpdating(infodoc.doc.id);
+    setUploadFileUpdate(true);
 
     // H - homolog
     // R - revisão
@@ -685,7 +680,6 @@ const InfodocList = () => {
               <Tab label="Lista Mestra" {...a11yProps(0)} />
               <Tab label="Edição" {...a11yProps(1)} />
               <Tab label="Revisão" {...a11yProps(2)} />
-              <Tab label="Homologado" {...a11yProps(3)} />
               <Tab label="Obsoleto" {...a11yProps(4)} />
               <Tab label="Cancelado" {...a11yProps(5)} />
             </Tabs>
@@ -697,9 +691,6 @@ const InfodocList = () => {
             {renderTable()}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
-            {renderTable()}
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={3}>
             {renderTable()}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={4}>
