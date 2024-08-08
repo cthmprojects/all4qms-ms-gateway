@@ -18,6 +18,7 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
 import { updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
+import { toast } from 'react-toastify';
 
 export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFechamento }) => {
   const dispatch = useAppDispatch();
@@ -55,15 +56,25 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           descFechamento: firstForm.description.value,
         })
       );
+      toast.success('Fechamento salvo com sucesso!');
     }
   };
 
   const updateStatus = () => {
     if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'CONCLUIDO' }));
-      setTimeout(() => {
+      dispatch(
+        updateApprovalNC({
+          ...completion,
+          dataFechamento: firstForm.date.value,
+          responsavelFechamento: users.find(user => user.nome === firstForm.emitter.value)?.id,
+          alteracaoRisco: firstForm.changeRisk.value,
+          descFechamento: firstForm.description.value,
+        })
+      );
+      dispatch(update({ ..._rnc, statusAtual: 'CONCLUIDO' })).then(() => {
         navigate('/rnc');
-      }, 1000);
+      });
+      toast.success('Fechamento salvo com sucesso!');
     }
   };
 
