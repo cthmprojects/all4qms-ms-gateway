@@ -5,88 +5,54 @@ import ConfigComplexityMatrix from './config-complexity-matrix';
 import {
   ConfigRow,
   ConfigTipoRos,
+  ConfiguracaoRiscoOportunidade,
   ConfigurationsClassificationType,
   ConfigurationsDegreesType,
 } from '../../models/config-risk-opportunity';
+import ConfigurationsClassification from './config-classification';
 
-type ConfigurationsType = {
-  probabilityDegrees: ConfigurationsDegreesType[];
-  severityDegrees: ConfigurationsDegreesType[];
-  risksClassification: ConfigurationsClassificationType[];
-};
-
-const configValuesMock: ConfigurationsType = {
-  probabilityDegrees: [
-    {
-      label: 'Baixo',
-      color: '#07C610',
-      weight: 1,
-      description: 'Não há controle operacional',
+const configValuesMock: ConfiguracaoRiscoOportunidade = {
+  grausComplexidade: {
+    baixo: 'Não há controle operacional',
+    medio: 'Existe controle operacional, mas não é suficiente para evitar o risco',
+    alto: 'Existe controle operacional considerado robusto',
+  },
+  grausMelhoria: {
+    baixo: 'Existe controle operacional considerado robust',
+    medio:
+      'Os efeitos interferem não só localmente, mas interfere em outras áreas, em outras atividades e em partes interessadas internas ou Produto/serviço ocasionando atraso no processo.',
+    alto: 'Os efeitos afetam fora do local de trabalho, externamente incluindo outras partes interessadas ou falha que ocasione recall no produto e/ou preju[izo financeiro significativo.',
+  },
+  classificacaoOportunidades: {
+    primeira: {
+      decisao: 'Aceitar o risco',
+      descricao: 'Não obrigatório tratativa',
     },
-    {
-      label: 'Médio',
-      color: '#FFDF78',
-      weight: 2,
-      description: 'Existe controle operacional, mas não é suficiente para evitar o risco',
+    segunda: {
+      decisao: 'Avaliar o risco',
+      descricao: 'Prioridade 2 - Avaliar custo/ benefício (Tratativa de médio e longo prazo)',
     },
-    {
-      label: 'Alto',
-      color: '#FF8E6A',
-      weight: 3,
-      description: 'Existe controle operacional considerado robusto',
+    terceira: {
+      decisao: 'Reduzir o risco',
+      descricao: 'Prioridade 1 (Tratativa imediata - curto prazo ou médio prazo)',
     },
-  ],
-  severityDegrees: [
-    {
-      label: 'Baixo',
-      color: '#07C610',
-      weight: 1,
-      description:
-        'Os danos servo local, no processo. Não interferem em outras atividades, em outras partes interessadas ou afeta a performance do produto/ serviço e entrega',
-    },
-    {
-      label: 'Médio',
-      color: '#FFDF78',
-      weight: 2,
-      description:
-        'Os efeitos interferem não só localmente, mas interfere em outras áreas, em outras atividades e em partes interessadas internas ou Produto/serviço ocasionando atraso no processo.',
-    },
-    {
-      label: 'Alto',
-      color: '#FF8E6A',
-      weight: 3,
-      description:
-        'Os efeitos afetam fora do local de trabalho, externamente incluindo outras partes interessadas ou falha que ocasione recall no produto e/ou preju[izo financeiro significativo.',
-    },
-  ],
-  risksClassification: [
-    {
-      codigo: 1,
-      decision: 'Aceitar o risco',
-      description: 'Não obrigatório tratativa',
-    },
-    {
-      codigo: 2,
-      decision: 'Avaliar o risco',
-      description: 'Prioridade 2 - Avaliar custo/ benefício (Tratativa de médio e longo prazo)',
-    },
-    {
-      codigo: 3,
-      decision: 'Reduzir o risco',
-      description: 'Prioridade 1 (Tratativa imediata - curto prazo ou médio prazo)',
-    },
-  ],
+  },
 };
 
 const ConfigurationsTabRisk = () => {
-  const [riscoConfigs, setRiscoConfig] = useState<ConfigTipoRos>();
+  const [riscoConfigs, setRiscoConfig] = useState<ConfiguracaoRiscoOportunidade>(configValuesMock);
   return (
     <Stack spacing={2} pt={2}>
-      <ConfigurationsDegrees isDegree title="Probabilidade" configValues={riscoConfigs?.linhaConfig1} setConfigValues={setRiscoConfig} />
-      <ConfigurationsDegrees isDegree title="Severidade" configValues={riscoConfigs?.linhaConfig2} />
-      <ConfigurationsDegrees title="Riscos" configValues={riscoConfigs?.linhaConfigDecisao} />
+      <ConfigurationsDegrees
+        isDegree
+        title="Probabilidade"
+        configValues={riscoConfigs?.grausComplexidade}
+        setConfigValues={setRiscoConfig}
+      />
+      <ConfigurationsDegrees isDegree title="Severidade" configValues={riscoConfigs?.grausMelhoria} />
+      <ConfigurationsClassification title="Riscos" configValues={riscoConfigs?.classificacaoOportunidades} />
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <ConfigComplexityMatrix classifications={configValuesMock.risksClassification} />
+        <ConfigComplexityMatrix classifications={configValuesMock?.classificacaoOportunidades} />
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'right', gap: 2, pt: 5, pr: 6 }}>
         <Button variant="contained" size="large" sx={{ bgcolor: '#E0E0E0', color: 'black' }}>

@@ -22,6 +22,28 @@ export interface ConfigTipoRos {
   linhaConfig2: ConfigRow[];
   linhaConfigDecisao: ConfigRow[];
 }
+export interface ConfiguracaoRiscoOportunidade {
+  grausComplexidade: Graus;
+  grausMelhoria: Graus;
+  classificacaoOportunidades: ClassificacaoOportunidades;
+}
+
+export interface ClassificacaoOportunidades {
+  primeira: Primeira;
+  segunda: Primeira;
+  terceira: Primeira;
+}
+
+export interface Primeira {
+  decisao: string;
+  descricao: string;
+}
+
+export interface Graus {
+  baixo: string;
+  medio: string;
+  alto: string;
+}
 
 export type ConfigurationsDegreesType = {
   codigo?: number;

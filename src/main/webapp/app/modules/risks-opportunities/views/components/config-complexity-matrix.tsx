@@ -1,7 +1,18 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+} from '@mui/material';
 import { styled } from '@mui/system';
-import { ConfigurationsClassificationType } from '../../models/config-risk-opportunity';
+import { ClassificacaoOportunidades, ConfigurationsClassificationType } from '../../models/config-risk-opportunity';
 
 const riskOptions = {
   'Aceitar o Risco': 'Aceitar o Risco',
@@ -9,10 +20,10 @@ const riskOptions = {
   'Avaliar o Risco': 'Avaliar o Risco',
 };
 
-const getBackgroundColor = (severity, frequency) => {
-  if ((severity === 1 && frequency === 1) || (severity === 1 && frequency === 2) || (severity === 2 && frequency === 1)) return '#07C610';
-  if ((severity === 3 && frequency === 1) || (severity === 1 && frequency === 3) || (severity === 2 && frequency === 2)) return '#FFDF78';
-  if ((severity === 2 && frequency === 3) || (severity === 3 && frequency === 2) || (severity === 3 && frequency === 3)) return '#FF8E6A';
+const getBackgroundColor = (coluna, linha) => {
+  if ((coluna === 1 && linha === 1) || (coluna === 1 && linha === 2) || (coluna === 2 && linha === 1)) return '#07C610';
+  if ((coluna === 3 && linha === 1) || (coluna === 1 && linha === 3) || (coluna === 2 && linha === 2)) return '#FFDF78';
+  if ((coluna === 2 && linha === 3) || (coluna === 3 && linha === 2) || (coluna === 3 && linha === 3)) return '#FF8E6A';
   return 'white';
 };
 
@@ -49,10 +60,13 @@ const VerticalTextCell = styled(TableCell)(({ theme }) => ({
 }));
 
 interface ConfigComplexityMatrixProps {
-  classifications: ConfigurationsClassificationType[];
+  classifications: ClassificacaoOportunidades;
 }
 
 const ConfigComplexityMatrix: React.FC<ConfigComplexityMatrixProps> = ({ classifications }) => {
+  const changeInputMatrix = (selected: SelectChangeEvent<string>) => {
+    console.log(selected);
+  };
   return (
     <TableContainer sx={{ width: '60rem', minWidth: '50rem', justifyContent: 'center' }}>
       <Table>
@@ -80,18 +94,23 @@ const ConfigComplexityMatrix: React.FC<ConfigComplexityMatrixProps> = ({ classif
                 <RiskCell key={coluna} bgColor={getBackgroundColor(coluna, linha)}>
                   <Select
                     fullWidth
-                    defaultValue={classifications[0].decision}
+                    defaultValue={classifications.primeira.decisao}
                     variant="outlined"
+                    onChange={changeInputMatrix}
                     label=" "
+                    name={`${coluna}${linha}`}
                     sx={{ backgroundColor: 'white' }}
                     // inputProps={}
                   >
-                    {classifications &&
-                      classifications.map((option, index) => (
-                        <MenuItem key={index} value={option.decision}>
-                          {option.decision}
-                        </MenuItem>
-                      ))}
+                    <MenuItem key={0} value={JSON.stringify(classifications.primeira)}>
+                      {classifications.primeira.decisao}
+                    </MenuItem>
+                    <MenuItem key={1} value={JSON.stringify(classifications.segunda)}>
+                      {classifications.segunda.decisao}
+                    </MenuItem>
+                    <MenuItem key={2} value={JSON.stringify(classifications.terceira)}>
+                      {classifications.terceira.decisao}
+                    </MenuItem>
                   </Select>
                 </RiskCell>
               ))}

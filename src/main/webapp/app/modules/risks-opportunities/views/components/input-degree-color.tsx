@@ -7,7 +7,7 @@ import { InputAdornment } from '@mui/material';
 interface DegreeProps {
   label: string;
   color: string;
-  value: string;
+  value: string | any;
   InputProps?: {};
 }
 const DegreeBulletColor: React.FC<any> = ({ color }) => {

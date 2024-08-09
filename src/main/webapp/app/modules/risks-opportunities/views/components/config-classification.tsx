@@ -15,14 +15,14 @@ import {
 
 interface ConfigurationsDegreesProps {
   title: string;
-  configValues?: Graus;
+  configValues?: ClassificacaoOportunidades;
   setConfigValues?: React.Dispatch<React.SetStateAction<ConfiguracaoRiscoOportunidade>>;
   isDegree?: boolean;
 }
 
 const InputPropsTextFild = { readOnly: true };
 
-const ConfigurationsDegrees = ({ title, configValues, setConfigValues, isDegree }: ConfigurationsDegreesProps) => {
+const ConfigurationsClassification = ({ title, configValues, setConfigValues, isDegree }: ConfigurationsDegreesProps) => {
   const [probability, setProbability] = useState<string>('');
 
   return (
@@ -30,34 +30,52 @@ const ConfigurationsDegrees = ({ title, configValues, setConfigValues, isDegree 
       <Typography variant="h5">{isDegree ? `Graus de ${title}` : `Classificação das ${title}`}</Typography>
       <Divider variant="fullWidth" sx={{ bgcolor: 'black', height: 1, marginX: -2 }} />
       <Stack direction="row" spacing={2}>
-        <InputDegreeColor label="Grau" color={'#07C610'} value={'Baixo'} InputProps={InputPropsTextFild} />
-        <TextField label="Peso" placeholder="Peso" value={1} InputProps={InputPropsTextFild} sx={{ width: '140px' }} />
+        <TextField label="Código" placeholder="Código" value={1} InputProps={InputPropsTextFild} sx={{ width: '140px' }} />
+        <TextField
+          label="Decisão"
+          placeholder="Decisão"
+          value={configValues?.primeira?.decisao}
+          InputProps={InputPropsTextFild}
+          sx={{ width: '150px' }}
+        />
         <TextField
           label="Descrição"
           placeholder={`Descrição do grau de ${title}`}
-          value={configValues?.baixo}
+          value={configValues?.primeira.descricao}
           InputProps={InputPropsTextFild}
           sx={{ flexGrow: 1 }}
         />
       </Stack>
       <Stack direction="row" spacing={2}>
-        <InputDegreeColor label="Grau" color={'#FFDF78'} value={'Médio'} InputProps={InputPropsTextFild} />
-        <TextField label="Peso" placeholder="Peso" value={2} InputProps={InputPropsTextFild} sx={{ width: '140px' }} />
+        <TextField label="Código" placeholder="Código" value={2} InputProps={InputPropsTextFild} sx={{ width: '140px' }} />
+        <TextField
+          label="Decisão"
+          placeholder="Decisão"
+          value={configValues?.segunda?.decisao}
+          InputProps={InputPropsTextFild}
+          sx={{ width: '150px' }}
+        />
         <TextField
           label="Descrição"
           placeholder={`Descrição do grau de ${title}`}
-          value={configValues?.baixo}
+          value={configValues?.segunda.descricao}
           InputProps={InputPropsTextFild}
           sx={{ flexGrow: 1 }}
         />
       </Stack>
       <Stack direction="row" spacing={2}>
-        <InputDegreeColor label="Grau" color={'#FF8E6A'} value={'Alto'} InputProps={InputPropsTextFild} />
-        <TextField label="Peso" placeholder="Peso" value={3} InputProps={InputPropsTextFild} sx={{ width: '140px' }} />
+        <TextField label="Código" placeholder="Código" value={3} InputProps={InputPropsTextFild} sx={{ width: '140px' }} />
+        <TextField
+          label="Decisão"
+          placeholder="Decisão"
+          value={configValues?.terceira?.decisao}
+          InputProps={InputPropsTextFild}
+          sx={{ width: '150px' }}
+        />
         <TextField
           label="Descrição"
           placeholder={`Descrição do grau de ${title}`}
-          value={configValues?.baixo}
+          value={configValues?.terceira.descricao}
           InputProps={InputPropsTextFild}
           sx={{ flexGrow: 1 }}
         />
@@ -66,4 +84,4 @@ const ConfigurationsDegrees = ({ title, configValues, setConfigValues, isDegree 
   );
 };
 
-export default ConfigurationsDegrees;
+export default ConfigurationsClassification;
