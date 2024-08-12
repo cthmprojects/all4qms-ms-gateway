@@ -30,7 +30,7 @@ const reasonsApiUrl = 'services/all4qmsmsrnc/api/porques';
 const apiPartesInteressadasUrl = 'services/all4qmsmsrisco/api/risco/partes-interessadas';
 
 // Initial State
-const initialState: EntityState<RiskOpportunity> = {
+const initialState: EntityState<RawRiskOpportunity> = {
   entities: [],
   entity: null,
   errorMessage: null,
@@ -86,7 +86,7 @@ export const listROs = createAsyncThunk('ro/list', async (params: ListPagination
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
   const queryString = queryParams.join('&');
 
-  return axios.get<Array<RiskOpportunity>>(`${apiRiscoOportunidadeUrl}${queryString ? `?${queryString}` : ''}`);
+  return axios.get<Array<RawRiskOpportunity>>(`${apiRiscoOportunidadeUrl}${queryString ? `?${queryString}` : ''}`);
 });
 
 export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: ListParams) => {
@@ -131,11 +131,11 @@ export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: Lis
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
   const queryString = queryParams.join('&');
 
-  return axios.get<Array<RiskOpportunity>>(`${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`);
+  return axios.get<Array<RawRiskOpportunity>>(`${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`);
 });
 
 export const createRO = createAsyncThunk('ro/create', async (data: RiskOpportunity) => {
-  return await axios.post<RiskOpportunity>(apiRiscoOportunidadeUrl, data);
+  return await axios.post<RawRiskOpportunity>(apiRiscoOportunidadeUrl, data);
 });
 
 interface updateParams {
@@ -151,7 +151,7 @@ export const deleteRO = createAsyncThunk('ro/delete', async (id: number | string
 });
 
 export const getROById = createAsyncThunk('ro/get', async (id: number | string) => {
-  const { data } = await axios.get<RiskOpportunity>(`${apiRiscoOportunidadeUrl}/${id}`);
+  const { data } = await axios.get<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${id}`);
 
   return data;
 });

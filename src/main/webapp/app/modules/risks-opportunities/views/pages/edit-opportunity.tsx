@@ -16,6 +16,7 @@ import {
   SummarizedProcess,
   SummarizedUser,
 } from '../../models';
+import { getROById } from '../../reducers/risks-opportunities.reducer';
 import { BaseDetails } from '../components';
 
 const EditOpportunity = () => {
@@ -26,10 +27,16 @@ const EditOpportunity = () => {
   useEffect(() => {
     dispatch(getProcesses());
     dispatch(getUsers({}));
+    dispatch(getROById(id));
   }, []);
 
   const allUsers = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const allProcesses = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+  const rawRiskOpportunity: RawRiskOpportunity = useAppSelector<RawRiskOpportunity>(state => state.all4qmsmsgatewayro.risco.entity);
+
+  useEffect(() => {
+    console.log('raw', rawRiskOpportunity);
+  }, [rawRiskOpportunity]);
 
   const getSummarizedProcesses = (): Array<SummarizedProcess> => {
     if (!allProcesses || allProcesses.length <= 0) {
