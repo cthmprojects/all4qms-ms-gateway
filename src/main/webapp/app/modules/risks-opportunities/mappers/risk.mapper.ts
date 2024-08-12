@@ -86,8 +86,6 @@ export const mapCompleteAnalysisToIshikawa = (completeAnalysis: CompleteAnalysis
 };
 
 export const mapCompleteAnalysisToReasons = (completeAnalysis: CompleteAnalysis): Reason | null => {
-  console.log('mapCompleteAnalysisToReasons', completeAnalysis);
-
   return completeAnalysis.useReasons
     ? {
         cause: completeAnalysis.reasonCause,

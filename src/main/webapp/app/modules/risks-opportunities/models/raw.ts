@@ -60,3 +60,48 @@ export type RawInterestedPart = {
   criadoEm: Date;
   atualizadoEm: Date;
 };
+
+export type RawMap = {
+  id?: number;
+  tipoRO: 'R' | 'O';
+  criadoPor: number;
+  atualizadoPor: number;
+  criadoEm: Date;
+  atualizadoEm: Date;
+  decisaoEixo11: {
+    id: number;
+    pesoRO?: number;
+  };
+  decisaoEixo12: {
+    id: number;
+    pesoRO?: number;
+  };
+  decisaoEixo13: {
+    id: number;
+    pesoRO?: number;
+  };
+  decisaoEixo21: {
+    id: number;
+    pesoRO?: number;
+  };
+  decisaoEixo22: {
+    id: number;
+    pesoRO?: number;
+  };
+  decisaoEixo23: {
+    id: number;
+    pesoRO?: number;
+  };
+  decisaoEixo31: {
+    id: number;
+    pesoRO?: number;
+  };
+  decisaoEixo32: {
+    id: number;
+    pesoRO?: number;
+  };
+  decisaoEixo33: {
+    id: number;
+    pesoRO?: number;
+  };
+};

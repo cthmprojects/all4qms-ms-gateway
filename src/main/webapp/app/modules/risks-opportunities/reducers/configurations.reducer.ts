@@ -4,7 +4,6 @@ import axios from 'axios';
 import { Configuration } from '../models';
 
 const apiUrl = 'services/all4qmsmsrisco/api/risco/linha-configros';
-//              services/all4qmsmsrisco/api/risco/linha-configros
 
 const initialState: EntityState<Configuration> = {
   loading: false,
@@ -44,13 +43,15 @@ export const getConfigurations = createAsyncThunk('get/configurations', async (p
   const urlParams: string = query ? `?${query}` : '';
   const url: string = `${apiUrl}${urlParams}`;
 
-  console.log('url', url);
-
   return axios.get<Array<Configuration>>(url);
 });
 
 export const saveConfiguration = createAsyncThunk('save/configuration', async (configuration: Configuration) => {
   return axios.post<Configuration>(apiUrl, configuration);
+});
+
+export const updateConfiguration = createAsyncThunk('update/configuration', async (configuration: Configuration) => {
+  return axios.put<Configuration>(`${apiUrl}/${configuration.id}`, configuration);
 });
 
 const configurationsSlice = createEntitySlice({
@@ -67,6 +68,10 @@ const configurationsSlice = createEntitySlice({
         state.entities = action.payload.data;
       })
       .addMatcher(isFulfilled(saveConfiguration), (state, action) => {
+        state.loading = false;
+        state.entity = action.payload.data;
+      })
+      .addMatcher(isFulfilled(updateConfiguration), (state, action) => {
         state.loading = false;
         state.entity = action.payload.data;
       });
