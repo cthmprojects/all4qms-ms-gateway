@@ -6,6 +6,7 @@ import { Route } from 'react-router-dom';
 import HomeGoalsList from './ui/home';
 
 import { ReducersMapObject, combineReducers } from 'redux';
+import { ResultPage } from './ui/result-page';
 
 const GoalsObjectivesRoutes = () => {
   const store = getStore();
@@ -17,7 +18,7 @@ const GoalsObjectivesRoutes = () => {
         <Route path="" element={<HomeGoalsList />} />
         <Route path="new/" element={<> </>} />
         <Route path="edit/:id" element={<> </>} />
-        <Route path="result/:id" element={<> </>} />
+        <Route path="result/:id" element={<ResultPage />} />
         <Route path="resources" element={<> </>} />
       </ErrorBoundaryRoutes>
     </div>
