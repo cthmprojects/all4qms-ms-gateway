@@ -1,5 +1,7 @@
+import { Configuration } from './configuration';
+
 export type ControlActionSummary = {
   description: string;
-  probability: 'Baixo' | 'Médio' | 'Alto';
-  severity: 'Baixo' | 'Médio' | 'Alto';
+  probability: Configuration;
+  severity: Configuration;
 };

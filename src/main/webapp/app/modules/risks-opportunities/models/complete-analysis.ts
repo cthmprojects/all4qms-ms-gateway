@@ -1,8 +1,10 @@
+import { Configuration } from './configuration';
+
 export type CompleteAnalysis = {
   description: string;
   meaning: string;
-  probability: 'Baixo' | 'Médio' | 'Alto';
-  severity: 'Baixo' | 'Médio' | 'Alto';
+  probability: Configuration;
+  severity: Configuration;
   useIshikawa: boolean;
   ishikawaCause: string;
   environment: string;

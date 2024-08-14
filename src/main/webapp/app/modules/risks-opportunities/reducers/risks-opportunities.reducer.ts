@@ -8,6 +8,7 @@ import {
   AnalysisDetails,
   AnalysisSummary,
   Ishikawa,
+  PaginatedResource,
   RawInterestedPart,
   RawRiskOpportunity,
   RawRiskOpportunityAnalysis,
@@ -94,32 +95,6 @@ export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: Lis
 
   const queryParams: string[] = [];
 
-  queryParams.push('sort=desc');
-
-  if (tipoRO) {
-    queryParams.push(`tipoRO=${tipoRO}`);
-  }
-
-  if (idProcesso) {
-    queryParams.push(`idProcesso=${idProcesso}`);
-  }
-
-  if (probabilidadeComplexidade) {
-    queryParams.push(`probabilidadeComplexidade=${probabilidadeComplexidade}`);
-  }
-
-  if (severidadeMelhoria) {
-    queryParams.push(`severidade=${severidadeMelhoria}`);
-  }
-
-  if (decisao) {
-    queryParams.push(`decisao=${decisao}`);
-  }
-
-  if (pesquisa) {
-    queryParams.push(`pesquisa=${pesquisa}`);
-  }
-
   if (page) {
     queryParams.push(`page=${page}`);
   }
@@ -128,10 +103,19 @@ export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: Lis
     queryParams.push(`size=${size}`);
   }
 
+  queryParams.push('sort=desc');
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
+
   const queryString = queryParams.join('&');
 
-  return axios.get<Array<RawRiskOpportunity>>(`${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`);
+  return axios.post<PaginatedResource<RawRiskOpportunity>>(`${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`, {
+    tipoRO: tipoRO ?? null,
+    idProcesso: idProcesso ?? null,
+    probabilidadeComplexidade: probabilidadeComplexidade ?? null,
+    severidadeMelhoria: severidadeMelhoria ?? null,
+    decisao: decisao ?? null,
+    pesquisa: pesquisa ?? null,
+  });
 });
 
 export const createRO = createAsyncThunk('ro/create', async (data: RiskOpportunity) => {
@@ -154,6 +138,10 @@ export const getROById = createAsyncThunk('ro/get', async (id: number | string) 
   const { data } = await axios.get<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${id}`);
 
   return data;
+});
+
+export const editRiskOpportunity = createAsyncThunk('ro/edit', async (riskOpportunity: RawRiskOpportunity) => {
+  return await axios.put<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${riskOpportunity.id}`, riskOpportunity);
 });
 
 export const saveRiskOpportunity = createAsyncThunk('ro/save', async (riskOpportunity: RawRiskOpportunity) => {
@@ -333,14 +321,14 @@ const ROSlice = createEntitySlice({
         };
       })
       .addMatcher(isFulfilled(listROFiltro), (state, action) => {
-        const { data, headers } = action.payload;
+        const { data } = action.payload;
 
         return {
           ...state,
           loading: false,
-          entities: data,
+          entities: data.content,
           entity: null,
-          totalItems: parseInt(headers['x-total-count'], 10),
+          totalItems: data.totalElements,
         };
       })
       .addMatcher(isFulfilled(createRO), (state, action) => {
@@ -361,6 +349,12 @@ const ROSlice = createEntitySlice({
       })
       .addMatcher(isFulfilled(saveRiskOpportunity), (state, action) => {
         state.loading = false;
+      })
+      .addMatcher(isFulfilled(editRiskOpportunity), (state, action) => {
+        const { data } = action.payload;
+
+        state.loading = false;
+        state.entity = data;
       });
   },
 });

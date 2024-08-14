@@ -27,6 +27,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
 
   const otherDate = useWatch({ control, name: 'date' });
   const formInterestedParts = useWatch({ control, name: 'interestedParts' });
+  const processForm = useWatch({ control, name: 'process' });
 
   useEffect(() => {
     // Poderia ser qualquer outro campo registrado
@@ -66,45 +67,60 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
           <InputLabel>Emitido por</InputLabel>
           <Select value={user} input={<OutlinedInput label="Emitido por" />} disabled>
             <MenuItem selected value={user}>
-              {user.firstName}
+              {user?.firstName}
             </MenuItem>
           </Select>
         </FormControl>
 
-        <MaterialDatepicker label="Data" selected={otherDate} onChange={date => setValue('date', date, { shouldValidate: true })} />
+        <MaterialDatepicker
+          disabled={readonly}
+          label="Data"
+          selected={otherDate}
+          onChange={date => setValue('date', date, { shouldValidate: true })}
+        />
 
         {!isOpportunity && (
           <>
-            <Autocomplete
+            {/* <Autocomplete
               disableClearable
               onChange={(event, value, reason, details) => setValue('type', value, { shouldValidate: true })}
               options={types}
               renderInput={params => <TextField {...params} label="Tipo" />}
               value={type}
-            />
+            /> */}
             <Autocomplete
               disableClearable
-              onChange={(event, value, reason, details) => setValue('processId', value.id, { shouldValidate: true })}
+              disabled={readonly}
+              onChange={(event, value, reason, details) => setValue('process', value, { shouldValidate: true })}
               options={processes}
               getOptionLabel={option => option.name}
               renderInput={params => <TextField {...params} label="Processo" />}
-              value={process}
+              value={processForm}
             />
           </>
         )}
       </Stack>
 
       <Stack direction="row" spacing={2}>
-        <TextField label="Fluxo" {...fieldHook('flow')} placeholder="Fluxo" sx={{ flexGrow: 1 }} />
-        <TextField label="Atividade" {...fieldHook('activity')} placeholder="Atividade" />
-      </Stack>
-
-      <Stack direction="row" spacing={2}>
-        <TextField label="Descrição" multiline placeholder="Descrição" rows={5} sx={{ flexGrow: 1 }} {...fieldHook('description')} />
+        <TextField disabled={readonly} label="Fluxo" {...fieldHook('flow')} placeholder="Fluxo" sx={{ flexGrow: 1 }} />
+        <TextField disabled={readonly} label="Atividade" {...fieldHook('activity')} placeholder="Atividade" />
       </Stack>
 
       <Stack direction="row" spacing={2}>
         <TextField
+          disabled={readonly}
+          label="Descrição"
+          multiline
+          placeholder="Descrição"
+          rows={5}
+          sx={{ flexGrow: 1 }}
+          {...fieldHook('description')}
+        />
+      </Stack>
+
+      <Stack direction="row" spacing={2}>
+        <TextField
+          disabled={readonly}
           label={getFirstAuxiliaryDescriptionLabel()}
           multiline
           placeholder={getFirstAuxiliaryDescriptionLabel()}
@@ -113,6 +129,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
           {...fieldHook('firstAuxiliaryDescription')}
         />
         <TextField
+          disabled={readonly}
           label={getSecondAuxiliaryDescriptionLabel()}
           multiline
           placeholder={getSecondAuxiliaryDescriptionLabel()}
@@ -125,6 +142,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
       <Stack spacing={2}>
         <Stack direction="row" spacing={2}>
           <TextField
+            disabled={readonly}
             label="Parte interessada"
             onChange={event => onTextChanged(event, setInterestedPart)}
             placeholder="Parte interessada"
@@ -138,6 +156,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
 
         <Autocomplete
           clearIcon={false}
+          disabled={readonly}
           options={[]}
           freeSolo
           multiple

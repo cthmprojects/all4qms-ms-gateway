@@ -34,19 +34,19 @@ const ConfigDegree = ({ code, color, decision, description, label, title, weight
     <Stack direction="row" spacing={2}>
       {isDegree ? (
         <>
-          <InputDegreeColor label="Grau" color={color} value={label} InputProps={{ readOnly: true }} />
-          <TextField label="Peso" placeholder="Peso" value={weight ? weight.toString() : ''} InputProps={{ readOnly: true }} />
+          <InputDegreeColor label="Grau" color={color ?? 'black'} value={label ?? ''} InputProps={{ readOnly: true }} />
+          <TextField label="Peso" placeholder="Peso" value={weight?.toString() ?? ''} InputProps={{ readOnly: true }} />
         </>
       ) : (
         <>
-          <TextField label="Código" placeholder="Código" value={code ? code.toString() : ''} InputProps={{ readOnly: true }} />
-          <TextField label="Decisão" placeholder="Decisão" value={decision} InputProps={{ readOnly: true }} />
+          <TextField label="Código" placeholder="Código" value={code?.toString() ?? ''} InputProps={{ readOnly: true }} />
+          <TextField label="Decisão" placeholder="Decisão" value={decision ?? ''} InputProps={{ readOnly: true }} />
         </>
       )}
       <TextField
         label="Descrição"
         onChange={event => onChanged(event.target.value)}
-        placeholder={`Descrição do grau de ${title}`}
+        placeholder={`Descrição do grau de ${title ?? ''}`}
         value={desc}
         sx={{ flexGrow: 1 }}
       />

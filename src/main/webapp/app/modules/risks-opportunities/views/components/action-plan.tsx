@@ -63,12 +63,19 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
       <Typography variant="h6">Plano de ação</Typography>
 
       <Stack spacing={2} sx={{ flexGrow: 1 }}>
-        <TextField label="Descrição da ação" maxRows={5} multiline placeholder="Descrição da ação" {...fieldHook('actionDescription')} />
+        <TextField
+          disabled={readonly}
+          label="Descrição da ação"
+          maxRows={5}
+          multiline
+          placeholder="Descrição da ação"
+          {...fieldHook('actionDescription')}
+        />
 
         <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
           <DatePicker
-            selected={actionDate}
             disabled={readonly}
+            selected={actionDate}
             onChange={newDate => setValue('actionDate', newDate, { shouldValidate: true })}
             className="date-picker"
             dateFormat={'dd/MM/yyyy'}
@@ -76,6 +83,7 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
 
           <Autocomplete
             disableClearable
+            disabled={readonly}
             getOptionLabel={option => option.name}
             onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setResponsible)}
             options={responsibles}
@@ -85,7 +93,11 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
           />
 
           <Stack direction="row" alignItems="center">
-            <Checkbox checked={shouldVerify} onChange={(event, checked) => onCheckboxChanged(event, checked, setShouldVerify)} />
+            <Checkbox
+              disabled={readonly}
+              checked={shouldVerify}
+              onChange={(event, checked) => onCheckboxChanged(event, checked, setShouldVerify)}
+            />
 
             <Typography>Verificar</Typography>
           </Stack>
@@ -100,6 +112,7 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
 
           <Autocomplete
             disableClearable
+            disabled={readonly}
             getOptionLabel={option => option.name}
             onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setVerifier)}
             options={verifiers}

@@ -53,13 +53,21 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
 
           <Stack direction="row" spacing={2}>
             <Stack direction="row" alignItems="center">
-              <Checkbox checked={implemented} onChange={(event, checked) => onCheckboxChanged(event, checked, setImplemented)} />
+              <Checkbox
+                disabled={readonly}
+                checked={implemented}
+                onChange={(event, checked) => onCheckboxChanged(event, checked, setImplemented)}
+              />
 
               <Typography>Sim</Typography>
             </Stack>
 
             <Stack direction="row" alignItems="center">
-              <Checkbox checked={!implemented} onChange={(event, checked) => onCheckboxChanged(event, !checked, setImplemented)} />
+              <Checkbox
+                disabled={readonly}
+                checked={!implemented}
+                onChange={(event, checked) => onCheckboxChanged(event, !checked, setImplemented)}
+              />
 
               <Typography>Não</Typography>
             </Stack>
@@ -76,6 +84,7 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
 
         <Autocomplete
           disableClearable
+          disabled={readonly}
           getOptionLabel={option => option.name}
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setVerifier)}
           options={verifiers}
@@ -86,6 +95,7 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
       </Stack>
 
       <TextField
+        disabled={readonly}
         label={description}
         maxRows={5}
         multiline

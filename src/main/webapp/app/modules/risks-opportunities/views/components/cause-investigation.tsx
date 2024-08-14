@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import { onCheckboxChanged } from '../../utils';
 import { useFormContext, useWatch } from 'react-hook-form';
 
-const CauseInvestigation = () => {
+type CauseInvestigationProps = {
+  readonly?: boolean;
+};
+
+const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
   const [useIshikawa, setUseIshikawa] = useState<boolean>(false);
   const [useReasons, setUseReasons] = useState<boolean>(true);
 
@@ -34,35 +38,35 @@ const CauseInvestigation = () => {
 
       <Stack direction="row" spacing={2}>
         <Stack direction="row" alignItems="center">
-          <Checkbox checked={useIshikawa} onChange={onUseIshikawaChanged} />
+          <Checkbox disabled={readonly} checked={useIshikawa} onChange={onUseIshikawaChanged} />
           <Typography>Ishikawa</Typography>
         </Stack>
 
         <Stack direction="row" alignItems="center">
-          <Checkbox checked={useReasons} onChange={onUseReasonsChanged} />
+          <Checkbox disabled={readonly} checked={useReasons} onChange={onUseReasonsChanged} />
           <Typography>Resposta dos 5 porquês</Typography>
         </Stack>
       </Stack>
 
       {useIshikawa && (
         <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-          <TextField label="Causa" maxRows={5} multiline placeholder="Causa" {...fieldHook('ishikawaCause')} />
+          <TextField disabled={readonly} label="Causa" maxRows={5} multiline placeholder="Causa" {...fieldHook('ishikawaCause')} />
 
           <Stack spacing={2} sx={{ flexGrow: 1 }}>
             <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-              <TextField label="Meio ambiente" placeholder="Meio ambiente" {...fieldHook('environment')} />
+              <TextField disabled={readonly} label="Meio ambiente" placeholder="Meio ambiente" {...fieldHook('environment')} />
 
-              <TextField label="Mão de obra" placeholder="Mão de obra" {...fieldHook('workforce')} />
+              <TextField disabled={readonly} label="Mão de obra" placeholder="Mão de obra" {...fieldHook('workforce')} />
 
-              <TextField label="Método" placeholder="Método" {...fieldHook('method')} />
+              <TextField disabled={readonly} label="Método" placeholder="Método" {...fieldHook('method')} />
             </Stack>
 
             <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-              <TextField label="Máquina" placeholder="Máquina" {...fieldHook('machine')} />
+              <TextField disabled={readonly} label="Máquina" placeholder="Máquina" {...fieldHook('machine')} />
 
-              <TextField label="Medição" placeholder="Medição" {...fieldHook('measurement')} />
+              <TextField disabled={readonly} label="Medição" placeholder="Medição" {...fieldHook('measurement')} />
 
-              <TextField label="Matéria prima" placeholder="Matéria prima" {...fieldHook('rawMaterial')} />
+              <TextField disabled={readonly} label="Matéria prima" placeholder="Matéria prima" {...fieldHook('rawMaterial')} />
             </Stack>
           </Stack>
         </Stack>
@@ -70,21 +74,21 @@ const CauseInvestigation = () => {
 
       {useReasons && (
         <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-          <TextField label="Causa" maxRows={5} multiline placeholder="Causa" {...fieldHook('reasonCause')} />
+          <TextField disabled={readonly} label="Causa" maxRows={5} multiline placeholder="Causa" {...fieldHook('reasonCause')} />
 
           <Stack spacing={2} sx={{ flexGrow: 1 }}>
-            <TextField label="Porquê?" placeholder="Porquê?" {...fieldHook('reason1')} />
+            <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...fieldHook('reason1')} />
 
-            <TextField label="Porquê?" placeholder="Porquê?" {...fieldHook('reason2')} />
+            <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...fieldHook('reason2')} />
 
-            <TextField label="Porquê?" placeholder="Porquê?" {...fieldHook('reason3')} />
+            <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...fieldHook('reason3')} />
 
-            <TextField label="Porquê?" placeholder="Porquê?" {...fieldHook('reason4')} />
+            <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...fieldHook('reason4')} />
 
-            <TextField label="Porquê?" placeholder="Porquê?" {...fieldHook('reason5')} />
+            <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...fieldHook('reason5')} />
           </Stack>
 
-          <TextField label="Efeito" maxRows={5} multiline placeholder="Efeito" {...fieldHook('reasonEffect')} />
+          <TextField disabled={readonly} label="Efeito" maxRows={5} multiline placeholder="Efeito" {...fieldHook('reasonEffect')} />
         </Stack>
       )}
     </Stack>

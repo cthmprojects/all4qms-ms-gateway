@@ -1,6 +1,6 @@
 import { Button, Stack } from '@mui/material';
 import { useAppSelector } from 'app/config/store';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   mapCompleteAnalysisToActionPlanEfficacy,
@@ -9,8 +9,6 @@ import {
   mapCompleteAnalysisToIshikawa,
   mapCompleteAnalysisToReasons,
   mapCompleteToAnalysisDetails,
-  mapInterestPartToRaw,
-  mapLevelToConfiguration,
   mapRiskOpportunity,
 } from '../../mappers';
 import {
@@ -19,49 +17,62 @@ import {
   ActionPlanSummary,
   AnalysisDetails,
   CompleteAnalysis,
+  Configuration,
   ControlActionSummary,
+  Enums,
   Ishikawa,
+  RawMap,
   RawRiskOpportunity,
-  RawRiskOpportunityConfiguration,
   Reason,
   SummarizedProcess,
   SummarizedUser,
 } from '../../models';
-import {
-  saveInterestedPartAsync,
-  saveRiskOpportunityAnalysis,
-  saveRiskOpportunityApprovalAsync,
-  saveRiskOpportunityConfigAsync,
-  saveRiskOpportunityInvestigation,
-  saveRiskOpportunityPlanAsync,
-} from '../../reducers/risks-opportunities.reducer';
 import Analysis from './analysis';
 import ControlAction from './control-action';
 import GeneralInformation from './general-information';
 
 type BaseDetailsProps = {
+  enums: Enums;
+  firstConfigurations: Array<Configuration>;
   isOpportunity?: boolean;
+  map: RawMap | null;
   processes: Array<SummarizedProcess>;
   readonly?: boolean;
+  riskOpportunity?: RawRiskOpportunity;
+  secondConfigurations: Array<Configuration>;
   users: Array<SummarizedUser>;
   onBack: () => void;
   onSave?: (
+    senderId: number,
     efficacy: ActionPlanEfficacy,
     implementation: ActionPlanImplementation,
     actionPlanSummary: ActionPlanSummary,
     ishikawa: Ishikawa | null,
     reasons: Reason | null,
     details: AnalysisDetails,
+    interestedParts: Array<string>,
     rawRiskOpportunity: RawRiskOpportunity
   ) => void;
 };
 
-const BaseDetails = ({ isOpportunity, processes, readonly, users, onBack, onSave }: BaseDetailsProps) => {
+const BaseDetails = ({
+  enums,
+  firstConfigurations,
+  isOpportunity,
+  map,
+  processes,
+  readonly,
+  riskOpportunity,
+  secondConfigurations,
+  users,
+  onBack,
+  onSave,
+}: BaseDetailsProps) => {
   let isAdmin = useAppSelector(state => state.authentication.account);
 
   const generalFormMethods = useForm({
     defaultValues: {
-      activity: null,
+      activity: '',
       date: null,
       interestedParts: [],
       description: '',
@@ -79,8 +90,8 @@ const BaseDetails = ({ isOpportunity, processes, readonly, users, onBack, onSave
   const controlActionFormMethods = useForm({
     defaultValues: {
       description: '',
-      probability: 'Baixo',
-      severity: 'Baixo',
+      probability: null,
+      severity: null,
     },
     mode: 'all',
     reValidateMode: 'onChange',
@@ -90,8 +101,8 @@ const BaseDetails = ({ isOpportunity, processes, readonly, users, onBack, onSave
     defaultValues: {
       description: '',
       meaning: '',
-      probability: 'Baixo',
-      severity: 'Baixo',
+      probability: null,
+      severity: null,
       useIshikawa: false,
       ishikawaCause: '',
       environment: '',
@@ -129,20 +140,69 @@ const BaseDetails = ({ isOpportunity, processes, readonly, users, onBack, onSave
 
   generalFormMethods.formState.isValid;
 
+  const filterConfiguration = (id: number, configurations: Array<Configuration>): Configuration | null => {
+    if (id <= 0 || !configurations || configurations.length <= 0) {
+      return null;
+    }
+
+    const filteredConfigurations: Array<Configuration> = configurations.filter(c => c.id === id);
+    return filteredConfigurations.length > 0 ? filteredConfigurations[0] : null;
+  };
+
   useEffect(() => {
     generalFormMethods.register('interestedParts', { min: 1, required: true });
     generalFormMethods.register('date', { required: true });
   }, []);
 
-  const parseLevel = (level: string): 'Baixo' | 'Médio' | 'Alto' => {
-    if (level.toUpperCase() === 'BAIXO') {
-      return 'Baixo';
-    } else if (level.toUpperCase() === 'MÉDIO') {
-      return 'Médio';
-    } else {
-      return 'Alto';
+  useEffect(() => {
+    if (!generalFormMethods || !riskOpportunity) {
+      return;
     }
-  };
+
+    generalFormMethods.setValue('activity', riskOpportunity.nomeAtividade);
+    generalFormMethods.setValue('date', new Date(riskOpportunity.dataRegistro));
+    generalFormMethods.setValue('description', riskOpportunity.descricao1);
+    generalFormMethods.setValue('firstAuxiliaryDescription', riskOpportunity.descricao2);
+    generalFormMethods.setValue('flow', riskOpportunity.nomeFluxo);
+    generalFormMethods.setValue(
+      'interestedParts',
+      riskOpportunity.partesInteressadas ? [riskOpportunity.partesInteressadas.nomeParteInteressada] : []
+    );
+    generalFormMethods.setValue('secondAuxiliaryDescription', riskOpportunity.descricao3);
+    generalFormMethods.setValue('type', riskOpportunity.tipoRO === 'R' ? 'Risco' : 'Oportunidade');
+
+    const filteredUsers: Array<SummarizedUser> = users.filter(u => u.id === riskOpportunity.idEmissor);
+    const user: SummarizedProcess | null = filteredUsers.length > 0 ? filteredUsers[0] : null;
+    generalFormMethods.setValue('sender', user);
+
+    const filteredProcesses: Array<SummarizedProcess> = processes.filter(p => p.id === riskOpportunity.idProcesso);
+    const process: SummarizedProcess | null = filteredProcesses.length > 0 ? filteredProcesses[0] : null;
+    generalFormMethods.setValue('process', process);
+  }, [generalFormMethods, processes, users, riskOpportunity]);
+
+  useEffect(() => {
+    generalFormMethods.register('interestedParts', { min: 1, required: true });
+    generalFormMethods.register('date', { required: true });
+  }, []);
+
+  useEffect(() => {
+    if (!controlActionFormMethods || !riskOpportunity) {
+      return;
+    }
+
+    controlActionFormMethods.setValue('description', riskOpportunity.descricaoControle);
+    const probability: Configuration = filterConfiguration(riskOpportunity.linhaConfigControle1?.id ?? 0, firstConfigurations);
+    const severity: Configuration = filterConfiguration(riskOpportunity.linhaConfigControle2?.id ?? 0, secondConfigurations);
+
+    controlActionFormMethods.setValue('probability', probability);
+    controlActionFormMethods.setValue('severity', severity);
+  }, [controlActionFormMethods, riskOpportunity]);
+
+  useEffect(() => {
+    if (!analysisFormMethods || !riskOpportunity) {
+      return;
+    }
+  }, [analysisFormMethods, riskOpportunity]);
 
   const save = async (): Promise<void> => {
     if (!onSave) {
@@ -160,15 +220,11 @@ const BaseDetails = ({ isOpportunity, processes, readonly, users, onBack, onSave
     const controlActionValues = controlActionFormMethods.getValues();
     const controlAction: ControlActionSummary = {
       ...controlActionValues,
-      probability: parseLevel(controlActionValues.probability),
-      severity: parseLevel(controlActionValues.severity),
     };
 
     const analysisValues = analysisFormMethods.getValues();
     const completeAnalysis: CompleteAnalysis = {
       ...analysisValues,
-      probability: parseLevel(analysisValues.probability),
-      severity: parseLevel(analysisValues.severity),
     };
 
     const efficacy: ActionPlanEfficacy = mapCompleteAnalysisToActionPlanEfficacy(completeAnalysis);
@@ -179,42 +235,13 @@ const BaseDetails = ({ isOpportunity, processes, readonly, users, onBack, onSave
     const details: AnalysisDetails = mapCompleteToAnalysisDetails(completeAnalysis);
     const rawRiskOpportunity: RawRiskOpportunity = mapRiskOpportunity(payload as any);
 
-    const controlActionProbabilityConfiguration: RawRiskOpportunityConfiguration = mapLevelToConfiguration(
-      controlAction.probability,
-      senderId
-    );
-    const controlActionSeverityConfiguration: RawRiskOpportunityConfiguration = mapLevelToConfiguration(controlAction.severity, senderId);
-
-    const controlActionProbabilityConfigurationId: number = await saveRiskOpportunityConfigAsync(controlActionProbabilityConfiguration);
-    const controlActionSeverityConfigurationId: number = await saveRiskOpportunityConfigAsync(controlActionSeverityConfiguration);
-    const riskOpportunityApprovalId: number = await saveRiskOpportunityApprovalAsync(implementation, efficacy);
-    const riskOpportunityPlanId: number = await saveRiskOpportunityPlanAsync(actionPlanSummary);
-    const riskOpportunityInvestigationId: number = await saveRiskOpportunityInvestigation(ishikawa, reasons);
-    const riskOpportunityAnalysisId: number = await saveRiskOpportunityAnalysis(
-      details,
-      senderId,
-      riskOpportunityApprovalId,
-      riskOpportunityInvestigationId,
-      riskOpportunityPlanId
-    );
-    const riskOpportunityInterestedPartsIds: Array<number> = [];
-    for (let i = 0; i < payload.interestedParts.length; i++) {
-      const interestedPart: string = payload.interestedParts[i];
-
-      const interestPartId: number | null = await saveInterestedPartAsync(mapInterestPartToRaw(interestedPart, senderId));
-
-      if (interestPartId) {
-        riskOpportunityInterestedPartsIds.push(interestPartId);
-      }
+    if (!isOpportunity) {
+      rawRiskOpportunity.descricaoControle = controlAction.description;
+      rawRiskOpportunity.idLinhaConfigControle1 = controlAction.probability.id;
+      rawRiskOpportunity.idLinhaConfigControle2 = controlAction.severity.id;
     }
 
-    rawRiskOpportunity.descricaoControle = controlAction.description;
-    rawRiskOpportunity.idLinhaConfigControle1 = controlActionProbabilityConfigurationId;
-    rawRiskOpportunity.idLinhaConfigControle2 = controlActionSeverityConfigurationId;
-    rawRiskOpportunity.idsAnaliseROS = [riskOpportunityAnalysisId];
-    rawRiskOpportunity.idPartesInteressadas = riskOpportunityInterestedPartsIds.length > 0 ? riskOpportunityInterestedPartsIds[0] : 0;
-
-    onSave(efficacy, implementation, actionPlanSummary, ishikawa, reasons, details, rawRiskOpportunity);
+    onSave(senderId, efficacy, implementation, actionPlanSummary, ishikawa, reasons, details, payload.interestedParts, rawRiskOpportunity);
   };
 
   const back = (): void => {
@@ -229,12 +256,19 @@ const BaseDetails = ({ isOpportunity, processes, readonly, users, onBack, onSave
 
       {!isOpportunity && (
         <FormProvider {...controlActionFormMethods}>
-          <ControlAction />
+          <ControlAction allProbabilities={firstConfigurations} allSeverities={secondConfigurations} readonly={readonly} />
         </FormProvider>
       )}
 
       <FormProvider {...analysisFormMethods}>
-        <Analysis users={users} />
+        <Analysis
+          enums={enums}
+          firstConfigurations={firstConfigurations}
+          map={map}
+          readonly={readonly}
+          secondConfigurations={secondConfigurations}
+          users={users}
+        />
       </FormProvider>
 
       <Stack justifyContent="flex-end" gap="20px" flexDirection="row">

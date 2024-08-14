@@ -1,5 +1,6 @@
 /* eslint-disable radix */
 /* eslint-disable no-console */
+import { Check, Visibility } from '@mui/icons-material';
 import BlockIcon from '@mui/icons-material/Block';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -11,10 +12,12 @@ import {
   Breadcrumbs,
   Button,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
   Select,
+  Stack,
   Tab,
   Table,
   TableBody,
@@ -24,6 +27,7 @@ import {
   TableRow,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
@@ -32,8 +36,8 @@ import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { a11yProps, CustomTabPanel } from 'app/shared/components/tabs';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { RiskOpportunity } from '../../models';
-import { listROFiltro } from '../../reducers/risks-opportunities.reducer';
+import { RawRiskOpportunity } from '../../models';
+import { listROFiltro, listROs } from '../../reducers/risks-opportunities.reducer';
 
 // Example
 const getSituacaoIcon = situacao => {
@@ -58,7 +62,7 @@ const columns = ['Fluxo', 'Atividade', 'Descrição', 'Causa', 'Efeito', 'Área/
 const Home = () => {
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
-  const rolist: Array<RiskOpportunity> = useAppSelector(state => state.all4qmsmsgatewayro.risco.entities);
+  const rolist: Array<RawRiskOpportunity> = useAppSelector(state => state.all4qmsmsgatewayro.risco.entities);
   const [tab, setTab] = useState(0);
   const [filters, setFilters] = useState({
     idProcesso: null,
@@ -83,15 +87,16 @@ const Home = () => {
   useEffect(() => {
     const { idProcesso, probabilidade, severidade, decisao, pesquisa } = filters;
     dispatch(
-      listROFiltro({
-        idProcesso,
-        probabilidadeComplexidade: probabilidade,
-        severidadeMelhoria: severidade,
-        decisao,
-        pesquisa,
-        size: pageSize,
-        page,
-      })
+      // listROFiltro({
+      //   idProcesso,
+      //   probabilidadeComplexidade: probabilidade,
+      //   severidadeMelhoria: severidade,
+      //   decisao,
+      //   pesquisa,
+      //   size: pageSize,
+      //   page,
+      // })
+      listROs({ page, size: pageSize })
     );
 
     dispatch(getProcesses());
@@ -131,38 +136,71 @@ const Home = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rolist?.map((ro: RiskOpportunity) => (
-            <TableRow key={ro.id}>
-              {/* <TableCell>{ro.fluxo ? ro.fluxo : 'Fluxo mock'}</TableCell>
-              <TableCell>{ro.atividade ? ro.atividade : 'Atividade 1 mock'}</TableCell>
-              <TableCell>{ro.descricao ? ro.descricao : 'Descrição 1 mock'}</TableCell>
-              <TableCell>{ro.causa ? ro.causa : 'Causa mock'}</TableCell>
-              <TableCell>{ro.efeito ? ro.efeito : 'Efeito mock'}</TableCell>
-              <TableCell>{ro.areaProcesso ? ro.areaProcesso : 'Area mock'}</TableCell>
-              <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  {ro.areaProcesso ? ro.areaProcesso : 'Probabilidade mock'}
-                </Box>
-              </TableCell>
-              <TableCell>{ro.serveridade ? ro.serveridade : 'Severidade mock'}</TableCell>
-              <TableCell>{ro.decisao ? ro.decisao : 'Decisão mock'}</TableCell> */}
+          {rolist?.map((ro: RawRiskOpportunity) => {
+            const {
+              atualizadoEm,
+              atualizadoPor,
+              criadoEm,
+              criadoPor,
+              dataRegistro,
+              descricao1,
+              descricao2,
+              descricao3,
+              descricaoControle,
+              id,
+              idEmissor,
+              idLinhaConfigControle1,
+              idLinhaConfigControle2,
+              idPartesInteressadas,
+              idProcesso,
+              idsAnaliseROS,
+              nomeAtividade,
+              nomeFluxo,
+              tipoRO,
+              linhaConfigControle1,
+              linhaConfigControle2,
+            } = ro;
 
-              {/* <TableCell> */}
-              {/* <IconButton title="Editar" color="primary" onClick={() => {}}>
-                  <EditIcon sx={{ color: '#e6b200' }} />
-                </IconButton>
-                <IconButton title="Visualizar" color="primary" onClick={() => {}}>
-                  <Visibility sx={{ color: '#0EBDCE' }} />
-                </IconButton>
-                <IconButton title="Imprimir" color="primary" onClick={() => {}}>
-                  <Check sx={{ color: '#03AC59' }} />
-                </IconButton> */}
-              {/* <IconButton title="Cancelar" color="primary" onClick={() => {}}>
-                  <CancelIcon sx={{ color: '#FF0000' }} />
-                </IconButton> */}
-              {/* </TableCell> */}
-            </TableRow>
-          ))}
+            const path: string = tipoRO === 'R' ? 'risk' : 'opportunity';
+
+            return (
+              <TableRow key={id}>
+                <TableCell>{nomeFluxo ?? '-'}</TableCell>
+                <TableCell>{nomeAtividade ?? '-'}</TableCell>
+                <TableCell>{descricao1 ?? '-'}</TableCell>
+                <TableCell>{descricao2 ?? '-'}</TableCell>
+                <TableCell>{descricao3 ?? '-'}</TableCell>
+                <TableCell>{idProcesso ?? '-'}</TableCell>
+                <TableCell>{idLinhaConfigControle1 ?? linhaConfigControle1?.id ?? '-'}</TableCell>
+                <TableCell>{idLinhaConfigControle2 ?? linhaConfigControle2?.id ?? '-'}</TableCell>
+                <TableCell>{descricaoControle ?? '-'}</TableCell>
+                <TableCell>
+                  <Stack direction="row" spacing={2}>
+                    <Tooltip title="Editar">
+                      <IconButton title="Editar" color="primary" onClick={() => navigate(`${path}/${id}`)}>
+                        <EditIcon sx={{ color: '#e6b200' }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Visualizar">
+                      <IconButton title="Visualizar" color="primary" onClick={() => navigate(`${path}/view/${id}`)}>
+                        <Visibility sx={{ color: '#0EBDCE' }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Imprimir">
+                      <IconButton title="Imprimir" color="primary" onClick={() => {}}>
+                        <Check sx={{ color: '#03AC59' }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Cancelar">
+                      <IconButton title="Cancelar" color="primary" onClick={() => {}}>
+                        <CancelIcon sx={{ color: '#FF0000' }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
@@ -262,6 +300,18 @@ const Home = () => {
           variant="filled"
         />
       </FormControl>
+
+      <Button
+        variant="contained"
+        className="secondary-button me-2"
+        style={{ marginRight: '10px', height: '42px', width: '185px' }}
+        onClick={() => {
+          navigate('configurations');
+        }}
+        title="Configurações"
+      >
+        Configurações
+      </Button>
     </div>
   );
 
