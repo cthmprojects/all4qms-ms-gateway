@@ -1,22 +1,25 @@
 import { createAsyncThunk, isFulfilled, isPending } from '@reduxjs/toolkit';
-import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducers/reducer.utils';
+import { AprovacaoNC, Plan } from 'app/modules/rnc/models';
+import { EntityState, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
+import { mapInterestPartToRaw } from '../mappers';
 import {
   ActionPlanEfficacy,
   ActionPlanImplementation,
   ActionPlanSummary,
   AnalysisDetails,
-  AnalysisSummary,
   Ishikawa,
   PaginatedResource,
+  RawCauseEffectInvestigation,
+  RawCompleteAnalysis,
   RawInterestedPart,
+  RawInvestigation,
+  RawIshikawaInvestigation,
+  RawPlanWithActions,
   RawRiskOpportunity,
-  RawRiskOpportunityAnalysis,
-  RawRiskOpportunityConfiguration,
   Reason,
   RiskOpportunity,
 } from '../models';
-import { AprovacaoNC, Plan } from 'app/modules/rnc/models';
 
 const apiRiscoOportunidadeUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades';
 const apiRiscoOportunidadeTipoROUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades/tipo-ro';
@@ -25,6 +28,7 @@ const apiLinhaConfigRoUrl = 'services/all4qmsmsrisco/api/risco/linha-configros';
 const apiAnaliseRoUrl = 'services/all4qmsmsrisco/api/risco/analise-ros';
 const aprovacaoNcUrl = 'services/all4qmsmsrnc/api/aprovacao-ncs';
 const planApiUrl = 'services/all4qmsmsrnc/api/planos';
+const investigationApiUrl = 'services/all4qmsmsrnc/api/investigacao';
 const actionPlanApiUrl = 'services/all4qmsmsrnc/api/acao-planos';
 const ishikawaApiUrl = 'services/all4qmsmsrnc/api/causa-efeitos';
 const reasonsApiUrl = 'services/all4qmsmsrnc/api/porques';
@@ -56,6 +60,18 @@ interface ListParams {
 interface ListPagination {
   page?: number;
   size?: number;
+}
+
+interface RiskOpportunityPayload {
+  senderId: number;
+  efficacy: ActionPlanEfficacy;
+  implementation: ActionPlanImplementation;
+  actionPlanSummary: ActionPlanSummary;
+  ishikawa: Ishikawa | null;
+  reasons: Reason | null;
+  details: AnalysisDetails;
+  interestedParts: Array<string>;
+  riskOpportunity: RawRiskOpportunity;
 }
 
 const formatDate = (date: Date, shortened: boolean = false): string => {
@@ -140,158 +156,246 @@ export const getROById = createAsyncThunk('ro/get', async (id: number | string) 
   return data;
 });
 
-export const editRiskOpportunity = createAsyncThunk('ro/edit', async (riskOpportunity: RawRiskOpportunity) => {
-  return await axios.put<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${riskOpportunity.id}`, riskOpportunity);
-});
+export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: RiskOpportunityPayload) => {
+  const { actionPlanSummary, details, efficacy, implementation, interestedParts, ishikawa, riskOpportunity, reasons, senderId } = payload;
 
-export const saveRiskOpportunity = createAsyncThunk('ro/save', async (riskOpportunity: RawRiskOpportunity) => {
-  return await axios.post<RawRiskOpportunity>(apiRiscoOportunidadeUrl, riskOpportunity);
-});
-
-export const saveRiskOpportunityConfigAsync = async (configuration: RawRiskOpportunityConfiguration): Promise<number | null> => {
-  const response = await axios.post<RawRiskOpportunityConfiguration>(apiLinhaConfigRoUrl, configuration);
-
-  if (response.status === 201) {
-    return response.data?.id;
-  } else {
-    return null;
-  }
-};
-
-export const saveRiskOpportunityApprovalAsync = async (
-  implementation: ActionPlanImplementation,
-  efficacy: ActionPlanEfficacy
-): Promise<number | null> => {
-  const now: Date = new Date();
-  const response = await axios.post<AprovacaoNC>(aprovacaoNcUrl, {
-    possuiImplementacao: implementation.implemented,
-    dataImplementacao: implementation.implementationDate,
-    responsavelImplementacao: implementation.implementationResponsibleId,
-    descImplementacao: implementation.implementationDescription,
-    possuiEficacia: efficacy.efficacyVerified,
-    dataEficacia: efficacy.efficacyVerificationDate,
-    responsavelEficacia: efficacy.efficacyResponsibleId,
-    novoRegistro: true,
-    descEficacia: efficacy.efficacyDescription,
-    dataFechamento: null,
-    responsavelFechamento: null,
-    alterarRisco: false,
-    vinculoRisco: null,
-    descFechamento: null,
-    criadoEm: now,
-    atualizadoEm: now,
-  });
-
-  if (response.status === 201) {
-    return response.data?.id;
-  } else {
-    return null;
-  }
-};
-
-export const saveRiskOpportunityPlanAsync = async (summary: ActionPlanSummary): Promise<number | null> => {
-  const planResponse = await axios.post<Plan>(planApiUrl, {
-    statusPlano: 'ABERTO',
-    qtdAcoes: 1,
-    qtdAcoesConcluidas: 0,
-    percentualPlano: 0,
-    dtConclusaoPlano: formatDate(summary.actionDate),
-    idNaoConformidade: 1,
-  });
-
-  if (planResponse.status !== 201) {
-    return null;
+  const interestedPartIdToBeRemoved: number = riskOpportunity.idPartesInteressadas;
+  if (interestedPartIdToBeRemoved > 0) {
+    await axios.delete(`${apiPartesInteressadasUrl}/${interestedPartIdToBeRemoved}`);
   }
 
-  const savedPlan: Plan = planResponse.data;
-
-  const response = await axios.post(actionPlanApiUrl, {
-    idPlano: savedPlan.id,
-    descricaoAcao: summary.actionDescription,
-    prazoAcao: formatDate(summary.actionDate, true),
-    idResponsavelAcao: summary.responsibleId,
-    statusAcao: 'VISTO',
-    dataVerificao: formatDate(summary.actionVerificationDate, true),
-    idResponsavelVerificaoAcao: summary.actionVerifierId,
-    idAnexosExecucao: null,
-    dataConclusaoAcao: formatDate(summary.actionVerificationDate),
-    planoId: savedPlan.id,
-  });
-
-  if (response.status === 201) {
-    return response.data.id;
-  } else {
-    return null;
-  }
-};
-
-export const saveRiskOpportunityAnalysis = async (
-  details: AnalysisDetails,
-  id: number,
-  approvalId: number,
-  investigationId: number,
-  planId: number
-): Promise<number | null> => {
-  const now: Date = new Date();
-  const response = await axios.post<RawRiskOpportunityAnalysis>(apiAnaliseRoUrl, {
-    id: null,
-    dataAnalise: now,
-    decisao: details.description,
-    descricaoDecisao: details.description,
-    corDecisao: '',
-    idInvestigacao: investigationId,
-    idPlano: planId,
-    idAprovacaoNC: approvalId,
-    criadoPor: id,
-    atualizadoPor: id,
-    criadoEm: now,
-    atualizadoEm: now,
-  });
-
-  if (response.status === 201) {
-    return response.data?.id;
-  } else {
-    return null;
-  }
-};
-
-export const saveRiskOpportunityInvestigation = async (ishikawa: Ishikawa | null, reason: Reason | null): Promise<number | null> => {
-  if (ishikawa) {
-    const response = await axios.post(ishikawaApiUrl, {
-      descCausaEfeito: ishikawa.cause,
-      meioAmbiente: ishikawa.environment,
-      maoDeObra: ishikawa.workforce,
-      metodo: ishikawa.method,
-      maquina: ishikawa.machine,
-      medicao: ishikawa.measurement,
-      materiaPrima: ishikawa.rawMaterial,
-    });
-
-    if (response.status === 201) {
-      return response.data?.id;
-    } else {
-      return null;
-    }
-  } else {
-    const response = await axios.post(reasonsApiUrl, {
-      descProblema: reason.effect,
-      pq1: reason.reason1,
-      pq2: reason.reason2,
-      pq3: reason.reason3,
-      pq4: reason.reason4,
-      pq5: reason.reason5,
-      descCausa: reason.cause,
-    });
-
-    if (response.status === 201) {
-      return response.data?.id;
-    } else {
-      return null;
+  const analysisIdsToBeRemoved: Array<number> = riskOpportunity.idsAnaliseROS;
+  if (analysisIdsToBeRemoved && analysisIdsToBeRemoved.length > 0) {
+    for (let i = 0; i < analysisIdsToBeRemoved.length; i++) {
+      const analysisIdToBeRemoved: number = analysisIdsToBeRemoved[i];
+      await axios.delete(`${apiAnaliseRoUrl}/${analysisIdToBeRemoved}`);
     }
   }
-};
 
-export const saveInterestedPartAsync = async (interestedPart: RawInterestedPart): Promise<number | null> => {
+  const riskOpportunityInterestedPartsIds: Array<number> = [];
+  for (let i = 0; i < interestedParts.length; i++) {
+    const interestedPart: string = interestedParts[i];
+
+    const interestPartId: number | null = await saveInterestedPartAsync(mapInterestPartToRaw(interestedPart, senderId));
+
+    if (interestPartId) {
+      riskOpportunityInterestedPartsIds.push(interestPartId);
+    }
+  }
+
+  riskOpportunity.idPartesInteressadas = riskOpportunityInterestedPartsIds.length > 0 ? riskOpportunityInterestedPartsIds[0] : 0;
+
+  riskOpportunity.idsAnaliseROS = null;
+
+  const response = await axios.put<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${riskOpportunity.id}`, riskOpportunity);
+
+  if (response.status !== 201) {
+    return null;
+  }
+
+  const resource: RawRiskOpportunity = response.data;
+
+  const now: Date = new Date();
+
+  const body: RawCompleteAnalysis = {
+    acoesPlano: [
+      {
+        atualizadoEm: null,
+        criadoEm: null,
+        descricaoAcao: actionPlanSummary.actionDescription,
+        prazoAcao: formatDate(actionPlanSummary.actionDate, true),
+        idResponsavelAcao: actionPlanSummary.responsibleId,
+        statusAcao: 'PENDENTE',
+        dataVerificao: formatDate(actionPlanSummary.actionVerificationDate, true),
+        idResponsavelVerificaoAcao: actionPlanSummary.actionVerifierId,
+        idAnexosExecucao: null,
+        dataConclusaoAcao: actionPlanSummary.actionVerificationDate,
+        idPlano: null,
+        planoId: null,
+      },
+    ],
+    analise: {
+      atualizadoEm: now,
+      atualizadoPor: senderId,
+      corDecisao: '',
+      criadoEm: now,
+      criadoPor: senderId,
+      dataAnalise: now,
+      decisao: details.meaning,
+      descricaoDecisao: details.description,
+      idAprovacaoNC: null,
+      idInvestigacao: null,
+      idPlano: null,
+      linhaConfigAnalise1: details.probability,
+      linhaConfigAnalise2: details.severity,
+      riscoOportunidade: resource,
+    },
+    aprovacao: {
+      alterarRisco: true,
+      atualizadoEm: now,
+      criadoEm: now,
+      dataEficacia: efficacy.efficacyVerificationDate,
+      dataFechamento: null,
+      dataImplementacao: implementation.implementationDate,
+      descEficacia: efficacy.efficacyDescription,
+      descFechamento: '',
+      descImplementacao: implementation.implementationDescription,
+      novoRegistro: true,
+      possuiEficacia: efficacy.efficacyVerified,
+      possuiImplementacao: implementation.implemented,
+      responsavelEficacia: efficacy.efficacyResponsibleId,
+      responsavelFechamento: null,
+      responsavelImplementacao: implementation.implementationResponsibleId,
+      vinculoRisco: resource.id,
+    },
+    ishikawa: {
+      descCausaEfeito: ishikawa?.cause,
+      maoDeObra: ishikawa?.workforce,
+      maquina: ishikawa?.machine,
+      materiaPrima: ishikawa?.rawMaterial,
+      medicao: ishikawa?.measurement,
+      meioAmbiente: ishikawa?.environment,
+      metodo: ishikawa?.method,
+    },
+    plano: {
+      atualizadoEm: now,
+      criadoEm: now,
+      statusPlano: 'ABERTO',
+      qtdAcoes: 1,
+      qtdAcoesConcluidas: 0,
+      percentualPlano: 0,
+      dtConclusaoPlano: formatDate(actionPlanSummary.actionDate),
+      idNaoConformidade: 1,
+    },
+    porques: {
+      descCausa: reasons?.cause,
+      descProblema: reasons?.effect,
+      pq1: reasons?.reason1,
+      pq2: reasons?.reason2,
+      pq3: reasons?.reason3,
+      pq4: reasons?.reason4,
+      pq5: reasons?.reason5,
+    },
+  };
+
+  await axios.post(apiAnaliseRoUrl, body);
+
+  return resource;
+});
+
+export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: RiskOpportunityPayload) => {
+  const { actionPlanSummary, details, efficacy, implementation, interestedParts, ishikawa, riskOpportunity, reasons, senderId } = payload;
+
+  const riskOpportunityInterestedPartsIds: Array<number> = [];
+  for (let i = 0; i < interestedParts.length; i++) {
+    const interestedPart: string = interestedParts[i];
+
+    const interestPartId: number | null = await saveInterestedPartAsync(mapInterestPartToRaw(interestedPart, senderId));
+
+    if (interestPartId) {
+      riskOpportunityInterestedPartsIds.push(interestPartId);
+    }
+  }
+
+  riskOpportunity.idPartesInteressadas = riskOpportunityInterestedPartsIds.length > 0 ? riskOpportunityInterestedPartsIds[0] : 0;
+
+  const response = await axios.post<RawRiskOpportunity>(apiRiscoOportunidadeUrl, riskOpportunity);
+
+  if (response.status !== 201) {
+    return null;
+  }
+
+  const resource: RawRiskOpportunity = response.data;
+
+  const now: Date = new Date();
+
+  const body: RawCompleteAnalysis = {
+    acoesPlano: [
+      {
+        atualizadoEm: null,
+        criadoEm: null,
+        descricaoAcao: actionPlanSummary.actionDescription,
+        prazoAcao: formatDate(actionPlanSummary.actionDate, true),
+        idResponsavelAcao: actionPlanSummary.responsibleId,
+        statusAcao: 'PENDENTE',
+        dataVerificao: formatDate(actionPlanSummary.actionVerificationDate, true),
+        idResponsavelVerificaoAcao: actionPlanSummary.actionVerifierId,
+        idAnexosExecucao: null,
+        dataConclusaoAcao: actionPlanSummary.actionVerificationDate,
+        idPlano: null,
+        planoId: null,
+      },
+    ],
+    analise: {
+      atualizadoEm: now,
+      atualizadoPor: senderId,
+      corDecisao: '',
+      criadoEm: now,
+      criadoPor: senderId,
+      dataAnalise: now,
+      decisao: details.meaning,
+      descricaoDecisao: details.description,
+      idAprovacaoNC: null,
+      idInvestigacao: null,
+      idPlano: null,
+      linhaConfigAnalise1: details.probability,
+      linhaConfigAnalise2: details.severity,
+      riscoOportunidade: resource,
+    },
+    aprovacao: {
+      alterarRisco: true,
+      atualizadoEm: now,
+      criadoEm: now,
+      dataEficacia: efficacy.efficacyVerificationDate,
+      dataFechamento: null,
+      dataImplementacao: implementation.implementationDate,
+      descEficacia: efficacy.efficacyDescription,
+      descFechamento: '',
+      descImplementacao: implementation.implementationDescription,
+      novoRegistro: true,
+      possuiEficacia: efficacy.efficacyVerified,
+      possuiImplementacao: implementation.implemented,
+      responsavelEficacia: efficacy.efficacyResponsibleId,
+      responsavelFechamento: null,
+      responsavelImplementacao: implementation.implementationResponsibleId,
+      vinculoRisco: resource.id,
+    },
+    ishikawa: {
+      descCausaEfeito: ishikawa?.cause,
+      maoDeObra: ishikawa?.workforce,
+      maquina: ishikawa?.machine,
+      materiaPrima: ishikawa?.rawMaterial,
+      medicao: ishikawa?.measurement,
+      meioAmbiente: ishikawa?.environment,
+      metodo: ishikawa?.method,
+    },
+    plano: {
+      atualizadoEm: now,
+      criadoEm: now,
+      statusPlano: 'ABERTO',
+      qtdAcoes: 1,
+      qtdAcoesConcluidas: 0,
+      percentualPlano: 0,
+      dtConclusaoPlano: formatDate(actionPlanSummary.actionDate),
+      idNaoConformidade: 1,
+    },
+    porques: {
+      descCausa: reasons?.cause,
+      descProblema: reasons?.effect,
+      pq1: reasons?.reason1,
+      pq2: reasons?.reason2,
+      pq3: reasons?.reason3,
+      pq4: reasons?.reason4,
+      pq5: reasons?.reason5,
+    },
+  };
+
+  await axios.post(apiAnaliseRoUrl, body);
+
+  return resource;
+});
+
+const saveInterestedPartAsync = async (interestedPart: RawInterestedPart): Promise<number | null> => {
   const response = await axios.post<RawInterestedPart>(apiPartesInteressadasUrl, interestedPart);
 
   if (response.status === 201) {
@@ -299,6 +403,41 @@ export const saveInterestedPartAsync = async (interestedPart: RawInterestedPart)
   } else {
     return null;
   }
+};
+
+export const getApprovalById = async (id: number): Promise<AprovacaoNC> => {
+  const response = await axios.get<AprovacaoNC>(`${aprovacaoNcUrl}/${id}`);
+  const resource = response.data;
+
+  return resource;
+};
+
+export const getPlanById = async (id: number): Promise<RawPlanWithActions> => {
+  const response = await axios.get<RawPlanWithActions>(`${planApiUrl}/byidplano/${id}`);
+  const resource = response.data;
+
+  return resource;
+};
+
+export const getInvestigationById = async (id: number): Promise<RawInvestigation> => {
+  const response = await axios.get<RawInvestigation>(`${investigationApiUrl}/${id}`);
+  const resource = response.data;
+
+  return resource;
+};
+
+export const getIshikawaById = async (id: number): Promise<RawIshikawaInvestigation> => {
+  const response = await axios.get<RawIshikawaInvestigation>(`${ishikawaApiUrl}/${id}`);
+  const resource = response.data;
+
+  return resource;
+};
+
+export const getReasonsById = async (id: number): Promise<RawCauseEffectInvestigation> => {
+  const response = await axios.get<RawCauseEffectInvestigation>(`${reasonsApiUrl}/${id}`);
+  const resource = response.data;
+
+  return resource;
 };
 
 const ROSlice = createEntitySlice({
@@ -351,10 +490,8 @@ const ROSlice = createEntitySlice({
         state.loading = false;
       })
       .addMatcher(isFulfilled(editRiskOpportunity), (state, action) => {
-        const { data } = action.payload;
-
         state.loading = false;
-        state.entity = data;
+        state.entity = action.payload;
       });
   },
 });

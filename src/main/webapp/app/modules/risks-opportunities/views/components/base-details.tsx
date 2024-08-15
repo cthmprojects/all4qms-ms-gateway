@@ -1,6 +1,7 @@
 import { Button, Stack } from '@mui/material';
 import { useAppSelector } from 'app/config/store';
-import { useEffect, useMemo } from 'react';
+import { AprovacaoNC, Plan } from 'app/modules/rnc/models';
+import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   mapCompleteAnalysisToActionPlanEfficacy,
@@ -21,12 +22,25 @@ import {
   ControlActionSummary,
   Enums,
   Ishikawa,
+  RawCauseEffectInvestigation,
+  RawInvestigation,
+  RawIshikawaInvestigation,
   RawMap,
+  RawPlanAction,
+  RawPlanWithActions,
   RawRiskOpportunity,
+  RawRiskOpportunityAnalysis,
   Reason,
   SummarizedProcess,
   SummarizedUser,
 } from '../../models';
+import {
+  getApprovalById,
+  getInvestigationById,
+  getIshikawaById,
+  getPlanById,
+  getReasonsById,
+} from '../../reducers/risks-opportunities.reducer';
 import Analysis from './analysis';
 import ControlAction from './control-action';
 import GeneralInformation from './general-information';
@@ -198,10 +212,83 @@ const BaseDetails = ({
     controlActionFormMethods.setValue('severity', severity);
   }, [controlActionFormMethods, riskOpportunity]);
 
+  const fetchAnalysis = async (analysis: RawRiskOpportunityAnalysis): Promise<void> => {
+    const approvalId: number = analysis.idAprovacaoNC;
+    const investigationId: number = analysis.idInvestigacao;
+    const planId: number = analysis.idPlano;
+    const approval: AprovacaoNC = await getApprovalById(approvalId);
+    const investigation: RawInvestigation = await getInvestigationById(investigationId);
+    const planWithActions: RawPlanWithActions = await getPlanById(planId);
+    const ishikawa: RawIshikawaInvestigation = investigation.idCausaEfeito ? await getIshikawaById(investigation.idCausaEfeito) : null;
+    const reasons: RawCauseEffectInvestigation = investigation.idPorques ? await getReasonsById(investigation.idPorques) : null;
+
+    const useIshikawa: boolean =
+      !ishikawa &&
+      !ishikawa.descCausaEfeito &&
+      !ishikawa.maoDeObra &&
+      !ishikawa.maquina &&
+      !ishikawa.materiaPrima &&
+      !ishikawa.medicao &&
+      !ishikawa.meioAmbiente &&
+      !ishikawa.metodo;
+
+    analysisFormMethods.setValue('useIshikawa', useIshikawa);
+    analysisFormMethods.setValue('ishikawaCause', ishikawa?.descCausaEfeito);
+    analysisFormMethods.setValue('environment', ishikawa?.meioAmbiente);
+    analysisFormMethods.setValue('manpower', ishikawa?.maoDeObra);
+    analysisFormMethods.setValue('machine', ishikawa?.maquina);
+    analysisFormMethods.setValue('measurement', ishikawa?.medicao);
+    analysisFormMethods.setValue('method', ishikawa?.metodo);
+    analysisFormMethods.setValue('rawMaterial', ishikawa?.materiaPrima);
+    analysisFormMethods.setValue('useReasons', !useIshikawa);
+    analysisFormMethods.setValue('reasonCause', reasons?.descCausa);
+    analysisFormMethods.setValue('reasonEffect', reasons?.descProblema);
+    analysisFormMethods.setValue('reason1', reasons?.pq1);
+    analysisFormMethods.setValue('reason2', reasons?.pq2);
+    analysisFormMethods.setValue('reason3', reasons?.pq3);
+    analysisFormMethods.setValue('reason4', reasons?.pq4);
+    analysisFormMethods.setValue('reason5', reasons?.pq5);
+
+    const action: RawPlanAction | null = planWithActions.acoes.length > 0 ? planWithActions.acoes[0] : null;
+
+    analysisFormMethods.setValue('actionDescription', action?.descricaoAcao);
+    analysisFormMethods.setValue('actionDate', new Date(action?.dataConclusaoAcao));
+    analysisFormMethods.setValue('responsibleId', action?.idResponsavelAcao);
+    analysisFormMethods.setValue('verifyAction', false);
+    analysisFormMethods.setValue('actionVerificationDate', new Date(action?.dataVerificao));
+    analysisFormMethods.setValue('actionVerifierId', action?.idResponsavelVerificaoAcao);
+
+    analysisFormMethods.setValue('implementationDate', new Date(approval.dataImplementacao));
+    analysisFormMethods.setValue('implementationResponsibleId', approval.responsavelImplementacao);
+    analysisFormMethods.setValue('implemented', approval.possuiImplementacao);
+    analysisFormMethods.setValue('implementationDescription', approval.descImplementacao);
+    analysisFormMethods.setValue('efficacyVerificationDate', new Date(approval.dataEficacia));
+    analysisFormMethods.setValue('efficacyResponsibleId', approval.responsavelEficacia);
+    analysisFormMethods.setValue('efficacyVerified', approval.possuiEficacia);
+    analysisFormMethods.setValue('efficacyDescription', approval.descEficacia);
+  };
+
   useEffect(() => {
     if (!analysisFormMethods || !riskOpportunity) {
       return;
     }
+
+    const allAnalysis: Array<RawRiskOpportunityAnalysis> = riskOpportunity.analiseROS;
+
+    if (!allAnalysis || allAnalysis.length <= 0) {
+      return;
+    }
+
+    const analysis: RawRiskOpportunityAnalysis = allAnalysis[0];
+    const probability: Configuration = filterConfiguration(analysis.linhaConfigAnalise1?.id ?? 0, firstConfigurations);
+    const severity: Configuration = filterConfiguration(analysis.linhaConfigAnalise2?.id ?? 0, secondConfigurations);
+
+    analysisFormMethods.setValue('description', analysis.descricaoDecisao);
+    analysisFormMethods.setValue('meaning', analysis.decisao);
+    analysisFormMethods.setValue('probability', probability);
+    analysisFormMethods.setValue('severity', severity);
+
+    fetchAnalysis(analysis);
   }, [analysisFormMethods, riskOpportunity]);
 
   const save = async (): Promise<void> => {

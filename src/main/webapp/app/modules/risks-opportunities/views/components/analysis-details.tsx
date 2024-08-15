@@ -53,6 +53,14 @@ const AnalysisDetails = ({ description, firstConfigurations, points, readonly, s
   }, [severities]);
 
   useEffect(() => {
+    setValue('description', description ?? '', { shouldValidate: true });
+  }, [description]);
+
+  useEffect(() => {
+    setValue('meaning', points?.toString() ?? '0', { shouldValidate: true });
+  }, [points]);
+
+  useEffect(() => {
     setValue('probability', probability, { shouldValidate: true });
   }, [probability]);
 

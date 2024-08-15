@@ -21,10 +21,11 @@ export type RawRiskOpportunity = {
   linhaConfigControle2?: RawRiskOpportunityConfiguration;
   idsAnaliseROS: Array<number>;
   partesInteressadas?: RawInterestedPart;
+  analiseROS?: Array<RawRiskOpportunityAnalysis>;
 };
 
 export type RawRiskOpportunityConfiguration = {
-  id: number;
+  id?: number;
   tipoRO: 'R' | 'O';
   tipoAnaliseRO: 'P' | 'S' | 'C' | 'M' | 'D';
   grauRO: 'A' | 'M' | 'B';
@@ -126,7 +127,7 @@ export type PaginatedResource<T> = {
 };
 
 export type RawIshikawaInvestigation = {
-  id: number;
+  id?: number;
   descCausaEfeito: string;
   meioAmbiente: string;
   maoDeObra: string;
@@ -137,7 +138,7 @@ export type RawIshikawaInvestigation = {
 };
 
 export type RawCauseEffectInvestigation = {
-  id: number;
+  id?: number;
   descProblema: string;
   pq1: string;
   pq2: string;
@@ -148,7 +149,7 @@ export type RawCauseEffectInvestigation = {
 };
 
 export type RawApproval = {
-  id: number;
+  id?: number;
   possuiImplementacao: boolean;
   dataImplementacao: Date;
   responsavelImplementacao: number;
@@ -168,35 +169,35 @@ export type RawApproval = {
 };
 
 export type RawPlan = {
-  id: number;
+  id?: number;
   statusPlano: 'ABERTO';
   qtdAcoes: number;
   qtdAcoesConcluidas: number;
   percentualPlano: number;
-  dtConclusaoPlano: Date;
+  dtConclusaoPlano: Date | string;
   criadoEm: Date;
   atualizadoEm: Date;
-  idNaoConformidade: number;
+  idNaoConformidade?: number;
 };
 
 export type RawPlanAction = {
-  id: number;
+  id?: number;
   idPlano: number;
   descricaoAcao: string;
-  prazoAcao: Date;
+  prazoAcao: Date | string;
   idResponsavelAcao: number;
-  statusAcao: 'PENDENTE';
-  dataVerificao: Date;
+  statusAcao: 'PENDENTE' | 'VISTO';
+  dataVerificao: Date | string;
   idResponsavelVerificaoAcao: number;
   idAnexosExecucao: number;
-  dataConclusaoAcao: Date;
+  dataConclusaoAcao: Date | string;
   criadoEm: Date;
   atualizadoEm: Date;
   planoId: number;
 };
 
 export type RawAnalysis = {
-  id: number;
+  id?: number;
   dataAnalise: Date;
   decisao: string;
   descricaoDecisao: string;
@@ -218,6 +219,18 @@ export type RawCompleteAnalysis = {
   ishikawa: RawIshikawaInvestigation;
   porques: RawCauseEffectInvestigation;
   aprovacao: RawApproval;
-  plano: RawApproval;
+  plano: RawPlan;
   acoesPlano: Array<RawPlanAction>;
+};
+
+export type RawInvestigation = {
+  id: number | null;
+  idNaoConformidade: number | null;
+  idCausaEfeito: number | null;
+  idPorques: number | null;
+};
+
+export type RawPlanWithActions = {
+  plano: RawPlan;
+  acoes: Array<RawPlanAction>;
 };

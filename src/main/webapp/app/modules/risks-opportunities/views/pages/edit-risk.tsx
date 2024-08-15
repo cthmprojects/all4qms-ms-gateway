@@ -5,7 +5,6 @@ import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { mapInterestPartToRaw } from '../../mappers';
 import {
   ActionPlanEfficacy,
   ActionPlanImplementation,
@@ -23,14 +22,7 @@ import {
 import { getAnalysis, getLevels, getTypes } from '../../reducers/enums.reducer';
 import { getMaps } from '../../reducers/maps.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
-import {
-  editRiskOpportunity,
-  getROById,
-  saveInterestedPartAsync,
-  saveRiskOpportunityApprovalAsync,
-  saveRiskOpportunityInvestigation,
-  saveRiskOpportunityPlanAsync,
-} from '../../reducers/risks-opportunities.reducer';
+import { editRiskOpportunity, getROById } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 import { BaseDetails } from '../components';
 
@@ -105,36 +97,21 @@ const EditRisk = () => {
     interestedParts: Array<string>,
     rawRiskOpportunity: RawRiskOpportunity
   ): Promise<void> => {
-    const riskOpportunityApprovalId: number = await saveRiskOpportunityApprovalAsync(implementation, efficacy);
+    dispatch(
+      editRiskOpportunity({
+        actionPlanSummary,
+        details,
+        efficacy,
+        implementation,
+        interestedParts,
+        ishikawa,
+        reasons,
+        riskOpportunity: { ...rawRiskOpportunity, id: parseInt(id) },
+        senderId,
+      })
+    );
 
-    const riskOpportunityPlanId: number = await saveRiskOpportunityPlanAsync(actionPlanSummary);
-
-    const riskOpportunityInvestigationId: number = await saveRiskOpportunityInvestigation(ishikawa, reasons);
-
-    const riskOpportunityInterestedPartsIds: Array<number> = [];
-    for (let i = 0; i < interestedParts.length; i++) {
-      const interestedPart: string = interestedParts[i];
-
-      const interestPartId: number | null = await saveInterestedPartAsync(mapInterestPartToRaw(interestedPart, senderId));
-
-      if (interestPartId) {
-        riskOpportunityInterestedPartsIds.push(interestPartId);
-      }
-    }
-
-    rawRiskOpportunity.idPartesInteressadas = riskOpportunityInterestedPartsIds.length > 0 ? riskOpportunityInterestedPartsIds[0] : 0;
-    rawRiskOpportunity.id = parseInt(id);
-
-    dispatch(editRiskOpportunity(rawRiskOpportunity));
-
-    // const riskOpportunityAnalysisId: number = await saveRiskOpportunityAnalysis(
-    //   details,
-    //   senderId,
-    //   riskOpportunityApprovalId,
-    //   riskOpportunityInvestigationId,
-    //   riskOpportunityPlanId
-    // );
-    // rawRiskOpportunity.idsAnaliseROS = [riskOpportunityAnalysisId];
+    navigate('/risks-opportunities/');
   };
 
   return (

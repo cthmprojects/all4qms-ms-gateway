@@ -14,14 +14,7 @@ type GeneralInformationProps = {
 
 const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: GeneralInformationProps) => {
   const [interestedPart, setInterestedPart] = useState<string>('');
-  const [interestedParts, setInterestedParts] = useState<Array<string>>(['A', 'B']);
-  const [process, setProcess] = useState<SummarizedProcess | null>(null);
   const [processes, setProcesses] = useState<Array<SummarizedProcess>>([]);
-  const [secondAuxiliaryDescription, setSecondAuxiliaryDescription] = useState<string>('');
-  const [sender, setSender] = useState<string | null>(null);
-  const [senders, setSenders] = useState<Array<string>>([]);
-  const [type, setType] = useState<string | null>(null);
-  const [types, setTypes] = useState<Array<string>>(['Risco', 'Oportunidade']);
 
   const { register, setValue, formState, control, trigger } = useFormContext();
 
@@ -91,6 +84,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
             <Autocomplete
               disableClearable
               disabled={readonly}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
               onChange={(event, value, reason, details) => setValue('process', value, { shouldValidate: true })}
               options={processes}
               getOptionLabel={option => option.name}

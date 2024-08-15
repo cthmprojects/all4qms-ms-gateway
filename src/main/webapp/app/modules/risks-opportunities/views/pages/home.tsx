@@ -36,8 +36,13 @@ import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { a11yProps, CustomTabPanel } from 'app/shared/components/tabs';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { RawRiskOpportunity } from '../../models';
+import { Configuration, RawRiskOpportunity } from '../../models';
+import { getComplexities } from '../../reducers/complexities.reducer';
+import { getImprovements } from '../../reducers/improvements.reducer';
+import { getProbabilities } from '../../reducers/probabilities.reducer';
+import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
 import { listROFiltro, listROs } from '../../reducers/risks-opportunities.reducer';
+import { getSeverities } from '../../reducers/severities.reducer';
 
 // Example
 const getSituacaoIcon = situacao => {
@@ -63,6 +68,19 @@ const Home = () => {
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
   const rolist: Array<RawRiskOpportunity> = useAppSelector(state => state.all4qmsmsgatewayro.risco.entities);
+  const riskDecisions: Array<Configuration> = useAppSelector<Array<Configuration>>(
+    state => state.all4qmsmsgatewayro.riskDecisions.entities
+  );
+  const opportunityDecisions: Array<Configuration> = useAppSelector<Array<Configuration>>(
+    state => state.all4qmsmsgatewayro.opportunityDecisions.entities
+  );
+  const complexities: Array<Configuration> = useAppSelector<Array<Configuration>>(state => state.all4qmsmsgatewayro.complexities.entities);
+  const improvements: Array<Configuration> = useAppSelector<Array<Configuration>>(state => state.all4qmsmsgatewayro.improvements.entities);
+  const probabilities: Array<Configuration> = useAppSelector<Array<Configuration>>(
+    state => state.all4qmsmsgatewayro.probabilities.entities
+  );
+  const severities: Array<Configuration> = useAppSelector<Array<Configuration>>(state => state.all4qmsmsgatewayro.severities.entities);
+
   const [tab, setTab] = useState(0);
   const [filters, setFilters] = useState({
     idProcesso: null,
@@ -99,7 +117,12 @@ const Home = () => {
       listROs({ page, size: pageSize })
     );
 
+    dispatch(getComplexities());
+    dispatch(getImprovements());
     dispatch(getProcesses());
+    dispatch(getProbabilities());
+    dispatch(getSeverities());
+    dispatch(getRiskDecisions());
   }, []);
 
   const handleChangeTag = (event: React.SyntheticEvent, newValue: number) => {
@@ -122,7 +145,7 @@ const Home = () => {
    * Pagination
    */
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState<number>(5);
+  const [pageSize, setPageSize] = useState<number>(10);
 
   const TableRendered = (
     <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -171,28 +194,28 @@ const Home = () => {
                 <TableCell>{descricao2 ?? '-'}</TableCell>
                 <TableCell>{descricao3 ?? '-'}</TableCell>
                 <TableCell>{idProcesso ?? '-'}</TableCell>
-                <TableCell>{idLinhaConfigControle1 ?? linhaConfigControle1?.id ?? '-'}</TableCell>
-                <TableCell>{idLinhaConfigControle2 ?? linhaConfigControle2?.id ?? '-'}</TableCell>
+                <TableCell>{idLinhaConfigControle1 ?? linhaConfigControle1?.descricaoRO ?? '-'}</TableCell>
+                <TableCell>{idLinhaConfigControle2 ?? linhaConfigControle2?.descricaoRO ?? '-'}</TableCell>
                 <TableCell>{descricaoControle ?? '-'}</TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={2}>
                     <Tooltip title="Editar">
-                      <IconButton title="Editar" color="primary" onClick={() => navigate(`${path}/${id}`)}>
+                      <IconButton color="primary" onClick={() => navigate(`${path}/${id}`)}>
                         <EditIcon sx={{ color: '#e6b200' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Visualizar">
-                      <IconButton title="Visualizar" color="primary" onClick={() => navigate(`${path}/view/${id}`)}>
+                      <IconButton color="primary" onClick={() => navigate(`${path}/view/${id}`)}>
                         <Visibility sx={{ color: '#0EBDCE' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Imprimir">
-                      <IconButton title="Imprimir" color="primary" onClick={() => {}}>
+                      <IconButton color="primary" onClick={() => {}}>
                         <Check sx={{ color: '#03AC59' }} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Cancelar">
-                      <IconButton title="Cancelar" color="primary" onClick={() => {}}>
+                      <IconButton color="primary" onClick={() => {}}>
                         <CancelIcon sx={{ color: '#FF0000' }} />
                       </IconButton>
                     </Tooltip>
@@ -232,7 +255,6 @@ const Home = () => {
         <FormControl className=" me-2">
           <InputLabel>Processo</InputLabel>
           <Select onChange={e => setFilters({ ...filters, idProcesso: parseInt(e.target.value.toString()) })} label="Processo">
-            <MenuItem value={0}>Selecionar</MenuItem>
             {processes?.map((process, index) => (
               <MenuItem key={index} value={process.id}>
                 {process.nome}
@@ -244,45 +266,33 @@ const Home = () => {
         <FormControl className=" me-2">
           <InputLabel>Probabilidade</InputLabel>
           <Select onChange={e => setFilters({ ...filters, probabilidade: parseInt(e.target.value.toString()) })} label="Probabilidade">
-            <MenuItem value={0}>Selecionar</MenuItem>
-            {/* {(processes || [])?.map((process, index) => (
-              <MenuItem key={index} value={process.id}>
-                {process.nome}
+            {probabilities?.map((probability, index) => (
+              <MenuItem key={index} value={probability.id}>
+                {probability.descricaoRO}
               </MenuItem>
-            ))} */}
-            <MenuItem value={0}>Alta</MenuItem>
-            <MenuItem value={0}>Média</MenuItem>
-            <MenuItem value={0}>Baixa</MenuItem>
+            ))}
           </Select>
         </FormControl>
 
         <FormControl className=" me-2">
           <InputLabel>Severidade</InputLabel>
           <Select onChange={e => setFilters({ ...filters, severidade: parseInt(e.target.value.toString()) })} label="Processo">
-            <MenuItem value={0}>Selecionar</MenuItem>
-            {/* {processes?.map((process, index) => (
-            <MenuItem key={index} value={process.id}>
-              {process.nome}
-            </MenuItem>
-          ))} */}
-            <MenuItem value={0}>Alta</MenuItem>
-            <MenuItem value={0}>Média</MenuItem>
-            <MenuItem value={0}>Baixa</MenuItem>
+            {severities?.map((severity, index) => (
+              <MenuItem key={index} value={severity.id}>
+                {severity.descricaoRO}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
         <FormControl className=" me-2">
           <InputLabel>Decisão</InputLabel>
           <Select onChange={e => setFilters({ ...filters, decisao: parseInt(e.target.value.toString()) })} label="Processo">
-            <MenuItem value={0}>Selecionar</MenuItem>
-            {/* {processes?.map((process, index) => (
-            <MenuItem key={index} value={process.id}>
-              {process.nome}
-            </MenuItem>
-          ))} */}
-            <MenuItem value={0}>Decisao 1</MenuItem>
-            <MenuItem value={0}>Média</MenuItem>
-            <MenuItem value={0}>Baixa</MenuItem>
+            {(tab === 0 ? opportunityDecisions : riskDecisions)?.map((decision, index) => (
+              <MenuItem key={index} value={decision.id}>
+                {decision.descricaoRO}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </div>

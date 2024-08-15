@@ -39,6 +39,22 @@ const ControlAction = ({ allProbabilities, allSeverities, readonly }: ControlAct
     setSeverities(allSeverities);
   }, [allSeverities]);
 
+  useEffect(() => {
+    if (!probabilities || probabilities.length > 0) {
+      return;
+    }
+
+    setValue('probability', probabilities[0], { shouldValidate: true });
+  }, [probabilities]);
+
+  useEffect(() => {
+    if (!severities || severities.length > 0) {
+      return;
+    }
+
+    setValue('severity', severities[0], { shouldValidate: true });
+  }, [severities]);
+
   return (
     <Stack spacing={2}>
       <Typography variant="h6">Controle / Ação</Typography>
@@ -60,21 +76,23 @@ const ControlAction = ({ allProbabilities, allSeverities, readonly }: ControlAct
           disableClearable
           disabled={readonly}
           getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
-          onChange={(event, value, reason, details) => setValue('probability', probability, { shouldValidate: true })}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          onChange={(event, value, reason, details) => setValue('probability', value, { shouldValidate: true })}
           options={probabilities}
           renderInput={params => <TextField {...params} label="Controlar a probabilidade" />}
           sx={{ flexGrow: 1 }}
-          value={probabilityForm}
+          value={probabilityForm ?? null}
         />
         <Autocomplete
           disableClearable
           disabled={readonly}
           getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
-          onChange={(event, value, reason, details) => setValue('severity', severity, { shouldValidate: true })}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          onChange={(event, value, reason, details) => setValue('severity', value, { shouldValidate: true })}
           options={severities}
           renderInput={params => <TextField {...params} label="Controlar a severidade" />}
           sx={{ flexGrow: 1 }}
-          value={severityForm}
+          value={severityForm ?? null}
         />
       </Stack>
     </Stack>
