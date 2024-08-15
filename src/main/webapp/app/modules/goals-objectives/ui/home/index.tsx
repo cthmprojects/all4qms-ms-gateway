@@ -22,6 +22,10 @@ import {
   Tooltip,
   TextField,
   TablePagination,
+  Grid,
+  Input,
+  InputAdornment,
+  OutlinedInput,
 } from '@mui/material';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -35,7 +39,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
 import { Link, useNavigate } from 'react-router-dom';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import SearchIcon from '@mui/icons-material/Search';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
@@ -49,6 +53,7 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { getUsersAsAdminSGQ } from 'app/modules/administration/user-management/user-management.reducer';
 
 import axios, { AxiosResponse } from 'axios';
+import { Process } from 'app/modules/rnc/models';
 
 const getSituacaoIcon = situacao => {
   switch (situacao) {
@@ -77,17 +82,17 @@ const HomeGoalsList = () => {
   const [usersSGQ, setUsersSGQ] = useState<[]>([]);
   const [goalsList, setGoalsList] = useState<[]>([]);
 
+  const processes = useAppSelector<Array<Process>>(state => state?.all4qmsmsgatewayrnc?.process?.entities);
   // const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
 
   /**
    * Filters
    */
   const [filters, setFilters] = useState({
-    dtIni: null,
-    dtFim: null,
-    idProcesso: 0,
-    origem: null,
-    situacao: null,
+    processo: '',
+    ano: '',
+    mes: '',
+    situacao: '',
     pesquisa: '',
   });
 
@@ -176,7 +181,7 @@ const HomeGoalsList = () => {
         break;
     }
 
-    const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
+    const { processo, ano, mes, situacao } = filters;
     // dispatch(
     //   listdocs({
     //     dtIni: dtIni?.toISOString(),
@@ -219,7 +224,7 @@ const HomeGoalsList = () => {
   };
 
   const handleApplyFilters = () => {
-    const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa } = filters;
+    const { processo, ano, mes, situacao, pesquisa } = filters;
 
     // dispatch(
     //   listdocs({
@@ -237,11 +242,10 @@ const HomeGoalsList = () => {
 
   const clearFilters = () => {
     setFilters({
-      dtIni: null,
-      dtFim: null,
-      idProcesso: 0,
-      origem: null,
-      situacao: null,
+      processo: '',
+      ano: '',
+      mes: '',
+      situacao: '',
       pesquisa: '',
     });
   };
@@ -368,80 +372,124 @@ const HomeGoalsList = () => {
         </Breadcrumbs>
         <h1 className="title">Metas</h1>
 
-        <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
+        <Grid container gap={1}>
           <Button
             variant="contained"
-            className="primary-button me-2 infodoc-list-form-field"
-            style={{ marginRight: '10px', height: '58px' }}
+            className="primary-button infodoc-list-form-field"
+            style={{ marginRight: '10px', height: '54px', width: '100px' }}
             onClick={event => null}
             title="Novo Registro"
           >
             Novo
           </Button>
+          <Grid item xs={1.5}>
+            <FormControl fullWidth>
+              <InputLabel>Processo</InputLabel>
+              <Select
+                sx={{ height: '56px' }}
+                value={filters.processo}
+                onChange={e => setFilters({ ...filters, processo: e.target.value.toString() })}
+                label="Processo"
+              >
+                <MenuItem value={0}>Selecionar</MenuItem>
+                {processes?.map((process, index) => (
+                  <MenuItem key={index} value={process.id}>
+                    {process.nome}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={1.5}>
+            <FormControl fullWidth>
+              <InputLabel>Ano</InputLabel>
+              <Select
+                sx={{ height: '56px' }}
+                value={filters.processo}
+                onChange={e => setFilters({ ...filters, ano: e?.target?.value?.toString() })}
+                label="ano"
+              >
+                <MenuItem value={0}>Selecionar</MenuItem>
+                {['2024', '2023']?.map((ano, index) => (
+                  <MenuItem key={index} value={ano}>
+                    {ano}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={1.5}>
+            <FormControl fullWidth>
+              <InputLabel>Mês</InputLabel>
+              <Select
+                sx={{ height: '56px' }}
+                value={filters.processo}
+                onChange={e => setFilters({ ...filters, ano: e?.target?.value?.toString() })}
+                label="Mês"
+              >
+                <MenuItem value={0}>Selecionar</MenuItem>
+                {['Janeiro', 'Fevereiro']?.map((ano, index) => (
+                  <MenuItem key={index} value={ano}>
+                    {ano}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={1.5}>
+            <FormControl fullWidth>
+              <InputLabel>Situação</InputLabel>
+              <Select
+                sx={{ height: '56px' }}
+                value={filters.situacao}
+                onChange={e => setFilters({ ...filters, situacao: e?.target?.value?.toString() })}
+                label="Situação"
+              >
+                <MenuItem value={0}>Selecionar</MenuItem>
+                {['Finalizado', 'Parcial']?.map((ano, index) => (
+                  <MenuItem key={index} value={ano}>
+                    {ano}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item>
+            <FormControl fullWidth>
+              <InputLabel>Pesquisa</InputLabel>
+              {/* <TextField
+                label="Pesquisa"
+                style={{ minWidth: '20vw'  }}
+                onChange={event => {
+                  setFilters({ ...filters, pesquisa: event?.target?.value || '' });
+                }}
+                placeholder="Descrição"
+                value={filters.pesquisa || ''}
+              /> */}
+              <OutlinedInput
+                fullWidth
+                label="Pesquisa"
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton aria-label="toggle password visibility" onClick={() => null} onMouseDown={() => null}>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
+          </Grid>
 
-          <FormControl className="me-2">
-            <DatePicker
-              selected={filters.dtIni}
-              onChange={date => setFilters({ ...filters, dtIni: date })}
-              dateFormat="dd/MM/yyyy"
-              className="infodoc-list-date-picker mt-4"
-              id="start-date-picker"
-              placeholderText="Data de início"
-            />
-            <label htmlFor="start-date-picker" className="infodoc-list-date-label">
-              Início
-            </label>
-          </FormControl>
-          <FormControl className="infodoc-list-form-field me-2">
-            <DatePicker
-              selected={filters.dtFim}
-              onChange={date => setFilters({ ...filters, dtFim: date })}
-              dateFormat={'dd/MM/yyyy'}
-              className="infodoc-list-date-picker mt-4"
-              placeholderText="Data de fim"
-            />
-            <label htmlFor="" className="infodoc-list-date-label">
-              Fim
-            </label>
-          </FormControl>
-          <FormControl className="infodoc-list-form-field me-2">
-            <InputLabel>Processo</InputLabel>
-            <Select
-              value={filters.idProcesso}
-              onChange={e => setFilters({ ...filters, idProcesso: parseInt(e.target.value.toString()) })}
-              label="Processo"
-            >
-              <MenuItem value={0}>Selecionar</MenuItem>
-              {/* {processes?.map((process, index) => (
-                <MenuItem key={index} value={process.id}>
-                  {process.nome}
-                </MenuItem>
-              ))} */}
-            </Select>
-          </FormControl>
-
-          <FormControl>
-            <TextField
-              label="Pesquisa"
-              style={{ minWidth: '20vw' }}
-              onChange={event => {
-                setFilters({ ...filters, pesquisa: event?.target?.value || '' });
-              }}
-              placeholder="Descrição"
-              value={filters.pesquisa || ''}
-            />
-          </FormControl>
-
-          <Button
+          {/* <Button
             variant="contained"
-            className="secondary-button me-2 rnc-list-form-field"
+            className="secondary-button rnc-list-form-field"
             style={{ height: '49px', width: '60px', marginLeft: '7px' }}
             onClick={clearFilters}
             title="Limpar"
           >
             Limpar
-          </Button>
-        </div>
+          </Button> */}
+        </Grid>
 
         <Box sx={{ width: '100%' }}>{renderTable()}</Box>
       </div>
