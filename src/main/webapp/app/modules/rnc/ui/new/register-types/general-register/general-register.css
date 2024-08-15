@@ -20,11 +20,11 @@
   width: 66px;
 }
 
-.react-datepicker-popper {
+/* .react-datepicker-popper {
   z-index: 1000 !important;
   transform: translate(-12px, -211px) !important;
   position: relative !important;
-}
+} */
 
 .react-datepicker__triangle {
   display: none !important;
