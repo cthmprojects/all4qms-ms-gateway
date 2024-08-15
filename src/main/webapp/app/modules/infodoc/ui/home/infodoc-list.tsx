@@ -470,8 +470,8 @@ const InfodocList = () => {
               </TableHead>
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
-                  <TableRow className="table-row" key={infodoc.doc.id}>
-                    <Tooltip onClick={event => openDocToValidation(event, infodoc)} title={infodoc.doc.titulo}>
+                  <TableRow key={infodoc.doc.id}>
+                    <Tooltip title={infodoc.doc.descricaoDoc}>
                       <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.titulo}</TableCell>

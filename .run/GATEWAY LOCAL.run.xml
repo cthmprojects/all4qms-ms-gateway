@@ -3,7 +3,7 @@
     <option name="ALTERNATIVE_JRE_PATH" value="17" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="com.tellescom.all4qms.All4QmsMsGatewayApp" />
-    <module name="all-4-qms-ms-gateway" />
+    <module name="ms-gateway" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.tellescom.all4qms.*" />
