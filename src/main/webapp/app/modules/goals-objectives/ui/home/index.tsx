@@ -27,24 +27,16 @@ import {
   InputAdornment,
   OutlinedInput,
 } from '@mui/material';
-
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import PrintIcon from '@mui/icons-material/Print';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DatePicker from 'react-datepicker';
 import React, { useEffect, useState } from 'react';
 import { Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import BlockIcon from '@mui/icons-material/Block';
 import { Link, useNavigate } from 'react-router-dom';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import NoteAltOutlinedIcon from '@mui/icons-material/NoteAltOutlined';
 import SearchIcon from '@mui/icons-material/Search';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import HourglassFullIcon from '@mui/icons-material/HourglassFull';
-import InfoIcon from '@mui/icons-material/Info';
+import CheckIcon from '@mui/icons-material/Check';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
 
@@ -54,25 +46,45 @@ import { getUsersAsAdminSGQ } from 'app/modules/administration/user-management/u
 
 import axios, { AxiosResponse } from 'axios';
 import { Process } from 'app/modules/rnc/models';
+import { ListMeta } from '../../models/goals';
+import { EnumTemporal } from '../../models/enums';
 
-const getSituacaoIcon = situacao => {
-  switch (situacao) {
-    case 'E':
-      // return { icon: <EditIcon />, text: 'Em Emissão' };
-      return { icon: <EditIcon />, text: 'Em Edição' };
-    case 'H':
-      return { icon: <CheckCircleIcon />, text: 'Homologado' };
-    case 'R':
-      return { icon: <HourglassEmptyIcon />, text: 'Em Revisão' };
-    case 'O':
-      return { icon: <BlockIcon />, text: 'Obsoleto' };
-    case 'C':
-      return { icon: <CancelIcon />, text: 'Cancelado' };
-    default:
-      return { icon: <InfoIcon />, text: 'Indefinido' };
-  }
-};
-
+const listMetas: ListMeta[] = [
+  {
+    idMetaObjetivo: 0,
+    idMeta: 0,
+    idMetaResultado: 0,
+    descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M1',
+    avaliacao:
+      'Auditoria documental realizada de 21 a 23 de novembro de 2023 com resultado satisfatório A auditoria interna e extena foram realizadas na data do dia 23/nov',
+    analise: '',
+    parcial: true,
+    metaAtingida: true,
+    lancadoEm: new Date(),
+  },
+  {
+    idMetaObjetivo: 0,
+    idMeta: 0,
+    idMetaResultado: 0,
+    descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M2',
+    avaliacao: 'Auditoria interna enm andamento',
+    analise: '',
+    parcial: true,
+    metaAtingida: false,
+    lancadoEm: new Date(),
+  },
+  {
+    idMetaObjetivo: 0,
+    idMeta: 0,
+    idMetaResultado: 0,
+    descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M3',
+    avaliacao: 'Não foi possívek realizar a  auditoria devido parada não programada da produção por problema de manutenção',
+    analise: '',
+    parcial: false,
+    metaAtingida: false,
+    lancadoEm: new Date(),
+  },
+];
 const HomeGoalsList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -80,7 +92,7 @@ const HomeGoalsList = () => {
   const [totalItems, setTotalItems] = useState(0);
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   const [usersSGQ, setUsersSGQ] = useState<[]>([]);
-  const [goalsList, setGoalsList] = useState<[]>([]);
+  const [goalsList, setGoalsList] = useState<ListMeta[]>(listMetas);
 
   const processes = useAppSelector<Array<Process>>(state => state?.all4qmsmsgatewayrnc?.process?.entities);
   // const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -197,19 +209,12 @@ const HomeGoalsList = () => {
     // setValue(newValue);
   };
 
-  const columns = [
-    'Código',
-    'Título',
-    'Emissor',
-    'Revisão',
-    'Data',
-    'Área/Processo',
-    'Origem',
-    'Situação',
-    // 'Status',
-    // 'Distribuição',
-    'Ações',
-  ];
+  const columns = ['Metas', 'Resultados', 'Situação', 'Atualização', 'Ações'];
+  const getSituacaoIcon = (parcial, metaAtingida) => {
+    if (parcial && metaAtingida) return { icon: <CheckIcon color="success" />, text: 'Meta Atingida' };
+    if (parcial || metaAtingida) return { icon: <TaskAltIcon color="success" />, text: 'Meta Parcial' };
+    else return { icon: <CancelOutlinedIcon color="error" />, text: 'Meta Não Atingida' };
+  };
 
   const formatDateToString = (date: Date) => {
     if (!date) {
@@ -265,54 +270,34 @@ const HomeGoalsList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {goalsList?.map((goal: any) => (
-                  <TableRow className="table-row" key={goal.doc.id}>
-                    <Tooltip onClick={event => null} title={goal.doc.titulo}>
-                      <TableCell>{goal.doc.codigo}</TableCell>
-                    </Tooltip>
-                    <TableCell onClick={event => null}>{goal.doc.titulo}</TableCell>
-                    <TableCell onClick={event => null}> {/* {filterUser(goal.doc.idUsuarioCriacao)?.nome} */}</TableCell>
-                    <TableCell onClick={event => null}>-</TableCell>
-                    <TableCell onClick={event => null}>
-                      {goal.doc.dataCricao ? formatDateToString(new Date(goal.doc.dataCricao)) : '-'}
-                    </TableCell>
-                    <TableCell onClick={event => null}></TableCell>
-                    <TableCell onClick={event => null}></TableCell>
-                    <TableCell onClick={event => null}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(goal?.doc.enumSituacao).text}</Box>
-                    </TableCell>
-                    {/* <TableCell onClick={event => null}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(goal.doc.status).icon}</Box>
-                    </TableCell> */}
-                    <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
-                      <IconButton title="Editar" color="primary" disabled={goal.doc.enumSituacao != 'H'} onClick={event => null}>
-                        <EditIcon sx={{ color: goal.doc.enumSituacao != 'H' ? '#cacaca' : '#e6b200' }} />
-                      </IconButton>
-                      <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => null}>
-                        <VisibilityIcon sx={{ color: '#0EBDCE' }} />
-                      </IconButton>
-                      <IconButton
-                        id="btn-print"
-                        title="Imprimir"
-                        color="primary"
-                        onClick={event => null}
-                        // disabled={goal.doc.enumSituacao == 'C'}
-                        disabled
-                      >
-                        {/* <PrintIcon sx={{ color: goal.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} /> */}
-                        <PrintIcon sx={{ color: '#cacaca' }} />
-                      </IconButton>
-                      <IconButton
-                        id="btn-cancel"
-                        title="Cancelar"
-                        color="primary"
-                        onClick={event => null}
-                        disabled={goal.doc.enumSituacao == 'C'}
-                      >
-                        <CancelIcon sx={{ color: goal.doc.enumSituacao == 'C' ? '#cacaca' : '#FF0000' }} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
+                {goalsList?.map((goal: ListMeta, index) => (
+                  <Tooltip title={goal.analise}>
+                    <TableRow className="table-row" key={index}>
+                      <TableCell onClick={event => null}>{goal.descricaoMeta}</TableCell>
+                      <TableCell onClick={event => null}>{goal.avaliacao}</TableCell>
+                      <TableCell onClick={event => null}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {getSituacaoIcon(goal.parcial, goal.metaAtingida).icon}
+                        </Box>
+                      </TableCell>
+                      <TableCell onClick={event => null}>{goal.lancadoEm ? formatDateToString(new Date(goal.lancadoEm)) : '-'}</TableCell>
+                      <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <IconButton title="Editar" color="primary" onClick={event => null}>
+                          {' '}
+                          {/*disabled={goal.doc.enumSituacao != 'H'}*/}
+                          <EditIcon sx={{ color: '#e6b200' }} />
+                        </IconButton>
+                        <IconButton
+                          id="btn-view"
+                          title="Resultado"
+                          color="primary"
+                          onClick={() => navigate(`result/${goal.idMetaResultado}`)}
+                        >
+                          <NoteAltOutlinedIcon sx={{ color: '#2196F3' }} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  </Tooltip>
                 ))}
               </TableBody>
             </Table>
