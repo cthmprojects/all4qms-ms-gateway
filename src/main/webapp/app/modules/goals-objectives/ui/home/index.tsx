@@ -92,10 +92,11 @@ const HomeGoalsList = () => {
   const [totalItems, setTotalItems] = useState(0);
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   const [usersSGQ, setUsersSGQ] = useState<[]>([]);
+  const [isSGQ, setIsSGQ] = useState<Boolean>(false);
   const [goalsList, setGoalsList] = useState<ListMeta[]>(listMetas);
 
   const processes = useAppSelector<Array<Process>>(state => state?.all4qmsmsgatewayrnc?.process?.entities);
-  // const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc?.users?.entities);
 
   /**
    * Filters
@@ -143,11 +144,15 @@ const HomeGoalsList = () => {
     const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
     const users_ = (resUsers.payload as AxiosResponse).data || [];
 
-    // const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
-    // setUsersSGQ(filteredUser);
+    const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
+    setUsersSGQ(filteredUser);
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const roles = Storage.local.get('ROLE');
+    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(isSGQ);
+  }, []);
 
   useEffect(() => {
     handleApplyFilters();
