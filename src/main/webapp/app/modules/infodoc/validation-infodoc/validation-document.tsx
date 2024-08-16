@@ -162,7 +162,7 @@ export const ValidationDocument = () => {
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
-          fileDownload(file, `${fileName}.pdf`);
+          fileDownload(file, `${fileName}`);
         });
     }
   };

@@ -313,6 +313,14 @@ http://stackoverflow.com/questions/23436430/bootstrap-3-input-group-100-width */
 
 /* jhipster-needle-scss-add-main JHipster will add new css style */
 
+.react-datepicker-popper {
+  z-index: 1000 !important;
+}
+
+.react-datepicker__triangle {
+  display: none !important;
+}
+
 .MuiButton-containedPrimary:not(.Mui-disabled) {
   background-color: #e6b200;
   color: #4e4d4d;

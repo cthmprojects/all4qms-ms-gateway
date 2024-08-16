@@ -10,7 +10,7 @@ const ButtonList = () => {
   const buttons = [
     { icon: <FontAwesomeIcon icon="calendar-check" />, link: 'goals/', legenda: 'Objetivos e Metas', disabled: false },
     { icon: <FontAwesomeIcon icon="file-lines" />, link: '/infodoc', legenda: 'Informação Documentada' },
-    { icon: <FontAwesomeIcon icon="crosshairs" />, link: '', legenda: 'Riscos e Oportunidades', disabled: true },
+    { icon: <FontAwesomeIcon icon="crosshairs" />, link: '/risks-opportunities', legenda: 'Riscos e Oportunidades' },
     { icon: <FontAwesomeIcon icon="location-crosshairs" />, link: '', legenda: 'Auditorias', disabled: true },
     { icon: <FontAwesomeIcon icon="file-circle-check" />, link: '/rnc', legenda: 'RNC / OM' },
     { icon: <FontAwesomeIcon icon="file-circle-exclamation" />, link: '', legenda: 'Indicadores de Desempenho', disabled: true },
