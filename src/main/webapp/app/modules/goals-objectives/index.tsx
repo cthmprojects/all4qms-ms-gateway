@@ -18,7 +18,7 @@ const GoalsObjectivesRoutes = () => {
         <Route path="" element={<HomeGoalsList />} />
         <Route path="new/" element={<> </>} />
         <Route path="edit/:id" element={<> </>} />
-        <Route path="result/:id" element={<ResultPage />} />
+        <Route path=":metaId/results" element={<ResultPage />} />
         <Route path="resources" element={<> </>} />
       </ErrorBoundaryRoutes>
     </div>
