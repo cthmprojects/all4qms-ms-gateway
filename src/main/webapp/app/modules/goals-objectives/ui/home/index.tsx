@@ -52,7 +52,7 @@ import { EnumTemporal } from '../../models/enums';
 const listMetas: ListMeta[] = [
   {
     idMetaObjetivo: 0,
-    idMeta: 0,
+    idMeta: 1,
     idMetaResultado: 0,
     descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M1',
     avaliacao:
@@ -64,7 +64,7 @@ const listMetas: ListMeta[] = [
   },
   {
     idMetaObjetivo: 0,
-    idMeta: 0,
+    idMeta: 2,
     idMetaResultado: 0,
     descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M2',
     avaliacao: 'Auditoria interna enm andamento',
@@ -75,7 +75,7 @@ const listMetas: ListMeta[] = [
   },
   {
     idMetaObjetivo: 0,
-    idMeta: 0,
+    idMeta: 3,
     idMetaResultado: 0,
     descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M3',
     avaliacao: 'Não foi possívek realizar a  auditoria devido parada não programada da produção por problema de manutenção',
@@ -296,7 +296,7 @@ const HomeGoalsList = () => {
                           id="btn-view"
                           title="Resultado"
                           color="primary"
-                          onClick={() => navigate(`result/${goal.idMetaResultado}`)}
+                          onClick={() => navigate(`/goals/${goal.idMeta}/results`)}
                         >
                           <NoteAltOutlinedIcon sx={{ color: '#2196F3' }} />
                         </IconButton>
@@ -367,7 +367,7 @@ const HomeGoalsList = () => {
             variant="contained"
             className="primary-button infodoc-list-form-field"
             style={{ marginRight: '10px', height: '54px', width: '100px' }}
-            onClick={event => null}
+            onClick={event => navigate('/goals/1/results')}
             title="Novo Registro"
           >
             Novo
