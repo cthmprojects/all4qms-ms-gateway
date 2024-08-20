@@ -1,17 +1,17 @@
-import { SearchOutlined, TableChart } from '@mui/icons-material';
+import { BarChartOutlined, SearchOutlined, TableChart } from '@mui/icons-material';
 import { Autocomplete, Button, Stack, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Indicator, SummarizedProcess } from '../../models';
 import { onAutocompleteChanged, onTextChanged } from '../../utils';
 
-type DashboardHeaderProps = {
-  indicators: Array<Indicator>;
+type AnalyticsHeaderProps = {
   processes: Array<SummarizedProcess>;
-  onAnalyticsRequested: () => void;
+  onAddIndicatorRequested: () => void;
+  onDashboardRequested: () => void;
   onSearchRequested: (indicator: Indicator, process: SummarizedProcess, year: number, query: string) => void;
 };
 
-const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, processes }: DashboardHeaderProps) => {
+const AnalyticsHeader = ({ onAddIndicatorRequested, onDashboardRequested, onSearchRequested, processes }: AnalyticsHeaderProps) => {
   const [indicator, setIndicator] = useState<Indicator | null>(null);
   const [process, setProcess] = useState<SummarizedProcess | null>(null);
   const [query, setQuery] = useState<string>('');
@@ -30,14 +30,6 @@ const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, 
 
     setYears(allYears);
   }, []);
-
-  useEffect(() => {
-    if (!indicators || indicators.length <= 0) {
-      return;
-    }
-
-    setIndicator(indicators[0]);
-  }, [indicators]);
 
   useEffect(() => {
     if (!processes || processes.length <= 0) {
@@ -61,8 +53,25 @@ const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, 
   return (
     <Stack direction="row" spacing={2}>
       <Button
-        onClick={_ => onAnalyticsRequested()}
-        startIcon={<TableChart />}
+        onClick={_ => onAddIndicatorRequested()}
+        sx={{
+          background: '#e6b200',
+          color: '#4e4d4d',
+          '& .MuiButton-startIcon': {
+            marginTop: 0,
+          },
+          '& .MuiTouchRipple-root': {
+            marginTop: 0,
+          },
+        }}
+        variant="contained"
+      >
+        Novo Registro
+      </Button>
+
+      <Button
+        onClick={_ => onDashboardRequested()}
+        startIcon={<BarChartOutlined />}
         sx={{
           '& .MuiButton-startIcon': {
             marginTop: 0,
@@ -73,19 +82,8 @@ const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, 
         }}
         variant="outlined"
       >
-        Analítico
+        Indicadores
       </Button>
-
-      <Autocomplete
-        disableClearable
-        getOptionLabel={option => `${option.code} - ${option.name}`}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
-        onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setIndicator)}
-        options={indicators}
-        renderInput={props => <TextField {...props} label="Indicador" />}
-        sx={{ display: 'flex', flexGrow: 1 }}
-        value={indicator}
-      />
 
       <Autocomplete
         disableClearable
@@ -126,4 +124,4 @@ const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, 
   );
 };
 
-export default DashboardHeader;
+export default AnalyticsHeader;
