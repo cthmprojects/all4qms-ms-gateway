@@ -124,20 +124,26 @@ const getProcesses = async () => {
 };
 
 const getResources = async () => {
-  const apiUrl = 'services/all4qmsmsgateway/api/resources';
+  const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/recursos';
   const response = await axios.get(`${apiUrl}`);
-  return response.data;
+  // eslint-disable-next-line no-console
+  console.log(`getResources: ${JSON.stringify(response.data)}`);
+  return response.data.content;
 };
 
 const getMonitoring = async () => {
-  const apiUrl = 'services/all4qmsmsgateway/api/monitoring';
+  const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/';
   const response = await axios.get(`${apiUrl}`);
+  // eslint-disable-next-line no-console
+  console.log(`getMonitoring: ${JSON.stringify(response.data)}`);
   return response.data;
 };
 
 const getEvaluation = async () => {
-  const apiUrl = 'services/all4qmsmsgateway/api/evaluation';
+  const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/';
   const response = await axios.get(`${apiUrl}`);
+  // eslint-disable-next-line no-console
+  console.log(`getEvaluation: ${JSON.stringify(response.data)}`);
   return response.data;
 };
 
