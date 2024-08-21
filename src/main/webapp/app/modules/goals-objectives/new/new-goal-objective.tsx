@@ -123,6 +123,24 @@ const getProcesses = async () => {
   return response.data;
 };
 
+const getResources = async () => {
+  const apiUrl = 'services/all4qmsmsgateway/api/resources';
+  const response = await axios.get(`${apiUrl}`);
+  return response.data;
+};
+
+const getMonitoring = async () => {
+  const apiUrl = 'services/all4qmsmsgateway/api/monitoring';
+  const response = await axios.get(`${apiUrl}`);
+  return response.data;
+};
+
+const getEvaluation = async () => {
+  const apiUrl = 'services/all4qmsmsgateway/api/evaluation';
+  const response = await axios.get(`${apiUrl}`);
+  return response.data;
+};
+
 export const NewGoalObjective = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -145,7 +163,13 @@ export const NewGoalObjective = () => {
   const [origin, setOrigin] = useState('externa');
   const [originList, setOriginList] = useState([]);
   const [processes, setProcesses] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [monitoring, setMonitoring] = useState([]);
+  const [evaluation, setEvaluation] = useState([]);
   const [selectedProcess, setSelectedProcess] = useState('');
+  const [selectedResource, setSelectedResource] = useState('');
+  const [selectedMonitoring, setSelectedMonitoring] = useState('');
+  const [selectedEvaluation, setSelectedEvaluation] = useState('');
   const [noValidate, setNoValidate] = useState(false);
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
@@ -157,14 +181,31 @@ export const NewGoalObjective = () => {
   const [goals, setGoals] = useState([{ id: Date.now() }]);
 
   useEffect(() => {
-    // dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    // dispatch(listEnums());
-    // dispatch(getInfoDocById(id));
-
     getProcesses().then(data => {
       setProcesses(data);
       if (data.length > 0) {
         setSelectedProcess(data[0].id);
+      }
+    });
+
+    getMonitoring().then(data => {
+      setMonitoring(data);
+      if (data.length > 0) {
+        setSelectedMonitoring(data[0].id);
+      }
+    });
+
+    getEvaluation().then(data => {
+      setEvaluation(data);
+      if (data.length > 0) {
+        setSelectedEvaluation(data[0].id);
+      }
+    });
+
+    getResources().then(data => {
+      setResources(data);
+      if (data.length > 0) {
+        setSelectedResource(data[0].id);
       }
     });
   }, []);
@@ -484,9 +525,11 @@ export const NewGoalObjective = () => {
                 <div style={{ width: '24%' }}>
                   <FormControl sx={{ width: '100%' }} className="m-2">
                     <InputLabel>Processo</InputLabel>
-                    <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                      {originList?.map(e => (
-                        <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                    <Select label="Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+                      {processes?.map(e => (
+                        <MenuItem key={e.id} value={e.id}>
+                          {e.nome}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -495,9 +538,11 @@ export const NewGoalObjective = () => {
                 <div style={{ width: '24%' }}>
                   <FormControl sx={{ width: '100%' }} className="m-2">
                     <InputLabel>Recursos</InputLabel>
-                    <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                      {originList?.map(e => (
-                        <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                    <Select label="Recursos" value={selectedResource} onChange={event => setSelectedResource(event.target.value)}>
+                      {resources?.map(e => (
+                        <MenuItem key={e.id} value={e.id}>
+                          {e.nome}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -506,9 +551,11 @@ export const NewGoalObjective = () => {
                 <div style={{ width: '24%' }}>
                   <FormControl sx={{ width: '100%' }} className="m-2">
                     <InputLabel>Monitoramento</InputLabel>
-                    <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                      {originList?.map(e => (
-                        <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                    <Select label="Monitoramento" value={selectedMonitoring} onChange={event => setSelectedMonitoring(event.target.value)}>
+                      {monitoring?.map(e => (
+                        <MenuItem key={e.id} value={e.id}>
+                          {e.nome}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -517,9 +564,11 @@ export const NewGoalObjective = () => {
                 <div style={{ width: '24%' }}>
                   <FormControl sx={{ width: '100%' }} className="m-2">
                     <InputLabel>Avaliação</InputLabel>
-                    <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                      {originList?.map(e => (
-                        <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                    <Select label="Avaliação" value={selectedEvaluation} onChange={event => setSelectedEvaluation(event.target.value)}>
+                      {evaluation?.map(e => (
+                        <MenuItem key={e.id} value={e.id}>
+                          {e.nome}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
