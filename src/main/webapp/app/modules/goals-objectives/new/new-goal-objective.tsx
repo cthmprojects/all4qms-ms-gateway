@@ -124,27 +124,56 @@ const getProcesses = async () => {
 };
 
 const getResources = async () => {
-  const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/recursos';
-  const response = await axios.get(`${apiUrl}`);
-  // eslint-disable-next-line no-console
-  console.log(`getResources: ${JSON.stringify(response.data)}`);
-  return response.data.content;
+  // const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/recursos';
+  // const response = await axios.get(`${apiUrl}`);
+  // // eslint-disable-next-line no-console
+  // console.log(`getResources: ${JSON.stringify(response.data)}`);
+  // return response.data.content;
+  const list = [
+    { id: 0, nome: 'DIÁRIO' },
+    { id: 1, nome: 'SEMANAL' },
+    { id: 2, nome: 'MENSAL' },
+    { id: 3, nome: 'BIMESTRAL' },
+    { id: 4, nome: 'TRIMESTRAL' },
+    { id: 5, nome: 'SEMESTRAL' },
+    { id: 6, nome: 'ANUAL' },
+  ];
+  return list;
 };
 
 const getMonitoring = async () => {
-  const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/';
-  const response = await axios.get(`${apiUrl}`);
-  // eslint-disable-next-line no-console
-  console.log(`getMonitoring: ${JSON.stringify(response.data)}`);
-  return response.data;
+  // const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/';
+  // const response = await axios.get(`${apiUrl}`);
+  // // eslint-disable-next-line no-console
+  // console.log(`getMonitoring: ${JSON.stringify(response.data)}`);
+  const list = [
+    { id: 0, nome: 'DIÁRIO' },
+    { id: 1, nome: 'SEMANAL' },
+    { id: 2, nome: 'MENSAL' },
+    { id: 3, nome: 'BIMESTRAL' },
+    { id: 4, nome: 'TRIMESTRAL' },
+    { id: 5, nome: 'SEMESTRAL' },
+    { id: 6, nome: 'ANUAL' },
+  ];
+  return list;
 };
 
 const getEvaluation = async () => {
-  const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/';
-  const response = await axios.get(`${apiUrl}`);
-  // eslint-disable-next-line no-console
-  console.log(`getEvaluation: ${JSON.stringify(response.data)}`);
-  return response.data;
+  // const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/';
+  // const response = await axios.get(`${apiUrl}`);
+  // // eslint-disable-next-line no-console
+  // console.log(`getEvaluation: ${JSON.stringify(response.data)}`);
+  // return response.data;
+  const list = [
+    { id: 0, nome: 'DIÁRIO' },
+    { id: 1, nome: 'SEMANAL' },
+    { id: 2, nome: 'MENSAL' },
+    { id: 3, nome: 'BIMESTRAL' },
+    { id: 4, nome: 'TRIMESTRAL' },
+    { id: 5, nome: 'SEMESTRAL' },
+    { id: 6, nome: 'ANUAL' },
+  ];
+  return list;
 };
 
 export const NewGoalObjective = () => {
@@ -197,21 +226,21 @@ export const NewGoalObjective = () => {
     getMonitoring().then(data => {
       setMonitoring(data);
       if (data.length > 0) {
-        setSelectedMonitoring(data[0].id);
+        setSelectedMonitoring(id);
       }
     });
 
     getEvaluation().then(data => {
       setEvaluation(data);
       if (data.length > 0) {
-        setSelectedEvaluation(data[0].id);
+        setSelectedEvaluation(id);
       }
     });
 
     getResources().then(data => {
       setResources(data);
       if (data.length > 0) {
-        setSelectedResource(data[0].id);
+        setSelectedResource(id);
       }
     });
   }, []);
