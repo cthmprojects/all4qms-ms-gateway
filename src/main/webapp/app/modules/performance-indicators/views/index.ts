@@ -1,1 +1,1 @@
-export { Analytics, Dashboard } from './pages/';
+export { AddIndicator, Analytics, Dashboard } from './pages/';
