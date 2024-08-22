@@ -36,7 +36,7 @@ import { CauseInvestigation, ImmediateActions, PlannedActions, ProductDecision, 
 import './general-register.css';
 import { listEnums } from '../../../../reducers/enums.reducer';
 import { Enums } from '../../../../models';
-import { savePlan, updatePlan } from 'app/modules/rnc/reducers/plan.reducer';
+import { formatDate, savePlan, updatePlan } from 'app/modules/rnc/reducers/plan.reducer';
 import { rangeList } from 'app/modules/rnc/reducers/range.reducer';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Storage } from 'react-jhipster';
@@ -281,7 +281,7 @@ export const GeneralRegister = () => {
                 prazoAcao: new Date(action?.prazoAcao) || new Date(),
                 idResponsavelAcao: action?.idResponsavelAcao,
                 statusAcao: action?.statusAcao,
-                dataVerificao: new Date(action?.dataVerificao) || new Date(),
+                dataVerificao: action?.dataVerificao ? new Date(action?.dataVerificao) : null,
                 idResponsavelVerificaoAcao: action?.idResponsavelVerificaoAcao,
                 idAnexosExecucao: action?.idAnexosExecucao,
                 dataConclusaoAcao: new Date(action?.dataConclusaoAcao) || new Date(),
@@ -389,7 +389,7 @@ export const GeneralRegister = () => {
       if (_rnc.statusAtual == 'LEVANTAMENTO') {
         dispatch(update({ ..._rnc, statusAtual: 'ELABORACAO' }));
       } else if (_rnc.statusAtual == 'ELABORACAO') {
-        dispatch(update({ ..._rnc, statusAtual: 'EXECUCAO' }));
+        dispatch(update({ ..._rnc, statusAtual: 'EXECUCAO' })).then(() => navigate('/rnc'));
       }
     }
   };
@@ -639,7 +639,11 @@ export const GeneralRegister = () => {
             actionPlans: listaAcoesCorretivas,
             plan: plans[0],
           })
-        );
+        ).then(() => {
+          sendNotifications();
+        });
+
+        toast.success('RNC atualizada com sucesso!');
       } else {
         dispatch(
           savePlan({
@@ -653,7 +657,9 @@ export const GeneralRegister = () => {
               statusPlano: 'ABERTO',
             },
           })
-        );
+        ).then(() => {
+          sendNotifications();
+        });
       }
       navigate('/rnc');
     }
@@ -688,6 +694,39 @@ export const GeneralRegister = () => {
         let sgq = users.find(user => user.user.id == element.id);
         sendNotification('Existe uma pendência no módulo RNC', sgq);
       });
+    });
+  };
+
+  const sendNotifications = async () => {
+    let url = '/api/pendencias';
+    let urlEmail = '/services/all4qmsmsinfodoc/api/infodoc/notificacoes/enviar-email';
+
+    listaAcoesCorretivas.map(async e => {
+      let _user = users.find(user => user.id == e.idResponsavelAcao);
+      let _currentUser = JSON.parse(Storage.session.get('USUARIO_QMS'));
+
+      await axios.post(url, {
+        nome: `Pendência no módulo RNC. Descrição: ${e.descricaoAcao} - Prazo: ${formatDate(e.prazoAcao, true)}`,
+        status: false,
+        tipo: 'ATIVIDADE',
+        responsavel: _user,
+        link: `/rnc/general/${id}`,
+      });
+
+      await axios
+        .post(urlEmail, {
+          to: _user.email,
+          subject: 'Pendência no módulo RNC',
+          tipo: 'APROVAR',
+          tituloDocumento: '-',
+          nomeEmissor: _currentUser.nome,
+          dataCriacao: formatDate(new Date(), true),
+          descricao: `Pendência no módulo RNC. Descrição: ${e.descricaoAcao} - Prazo: ${formatDate(e.prazoAcao, true)}`,
+          motivoReprovacao: '-',
+        })
+        .catch(e => {
+          toast.error('Não foi possível notificar responsáveis por e-mail');
+        });
     });
   };
 
@@ -842,7 +881,6 @@ export const GeneralRegister = () => {
                     );
                   }
                   updateElaboration();
-                  navigate('/rnc');
                 }
               }}
             >

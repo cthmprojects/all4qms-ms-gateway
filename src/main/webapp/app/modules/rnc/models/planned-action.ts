@@ -29,7 +29,7 @@ export type ActionPlan = {
   prazoAcao: Date;
   idResponsavelAcao: number;
   statusAcao: string;
-  dataVerificao: Date;
+  dataVerificao?: Date;
   idResponsavelVerificaoAcao: number;
   idAnexosExecucao: number;
   dataConclusaoAcao: Date;
