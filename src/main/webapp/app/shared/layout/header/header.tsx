@@ -207,6 +207,7 @@ const Header = (props: IHeaderProps) => {
                 <MenuItem onClick={() => navigate('/setor')}>Setores</MenuItem>
                 <MenuItem onClick={() => navigate('/processo')}>Processos</MenuItem>
                 <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem>
+                <MenuItem onClick={() => navigate('/goals/resources')}>Recursos</MenuItem>
                 <MenuItem onClick={() => navigate('/account/reset/finish')}>Alterar senha</MenuItem>
               </Menu>
               <Button startIcon={<AccountCircleIcon />} className="remove-margin-top-icon" onClick={handleOpenProfileMenu}>

@@ -7,6 +7,7 @@ import HomeGoalsList from './ui/home';
 
 import { ReducersMapObject, combineReducers } from 'redux';
 import { ResultPage } from './ui/result-page';
+import { ResourcePage } from './ui/resource-page';
 import rncReducers from '../rnc/reducers';
 import metasObjetivosReducers from './reducers';
 
@@ -21,7 +22,7 @@ const GoalsObjectivesRoutes = () => {
         <Route path="new/" element={<> </>} />
         <Route path="edit/:id" element={<> </>} />
         <Route path=":metaId/results" element={<ResultPage />} />
-        <Route path="resources" element={<> </>} />
+        <Route path="resources" element={<ResourcePage />} />
       </ErrorBoundaryRoutes>
     </div>
   );

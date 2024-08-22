@@ -20,7 +20,7 @@ export type MetaObjetivo = {
 };
 
 export type MetaRecurso = {
-  idRecurso: Number;
+  id: number;
   recursoNome: String;
 };
 
