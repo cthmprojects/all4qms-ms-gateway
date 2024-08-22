@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Button, Fab, FormControl, FormControlLabel, Switch, TextField, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Button, Fab, FormControl, FormControlLabel, IconButton, Switch, TextField, Typography } from '@mui/material';
 import { Link, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { Controller, UseFormReturn, useForm, useWatch } from 'react-hook-form';
@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { createResult, getMeta, getMetaResultAttatchment, getMetaResults } from '../../goal-result.service';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 import { AttachmentButton } from 'app/shared/layout/AttachmentButton';
+import axios from 'axios';
 
 type ResultItemProps = {
   save: (formMethods: UseFormReturn<any>) => void;
@@ -16,6 +17,18 @@ type ResultItemProps = {
 };
 
 const queryClient = new QueryClient();
+
+export const deleteMetaResult = async (id: number) => {
+  try {
+    const { data } = await axios.delete('/services/all4qmsmsmetaind/api/metaobj/resultados/' + id);
+    queryClient.invalidateQueries({ queryKey: ['meta-results'] });
+    toast.success('Resultado excluído com sucesso');
+    return data;
+  } catch (error) {
+    toast.error('Erro ao excluir resultado');
+    toast.error('Tente novamente');
+  }
+};
 
 const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
   const formMethods = useForm({
@@ -58,15 +71,34 @@ const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
     queryClient
   );
 
-  function download() {
-    const link = document.createElement('a');
-    link.href = '/services/all4qmsmsmetaind/api/metaobj/anexos/download/zip/' + initialPayload?.id;
-    link.download = attatchment.nomeFisico;
+  async function download() {
+    try {
+      const response = await axios.get(`/services/all4qmsmsmetaind/api/metaobj/anexos/download/zip/${initialPayload?.id}`, {
+        responseType: 'blob', // Importante: Define o tipo de resposta como blob
+      });
 
-    // Simula um clique no link para iniciar o download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      // Cria um objeto URL para o blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // Cria um elemento de link
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Define o nome do arquivo que será baixado
+      link.download = attatchment.nomeFisico.slice(0, -4) + '.zip';
+
+      // Simula um clique no link para iniciar o download
+      document.body.appendChild(link);
+      link.click();
+
+      // Remove o link do DOM
+      document.body.removeChild(link);
+
+      // Libera o objeto URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao fazer o download do arquivo:', error);
+    }
   }
 
   return (
@@ -127,6 +159,12 @@ const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
             return <AttachmentButton {...(initialPayload?.id ? { download } : {})} onChange={onChange} />;
           }}
         />
+
+        {initialPayload?.id && (
+          <IconButton sx={{ marginLeft: 'auto' }} onClick={() => deleteMetaResult(initialPayload?.id)}>
+            <DeleteIcon />
+          </IconButton>
+        )}
       </Box>
       <TextField disabled={isDisabled} multiline rows={3} fullWidth label="Avaliação do Resultado" {...field('avaliacao')} />
       <TextField disabled={isDisabled} multiline rows={3} fullWidth label="Análise Crítica" {...field('analise')} />
@@ -158,7 +196,7 @@ export const ResultPage = () => {
 
   const { data: results, isLoading: isLoadingResults } = useQuery(
     {
-      queryKey: [`meta-results/${metaId}`],
+      queryKey: [`meta-results`],
       queryFn: () => getMetaResults(Number(metaId)),
       enabled: !!metaId, // Só faz a consulta se o ID estiver presente
       staleTime: 60000, // Dados ficam atualizados por 1 minuto,

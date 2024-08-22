@@ -19,7 +19,7 @@ export const AttachmentButton = ({ onChange, download }: CustomInputType) => {
           onChange([].slice.call(event.target.files));
         }}
         type="file"
-        multiple={false}
+        multiple={true}
         style={{ position: 'absolute', height: '0px', width: '0px' }}
         ref={inputRef}
       />
