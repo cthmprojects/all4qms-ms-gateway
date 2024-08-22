@@ -1,8 +1,6 @@
-import React from 'react';
-import './ButtonList.scss';
-import { Icon } from '@iconify/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
+import './ButtonList.scss';
 
 const ButtonList = () => {
   const navigate = useNavigate();
@@ -13,7 +11,7 @@ const ButtonList = () => {
     { icon: <FontAwesomeIcon icon="crosshairs" />, link: '/risks-opportunities', legenda: 'Riscos e Oportunidades' },
     { icon: <FontAwesomeIcon icon="location-crosshairs" />, link: '', legenda: 'Auditorias', disabled: true },
     { icon: <FontAwesomeIcon icon="file-circle-check" />, link: '/rnc', legenda: 'RNC / OM' },
-    { icon: <FontAwesomeIcon icon="file-circle-exclamation" />, link: '', legenda: 'Indicadores de Desempenho', disabled: true },
+    { icon: <FontAwesomeIcon icon="file-circle-exclamation" />, link: '/performance-indicators', legenda: 'Indicadores de Desempenho' },
     { icon: <FontAwesomeIcon icon="chart-line" />, link: '', legenda: 'Análise Crítica', disabled: true },
   ];
 
