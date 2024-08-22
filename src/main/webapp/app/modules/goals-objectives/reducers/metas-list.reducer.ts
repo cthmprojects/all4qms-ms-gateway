@@ -31,7 +31,7 @@ export interface ListPaginationMeta {
   totalPages: number;
   totalElements: number;
   size: number;
-  content: ListMeta[];
+  content: [];
   number: number;
   sort: Sort;
   numberOfElements: number;

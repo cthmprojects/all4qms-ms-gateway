@@ -10,6 +10,7 @@ import { ResultPage } from './ui/result-page';
 import { ResourcePage } from './ui/resource-page';
 import rncReducers from '../rnc/reducers';
 import metasObjetivosReducers from './reducers';
+import NewGoalObjective from './ui/new';
 
 const GoalsObjectivesRoutes = () => {
   const store = getStore();
@@ -19,8 +20,8 @@ const GoalsObjectivesRoutes = () => {
     <div>
       <ErrorBoundaryRoutes>
         <Route path="" element={<HomeGoalsList />} />
-        <Route path="new/" element={<> </>} />
-        <Route path="edit/:id" element={<> </>} />
+        <Route path="new/" element={<NewGoalObjective />} />
+        <Route path="edit/:metaId" element={<NewGoalObjective />} />
         <Route path=":metaId/results" element={<ResultPage />} />
         <Route path="resources" element={<ResourcePage />} />
       </ErrorBoundaryRoutes>

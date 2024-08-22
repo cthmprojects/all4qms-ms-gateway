@@ -19,14 +19,22 @@ export const getMeta = createAsyncThunk('get/meta', async (id: number) => {
   return axios.get<Meta>(`${apiUrl}/${id}`);
 });
 
+export const saveMeta = createAsyncThunk('set/meta', async (meta: Meta) => {
+  return axios.post<Meta>(apiUrl, meta);
+});
 const metasSlice = createEntitySlice({
   name: 'metas',
   initialState,
   extraReducers(builder) {
-    builder.addMatcher(isFulfilled(getMeta), (state, action) => {
-      state.loading = false;
-      state.entity = action.payload.data;
-    });
+    builder
+      .addMatcher(isFulfilled(getMeta), (state, action) => {
+        state.loading = false;
+        state.entity = action.payload.data;
+      })
+      .addMatcher(isFulfilled(saveMeta), (state, action) => {
+        state.loading = false;
+        state.entity = action.payload.data;
+      });
   },
 });
 

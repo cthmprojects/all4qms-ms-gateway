@@ -13,7 +13,7 @@ export interface ListMeta {
 }
 
 export type MetaObjetivo = {
-  idMetaObjetivo: Number;
+  id: Number;
   politicaSGQ: String;
   desdobramentoSGQ: String;
   objetivoSGQ: String;
@@ -56,4 +56,19 @@ export type Meta = {
   periodo: EnumTemporal;
   recursos: MetaRecurso[];
   metaObjetivo: MetaObjetivo;
+};
+
+export type TargetGoals = {
+  idUsuarioCriacao?: number;
+  dataCricao: string;
+  qp: string;
+  qt: string;
+  qpd: string;
+  goals: {
+    id: number;
+  }[];
+};
+
+export type Goals = {
+  id: number;
 };

@@ -18,7 +18,6 @@ import InfodocRoutes from './modules/infodoc';
 import RisksOpportunitiesRoutes from './modules/risks-opportunities';
 import RncRoutes from './modules/rnc';
 import GoalsObjectivesRoutes from './modules/goals-objectives';
-import { NewGoalObjective } from './modules/goals-objectives/new/new-goal-objective';
 
 const loading = <div>loading ...</div>;
 
@@ -54,7 +53,6 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="infodoc/*" element={<InfodocRoutes />} />
         <Route path="risks-opportunities/*" element={<RisksOpportunitiesRoutes />} />
         <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
-        <Route path="goals/new" element={<NewGoalObjective />} />
         <Route path="account">
           <Route
             path="*"
