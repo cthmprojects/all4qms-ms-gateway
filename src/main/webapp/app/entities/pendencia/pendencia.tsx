@@ -7,21 +7,19 @@ import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
-import { Modal } from 'app/shared/components/Modal';
+import { Modal } from 'app/shared/components-form/Modal';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import {
   Box,
   Breadcrumbs,
   CircularProgress,
   Divider,
-  IconButton,
   Paper,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import { IPendencia } from '../../shared/model/pendencia.model';
@@ -30,8 +28,6 @@ import { getEntity as getUsuario } from '../usuario/usuario.reducer';
 import { PendenciaOptions } from './pendencia-options';
 import { PendenciaDetail } from './pendencia-detail';
 import { AxiosResponse } from 'axios';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 export const Pendencia = () => {
   const dispatch = useAppDispatch();
@@ -123,10 +119,6 @@ export const Pendencia = () => {
     });
   };
 
-  const openLink = link => {
-    navigate(link);
-  };
-
   const columns = ['Tipo', 'Descrição', 'Link', 'status', 'Criado Em', 'Ações'];
 
   const renderTable = () => {
@@ -148,26 +140,8 @@ export const Pendencia = () => {
                     {/* <TableCell>{pendencia.id}</TableCell> */}
                     <TableCell width={120}>{pendencia.tipo?.toString()}</TableCell>
                     <TableCell>{pendencia.nome}</TableCell>
-                    <TableCell>
-                      <Button variant="text" onClick={() => openLink(pendencia.link)}>
-                        Abrir
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      {pendencia.status ? (
-                        <Tooltip title="Visto">
-                          <IconButton>
-                            <VisibilityIcon />
-                          </IconButton>
-                        </Tooltip>
-                      ) : (
-                        <Tooltip title="Não visto">
-                          <IconButton>
-                            <VisibilityOffIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </TableCell>
+                    <TableCell>{pendencia.link}</TableCell>
+                    <TableCell>{pendencia.status ? 'true' : 'false'}</TableCell>
                     <TableCell width={120}>{new Date(String(pendencia.criadoEm)).toLocaleDateString()}</TableCell>
                     {/* <TableCell>
                       {pendencia.criadoPor ? <Link to={`/usuario/${pendencia.criadoPor.id}`}>{pendencia.criadoPor.nome}</Link> : ''}

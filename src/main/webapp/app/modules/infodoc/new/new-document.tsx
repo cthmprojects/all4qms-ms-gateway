@@ -94,7 +94,7 @@ export const NewDocument = () => {
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
-    setEmitter(currentUser.id);
+    // dispatch(getInfoDocById(id));
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -138,7 +138,7 @@ export const NewDocument = () => {
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
-          fileDownload(file, `${fileName}`);
+          fileDownload(file, `${fileName}.pdf`);
         });
     }
   };
@@ -159,7 +159,7 @@ export const NewDocument = () => {
   };
 
   const validateFields = () => {
-    return emitter && emittedDate && selectedProcess && description;
+    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
   };
 
   const saveDocument = () => {
@@ -167,16 +167,15 @@ export const NewDocument = () => {
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
       descricaoDoc: description,
-      justificativa: '',
-      codigo: '',
-      titulo: '',
+      justificativa: documentDescription,
+      codigo: code,
+      titulo: title,
       origem: 'I',
       idProcesso: parseInt(selectedProcess),
       idArquivo: parseInt(id),
       ignorarValidade: true,
       enumSituacao: 'E',
       tipoDoc: 'MA',
-      revisao: 0,
     };
 
     if (!noValidate) {
@@ -299,7 +298,6 @@ export const NewDocument = () => {
               className="m-2 ms-0"
               autoComplete="off"
               value={code}
-              disabled
               onChange={e => setCode(e.target.value)}
             />
             <TextField
@@ -308,7 +306,6 @@ export const NewDocument = () => {
               name="number"
               className="m-2"
               autoComplete="off"
-              disabled
               value={title}
               onChange={e => setTitle(e.target.value)}
             />
@@ -346,7 +343,7 @@ export const NewDocument = () => {
           <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
             <FormControlLabel
               className="me-2"
-              control={<Checkbox disabled checked={noValidate} onClick={() => onNoValidateChanged()} />}
+              control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
             />
             <FormControl className="me-2 ms-2 mt-4">
@@ -355,7 +352,7 @@ export const NewDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled
+                disabled={noValidate}
               />
               <label htmlFor="" className="rnc-date-label">
                 Validade
@@ -368,7 +365,7 @@ export const NewDocument = () => {
                 label="Notificar:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled
+                disabled={noValidate}
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -386,7 +383,6 @@ export const NewDocument = () => {
             name="ncArea"
             value={documentDescription || ''}
             onChange={e => setDocumentDescription(e.target.value)}
-            disabled
           />
 
           <div className="mt-4">

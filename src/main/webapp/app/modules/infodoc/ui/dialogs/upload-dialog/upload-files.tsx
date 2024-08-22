@@ -63,7 +63,7 @@ const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
           <h2>Enviar arquivos</h2>
         </DialogTitle>
         <DialogContent>
-          <input type="file" style={{ display: 'none' }} onChange={onFileChanged} ref={fileInputRef} />
+          <input type="file" style={{ display: 'none' }} onChange={onFileChanged} ref={fileInputRef} accept="application/pdf" />
 
           {files.length == 0 && (
             <button

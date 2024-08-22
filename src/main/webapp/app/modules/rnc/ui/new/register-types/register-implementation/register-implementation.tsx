@@ -19,7 +19,6 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { saveApprovalNC, updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
 import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
-import { toast } from 'react-toastify';
 
 export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao }) => {
   const dispatch = useAppDispatch();
@@ -63,18 +62,17 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
         dataImplementacao: firstForm.date.value,
         responsavelImplementacao: users.find(user => user.nome === firstForm.emitter.value)?.id,
         descImplementacao: firstForm.description.value,
-        dataEficacia: null,
-        dataFechamento: null,
       };
       dispatch(saveApprovalNC(new_implementation));
     }
-    toast.success('Dados salvos com sucesso!');
   };
 
   const updateStatus = () => {
     if (_rnc) {
-      saveImplementation();
-      dispatch(update({ ..._rnc, statusAtual: 'VERIFICACAO' })).then(() => navigate('/rnc'));
+      dispatch(update({ ..._rnc, statusAtual: 'VERIFICACAO' }));
+      setTimeout(() => {
+        navigate('/rnc');
+      }, 1000);
     }
   };
 
@@ -90,6 +88,8 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
 
   useEffect(() => {
     if (implementation) {
+      console.log(users.find(user => user.id === implementation.responsavelImplementacao)?.nome);
+
       setFirstForm({
         date: { value: implementation?.dataImplementacao ? new Date(implementation.dataImplementacao) : new Date(), error: false },
         emitter: {
@@ -119,14 +119,14 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
             RNC
           </Link>
           <Link to={'/rnc/general/implementacao'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-            Verificação de Implementação
+            Implementação
           </Link>
         </Breadcrumbs>
       </Row>
       <div className="container-style">
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }} className="me-5">
-            <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Verificação de Implementação</h2>
+            <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Implementação do plano</h2>
             <div className="mt-3" style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
               <FormControlLabel
                 label="Sim"

@@ -31,7 +31,7 @@ type Payload = {
   plan: Plan;
 };
 
-export const formatDate = (date: Date, shortened: boolean = false): string => {
+const formatDate = (date: Date, shortened: boolean = false): string => {
   const year: string = date.getFullYear().toString();
   const month: string = (date.getMonth() + 1).toString().padStart(2, '0');
   const day: string = date.getDate().toString().padStart(2, '0');
@@ -52,7 +52,7 @@ export const savePlan = createAsyncThunk('/plan/save', async ({ actionPlans, pla
     qtdAcoes: plan.qtdAcoes,
     qtdAcoesConcluidas: plan.qtdAcoesConcluidas,
     percentualPlano: plan.percentualPlano,
-    dtConclusaoPlano: !plan.dtConclusaoPlano ? null : formatDate(plan.dtConclusaoPlano),
+    dtConclusaoPlano: formatDate(plan.dtConclusaoPlano),
     idNaoConformidade: plan.idNaoConformidade,
   });
 
@@ -66,18 +66,14 @@ export const savePlan = createAsyncThunk('/plan/save', async ({ actionPlans, pla
       descricaoAcao: actionPlan.descricaoAcao,
       prazoAcao: formatDate(actionPlan.prazoAcao, true),
       idResponsavelAcao: actionPlan.idResponsavelAcao,
-      statusAcao: !actionPlan.dataVerificao ? 'PENDENTE' : 'VISTO',
-      dataVerificao: !actionPlan.dataVerificao ? null : formatDate(actionPlan.dataVerificao, true),
+      statusAcao: !actionPlan.dataVerificao ? actionPlan.statusAcao : 'VISTO',
+      dataVerificao: formatDate(actionPlan.dataVerificao, true),
       idResponsavelVerificaoAcao: actionPlan.idResponsavelVerificaoAcao,
       idAnexosExecucao: actionPlan.idAnexosExecucao,
       dataConclusaoAcao: formatDate(actionPlan.dataConclusaoAcao),
       planoId: savedPlan.id,
     });
   }
-});
-
-export const deleteAction = createAsyncThunk('/action/delete', async (id: number) => {
-  await axios.delete(`${actionPlanApiUrl}/${id}`);
 });
 
 export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans, plan }: Payload) => {
@@ -104,7 +100,7 @@ export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans,
         prazoAcao: formatDate(new Date(actionPlan.prazoAcao), true),
         idResponsavelAcao: actionPlan.idResponsavelAcao,
         statusAcao: actionPlan.statusAcao,
-        dataVerificao: !actionPlan.dataVerificao ? null : formatDate(new Date(actionPlan.dataVerificao), true),
+        dataVerificao: formatDate(new Date(actionPlan.dataVerificao), true),
         idResponsavelVerificaoAcao: actionPlan.idResponsavelVerificaoAcao,
         idAnexosExecucao: actionPlan.idAnexosExecucao,
         dataConclusaoAcao: formatDate(new Date(actionPlan.dataConclusaoAcao)),
@@ -116,8 +112,8 @@ export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans,
         descricaoAcao: actionPlan.descricaoAcao,
         prazoAcao: formatDate(actionPlan.prazoAcao, true),
         idResponsavelAcao: actionPlan.idResponsavelAcao,
-        statusAcao: !actionPlan.dataVerificao ? 'PENDENTE' : 'VISTO',
-        dataVerificao: !actionPlan.dataVerificao ? null : formatDate(actionPlan.dataVerificao, true),
+        statusAcao: !actionPlan.dataVerificao ? actionPlan.statusAcao : 'VISTO',
+        dataVerificao: formatDate(actionPlan.dataVerificao, true),
         idResponsavelVerificaoAcao: actionPlan.idResponsavelVerificaoAcao,
         idAnexosExecucao: actionPlan.idAnexosExecucao,
         dataConclusaoAcao: formatDate(actionPlan.dataConclusaoAcao),
@@ -153,14 +149,6 @@ const rncPlanSlice = createEntitySlice({
         state.updating = true;
       })
       .addMatcher(isFulfilled(updatePlan), (state, action) => {
-        state.updating = false;
-        state.loading = false;
-        state.updateSuccess = true;
-      })
-      .addMatcher(isPending(deleteAction), (state, action) => {
-        state.loading = false;
-      })
-      .addMatcher(isFulfilled(deleteAction), (state, action) => {
         state.updating = false;
         state.loading = false;
         state.updateSuccess = true;

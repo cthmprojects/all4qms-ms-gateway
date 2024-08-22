@@ -164,7 +164,7 @@ export const UpdateDocument = () => {
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
-          fileDownload(file, `${fileName}`);
+          fileDownload(file, `${fileName}.pdf`);
         });
     }
   };

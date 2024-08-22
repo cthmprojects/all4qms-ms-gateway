@@ -1,21 +1,23 @@
-import { AUTHORITIES } from 'app/config/constants';
-import EntitiesRoutes from 'app/entities/routes';
-import Activate from 'app/modules/account/activate/activate';
-import PasswordResetFinish from 'app/modules/account/password-reset/finish/password-reset-finish';
-import PasswordResetInit from 'app/modules/account/password-reset/init/password-reset-init';
-import Register from 'app/modules/account/register/register';
+import React from 'react';
+import { Route } from 'react-router-dom';
+import Loadable from 'react-loadable';
+
 import Login from 'app/modules/login/login';
+import Register from 'app/modules/account/register/register';
+import Activate from 'app/modules/account/activate/activate';
+import PasswordResetInit from 'app/modules/account/password-reset/init/password-reset-init';
+import PasswordResetFinish from 'app/modules/account/password-reset/finish/password-reset-finish';
 import Logout from 'app/modules/login/logout';
+import EntitiesRoutes from 'app/entities/routes';
 import PrivateRoute from 'app/shared/auth/private-route';
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import PageNotFound from 'app/shared/error/page-not-found';
-import Loadable from 'react-loadable';
-import { Route } from 'react-router-dom';
+import { AUTHORITIES } from 'app/config/constants';
 import { Home } from './modules/home/home';
-import InfodocRoutes from './modules/infodoc';
-import PerformanceIndicatorsRoutes from './modules/performance-indicators';
-import RisksOpportunitiesRoutes from './modules/risks-opportunities';
 import RncRoutes from './modules/rnc';
+import InfodocRoutes from './modules/infodoc';
+import GoalsObjectivesRoutes from './modules/goals-objectives';
+import { NewGoalObjective } from './modules/goals-objectives/new/new-goal-objective';
 
 const loading = <div>loading ...</div>;
 
@@ -49,8 +51,8 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="logout" element={<Logout />} />
         <Route path="rnc/*" element={<RncRoutes />} />
         <Route path="infodoc/*" element={<InfodocRoutes />} />
-        <Route path="risks-opportunities/*" element={<RisksOpportunitiesRoutes />} />
-        <Route path="performance-indicators/*" element={<PerformanceIndicatorsRoutes />} />
+        <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
+        <Route path="goals/new" element={<NewGoalObjective />} />
         <Route path="account">
           <Route
             path="*"

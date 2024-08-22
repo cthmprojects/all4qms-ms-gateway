@@ -162,7 +162,7 @@ const InfodocList = () => {
     dtFim: null,
     idProcesso: 0,
     origem: null,
-    situacao: 'H',
+    situacao: null,
     pesquisa: null,
   });
 
@@ -282,6 +282,9 @@ const InfodocList = () => {
       case 2:
         type = 'R';
         break;
+      case 3:
+        type = 'H';
+        break;
       case 4:
         type = 'O';
         break;
@@ -349,8 +352,10 @@ const InfodocList = () => {
   };
 
   const onEditClicked = (infodoc: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    setIdDocUpdating(infodoc.doc.id);
-    setUploadFileUpdate(true);
+    if (infodoc.doc?.enumSituacao == 'E' || infodoc.doc?.enumSituacao == 'R') {
+      setIdDocUpdating(infodoc.doc.id);
+      setUploadFileUpdate(true);
+    }
 
     // H - homolog
     // R - revisão
@@ -470,8 +475,8 @@ const InfodocList = () => {
               </TableHead>
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
-                  <TableRow key={infodoc.doc.id}>
-                    <Tooltip title={infodoc.doc.descricaoDoc}>
+                  <TableRow className="table-row" key={infodoc.doc.id}>
+                    <Tooltip onClick={event => openDocToValidation(event, infodoc)} title={infodoc.doc.titulo}>
                       <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.titulo}</TableCell>
@@ -680,6 +685,7 @@ const InfodocList = () => {
               <Tab label="Lista Mestra" {...a11yProps(0)} />
               <Tab label="Edição" {...a11yProps(1)} />
               <Tab label="Revisão" {...a11yProps(2)} />
+              <Tab label="Homologado" {...a11yProps(3)} />
               <Tab label="Obsoleto" {...a11yProps(4)} />
               <Tab label="Cancelado" {...a11yProps(5)} />
             </Tabs>
@@ -691,6 +697,9 @@ const InfodocList = () => {
             {renderTable()}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
+            {renderTable()}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={3}>
             {renderTable()}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={4}>
