@@ -1,10 +1,10 @@
 import { EnumTemporal } from './enums';
 
 export interface ListMeta {
-  idMetaObjetivo: Number;
   idMeta: Number;
+  idMetaObjetivo: Number;
   idMetaResultado: Number;
-  descricaoMeta: String;
+  descricao: String;
   avaliacao: String;
   analise: String;
   parcial: Boolean;
@@ -17,7 +17,6 @@ export type MetaObjetivo = {
   politicaSGQ: String;
   desdobramentoSGQ: String;
   objetivoSGQ: String;
-  meta: Meta;
 };
 
 export type MetaRecurso = {
@@ -35,18 +34,18 @@ export type MetaAnexo = {
 };
 
 export type MetaResultado = {
-  idResultado: Number;
+  id: Number;
   avaliacao: String;
   analise: String;
   parcial: Boolean;
   metaAtingida: Boolean;
   lancadoEm: Date;
   periodo: Date;
-  anexo: MetaAnexo;
+  meta: Meta;
 };
 
 export type Meta = {
-  idMeta: Number;
+  id: Number;
   descricao: String;
   indicador: String;
   medicao: String;
@@ -56,5 +55,5 @@ export type Meta = {
   monitoramento: EnumTemporal;
   periodo: EnumTemporal;
   recursos: MetaRecurso[];
-  resultado: MetaResultado;
+  metaObjetivo: MetaObjetivo;
 };

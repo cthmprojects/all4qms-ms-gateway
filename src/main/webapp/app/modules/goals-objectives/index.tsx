@@ -8,11 +8,13 @@ import HomeGoalsList from './ui/home';
 import { ReducersMapObject, combineReducers } from 'redux';
 import { ResultPage } from './ui/result-page';
 import { ResourcePage } from './ui/resource-page';
+import rncReducers from '../rnc/reducers';
+import metasObjetivosReducers from './reducers';
 
 const GoalsObjectivesRoutes = () => {
   const store = getStore();
-  //   store.injectReducer('all4qmsmsgatewayrnc', combineReducers(rncReducer as ReducersMapObject));
-  //   store.injectReducer('all4qmsmsgateway', combineReducers(infodocReducers as ReducersMapObject));
+  store.injectReducer('all4qmsmsgatewayrnc', combineReducers(rncReducers as ReducersMapObject));
+  store.injectReducer('all4qmsmsmetaind', combineReducers(metasObjetivosReducers as ReducersMapObject));
   return (
     <div>
       <ErrorBoundaryRoutes>

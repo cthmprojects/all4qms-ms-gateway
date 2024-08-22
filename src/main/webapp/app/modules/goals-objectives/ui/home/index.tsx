@@ -38,75 +38,41 @@ import CheckIcon from '@mui/icons-material/Check';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import './infodoc.css';
+import './metas.css';
+import DatePicker from 'react-datepicker';
+import { registerLocale } from 'react-datepicker';
+import ptBR from 'date-fns/locale/pt-BR';
+import { parseISO, format } from 'date-fns';
 
 import { Storage } from 'react-jhipster';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import { getUsersAsAdminSGQ } from 'app/modules/administration/user-management/user-management.reducer';
 
 import axios, { AxiosResponse } from 'axios';
 import { Process } from 'app/modules/rnc/models';
-import { ListMeta } from '../../models/goals';
-import { EnumTemporal } from '../../models/enums';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import { ListMeta, Meta, MetaResultado } from '../../models/goals';
+import { EnumSituacao, EnumTemporal } from '../../models/enums';
+import { getAllMetasFilter, ListMetasInterface, ListPaginationMeta } from '../../reducers/metas-list.reducer';
 
-const listMetas: ListMeta[] = [
-  {
-    idMetaObjetivo: 0,
-    idMeta: 1,
-    idMetaResultado: 0,
-    descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M1',
-    avaliacao:
-      'Auditoria documental realizada de 21 a 23 de novembro de 2023 com resultado satisfatório A auditoria interna e extena foram realizadas na data do dia 23/nov',
-    analise: '',
-    parcial: true,
-    metaAtingida: true,
-    lancadoEm: new Date(),
-  },
-  {
-    idMetaObjetivo: 0,
-    idMeta: 2,
-    idMetaResultado: 0,
-    descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M2',
-    avaliacao: 'Auditoria interna enm andamento',
-    analise: '',
-    parcial: true,
-    metaAtingida: false,
-    lancadoEm: new Date(),
-  },
-  {
-    idMetaObjetivo: 0,
-    idMeta: 3,
-    idMetaResultado: 0,
-    descricaoMeta: 'Realizar todas as auditorias internas e externas planejadas M3',
-    avaliacao: 'Não foi possívek realizar a  auditoria devido parada não programada da produção por problema de manutenção',
-    analise: '',
-    parcial: false,
-    metaAtingida: false,
-    lancadoEm: new Date(),
-  },
-];
+// Registra a localidade
+registerLocale('pt-BR', ptBR);
+
 const HomeGoalsList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+  const metasLista: ListPaginationMeta = useAppSelector<ListPaginationMeta>(state => state.all4qmsmsmetaind.metasLista.entity);
+
   const [startDate, setStartDate] = useState(new Date());
   const [totalItems, setTotalItems] = useState(0);
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
-  const [usersSGQ, setUsersSGQ] = useState<[]>([]);
-  const [goalsList, setGoalsList] = useState<ListMeta[]>(listMetas);
-
-  const processes = useAppSelector<Array<Process>>(state => state?.all4qmsmsgatewayrnc?.process?.entities);
-  // const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
-
+  // const [usersSGQ, setUsersSGQ] = useState<[]>([]);
+  const [isSGQ, setIsSGQ] = useState<Boolean>(false);
+  const [goalsList, setGoalsList] = useState<ListMeta[]>([]);
   /**
    * Filters
    */
-  const [filters, setFilters] = useState({
-    processo: '',
-    ano: '',
-    mes: '',
-    situacao: '',
-    pesquisa: '',
-  });
+  const [filters, setFilters] = useState<ListMetasInterface>({ idProcesso: processes[0]?.id });
 
   /**
    * Pagination
@@ -139,75 +105,38 @@ const HomeGoalsList = () => {
     handleApplyFilters();
   }, [page]);
 
-  const getUsersSGQ = async () => {
-    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
-    const users_ = (resUsers.payload as AxiosResponse).data || [];
+  // const getUsersSGQ = async () => {
+  //   const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+  //   const users_ = (resUsers.payload as AxiosResponse).data || [];
 
-    // const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
-    // setUsersSGQ(filteredUser);
+  //   const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
+  //   setUsersSGQ(filteredUser);
+  // };
+
+  // const enums: Enums = useAppSelector<Enums>(state => state.all4qmsmsgatewayro.enums.entity);
+
+  const fetchMetasAllFilter = async () => {
+    const resMetasContent = await dispatch(getAllMetasFilter({}));
+    const listMetasRes: ListPaginationMeta = (resMetasContent.payload as AxiosResponse).data || {};
+    setGoalsList(listMetasRes.content);
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    dispatch(getProcesses());
+    dispatch(getUsers({}));
+    dispatch(getAllMetasFilter({}));
+    // fetchMetasAllFilter();
+
+    const roles = Storage.local.get('ROLE');
+    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(isSGQ);
+  }, []);
 
   useEffect(() => {
     handleApplyFilters();
   }, [filters, page, pageSize]);
 
-  // const filterUser = (id: number) => {
-  //   if (!users || users.length <= 0) {
-  //     return '-';
-  //   }
-
-  //   if (id) {
-  //     return users.find(user => user.id === id);
-  //   }
-
-  //   return '-';
-  // };
-
   //---------------------------------------------------------------
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    // E - Edição
-    // R - revisão
-    // H - homolog
-    // O - obsoleto
-    // C - cancelado
-
-    let type: string = '';
-    switch (newValue) {
-      case 1:
-        type = 'E';
-        break;
-      case 2:
-        type = 'R';
-        break;
-      case 3:
-        type = 'H';
-        break;
-      case 4:
-        type = 'O';
-        break;
-      case 5:
-        type = 'C';
-        break;
-    }
-
-    const { processo, ano, mes, situacao } = filters;
-    // dispatch(
-    //   listdocs({
-    //     dtIni: dtIni?.toISOString(),
-    //     dtFim: dtFim?.toISOString(),
-    //     idProcesso,
-    //     origem,
-    //     situacao: type,
-    //     size: pageSize,
-    //     page: 0,
-    //   })
-    // );
-
-    // setValue(newValue);
-  };
 
   const columns = ['Metas', 'Resultados', 'Situação', 'Atualização', 'Ações'];
   const getSituacaoIcon = (parcial, metaAtingida) => {
@@ -229,34 +158,35 @@ const HomeGoalsList = () => {
   };
 
   const handleApplyFilters = () => {
-    const { processo, ano, mes, situacao, pesquisa } = filters;
+    const { idProcesso, ano, mes, situacao, pesquisa } = filters;
 
-    // dispatch(
-    //   listdocs({
-    //     dtIni: dtIni?.toISOString(),
-    //     dtFim: dtFim?.toISOString(),
-    //     idProcesso,
-    //     origem,
-    //     situacao,
-    //     size: pageSize,
-    //     pesquisa,
-    //     page: page,
-    //   })
-    // );
+    // !processes && dispatch(getProcesses());
+
+    dispatch(
+      getAllMetasFilter({
+        idProcesso: idProcesso || processes[0]?.id,
+        ano: ano instanceof Date ? ano.getFullYear().toString() : ano,
+        mes: mes instanceof Date ? format(mes, 'MM') : mes,
+        situacao: situacao,
+        pesquisa: pesquisa,
+        size: pageSize,
+        page: page,
+      })
+    );
   };
 
   const clearFilters = () => {
     setFilters({
-      processo: '',
-      ano: '',
-      mes: '',
+      idProcesso: 0,
+      ano: new Date(),
+      mes: new Date(),
       situacao: '',
       pesquisa: '',
     });
   };
 
   const renderTable = () => {
-    if (goalsList?.length > 0) {
+    if (metasLista?.content.length > 0) {
       return (
         <>
           <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -270,28 +200,37 @@ const HomeGoalsList = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {goalsList?.map((goal: ListMeta, index) => (
-                  <Tooltip title={goal.analise}>
+                {metasLista?.content.map((goalResult: ListMeta, index) => (
+                  // <Tooltip title={goalResult.meta.metaObjetivo.desdobramentoSGQ}>
+                  <Tooltip title={''}>
                     <TableRow className="table-row" key={index}>
-                      <TableCell onClick={event => null}>{goal.descricaoMeta}</TableCell>
-                      <TableCell onClick={event => null}>{goal.avaliacao}</TableCell>
+                      {/* <TableCell onClick={event => null}>{goalResult.meta.descricao}</TableCell> */}
+                      <TableCell onClick={event => null}>{goalResult.descricao}</TableCell>
+                      {/* <TableCell onClick={event => null}>{goalResult.meta.avaliacaoResultado}</TableCell> */}
+                      <TableCell onClick={event => null}>
+                        {goalResult.avaliacao}
+                        <br />
+                        {goalResult.analise}
+                      </TableCell>
                       <TableCell onClick={event => null}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          {getSituacaoIcon(goal.parcial, goal.metaAtingida).icon}
+                          {getSituacaoIcon(goalResult.parcial, goalResult.metaAtingida).icon}
                         </Box>
                       </TableCell>
-                      <TableCell onClick={event => null}>{goal.lancadoEm ? formatDateToString(new Date(goal.lancadoEm)) : '-'}</TableCell>
+                      <TableCell onClick={event => null}>
+                        {goalResult.lancadoEm ? formatDateToString(new Date(goalResult.lancadoEm)) : '-'}
+                      </TableCell>
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                         <IconButton title="Editar" color="primary" onClick={event => null}>
                           {' '}
-                          {/*disabled={goal.doc.enumSituacao != 'H'}*/}
+                          {/*disabled={goalResult.doc.enumSituacao != 'H'}*/}
                           <EditIcon sx={{ color: '#e6b200' }} />
                         </IconButton>
                         <IconButton
                           id="btn-view"
                           title="Resultado"
                           color="primary"
-                          onClick={() => navigate(`/goals/${goal.idMeta}/results`)}
+                          onClick={() => navigate(`/goals/${goalResult.idMetaResultado}/results`)}
                         >
                           <NoteAltOutlinedIcon sx={{ color: '#2196F3' }} />
                         </IconButton>
@@ -372,8 +311,8 @@ const HomeGoalsList = () => {
               <InputLabel>Processo</InputLabel>
               <Select
                 sx={{ height: '56px' }}
-                value={filters.processo}
-                onChange={e => setFilters({ ...filters, processo: e.target.value.toString() })}
+                value={filters.idProcesso}
+                onChange={e => setFilters({ ...filters, idProcesso: Number(e.target.value.toString()) })}
                 label="Processo"
               >
                 <MenuItem value={0}>Selecionar</MenuItem>
@@ -387,38 +326,36 @@ const HomeGoalsList = () => {
           </Grid>
           <Grid item xs={1.5}>
             <FormControl fullWidth>
-              <InputLabel>Ano</InputLabel>
-              <Select
-                sx={{ height: '56px' }}
-                value={filters.processo}
-                onChange={e => setFilters({ ...filters, ano: e?.target?.value?.toString() })}
-                label="ano"
-              >
-                <MenuItem value={0}>Selecionar</MenuItem>
-                {['2024', '2023']?.map((ano, index) => (
-                  <MenuItem key={index} value={ano}>
-                    {ano}
-                  </MenuItem>
-                ))}
-              </Select>
+              <DatePicker
+                selected={filters.ano || ''}
+                onChange={date => setFilters({ ...filters, ano: new Date(date), mes: filters.mes ? filters.mes : new Date(date) })}
+                showYearPicker
+                dateFormat="yyyy"
+                className="metas-list-date-picker"
+                id="ano-date-picker"
+                placeholderText="Ano"
+                locale="pt-BR" // Define o idioma para português do Brasil
+              />
+              <label htmlFor="start-date-picker" className="infodoc-list-date-label">
+                Ano
+              </label>
             </FormControl>
           </Grid>
           <Grid item xs={1.5}>
             <FormControl fullWidth>
-              <InputLabel>Mês</InputLabel>
-              <Select
-                sx={{ height: '56px' }}
-                value={filters.processo}
-                onChange={e => setFilters({ ...filters, ano: e?.target?.value?.toString() })}
-                label="Mês"
-              >
-                <MenuItem value={0}>Selecionar</MenuItem>
-                {['Janeiro', 'Fevereiro']?.map((ano, index) => (
-                  <MenuItem key={index} value={ano}>
-                    {ano}
-                  </MenuItem>
-                ))}
-              </Select>
+              <DatePicker
+                selected={filters.mes || ''}
+                onChange={date => setFilters({ ...filters, mes: new Date(date) })}
+                showMonthYearPicker
+                dateFormat="MMMM"
+                className="metas-list-date-picker"
+                id="ano-date-picker"
+                placeholderText="Mês"
+                locale="pt-BR" // Define o idioma para português do Brasil
+              />
+              <label htmlFor="mes-date-picker" className="infodoc-list-date-label">
+                Mês
+              </label>
             </FormControl>
           </Grid>
           <Grid item xs={1.5}>
@@ -430,12 +367,16 @@ const HomeGoalsList = () => {
                 onChange={e => setFilters({ ...filters, situacao: e?.target?.value?.toString() })}
                 label="Situação"
               >
-                <MenuItem value={0}>Selecionar</MenuItem>
-                {['Finalizado', 'Parcial']?.map((ano, index) => (
-                  <MenuItem key={index} value={ano}>
-                    {ano}
-                  </MenuItem>
-                ))}
+                {['FINALIZADO', 'PARCIAL']?.map(
+                  (
+                    situacao,
+                    index // F = Finalizado; P = Parcial
+                  ) => (
+                    <MenuItem key={index} value={EnumSituacao[situacao]}>
+                      {situacao}
+                    </MenuItem>
+                  )
+                )}
               </Select>
             </FormControl>
           </Grid>
