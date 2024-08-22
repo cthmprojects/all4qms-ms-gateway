@@ -6,3 +6,8 @@ export enum EnumTemporal {
   SEMESTRAL = 'SEMESTRAL',
   ANUAL = 'ANUAL',
 }
+
+export enum EnumSituacao {
+  FINALIZADO = 'F',
+  PARCIAL = 'P',
+}
