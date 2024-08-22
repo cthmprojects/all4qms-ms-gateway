@@ -1,16 +1,18 @@
 import { Autocomplete, Stack, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { SummarizedProcess } from '../../models';
+import { Indicator, SummarizedProcess } from '../../models';
 import { onAutocompleteChanged, onTextChanged } from '../../utils';
 
 type IndicatorDetailsProps = {
+  initialValue?: Indicator;
   processes: Array<SummarizedProcess>;
+  readonly?: boolean;
   trends: Array<string>;
   units: Array<string>;
-  onChanged: (code: string, description: string, name: string, process: SummarizedProcess, trend: string, unit: string) => void;
+  onChanged?: (code: string, description: string, name: string, process: SummarizedProcess, trend: string, unit: string) => void;
 };
 
-const IndicatorDetails = ({ processes, trends, units, onChanged }: IndicatorDetailsProps) => {
+const IndicatorDetails = ({ initialValue, processes, readonly, trends, units, onChanged }: IndicatorDetailsProps) => {
   const [code, setCode] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -19,18 +21,51 @@ const IndicatorDetails = ({ processes, trends, units, onChanged }: IndicatorDeta
   const [unit, setUnit] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!onChanged) {
+      return;
+    }
+
     onChanged(code, description, name, process, trend, unit);
   }, [code, description, name, process, trend, unit]);
+
+  useEffect(() => {
+    if (!initialValue) {
+      return;
+    }
+
+    const { code, description, name, processId, trend, unit } = initialValue;
+
+    setCode(code);
+    setDescription(description);
+    setName(name);
+    setProcess(getProcess(processId));
+    setTrend(trend);
+    setUnit(unit);
+  }, [initialValue]);
+
+  const getProcess = (id: number): SummarizedProcess | null => {
+    const filteredProcesses: Array<SummarizedProcess> = processes.filter(i => i.id === id);
+
+    return filteredProcesses.length > 0 ? filteredProcesses[0] : null;
+  };
 
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={2}>
-        <TextField label="Código" onChange={event => onTextChanged(event, setCode)} placeholder="Código" value={code} />
+        <TextField disabled={readonly} label="Código" onChange={event => onTextChanged(event, setCode)} placeholder="Código" value={code} />
 
-        <TextField label="Nome" onChange={event => onTextChanged(event, setName)} placeholder="Nome" sx={{ flexGrow: 1 }} value={name} />
+        <TextField
+          disabled={readonly}
+          label="Nome"
+          onChange={event => onTextChanged(event, setName)}
+          placeholder="Nome"
+          sx={{ flexGrow: 1 }}
+          value={name}
+        />
 
         <Autocomplete
           disableClearable
+          disabled={readonly}
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setUnit)}
           options={units}
           renderInput={props => <TextField {...props} label="Unidade" />}
@@ -40,6 +75,7 @@ const IndicatorDetails = ({ processes, trends, units, onChanged }: IndicatorDeta
 
         <Autocomplete
           disableClearable
+          disabled={readonly}
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setTrend)}
           options={trends}
           renderInput={props => <TextField {...props} label="Tendência" />}
@@ -49,6 +85,7 @@ const IndicatorDetails = ({ processes, trends, units, onChanged }: IndicatorDeta
 
         <Autocomplete
           disableClearable
+          disabled={readonly}
           getOptionLabel={option => option.name}
           isOptionEqualToValue={(option, value) => option.id === value.id}
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setProcess)}
@@ -60,6 +97,7 @@ const IndicatorDetails = ({ processes, trends, units, onChanged }: IndicatorDeta
       </Stack>
 
       <TextField
+        disabled={readonly}
         label="Descrição do indicador"
         multiline
         onChange={event => onTextChanged(event, setDescription)}

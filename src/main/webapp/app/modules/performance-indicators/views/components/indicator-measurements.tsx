@@ -2,36 +2,47 @@ import { Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import IndicatorValues from './indicator-values';
 
-type IndicatorGoalsProps = {
+type IndicatorMeasurementsProps = {
   frequencies: Array<string>;
+  initialValues?: Array<Array<number | null>>;
   unit: string;
 };
 
-const IndicatorGoals = ({ frequencies, unit }: IndicatorGoalsProps) => {
-  const [goals, setGoals] = useState<Array<Array<number | null>>>([]);
+const IndicatorMeasurements = ({ frequencies, initialValues, unit }: IndicatorMeasurementsProps) => {
+  const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([]);
 
   useEffect(() => {
     const values: Array<number | null> = [null, null, null, null, null, null, null, null, null, null, null, null];
-    setGoals([[...values]]);
+    setMeasurements([[...values]]);
   }, []);
+
+  useEffect(() => {
+    if (!initialValues) {
+      return;
+    }
+
+    setMeasurements(initialValues);
+  }, [initialValues]);
 
   const addGoal = (): void => {
     const values: Array<number | null> = [null, null, null, null, null, null, null, null, null, null, null, null];
-    setGoals([...goals, values]);
+    setMeasurements([...measurements, values]);
   };
 
   const updateGoal = (values: Array<number | null>, idx: number): void => {
-    const allGoals: Array<Array<number | null>> = [...goals];
-    allGoals[idx] = values;
-    setGoals(allGoals);
+    const allMeasurements: Array<Array<number | null>> = [...measurements];
+    allMeasurements[idx] = values;
+    setMeasurements(allMeasurements);
   };
 
   return (
     <Stack spacing={2}>
-      {goals.map((goal, idx) => (
+      {measurements.map((measurement, idx) => (
         <IndicatorValues
-          allowAdding={idx === 0}
+          allowAdding={false}
           frequencies={frequencies}
+          initialValues={measurement}
+          inputOnly
           onAdded={addGoal}
           onChanged={values => updateGoal(values, idx)}
           unit={unit}
@@ -41,4 +52,4 @@ const IndicatorGoals = ({ frequencies, unit }: IndicatorGoalsProps) => {
   );
 };
 
-export default IndicatorGoals;
+export default IndicatorMeasurements;

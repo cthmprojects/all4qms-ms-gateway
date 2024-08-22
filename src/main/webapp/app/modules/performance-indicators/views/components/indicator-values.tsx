@@ -6,13 +6,15 @@ import { Add } from '@mui/icons-material';
 
 type IndicatorValuesProps = {
   allowAdding?: boolean;
+  initialValues?: Array<number | null>;
+  inputOnly?: boolean;
   frequencies: Array<string>;
   unit: string;
   onAdded?: () => void;
   onChanged: (values: Array<number | null>) => void;
 };
 
-const IndicatorValues = ({ allowAdding, frequencies, unit, onAdded, onChanged }: IndicatorValuesProps) => {
+const IndicatorValues = ({ allowAdding, frequencies, initialValues, inputOnly, unit, onAdded, onChanged }: IndicatorValuesProps) => {
   const [frequency, setFrequency] = useState<string | null>(null);
   const [values, setValues] = useState<Array<number | null>>([]);
   const [year, setYear] = useState<number | null>(null);
@@ -29,6 +31,14 @@ const IndicatorValues = ({ allowAdding, frequencies, unit, onAdded, onChanged }:
     }
     setFrequency(frequencies[0]);
   }, [frequencies]);
+
+  useEffect(() => {
+    if (!initialValues) {
+      return;
+    }
+
+    setValues(initialValues);
+  }, [initialValues]);
 
   useEffect(() => {
     onChanged(values);
@@ -201,6 +211,7 @@ const IndicatorValues = ({ allowAdding, frequencies, unit, onAdded, onChanged }:
       <Stack direction="row" spacing={2}>
         <Autocomplete
           disableClearable
+          disabled={inputOnly}
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setFrequency)}
           options={frequencies}
           renderInput={params => <TextField {...params} label="Frequência" />}
@@ -210,6 +221,7 @@ const IndicatorValues = ({ allowAdding, frequencies, unit, onAdded, onChanged }:
 
         <Autocomplete
           disableClearable
+          disabled={inputOnly}
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setYear)}
           options={years}
           renderInput={props => <TextField {...props} label="Ano" />}

@@ -4,6 +4,7 @@ import { Route } from 'react-router-dom';
 import { combineReducers, ReducersMapObject } from 'redux';
 import rncReducers from '../rnc/reducers';
 import { AddIndicator, Analytics, Dashboard } from './views';
+import Measurements from './views/pages/measurements';
 
 const PerformanceIndicatorsRoutes = () => {
   const store = getStore();
@@ -16,7 +17,7 @@ const PerformanceIndicatorsRoutes = () => {
         <Route path="analytics" element={<Analytics />} />
         <Route path="indicator" element={<AddIndicator />} />
         <Route path="indicator/:id" element={<>Edit indicator</>} />
-        <Route path="indicator/:id/measurements" element={<>Measurements</>} />
+        <Route path="indicator/:id/measurements" element={<Measurements />} />
       </ErrorBoundaryRoutes>
     </>
   );
