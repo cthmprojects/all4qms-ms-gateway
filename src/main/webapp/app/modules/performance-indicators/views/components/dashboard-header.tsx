@@ -2,7 +2,7 @@ import { SearchOutlined, TableChart } from '@mui/icons-material';
 import { Autocomplete, Button, Stack, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Indicator, SummarizedProcess } from '../../models';
-import { onAutocompleteChanged, onTextChanged } from '../../utils';
+import { getYearRange, onAutocompleteChanged, onTextChanged } from '../../utils';
 
 type DashboardHeaderProps = {
   indicators: Array<Indicator>;
@@ -19,16 +19,7 @@ const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, 
   const [years, setYears] = useState<Array<number>>([]);
 
   useEffect(() => {
-    const now: Date = new Date();
-    const currentYear: number = now.getFullYear();
-
-    const allYears: Array<number> = [];
-
-    for (let year = currentYear - 5; year <= currentYear + 5; year++) {
-      allYears.push(year);
-    }
-
-    setYears(allYears);
+    setYears(getYearRange());
   }, []);
 
   useEffect(() => {

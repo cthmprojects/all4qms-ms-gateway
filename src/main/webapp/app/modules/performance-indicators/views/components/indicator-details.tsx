@@ -1,25 +1,33 @@
 import { Autocomplete, Stack, TextField } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SummarizedProcess } from '../../models';
-import { onAutocompleteChanged } from '../../utils';
+import { onAutocompleteChanged, onTextChanged } from '../../utils';
 
 type IndicatorDetailsProps = {
   processes: Array<SummarizedProcess>;
   trends: Array<string>;
   units: Array<string>;
+  onChanged: (code: string, description: string, name: string, process: SummarizedProcess, trend: string, unit: string) => void;
 };
 
-const IndicatorDetails = ({ processes, trends, units }: IndicatorDetailsProps) => {
+const IndicatorDetails = ({ processes, trends, units, onChanged }: IndicatorDetailsProps) => {
+  const [code, setCode] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [name, setName] = useState<string>('');
   const [process, setProcess] = useState<SummarizedProcess | null>(null);
   const [trend, setTrend] = useState<string | null>(null);
   const [unit, setUnit] = useState<string | null>(null);
 
+  useEffect(() => {
+    onChanged(code, description, name, process, trend, unit);
+  }, [code, description, name, process, trend, unit]);
+
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={2}>
-        <TextField label="Código" placeholder="Código" />
+        <TextField label="Código" onChange={event => onTextChanged(event, setCode)} placeholder="Código" value={code} />
 
-        <TextField label="Nome" placeholder="Nome" sx={{ flexGrow: 1 }} />
+        <TextField label="Nome" onChange={event => onTextChanged(event, setName)} placeholder="Nome" sx={{ flexGrow: 1 }} value={name} />
 
         <Autocomplete
           disableClearable
@@ -51,7 +59,14 @@ const IndicatorDetails = ({ processes, trends, units }: IndicatorDetailsProps) =
         />
       </Stack>
 
-      <TextField label="Descrição do indicador" multiline placeholder="Descrição do indicador" rows={5} />
+      <TextField
+        label="Descrição do indicador"
+        multiline
+        onChange={event => onTextChanged(event, setDescription)}
+        placeholder="Descrição do indicador"
+        rows={5}
+        value={description}
+      />
     </Stack>
   );
 };
