@@ -31,7 +31,7 @@ import React, { useEffect, useState } from 'react';
 import { Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import NoteAltOutlinedIcon from '@mui/icons-material/NoteAltOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckIcon from '@mui/icons-material/Check';
@@ -176,13 +176,7 @@ const HomeGoalsList = () => {
   };
 
   const clearFilters = () => {
-    setFilters({
-      idProcesso: 0,
-      ano: new Date(),
-      mes: new Date(),
-      situacao: '',
-      pesquisa: '',
-    });
+    setFilters({});
   };
 
   const renderTable = () => {
@@ -221,16 +215,20 @@ const HomeGoalsList = () => {
                         {goalResult.lancadoEm ? formatDateToString(new Date(goalResult.lancadoEm)) : '-'}
                       </TableCell>
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
-                        <IconButton title="Editar" color="primary" onClick={event => null}>
-                          {' '}
-                          {/*disabled={goalResult.doc.enumSituacao != 'H'}*/}
-                          <EditIcon sx={{ color: '#e6b200' }} />
-                        </IconButton>
+                        {isSGQ ? (
+                          <IconButton title="Editar" color="primary" onClick={event => null}>
+                            <EditIcon sx={{ color: '#e6b200' }} />
+                          </IconButton>
+                        ) : (
+                          <IconButton title="Visualizar" color="primary" onClick={event => null}>
+                            <VisibilityIcon sx={{ color: '#e6b200' }} />
+                          </IconButton>
+                        )}
                         <IconButton
                           id="btn-view"
                           title="Resultado"
                           color="primary"
-                          onClick={() => navigate(`/goals/${goalResult.idMetaResultado}/results`)}
+                          onClick={() => navigate(`/goals/${goalResult.idMeta}/results`)}
                         >
                           <NoteAltOutlinedIcon sx={{ color: '#2196F3' }} />
                         </IconButton>
@@ -299,10 +297,11 @@ const HomeGoalsList = () => {
         <Grid container gap={1}>
           <Button
             variant="contained"
-            className="primary-button infodoc-list-form-field"
-            style={{ marginRight: '10px', height: '54px', width: '100px' }}
+            className="infodoc-list-form-field"
+            style={{ marginRight: '10px', height: '54px', width: '100px', backgroundColor: isSGQ ? '#e6b200' : '#a3a3a3' }}
             onClick={event => navigate('/goals/1/results')}
             title="Novo Registro"
+            disabled={!isSGQ}
           >
             Novo
           </Button>
@@ -406,15 +405,15 @@ const HomeGoalsList = () => {
             </FormControl>
           </Grid>
 
-          {/* <Button
+          <Button
             variant="contained"
             className="secondary-button rnc-list-form-field"
-            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
+            style={{ height: '54px', width: '60px', marginLeft: '7px' }}
             onClick={clearFilters}
             title="Limpar"
           >
             Limpar
-          </Button> */}
+          </Button>
         </Grid>
 
         <Box sx={{ width: '100%' }}>{renderTable()}</Box>
