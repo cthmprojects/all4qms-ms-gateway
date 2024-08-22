@@ -1,36 +1,59 @@
-import { Autocomplete, Button, IconButton, Stack, TextField } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Add, Delete } from '@mui/icons-material';
+import { Autocomplete, IconButton, Stack, TextField } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
 import { getYearRange, onAutocompleteChanged } from '../../utils';
 import IndicatorValue from './indicator-value';
-import { Add } from '@mui/icons-material';
 
 type IndicatorValuesProps = {
   allowAdding?: boolean;
+  allowRemoving?: boolean;
+  initialFrequency?: string | null;
   initialValues?: Array<number | null>;
+  initialYear?: number | null;
   inputOnly?: boolean;
   frequencies: Array<string>;
   unit: string;
   onAdded?: () => void;
-  onChanged: (values: Array<number | null>) => void;
+  onChanged: (frequency: string, year: number, values: Array<number | null>) => void;
+  onRemoved?: () => void;
 };
 
-const IndicatorValues = ({ allowAdding, frequencies, initialValues, inputOnly, unit, onAdded, onChanged }: IndicatorValuesProps) => {
+const IndicatorValues = ({
+  allowAdding,
+  allowRemoving,
+  frequencies,
+  initialFrequency,
+  initialValues,
+  initialYear,
+  inputOnly,
+  unit,
+  onAdded,
+  onChanged,
+  onRemoved,
+}: IndicatorValuesProps) => {
   const [frequency, setFrequency] = useState<string | null>(null);
-  const [values, setValues] = useState<Array<number | null>>([]);
+  const [values, setValues] = useState<Array<number | null>>([null, null, null, null, null, null, null, null, null, null, null, null]);
   const [year, setYear] = useState<number | null>(null);
   const [years, setYears] = useState<Array<number>>([]);
 
   useEffect(() => {
     setYears(getYearRange());
-    setValues([null, null, null, null, null, null, null, null, null, null, null, null]);
   }, []);
 
   useEffect(() => {
-    if (!frequencies || frequencies.length <= 0) {
+    if (!frequencies || frequencies.length <= 0 || frequency) {
       return;
     }
     setFrequency(frequencies[0]);
-  }, [frequencies]);
+  }, [frequency, frequencies]);
+
+  useEffect(() => {
+    if (!initialFrequency) {
+      return;
+    }
+
+    setFrequency(initialFrequency);
+  }, [initialFrequency]);
 
   useEffect(() => {
     if (!initialValues) {
@@ -41,11 +64,15 @@ const IndicatorValues = ({ allowAdding, frequencies, initialValues, inputOnly, u
   }, [initialValues]);
 
   useEffect(() => {
-    onChanged(values);
-  }, [values]);
+    if (!initialYear) {
+      return;
+    }
+
+    setYear(initialYear);
+  }, [initialYear]);
 
   useEffect(() => {
-    if (!years || years.length <= 0) {
+    if (!years || years.length <= 0 || year) {
       return;
     }
 
@@ -53,7 +80,7 @@ const IndicatorValues = ({ allowAdding, frequencies, initialValues, inputOnly, u
     const currentYear: number = now.getFullYear();
 
     setYear(currentYear);
-  }, [years]);
+  }, [year, years]);
 
   const getValueLabel = (idx: number): string => {
     const labels: Array<string> = [];
@@ -187,7 +214,7 @@ const IndicatorValues = ({ allowAdding, frequencies, initialValues, inputOnly, u
   const updateValue = (value: string, idx: number): void => {
     const newValues: Array<number> = [...values];
     newValues[idx] = value.length > 0 ? parseInt(value) : null;
-    setValues(newValues);
+    onChanged(frequency, year, newValues);
   };
 
   const renderValues = () => {
@@ -212,7 +239,10 @@ const IndicatorValues = ({ allowAdding, frequencies, initialValues, inputOnly, u
         <Autocomplete
           disableClearable
           disabled={inputOnly}
-          onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setFrequency)}
+          onChange={(event, value, reason, details) => {
+            onAutocompleteChanged(event, value, reason, details, setFrequency);
+            onChanged(value, year, values);
+          }}
           options={frequencies}
           renderInput={params => <TextField {...params} label="Frequência" />}
           sx={{ minWidth: '215px' }}
@@ -222,7 +252,11 @@ const IndicatorValues = ({ allowAdding, frequencies, initialValues, inputOnly, u
         <Autocomplete
           disableClearable
           disabled={inputOnly}
-          onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setYear)}
+          getOptionLabel={option => option.toString()}
+          onChange={(event, value, reason, details) => {
+            onAutocompleteChanged(event, value, reason, details, setYear);
+            onChanged(frequency, value, values);
+          }}
           options={years}
           renderInput={props => <TextField {...props} label="Ano" />}
           sx={{ minWidth: '100px' }}
@@ -232,6 +266,12 @@ const IndicatorValues = ({ allowAdding, frequencies, initialValues, inputOnly, u
         {allowAdding && (
           <IconButton onClick={onAdded} sx={{ width: 50, height: 50 }}>
             <Add />
+          </IconButton>
+        )}
+
+        {allowRemoving && (
+          <IconButton onClick={onRemoved} sx={{ width: 50, height: 50 }}>
+            <Delete />
           </IconButton>
         )}
       </Stack>

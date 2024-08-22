@@ -6,15 +6,19 @@ type IndicatorMeasurementsProps = {
   frequencies: Array<string>;
   initialValues?: Array<Array<number | null>>;
   unit: string;
+  onChanged: (measurements: Array<Array<number | null>>) => void;
 };
 
-const IndicatorMeasurements = ({ frequencies, initialValues, unit }: IndicatorMeasurementsProps) => {
-  const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([]);
+const IndicatorMeasurements = ({ frequencies, initialValues, unit, onChanged }: IndicatorMeasurementsProps) => {
+  const [frequency, setFrequency] = useState<string | null>(null);
+  const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([
+    [null, , null, null, null, null, null, null, null, null, null, null, null],
+  ]);
+  const [year, setYear] = useState<number | null>(null);
 
   useEffect(() => {
-    const values: Array<number | null> = [null, null, null, null, null, null, null, null, null, null, null, null];
-    setMeasurements([[...values]]);
-  }, []);
+    onChanged(measurements);
+  }, [measurements]);
 
   useEffect(() => {
     if (!initialValues) {
@@ -24,12 +28,11 @@ const IndicatorMeasurements = ({ frequencies, initialValues, unit }: IndicatorMe
     setMeasurements(initialValues);
   }, [initialValues]);
 
-  const addGoal = (): void => {
-    const values: Array<number | null> = [null, null, null, null, null, null, null, null, null, null, null, null];
-    setMeasurements([...measurements, values]);
+  const onIndicatorValuesChanged = (frequency: string, year: number, values: Array<number | null>, idx: number): void => {
+    updateMeasurements(values, idx);
   };
 
-  const updateGoal = (values: Array<number | null>, idx: number): void => {
+  const updateMeasurements = (values: Array<number | null>, idx: number): void => {
     const allMeasurements: Array<Array<number | null>> = [...measurements];
     allMeasurements[idx] = values;
     setMeasurements(allMeasurements);
@@ -41,10 +44,9 @@ const IndicatorMeasurements = ({ frequencies, initialValues, unit }: IndicatorMe
         <IndicatorValues
           allowAdding={false}
           frequencies={frequencies}
-          initialValues={measurement}
+          initialValues={[...measurement]}
           inputOnly
-          onAdded={addGoal}
-          onChanged={values => updateGoal(values, idx)}
+          onChanged={(frequency, year, values) => onIndicatorValuesChanged(frequency, year, values, idx)}
           unit={unit}
         />
       ))}

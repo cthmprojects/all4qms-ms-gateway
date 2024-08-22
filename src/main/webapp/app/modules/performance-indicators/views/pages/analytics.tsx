@@ -1,9 +1,23 @@
 import { Box, Breadcrumbs, Typography } from '@mui/material';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { Process } from 'app/modules/infodoc/models';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import { useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
+import { getAllIndicatorGoals } from '../../reducers/indicator-goals.reducer';
+import { getAllIndicators } from '../../reducers/indicators.reducer';
 import { AnalyticsHeader, AnalyticsTable } from '../components';
 
 const Analytics = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(getProcesses());
+    dispatch(getAllIndicators());
+    dispatch(getAllIndicatorGoals());
+  }, []);
 
   const goToAddIndicator = (): void => {
     navigate('../indicator');
@@ -16,6 +30,23 @@ const Analytics = () => {
   const goToManageMeasurements = (id: number): void => {
     navigate(`../indicator/${id}/measurements`);
   };
+
+  const indicators: Array<Indicator> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entities);
+  const indicatorGoals: Array<IndicatorGoal> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entities);
+  const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
+
+  const summarizedProcesses = useMemo<Array<SummarizedProcess>>(() => {
+    if (!processes || processes.length <= 0) {
+      return [];
+    }
+
+    return processes.map(p => {
+      return {
+        id: p.id,
+        name: p.nome,
+      };
+    });
+  }, [processes]);
 
   return (
     <div className="padding-container">
@@ -35,74 +66,14 @@ const Analytics = () => {
               onAddIndicatorRequested={goToAddIndicator}
               onDashboardRequested={goToDashboard}
               onSearchRequested={() => {}}
-              processes={[
-                { id: 1, name: 'Produção' },
-                { id: 2, name: 'Chão de fábrica' },
-              ]}
+              processes={summarizedProcesses}
             />
 
             <AnalyticsTable
-              indicatorGoals={[
-                {
-                  frequency: 'MENSAL',
-                  goals: [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
-                  indicator: {
-                    id: 1,
-                    code: null,
-                    description: null,
-                    name: null,
-                    processId: null,
-                    trend: null,
-                    unit: null,
-                    indicatorGoalId: null,
-                  },
-                  measurements: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                  year: '2024',
-                  id: 1,
-                },
-                {
-                  frequency: 'MENSAL',
-                  goals: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                  indicator: {
-                    id: 2,
-                    code: null,
-                    description: null,
-                    name: null,
-                    processId: null,
-                    trend: null,
-                    unit: null,
-                    indicatorGoalId: null,
-                  },
-                  measurements: [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
-                  year: '2024',
-                  id: 2,
-                },
-              ]}
-              indicators={[
-                {
-                  code: 'Código 1',
-                  description: 'Descrição 1',
-                  name: 'Nome 1',
-                  processId: 1,
-                  trend: 'MAIOR',
-                  unit: 'DECIMAL',
-                  id: 1,
-                },
-                {
-                  code: 'Código 2',
-                  description: 'Descrição 2',
-                  name: 'Nome 2',
-                  processId: 1,
-                  trend: 'MAIOR',
-                  unit: 'DECIMAL',
-                  id: 2,
-                },
-              ]}
+              indicatorGoals={indicatorGoals}
+              indicators={indicators}
               onManageMeasurementsRequested={goToManageMeasurements}
-              processes={[
-                { id: 1, name: 'Produção' },
-                { id: 2, name: 'Chão de fábrica' },
-              ]}
+              processes={summarizedProcesses}
             />
           </Box>
         </Box>

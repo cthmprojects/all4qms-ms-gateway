@@ -1,13 +1,41 @@
 import { Box, Breadcrumbs, Typography } from '@mui/material';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { Process } from 'app/modules/rnc/models';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import { useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Indicator, SummarizedProcess } from '../../models';
+import { getAllIndicators } from '../../reducers/indicators.reducer';
 import { DashboardHeader } from '../components';
 
 const Dashboard = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(getProcesses());
+    dispatch(getAllIndicators());
+  }, []);
 
   const goToAnalytics = (): void => {
     navigate('analytics');
   };
+
+  const indicators: Array<Indicator> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entities);
+  const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
+
+  const summarizedProcesses = useMemo<Array<SummarizedProcess>>(() => {
+    if (!processes || processes.length <= 0) {
+      return [];
+    }
+
+    return processes.map(p => {
+      return {
+        id: p.id,
+        name: p.nome,
+      };
+    });
+  }, [processes]);
 
   return (
     <div className="padding-container">
@@ -24,32 +52,10 @@ const Dashboard = () => {
             <h2 className="title">Indicador</h2>
 
             <DashboardHeader
-              indicators={[
-                {
-                  code: 'Código 1',
-                  description: 'Descrição 1',
-                  name: 'Nome 1',
-                  processId: 1,
-                  trend: 'MAIOR',
-                  unit: 'DECIMAL',
-                  id: 1,
-                },
-                {
-                  code: 'Código 2',
-                  description: 'Descrição 2',
-                  name: 'Nome 2',
-                  processId: 1,
-                  trend: 'MAIOR',
-                  unit: 'DECIMAL',
-                  id: 2,
-                },
-              ]}
+              indicators={indicators}
               onAnalyticsRequested={goToAnalytics}
               onSearchRequested={() => {}}
-              processes={[
-                { id: 1, name: 'Produção' },
-                { id: 2, name: 'Chão de fábrica' },
-              ]}
+              processes={summarizedProcesses}
             />
           </Box>
         </Box>

@@ -3,12 +3,14 @@ import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import { Route } from 'react-router-dom';
 import { combineReducers, ReducersMapObject } from 'redux';
 import rncReducers from '../rnc/reducers';
+import performanceIndicatorReducers from './reducers';
 import { AddIndicator, Analytics, Dashboard } from './views';
 import Measurements from './views/pages/measurements';
 
 const PerformanceIndicatorsRoutes = () => {
   const store = getStore();
   store.injectReducer('all4qmsmsgatewayrnc', combineReducers(rncReducers as ReducersMapObject));
+  store.injectReducer('all4qmsmsgatewaymetaind', combineReducers(performanceIndicatorReducers as ReducersMapObject));
 
   return (
     <>

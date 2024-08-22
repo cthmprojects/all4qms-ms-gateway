@@ -1,3 +1,9 @@
+export type Enumerador = {
+  cod: number;
+  nome: string;
+  valor: string;
+};
+
 export type Indicador = {
   codigoIndicador: string;
   descricaoIndicador: string;

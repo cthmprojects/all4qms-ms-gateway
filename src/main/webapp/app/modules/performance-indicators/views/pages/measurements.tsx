@@ -1,13 +1,115 @@
 import { Box, Breadcrumbs, Button, Stack, Typography } from '@mui/material';
-import { Link, useParams } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { Process } from 'app/modules/infodoc/models';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Enums, Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
+import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reducer';
+import { getIndicatorGoal, updateIndicatorGoal } from '../../reducers/indicator-goals.reducer';
+import { getIndicator } from '../../reducers/indicators.reducer';
 import { IndicatorDetails, IndicatorMeasurements } from '../components';
 
 const Measurements = () => {
+  const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([]);
   const { id } = useParams();
 
-  const back = (): void => {};
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const save = (): void => {};
+  useEffect(() => {
+    dispatch(getProcesses());
+    dispatch(getFrequencies());
+    dispatch(getTrends());
+    dispatch(getUnits());
+  }, []);
+
+  useEffect(() => {
+    dispatch(getIndicatorGoal(parseInt(id)));
+  }, [id]);
+
+  const back = (): void => {
+    navigate('../');
+  };
+
+  const save = (): void => {
+    // TODO: Save multiple measurements
+
+    dispatch(
+      updateIndicatorGoal({
+        frequency: indicatorGoal.frequency,
+        goals: indicatorGoal.goals,
+        id: indicatorGoal.id,
+        indicator: indicatorGoal.indicator,
+        measurements: measurements[0],
+        year: indicatorGoal.year,
+      })
+    );
+
+    navigate('../');
+  };
+
+  const enums: Enums = useAppSelector<Enums>(state => state.all4qmsmsgatewaymetaind.enums.entity);
+  const indicator: Indicator | null = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entity);
+  const indicatorGoal: IndicatorGoal | null = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entity);
+  const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
+
+  useEffect(() => {
+    if (!indicatorGoal || !indicatorGoal.id) {
+      return;
+    }
+
+    dispatch(getIndicator(indicatorGoal.indicator.id));
+  }, [indicatorGoal]);
+
+  const frequencies = useMemo<Array<string>>(() => {
+    if (!enums || !enums.frequencies || enums.frequencies.length <= 0) {
+      return [];
+    }
+
+    return enums.frequencies.map(t => t.name);
+  }, [enums]);
+
+  const initialMeasurementValues = useMemo<Array<Array<number | null>> | null>(() => {
+    if (!indicatorGoal) {
+      return null;
+    }
+
+    return [[...indicatorGoal.measurements]];
+  }, [indicatorGoal]);
+
+  const trends = useMemo<Array<string>>(() => {
+    if (!enums || !enums.trends || enums.trends.length <= 0) {
+      return [];
+    }
+
+    return enums.trends.map(t => t.name);
+  }, [enums]);
+
+  const units = useMemo<Array<string>>(() => {
+    if (!enums || !enums.units || enums.units.length <= 0) {
+      return [];
+    }
+
+    return enums.units.map(t => t.name);
+  }, [enums]);
+
+  const summarizedProcesses = useMemo<Array<SummarizedProcess>>(() => {
+    if (!processes || processes.length <= 0) {
+      return [];
+    }
+
+    return processes.map(p => {
+      return {
+        id: p.id,
+        name: p.nome,
+      };
+    });
+  }, [processes]);
+
+  const onIndicatorMeasurementsChanged = (measurements: Array<Array<number | null>>): void => {
+    setMeasurements(measurements);
+  };
 
   return (
     <div className="padding-container">
@@ -25,31 +127,12 @@ const Measurements = () => {
             <h2 className="title">Indicadores</h2>
 
             <Stack spacing={2}>
-              <IndicatorDetails
-                initialValue={{
-                  code: 'Código 1',
-                  description: 'Descrição 1',
-                  name: 'Nome 1',
-                  processId: 1,
-                  trend: 'MAIOR',
-                  unit: 'DECIMAL',
-                  id: 1,
-                }}
-                processes={[
-                  { id: 1, name: 'Produção' },
-                  { id: 2, name: 'Chão de fábrica' },
-                ]}
-                readonly
-                trends={['MAIOR', 'MENOR', 'ESTABILIZAR']}
-                units={['PERCENTUAL', 'MONETARIO', 'UNITARIO', 'DECIMAL']}
-              />
+              <IndicatorDetails initialValue={indicator} processes={summarizedProcesses} readonly trends={trends} units={units} />
 
               <IndicatorMeasurements
-                frequencies={['MENSAL', 'BIMESTRAL', 'TRIMESTRAL', 'QUADRIMESTRAL', 'SEMESTRAL', 'ANUAL']}
-                initialValues={[
-                  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-                  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-                ]}
+                frequencies={frequencies}
+                initialValues={initialMeasurementValues}
+                onChanged={onIndicatorMeasurementsChanged}
                 unit="PERCENTUAL"
               />
             </Stack>

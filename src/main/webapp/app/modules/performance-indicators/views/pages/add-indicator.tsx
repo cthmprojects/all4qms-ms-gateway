@@ -1,9 +1,35 @@
 import { Box, Breadcrumbs, Button, Stack, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { SummarizedProcess } from '../../models';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { Process } from 'app/modules/infodoc/models';
+import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Enums, SummarizedProcess } from '../../models';
+import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reducer';
+import { saveIndicatorGoal } from '../../reducers/indicator-goals.reducer';
 import { IndicatorDetails, IndicatorGoals } from '../components';
 
 const AddIndicator = () => {
+  const [code, setCode] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [goalFrequencies, setGoalFrequencies] = useState<Array<string>>([]);
+  const [goals, setGoals] = useState<Array<Array<number | null>>>([]);
+  const [goalYears, setGoalYears] = useState<Array<number>>([]);
+  const [name, setName] = useState<string>('');
+  const [process, setProcess] = useState<SummarizedProcess | null>(null);
+  const [trend, setTrend] = useState<string | null>(null);
+  const [unit, setUnit] = useState<string | null>(null);
+
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(getProcesses());
+    dispatch(getFrequencies());
+    dispatch(getTrends());
+    dispatch(getUnits());
+  }, []);
+
   const onDetailsChanged = (
     code: string,
     description: string,
@@ -12,12 +38,87 @@ const AddIndicator = () => {
     trend: string,
     unit: string
   ): void => {
-    // save latest changes
+    setCode(code);
+    setDescription(description);
+    setName(name);
+    setProcess(process);
+    setTrend(trend);
+    setUnit(unit);
   };
 
-  const back = (): void => {};
+  const onIndicatorGoalsChanged = (frequencies: Array<string>, goals: Array<Array<number | null>>, years: Array<number>): void => {
+    setGoalFrequencies(frequencies);
+    setGoals(goals);
+    setGoalYears(years);
+  };
 
-  const save = (): void => {};
+  const back = (): void => {
+    navigate('../');
+  };
+
+  const save = (): void => {
+    // TODO: Save multiple goals
+
+    dispatch(
+      saveIndicatorGoal({
+        frequency: goalFrequencies[0] as 'MENSAL' | 'BIMESTRAL' | 'TRIMESTRAL' | 'QUADRIMESTRAL' | 'SEMESTRAL' | 'ANUAL',
+        goals: goals[0],
+        indicator: {
+          code: code,
+          description: description,
+          name: name,
+          processId: process?.id,
+          trend: trend as 'MAIOR' | 'MENOR' | 'ESTABILIZAR',
+          unit: unit as 'PERCENTUAL' | 'MONETARIO' | 'UNITARIO' | 'DECIMAL',
+        },
+        measurements: [null, null, null, null, null, null, null, null, null, null, null, null],
+        year: goalYears[0].toString(),
+      })
+    );
+
+    navigate('../');
+  };
+
+  const enums: Enums = useAppSelector<Enums>(state => state.all4qmsmsgatewaymetaind.enums.entity);
+
+  const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
+
+  const frequencies = useMemo<Array<string>>(() => {
+    if (!enums || !enums.frequencies || enums.frequencies.length <= 0) {
+      return [];
+    }
+
+    return enums.frequencies.map(t => t.name);
+  }, [enums]);
+
+  const trends = useMemo<Array<string>>(() => {
+    if (!enums || !enums.trends || enums.trends.length <= 0) {
+      return [];
+    }
+
+    return enums.trends.map(t => t.name);
+  }, [enums]);
+
+  const units = useMemo<Array<string>>(() => {
+    if (!enums || !enums.units || enums.units.length <= 0) {
+      return [];
+    }
+
+    return enums.units.map(t => t.name);
+  }, [enums]);
+
+  const summarizedProcesses = useMemo<Array<SummarizedProcess>>(() => {
+    if (!processes || processes.length <= 0) {
+      return [];
+    }
+
+    return processes.map(p => {
+      return {
+        id: p.id,
+        name: p.nome,
+      };
+    });
+  }, [processes]);
 
   return (
     <div className="padding-container">
@@ -35,20 +136,9 @@ const AddIndicator = () => {
             <h2 className="title">Indicadores</h2>
 
             <Stack spacing={2}>
-              <IndicatorDetails
-                onChanged={onDetailsChanged}
-                processes={[
-                  { id: 1, name: 'Produção' },
-                  { id: 2, name: 'Chão de fábrica' },
-                ]}
-                trends={['MAIOR', 'MENOR', 'ESTABILIZAR']}
-                units={['PERCENTUAL', 'MONETARIO', 'UNITARIO', 'DECIMAL']}
-              />
+              <IndicatorDetails onChanged={onDetailsChanged} processes={summarizedProcesses} trends={trends} units={units} />
 
-              <IndicatorGoals
-                frequencies={['MENSAL', 'BIMESTRAL', 'TRIMESTRAL', 'QUADRIMESTRAL', 'SEMESTRAL', 'ANUAL']}
-                unit="PERCENTUAL"
-              />
+              <IndicatorGoals frequencies={frequencies} onChanged={onIndicatorGoalsChanged} unit={unit} />
             </Stack>
           </Box>
         </Box>

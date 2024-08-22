@@ -51,13 +51,16 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
             const { frequency, goals, id, indicator, measurements, year } = indicatorGoal;
 
             const completeIndicator: Indicator | null = getIndicator(indicator.id);
-            const process: SummarizedProcess | null = getProcess(completeIndicator.processId);
+            const process: SummarizedProcess | null = getProcess(completeIndicator?.processId);
+            const filteredGoals: Array<number> = goals.filter(g => g !== null);
+            // TODO: Check average calculation
+            const goal: number = filteredGoals.reduce((acc, value) => acc + value) / filteredGoals.length;
 
             return (
               <TableRow key={id}>
                 <TableCell>{completeIndicator?.name ?? '-'}</TableCell>
                 <TableCell>{process?.name ?? '-'}</TableCell>
-                <TableCell>{0 ?? '-'}</TableCell> {/* Metas */}
+                <TableCell>{goal ?? '-'}</TableCell> {/* Metas */}
                 <TableCell>{0 ?? '-'}</TableCell> {/* Acumulado */}
                 <TableCell>{measurements[0] ?? '-'}</TableCell> {/* JAN */}
                 <TableCell>{measurements[1] ?? '-'}</TableCell> {/* FEV */}

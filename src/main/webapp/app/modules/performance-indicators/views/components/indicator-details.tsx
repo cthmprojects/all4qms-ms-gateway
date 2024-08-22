@@ -43,6 +43,27 @@ const IndicatorDetails = ({ initialValue, processes, readonly, trends, units, on
     setUnit(unit);
   }, [initialValue]);
 
+  useEffect(() => {
+    if (!processes || processes.length <= 0 || process) {
+      return;
+    }
+    setProcess(processes[0]);
+  }, [process, processes]);
+
+  useEffect(() => {
+    if (!trends || trends.length <= 0 || trend) {
+      return;
+    }
+    setTrend(trends[0]);
+  }, [trend, trends]);
+
+  useEffect(() => {
+    if (!units || units.length <= 0 || unit) {
+      return;
+    }
+    setUnit(units[0]);
+  }, [unit, units]);
+
   const getProcess = (id: number): SummarizedProcess | null => {
     const filteredProcesses: Array<SummarizedProcess> = processes.filter(i => i.id === id);
 

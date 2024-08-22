@@ -91,6 +91,7 @@ const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, 
 
       <Autocomplete
         disableClearable
+        getOptionLabel={option => option.toString()}
         onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setYear)}
         options={years}
         renderInput={props => <TextField {...props} label="Ano" sx={{ minWidth: '100px' }} />}
