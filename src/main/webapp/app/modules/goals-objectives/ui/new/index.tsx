@@ -120,35 +120,7 @@ const ResultEvaluation = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElem
   );
 });
 
-// const getProcesses = async () => {
-//   const apiUrl = 'services/all4qmsmsgateway/api/processos';
-//   const response = await axios.get(`${apiUrl}`);
-//   return response.data;
-// };
-
-// const getResources = async () => {
-//   // const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/recursos';
-//   // const response = await axios.get(`${apiUrl}`);
-//   // // eslint-disable-next-line no-console
-//   // console.log(`getResources: ${JSON.stringify(response.data)}`);
-//   // return response.data.content;
-//   const list = [
-//     { id: 0, nome: 'DIÁRIO' },
-//     { id: 1, nome: 'SEMANAL' },
-//     { id: 2, nome: 'MENSAL' },
-//     { id: 3, nome: 'BIMESTRAL' },
-//     { id: 4, nome: 'TRIMESTRAL' },
-//     { id: 5, nome: 'SEMESTRAL' },
-//     { id: 6, nome: 'ANUAL' },
-//   ];
-//   return list;
-// };
-
 const getMonitoring = async () => {
-  // const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/';
-  // const response = await axios.get(`${apiUrl}`);
-  // // eslint-disable-next-line no-console
-  // console.log(`getMonitoring: ${JSON.stringify(response.data)}`);
   const list = [
     { id: 0, nome: 'DIÁRIO' },
     { id: 1, nome: 'SEMANAL' },
@@ -162,11 +134,6 @@ const getMonitoring = async () => {
 };
 
 const getEvaluation = async () => {
-  // const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/';
-  // const response = await axios.get(`${apiUrl}`);
-  // // eslint-disable-next-line no-console
-  // console.log(`getEvaluation: ${JSON.stringify(response.data)}`);
-  // return response.data;
   const list = [
     { id: 0, nome: 'DIÁRIO' },
     { id: 1, nome: 'SEMANAL' },
@@ -184,8 +151,11 @@ export const NewGoalObjective = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
+
   const metaObjetivo: MetaObjetivo = useAppSelector<MetaObjetivo>(state => state.all4qmsmsmetaind.metaObjetivo.entity);
+
   const metas: Array<Meta> = useAppSelector<Array<Meta>>(state => state.all4qmsmsmetaind.metas.entities);
+
   const resources: Array<MetaRecurso> = useAppSelector<Array<MetaRecurso>>(state => state.all4qmsmsmetaind.resources.entities);
 
   const [emitter, setEmitter] = useState('');
@@ -365,8 +335,12 @@ export const NewGoalObjective = () => {
               }}
               sx={{ borderRadius: '6px', minHeight: '5rem' }}
               name="ncAreaA"
-              value={innerTextQP || ''}
+              value={
+                innerTextQP ||
+                'A Tellescom, empresa fabricante de equipamentos transmissores de comunicação, cumprindo com os requisitos aplicáveis, incentiva a melhoria contínua do seu sistema de gestão da qualidade com focoestratégico na satisfação dos seus clientes e na liderança no mercado.'
+              }
               onChange={e => setQP(e.target.value)}
+              disabled
             />
           </div>
 
@@ -481,7 +455,7 @@ export const NewGoalObjective = () => {
                     sx={{ borderRadius: '6px', minHeight: '5rem' }}
                     name="ncAreaA"
                     value={targetDescription || ''}
-                    onChange={e => setQP(e.target.value)}
+                    onChange={e => setTargetDescription(e.target.value)}
                   />
                 </div>
                 <div
@@ -501,7 +475,7 @@ export const NewGoalObjective = () => {
                     sx={{ borderRadius: '6px', minHeight: '5rem' }}
                     name="ncAreaA"
                     value={indicatorText || ''}
-                    onChange={e => setQP(e.target.value)}
+                    onChange={e => setIndicatorText(e.target.value)}
                   />
                 </div>
                 <div
@@ -521,7 +495,7 @@ export const NewGoalObjective = () => {
                     sx={{ borderRadius: '6px', minHeight: '5rem' }}
                     name="ncAreaA"
                     value={measurementText || ''}
-                    onChange={e => setQP(e.target.value)}
+                    onChange={e => setMeasurementText(e.target.value)}
                   />
                 </div>
                 <div
@@ -541,7 +515,7 @@ export const NewGoalObjective = () => {
                     sx={{ borderRadius: '6px', minHeight: '5rem' }}
                     name="ncAreaB"
                     value={actionText || ''}
-                    onChange={f => setQPD(f.target.value)}
+                    onChange={f => setActionText(f.target.value)}
                   />
                 </div>
                 <div
@@ -561,7 +535,7 @@ export const NewGoalObjective = () => {
                     sx={{ borderRadius: '6px', minHeight: '5rem' }}
                     name="ncAreaC"
                     value={resultEvaluation || ''}
-                    onChange={g => setQT(g.target.value)}
+                    onChange={g => setResultEvaluation(g.target.value)}
                   />
                 </div>
 
