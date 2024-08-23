@@ -1,7 +1,3 @@
-import React from 'react';
-import Loadable from 'react-loadable';
-import { Route } from 'react-router-dom';
-
 import { AUTHORITIES } from 'app/config/constants';
 import EntitiesRoutes from 'app/entities/routes';
 import Activate from 'app/modules/account/activate/activate';
@@ -13,8 +9,11 @@ import Logout from 'app/modules/login/logout';
 import PrivateRoute from 'app/shared/auth/private-route';
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import PageNotFound from 'app/shared/error/page-not-found';
+import Loadable from 'react-loadable';
+import { Route } from 'react-router-dom';
 import { Home } from './modules/home/home';
 import InfodocRoutes from './modules/infodoc';
+import PerformanceIndicatorsRoutes from './modules/performance-indicators';
 import RisksOpportunitiesRoutes from './modules/risks-opportunities';
 import RncRoutes from './modules/rnc';
 import GoalsObjectivesRoutes from './modules/goals-objectives';
@@ -53,6 +52,8 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="infodoc/*" element={<InfodocRoutes />} />
         <Route path="risks-opportunities/*" element={<RisksOpportunitiesRoutes />} />
         <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
+        <Route path="performance-indicators/*" element={<PerformanceIndicatorsRoutes />} />
+
         <Route path="account">
           <Route
             path="*"
