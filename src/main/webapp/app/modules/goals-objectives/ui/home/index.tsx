@@ -216,7 +216,11 @@ const HomeGoalsList = () => {
                       </TableCell>
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                         {isSGQ ? (
-                          <IconButton title="Editar" color="primary" onClick={() => navigate(`/goals/edit/${goalResult.idMeta}`)}>
+                          <IconButton
+                            title="Editar"
+                            color="primary"
+                            onClick={() => navigate(`/goals/edit/${goalResult.idMeta}`, { state: goalResult })}
+                          >
                             <EditIcon sx={{ color: '#e6b200' }} />
                           </IconButton>
                         ) : (

@@ -15,7 +15,7 @@ const initialState: EntityState<MetaObjetivo> = {
   updateSuccess: false,
 };
 
-export const getMetaObjetivo = createAsyncThunk('get/meta_objetivo', async (id: number) => {
+export const getMetaObjetivo = createAsyncThunk('get/meta_objetivo', async (id: Number) => {
   return axios.get<MetaObjetivo>(`${apiUrl}/${id}`);
 });
 export const saveMetaObjetivo = createAsyncThunk('set/meta_objetivo', async (metaObj: MetaObjetivo) => {
