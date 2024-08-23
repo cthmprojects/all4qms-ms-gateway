@@ -3,5 +3,6 @@
     "terminal.explorerKind": "integrated",
     "terminal.integrated.automationProfile.linux": {},
     "terminal.integrated.defaultProfile.windows": "Git Bash",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "FSharp.suggestGitignore": false
 }

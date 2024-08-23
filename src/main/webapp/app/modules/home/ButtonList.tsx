@@ -6,7 +6,7 @@ const ButtonList = () => {
   const navigate = useNavigate();
 
   const buttons = [
-    { icon: <FontAwesomeIcon icon="calendar-check" />, link: '', legenda: 'Objetivos e Metas', disabled: true },
+    { icon: <FontAwesomeIcon icon="calendar-check" />, link: 'goals/', legenda: 'Objetivos e Metas', disabled: false },
     { icon: <FontAwesomeIcon icon="file-lines" />, link: '/infodoc', legenda: 'Informação Documentada' },
     { icon: <FontAwesomeIcon icon="crosshairs" />, link: '/risks-opportunities', legenda: 'Riscos e Oportunidades' },
     { icon: <FontAwesomeIcon icon="location-crosshairs" />, link: '', legenda: 'Auditorias', disabled: true },

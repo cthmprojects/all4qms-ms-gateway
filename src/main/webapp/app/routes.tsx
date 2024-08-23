@@ -16,6 +16,7 @@ import InfodocRoutes from './modules/infodoc';
 import PerformanceIndicatorsRoutes from './modules/performance-indicators';
 import RisksOpportunitiesRoutes from './modules/risks-opportunities';
 import RncRoutes from './modules/rnc';
+import GoalsObjectivesRoutes from './modules/goals-objectives';
 
 const loading = <div>loading ...</div>;
 
@@ -50,7 +51,9 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="rnc/*" element={<RncRoutes />} />
         <Route path="infodoc/*" element={<InfodocRoutes />} />
         <Route path="risks-opportunities/*" element={<RisksOpportunitiesRoutes />} />
+        <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
         <Route path="performance-indicators/*" element={<PerformanceIndicatorsRoutes />} />
+
         <Route path="account">
           <Route
             path="*"
