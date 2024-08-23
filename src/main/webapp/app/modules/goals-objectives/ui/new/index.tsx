@@ -155,7 +155,7 @@ export const NewGoalObjective = () => {
               Metas e Objetivos
             </Link>
             <Link to={'/goals/new'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              {propMeta ? `Editar Meta` : 'Cadastrar Meata'}
+              {propMeta ? `Editar Meta` : 'Cadastrar Meta'}
             </Link>
           </Breadcrumbs>
         </Row>
