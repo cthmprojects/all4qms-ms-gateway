@@ -13,15 +13,15 @@ export interface ListMeta {
 }
 
 export type MetaObjetivo = {
-  idMetaObjetivo: Number;
-  politicaSGQ: String;
-  desdobramentoSGQ: String;
-  objetivoSGQ: String;
+  id?: Number;
+  politicaSGQ?: string;
+  desdobramentoSGQ?: string;
+  objetivoSGQ?: string;
 };
 
 export type MetaRecurso = {
   id: number;
-  recursoNome: String;
+  recursoNome: string;
 };
 
 export type MetaAnexo = {
@@ -45,15 +45,30 @@ export type MetaResultado = {
 };
 
 export type Meta = {
-  id: Number;
-  descricao: String;
-  indicador: String;
-  medicao: String;
-  acao: String;
-  avaliacaoResultado: String;
+  id?: Number;
+  descricao: string;
+  indicador: string;
+  medicao: string;
+  acao: string;
+  avaliacaoResultado: string;
   idProcesso: Number; //entity Processo ( Lista )
   monitoramento: EnumTemporal;
   periodo: EnumTemporal;
-  recursos: MetaRecurso[];
+  recursos: any[];
   metaObjetivo: MetaObjetivo;
+};
+
+export type TargetGoals = {
+  idUsuarioCriacao?: number;
+  dataCricao: string;
+  qp: string;
+  qt: string;
+  qpd: string;
+  goals: {
+    id: number;
+  }[];
+};
+
+export type Goals = {
+  id: number;
 };

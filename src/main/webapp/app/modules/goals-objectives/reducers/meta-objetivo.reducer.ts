@@ -1,11 +1,11 @@
 import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
 import { EntityState, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
-import { ListMeta, Meta } from '../models/goals';
+import { ListMeta, Meta, MetaObjetivo } from '../models/goals';
 
-const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/metas/';
+const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/objetivos';
 
-const initialState: EntityState<Meta> = {
+const initialState: EntityState<MetaObjetivo> = {
   loading: false,
   errorMessage: null,
   entities: [],
@@ -15,18 +15,26 @@ const initialState: EntityState<Meta> = {
   updateSuccess: false,
 };
 
-export const getMeta = createAsyncThunk('get/meta', async (id: number) => {
-  return axios.get<Meta>(`${apiUrl}/${id}`);
+export const getMetaObjetivo = createAsyncThunk('get/meta_objetivo', async (id: Number) => {
+  return axios.get<MetaObjetivo>(`${apiUrl}/${id}`);
+});
+export const saveMetaObjetivo = createAsyncThunk('set/meta_objetivo', async (metaObj: MetaObjetivo) => {
+  return axios.post<MetaObjetivo>(apiUrl, metaObj);
 });
 
 const metaObjetivoSlice = createEntitySlice({
   name: 'metaObjetivo',
   initialState,
   extraReducers(builder) {
-    builder.addMatcher(isFulfilled(getMeta), (state, action) => {
-      state.loading = false;
-      state.entity = action.payload.data;
-    });
+    builder
+      .addMatcher(isFulfilled(getMetaObjetivo), (state, action) => {
+        state.loading = false;
+        state.entity = action.payload.data;
+      })
+      .addMatcher(isFulfilled(saveMetaObjetivo), (state, action) => {
+        state.loading = false;
+        state.entity = action.payload.data;
+      });
   },
 });
 

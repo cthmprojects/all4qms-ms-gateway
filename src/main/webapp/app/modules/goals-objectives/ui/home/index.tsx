@@ -123,7 +123,7 @@ const HomeGoalsList = () => {
 
   useEffect(() => {
     dispatch(getProcesses());
-    dispatch(getUsers({}));
+    // dispatch(getUsers({}));
     dispatch(getAllMetasFilter({}));
     // fetchMetasAllFilter();
 
@@ -216,7 +216,11 @@ const HomeGoalsList = () => {
                       </TableCell>
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                         {isSGQ ? (
-                          <IconButton title="Editar" color="primary" onClick={event => null}>
+                          <IconButton
+                            title="Editar"
+                            color="primary"
+                            onClick={() => navigate(`/goals/edit/${goalResult.idMeta}`, { state: goalResult })}
+                          >
                             <EditIcon sx={{ color: '#e6b200' }} />
                           </IconButton>
                         ) : (
@@ -299,7 +303,7 @@ const HomeGoalsList = () => {
             variant="contained"
             className="infodoc-list-form-field"
             style={{ marginRight: '10px', height: '54px', width: '100px', backgroundColor: isSGQ ? '#e6b200' : '#a3a3a3' }}
-            onClick={event => navigate('/goals/1/results')}
+            onClick={event => navigate(`/goals/new`)}
             title="Novo Registro"
             disabled={!isSGQ}
           >
