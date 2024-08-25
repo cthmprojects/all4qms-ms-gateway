@@ -54,7 +54,7 @@ const renderActiveShape = props => {
       />
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333">{`PV ${value}`}</text>
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333">{`Ind2 ${value}`}</text>
       <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="#999">
         {`(Percentual ${(percent * 100).toFixed(2)}%)`}
       </text>
@@ -65,39 +65,39 @@ const renderActiveShape = props => {
 const dataComposedBarLine = [
   {
     name: 'Page A',
-    uv: 590,
-    pv: 800,
-    amt: 1400,
+    Ind1: 590,
+    Ind2: 800,
+    Ind3: 1400,
   },
   {
     name: 'Page B',
-    uv: 868,
-    pv: 967,
-    amt: 1506,
+    Ind1: 868,
+    Ind2: 967,
+    Ind3: 1506,
   },
   {
     name: 'Page C',
-    uv: 1397,
-    pv: 1098,
-    amt: 989,
+    Ind1: 1397,
+    Ind2: 1098,
+    Ind3: 989,
   },
   {
     name: 'Page D',
-    uv: 1480,
-    pv: 1200,
-    amt: 1228,
+    Ind1: 1480,
+    Ind2: 1200,
+    Ind3: 1228,
   },
   {
     name: 'Page E',
-    uv: 1520,
-    pv: 1108,
-    amt: 1100,
+    Ind1: 1520,
+    Ind2: 1108,
+    Ind3: 1100,
   },
   {
     name: 'Page F',
-    uv: 1400,
-    pv: 680,
-    amt: 1700,
+    Ind1: 1400,
+    Ind2: 680,
+    Ind3: 1700,
   },
 ];
 
@@ -129,14 +129,14 @@ const DashboardBody = () => {
       </div>
       <div style={{ width: '100%', height: 400 }}>
         <ResponsiveContainer>
-          <PieChart width={400} height={400}>
-            <Pie data={data02} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} fill="#82ca9d" label />
+          <PieChart width={400} height={400} title="Metas por Processo">
+            <Pie data={data02} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} fill="#FFD200" label />
           </PieChart>
         </ResponsiveContainer>
       </div>
       <div style={{ width: '100%', height: 400 }}>
         <ResponsiveContainer>
-          <PieChart width={400} height={400}>
+          <PieChart width={400} height={400} title="Preenchimento dos Indicadores">
             <Pie
               data={dataPreenchimentoIndicadores}
               dataKey="value"
@@ -144,7 +144,7 @@ const DashboardBody = () => {
               cy="50%"
               innerRadius={60}
               outerRadius={80}
-              fill="#8884d8"
+              fill="#3A5AFE"
               label
             />
           </PieChart>
@@ -156,6 +156,7 @@ const DashboardBody = () => {
             width={500}
             height={400}
             data={dataComposedBarLine}
+            title="Defeito A - 2024"
             margin={{
               top: 20,
               right: 20,
@@ -168,9 +169,9 @@ const DashboardBody = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Area type="monotone" dataKey="amt" fill="#8884d8" stroke="#8884d8" />
-            <Bar dataKey="pv" barSize={20} fill="#413ea0" />
-            <Line type="monotone" dataKey="uv" stroke="#ff7300" />
+            <Area type="monotone" dataKey="Ind3" fill="#344BFD" stroke="#1F2D97" />
+            <Bar dataKey="Ind2" barSize={20} fill="#2841FD" />
+            <Line type="monotone" dataKey="Ind1" stroke="#344BFD" />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

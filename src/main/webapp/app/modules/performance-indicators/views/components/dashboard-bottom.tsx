@@ -1,53 +1,51 @@
+import { Title } from '@mui/icons-material';
 import './dashboard-body.css';
-import { Autocomplete, Button, Stack, TextField } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Rectangle } from 'recharts';
-import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
+
 const data = [
   {
-    name: 'Page A',
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
+    name: 'Indicador A',
+    Ind1: 4000,
+    Ind2: 2400,
+    Ind3: 2400,
   },
   {
-    name: 'Page B',
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
+    name: 'Indicador B',
+    Ind1: 3000,
+    Ind2: 1398,
+    Ind3: 2210,
   },
   {
-    name: 'Page C',
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
+    name: 'Indicador C',
+    Ind1: 2000,
+    Ind2: 9800,
+    Ind3: 2290,
   },
   {
-    name: 'Page D',
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
+    name: 'Indicador D',
+    Ind1: 2780,
+    Ind2: 3908,
+    Ind3: 2000,
   },
   {
-    name: 'Page E',
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
+    name: 'Indicador E',
+    Ind1: 1890,
+    Ind2: 4800,
+    Ind3: 2181,
   },
   {
-    name: 'Page F',
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
+    name: 'Indicador F',
+    Ind1: 2390,
+    Ind2: 3800,
+    Ind3: 2500,
   },
   {
-    name: 'Page G',
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
+    name: 'Indicador G',
+    Ind1: 3490,
+    Ind2: 4300,
+    Ind3: 2100,
   },
 ];
-
-const title = 'Meta por Periodo';
 
 const DashboardBottom = () => {
   return (
@@ -58,29 +56,7 @@ const DashboardBottom = () => {
             width={500}
             height={300}
             data={data}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="pv" stackId="a" fill="#8884d8" />
-            <Bar dataKey="uv" stackId="a" fill="#82ca9d" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="child" style={{ width: '50%', height: 400 }}>
-        <ResponsiveContainer>
-          <BarChart
-            width={500}
-            height={300}
-            data={data}
+            title="Comparação por Períodos"
             margin={{
               top: 5,
               right: 30,
@@ -93,8 +69,32 @@ const DashboardBottom = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="pv" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue" />} />
-            <Bar dataKey="uv" fill="#82ca9d" activeBar={<Rectangle fill="gold" stroke="purple" />} />
+            <Bar dataKey="Ind1" fill="#344BFD" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+            <Bar dataKey="Ind2" fill="#FF9359" activeBar={<Rectangle fill="gold" stroke="purple" />} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="child" style={{ width: '50%', height: 400 }}>
+        <ResponsiveContainer>
+          <BarChart
+            width={500}
+            height={300}
+            data={data}
+            title="Metas por Período"
+            margin={{
+              top: 20,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="Ind1" stackId="a" fill="#344BFD" />
+            <Bar dataKey="Ind2" stackId="a" fill="#E9ECF1" />
           </BarChart>
         </ResponsiveContainer>
       </div>
