@@ -28,22 +28,7 @@ export const updateMeta = createAsyncThunk('update/meta', async (meta: Meta) => 
 });
 
 export const saveMetas = createAsyncThunk('set/metas', async (metas: Meta[]) => {
-  const metasRequests = metas.map(meta => axios.post(apiUrl, meta));
-  axios
-    .all(metasRequests)
-    .then(
-      axios.spread((...responses) => {
-        // Respostas individuais
-        responses.forEach((response, index) => {
-          console.log(`Response meta ${index + 1}:`, response.data);
-        });
-        return true;
-      })
-    )
-    .catch(error => {
-      console.error('Erro em uma das requisições:', error);
-      return false;
-    });
+  axios.post(`${apiUrl}/lote`, metas).then();
 });
 const metasSlice = createEntitySlice({
   name: 'metas',

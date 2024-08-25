@@ -9,8 +9,11 @@ export const MaterialDatepicker = ({
   disabled,
   dateFormat,
   showMonthYearPicker,
+  showYearPicker,
+  hideHeader,
   ...props
-}: TextFieldProps & React.ComponentProps<typeof DatePicker>) => {
+}: Omit<TextFieldProps, 'onChange'> &
+  React.ComponentProps<typeof DatePicker> & { onChange: (date: Date) => void; hideHeader?: boolean }) => {
   const format = dateFormat || 'dd/MM/yyyy';
   return (
     <DatePicker
@@ -19,7 +22,9 @@ export const MaterialDatepicker = ({
       dateFormat={format}
       disabled={disabled}
       showMonthYearPicker={showMonthYearPicker}
+      showYearPicker={showYearPicker}
       locale="pt-BR"
+      {...(hideHeader ? { renderCustomHeader: () => null } : {})}
       customInput={
         <TextField
           {...props}
