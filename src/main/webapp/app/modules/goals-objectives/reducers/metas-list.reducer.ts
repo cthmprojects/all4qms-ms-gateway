@@ -3,7 +3,7 @@ import { EntityState, createEntitySlice } from 'app/shared/reducers/reducer.util
 import axios from 'axios';
 import { ListMeta, Meta } from '../models/goals';
 
-const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/metas/';
+const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/metas';
 
 const initialState: EntityState<ListPaginationMeta> = {
   loading: false,

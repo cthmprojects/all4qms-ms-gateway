@@ -1,9 +1,16 @@
-import { TablePagination, Box, BoxProps } from '@mui/material';
+import { TablePagination, Box, BoxProps, TablePaginationProps } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-export const usePaginator = (totalItems: number, boxProps?: BoxProps) => {
+type Config = {
+  boxProps?: BoxProps;
+  paginatorProps?: Omit<TablePaginationProps, 'count' | 'onPageChange' | 'page' | 'rowsPerPage' | 'onRowsPerPageChange'>;
+};
+
+export const usePaginator = (totalItems: number, config: Config = {}) => {
+  const { boxProps, paginatorProps } = config;
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<number>(5);
+
   function displayedRowsLabel({ from, to, count }) {
     return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
   }
@@ -21,8 +28,11 @@ export const usePaginator = (totalItems: number, boxProps?: BoxProps) => {
   }, [totalItems, pageSize]);
 
   const paginator = (
-    <Box display="flex" justifyContent="center" {...boxProps}>
+    <Box display="flex" justifyContent="center" {...(boxProps || {})}>
       <TablePagination
+        rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+        sx={{ display: 'flex', alignContent: 'center', width: 'fit-content' }}
+        {...(paginatorProps || {})}
         component="div"
         count={totalItems}
         labelDisplayedRows={displayedRowsLabel}
@@ -31,8 +41,6 @@ export const usePaginator = (totalItems: number, boxProps?: BoxProps) => {
         onRowsPerPageChange={onRowsPerPageChanged}
         page={page}
         rowsPerPage={pageSize}
-        rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-        sx={{ display: 'flex', alignContent: 'center', width: 'fit-content' }}
       />
     </Box>
   );

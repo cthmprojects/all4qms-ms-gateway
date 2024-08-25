@@ -17,17 +17,12 @@ import {
   Typography,
   Select,
   Box,
-  Tabs,
-  Tab,
   Tooltip,
-  TextField,
-  TablePagination,
   Grid,
-  Input,
   InputAdornment,
   OutlinedInput,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useNavigate } from 'react-router-dom';
@@ -42,17 +37,18 @@ import './metas.css';
 import DatePicker from 'react-datepicker';
 import { registerLocale } from 'react-datepicker';
 import ptBR from 'date-fns/locale/pt-BR';
-import { parseISO, format } from 'date-fns';
+import { format } from 'date-fns';
 
 import { Storage } from 'react-jhipster';
-import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 
 import axios, { AxiosResponse } from 'axios';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { ListMeta, Meta, MetaResultado } from '../../models/goals';
-import { EnumSituacao, EnumTemporal } from '../../models/enums';
+import { EnumSituacao } from '../../models/enums';
 import { getAllMetasFilter, ListMetasInterface, ListPaginationMeta } from '../../reducers/metas-list.reducer';
+import { usePaginator } from 'app/shared/hooks/usePaginator';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 
 // Registra a localidade
 registerLocale('pt-BR', ptBR);
@@ -64,7 +60,6 @@ const HomeGoalsList = () => {
   const metasLista: ListPaginationMeta = useAppSelector<ListPaginationMeta>(state => state.all4qmsmsmetaind.metasLista.entity);
 
   const [startDate, setStartDate] = useState(new Date());
-  const [totalItems, setTotalItems] = useState(0);
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   // const [usersSGQ, setUsersSGQ] = useState<[]>([]);
   const [isSGQ, setIsSGQ] = useState<Boolean>(false);
@@ -74,28 +69,7 @@ const HomeGoalsList = () => {
    */
   const [filters, setFilters] = useState<ListMetasInterface>({ idProcesso: processes[0]?.id });
 
-  /**
-   * Pagination
-   */
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState<number>(5);
-
-  function displayedRowsLabel({ from, to, count }) {
-    return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
-  }
-
-  const onPageChanged = (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
-    setPage(page);
-  };
-
-  const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (parseInt(event.target.value, 10) > totalItems) {
-      setPageSize(parseInt(event.target.value, 10));
-      setPage(0);
-    } else {
-      setPageSize(parseInt(event.target.value, 10));
-    }
-  };
+  const { page, pageSize, paginator } = usePaginator(metasLista.totalElements);
 
   useEffect(() => {
     if (page <= 0) {
@@ -245,18 +219,7 @@ const HomeGoalsList = () => {
           </TableContainer>
           <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
             {/* <Pagination count={10} style={{ width: '370px' }} /> */}
-            <TablePagination
-              component="div"
-              count={totalItems}
-              labelDisplayedRows={displayedRowsLabel}
-              labelRowsPerPage="Itens por página:"
-              onPageChange={onPageChanged}
-              onRowsPerPageChange={onRowsPerPageChanged}
-              page={page}
-              rowsPerPage={pageSize}
-              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
-            />
+            {paginator}
           </Row>
         </>
       );
@@ -268,18 +231,7 @@ const HomeGoalsList = () => {
           </Row>
           <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
             {/* <Pagination count={10} style={{ width: '370px' }} /> */}
-            <TablePagination
-              component="div"
-              count={totalItems}
-              labelDisplayedRows={displayedRowsLabel}
-              labelRowsPerPage="Itens por página:"
-              onPageChange={onPageChanged}
-              onRowsPerPageChange={onRowsPerPageChanged}
-              page={page}
-              rowsPerPage={pageSize}
-              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
-            />
+            {paginator}
           </Row>
         </>
       );
@@ -328,38 +280,23 @@ const HomeGoalsList = () => {
             </FormControl>
           </Grid>
           <Grid item xs={1.5}>
-            <FormControl fullWidth>
-              <DatePicker
-                selected={filters.ano || ''}
-                onChange={date => setFilters({ ...filters, ano: new Date(date), mes: filters.mes ? filters.mes : new Date(date) })}
-                showYearPicker
-                dateFormat="yyyy"
-                className="metas-list-date-picker"
-                id="ano-date-picker"
-                placeholderText="Ano"
-                locale="pt-BR" // Define o idioma para português do Brasil
-              />
-              <label htmlFor="start-date-picker" className="infodoc-list-date-label">
-                Ano
-              </label>
-            </FormControl>
+            <MaterialDatepicker
+              label="Ano"
+              selected={filters.ano as Date}
+              showYearPicker
+              onChange={date => setFilters({ ...filters, ano: new Date(date) })}
+              dateFormat="yyyy"
+            />
           </Grid>
           <Grid item xs={1.5}>
-            <FormControl fullWidth>
-              <DatePicker
-                selected={filters.mes || ''}
-                onChange={date => setFilters({ ...filters, mes: new Date(date) })}
-                showMonthYearPicker
-                dateFormat="MMMM"
-                className="metas-list-date-picker"
-                id="ano-date-picker"
-                placeholderText="Mês"
-                locale="pt-BR" // Define o idioma para português do Brasil
-              />
-              <label htmlFor="mes-date-picker" className="infodoc-list-date-label">
-                Mês
-              </label>
-            </FormControl>
+            <MaterialDatepicker
+              label="Mês"
+              selected={filters.mes as Date}
+              showMonthYearPicker
+              hideHeader
+              onChange={date => setFilters({ ...filters, mes: new Date(date) })}
+              dateFormat="MMMM"
+            />
           </Grid>
           <Grid item xs={1.5}>
             <FormControl fullWidth>
