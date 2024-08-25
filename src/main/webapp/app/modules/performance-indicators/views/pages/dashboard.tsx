@@ -7,6 +7,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Indicator, SummarizedProcess } from '../../models';
 import { getAllIndicators } from '../../reducers/indicators.reducer';
 import { DashboardHeader } from '../components';
+import DashboardBody from '../components/dashboard-body';
+import DashboardBottom from '../components/dashboard-bottom';
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
@@ -57,6 +59,12 @@ const Dashboard = () => {
               onSearchRequested={() => {}}
               processes={summarizedProcesses}
             />
+          </Box>
+          <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
+            <DashboardBody />
+          </Box>
+          <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
+            <DashboardBottom />
           </Box>
         </Box>
       </div>
