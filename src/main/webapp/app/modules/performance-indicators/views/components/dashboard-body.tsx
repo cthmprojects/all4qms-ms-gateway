@@ -1,23 +1,21 @@
-import './dashboard-body.css';
-import { Autocomplete, Button, Stack, TextField } from '@mui/material';
+import { ArrowDownward } from '@mui/icons-material';
+import { Stack } from '@mui/material';
 import {
-  BarChart,
   Bar,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Sector,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  ComposedChart,
-  Area,
-  Line,
-  Sector,
 } from 'recharts';
-import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
+import { Pair } from '../../models';
+import './dashboard-body.css';
 
 const dataPreenchimentoIndicadores = [
   { name: 'Pendente', value: 75 },
@@ -115,7 +113,11 @@ const data02 = [
   { name: 'D2', value: 50 },
 ];
 
-const DashboardBody = () => {
+type DashboardBodyProps = {
+  goalsByProcess: Array<Pair>;
+};
+
+const DashboardBody = ({ goalsByProcess }: DashboardBodyProps) => {
   return (
     <Stack direction="row" spacing={2}>
       <div className="featuredItem">
@@ -130,7 +132,7 @@ const DashboardBody = () => {
       <div style={{ width: '100%', height: 400 }}>
         <ResponsiveContainer>
           <PieChart width={400} height={400} title="Metas por Processo">
-            <Pie data={data02} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} fill="#FFD200" label />
+            <Pie data={goalsByProcess} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} fill="#FFD200" label />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -147,6 +149,7 @@ const DashboardBody = () => {
               fill="#3A5AFE"
               label
             />
+            <Tooltip />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -169,7 +172,7 @@ const DashboardBody = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Area type="monotone" dataKey="Ind3" fill="#344BFD" stroke="#1F2D97" />
+            {/* <Area type="monotone" dataKey="Ind3" fill="#344BFD" stroke="#1F2D97" /> */}
             <Bar dataKey="Ind2" barSize={20} fill="#2841FD" />
             <Line type="monotone" dataKey="Ind1" stroke="#344BFD" />
           </ComposedChart>

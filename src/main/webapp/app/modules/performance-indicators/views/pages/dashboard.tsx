@@ -2,9 +2,10 @@ import { Box, Breadcrumbs, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Indicator, SummarizedProcess } from '../../models';
+import { Indicator, IndicatorGoal, Pair, SummarizedProcess } from '../../models';
+import { getAllIndicatorGoals } from '../../reducers/indicator-goals.reducer';
 import { getAllIndicators } from '../../reducers/indicators.reducer';
 import { DashboardHeader } from '../components';
 import DashboardBody from '../components/dashboard-body';
@@ -17,6 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     dispatch(getProcesses());
     dispatch(getAllIndicators());
+    dispatch(getAllIndicatorGoals());
   }, []);
 
   const goToAnalytics = (): void => {
@@ -24,6 +26,7 @@ const Dashboard = () => {
   };
 
   const indicators: Array<Indicator> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entities);
+  const indicatorGoals: Array<IndicatorGoal> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entities);
   const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
 
   const summarizedProcesses = useMemo<Array<SummarizedProcess>>(() => {
@@ -38,6 +41,34 @@ const Dashboard = () => {
       };
     });
   }, [processes]);
+
+  const indicatorGoalsByProcess = useMemo<Array<Pair>>(() => {
+    if (
+      !indicators ||
+      !indicatorGoals ||
+      !summarizedProcesses ||
+      indicators.length <= 0 ||
+      indicatorGoals.length <= 0 ||
+      summarizedProcesses.length <= 0
+    ) {
+      return [];
+    }
+
+    return summarizedProcesses.map(p => {
+      const id: number = p.id;
+      const name: string = p.name;
+
+      const currentProcessIndicators: Array<Indicator> = indicators.filter(i => i && i.id && i.processId && i.processId === id);
+      const indicatorIds: Set<number> = new Set<number>(currentProcessIndicators.map(i => i.id));
+
+      const value: number = indicatorGoals.filter(g => g.indicator && g.indicator.id && indicatorIds.has(g.indicator.id)).length;
+
+      return {
+        name: name,
+        value: value,
+      };
+    });
+  }, [indicators, indicatorGoals, summarizedProcesses]);
 
   return (
     <div className="padding-container">
@@ -61,7 +92,7 @@ const Dashboard = () => {
             />
           </Box>
           <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
-            <DashboardBody />
+            <DashboardBody goalsByProcess={indicatorGoalsByProcess} />
           </Box>
           <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
             <DashboardBottom />
