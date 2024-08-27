@@ -1,6 +1,7 @@
 import { Title } from '@mui/icons-material';
 import './dashboard-body.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Rectangle } from 'recharts';
+import { GoalMeasured, Pair } from '../../models';
 
 const data = [
   {
@@ -47,7 +48,11 @@ const data = [
   },
 ];
 
-const DashboardBottom = () => {
+type DashboardBottomProps = {
+  comparisonByPeriod: Array<GoalMeasured>;
+};
+
+const DashboardBottom = ({ comparisonByPeriod }: DashboardBottomProps) => {
   return (
     <div className="parent">
       <div className="child" style={{ width: '50%', height: 400 }}>
@@ -55,7 +60,7 @@ const DashboardBottom = () => {
           <BarChart
             width={500}
             height={300}
-            data={data}
+            data={comparisonByPeriod}
             title="Comparação por Períodos"
             margin={{
               top: 5,
@@ -69,8 +74,8 @@ const DashboardBottom = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="Ind1" fill="#344BFD" activeBar={<Rectangle fill="pink" stroke="blue" />} />
-            <Bar dataKey="Ind2" fill="#FF9359" activeBar={<Rectangle fill="gold" stroke="purple" />} />
+            <Bar dataKey="goal" fill="#344BFD" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+            <Bar dataKey="measured" fill="#FF9359" activeBar={<Rectangle fill="pink" stroke="blue" />} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -93,7 +98,7 @@ const DashboardBottom = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="Ind1" stackId="a" fill="#344BFD" />
+            <Bar dataKey="Ind1  " stackId="a" fill="#344BFD" />
             <Bar dataKey="Ind2" stackId="a" fill="#E9ECF1" />
           </BarChart>
         </ResponsiveContainer>

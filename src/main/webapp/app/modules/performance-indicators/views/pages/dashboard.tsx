@@ -4,12 +4,13 @@ import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useCallback, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Indicator, IndicatorGoal, Pair, SummarizedProcess } from '../../models';
+import { GoalMeasured, Indicator, IndicatorGoal, Pair, SummarizedProcess } from '../../models';
 import { getAllIndicatorGoals } from '../../reducers/indicator-goals.reducer';
 import { getAllIndicators } from '../../reducers/indicators.reducer';
 import { DashboardHeader } from '../components';
 import DashboardBody from '../components/dashboard-body';
 import DashboardBottom from '../components/dashboard-bottom';
+import { toIndicatorGoal } from '../../mappers';
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
@@ -62,6 +63,100 @@ const Dashboard = () => {
       const indicatorIds: Set<number> = new Set<number>(currentProcessIndicators.map(i => i.id));
 
       const value: number = indicatorGoals.filter(g => g.indicator && g.indicator.id && indicatorIds.has(g.indicator.id)).length;
+      return {
+        name: name,
+        value: value,
+      };
+    });
+  }, [indicators, indicatorGoals, summarizedProcesses]);
+
+  const indicatorComparisonByPeriod = useMemo<Array<GoalMeasured>>(() => {
+    if (
+      !indicators ||
+      !indicatorGoals ||
+      !summarizedProcesses ||
+      indicators.length <= 0 ||
+      indicatorGoals.length <= 0 ||
+      summarizedProcesses.length <= 0
+    ) {
+      return [];
+    }
+
+    return summarizedProcesses.map(p => {
+      const name: string = p.name;
+
+      let sumMeasurements = 0;
+      let sumGoals = 0;
+      indicatorGoals.forEach(element => {
+        element.measurements.forEach(num => {
+          if (num) sumMeasurements += num;
+        });
+
+        element.goals.forEach(num => {
+          if (num) sumGoals += num;
+        });
+      });
+
+      return {
+        name,
+        goal: sumGoals,
+        measured: sumMeasurements,
+      };
+    });
+  }, [indicators, indicatorGoals, summarizedProcesses]);
+
+  const indicatorGoalsFeeding = useMemo<Array<Pair>>(() => {
+    if (
+      !indicators ||
+      !indicatorGoals ||
+      !summarizedProcesses ||
+      indicators.length <= 0 ||
+      indicatorGoals.length <= 0 ||
+      summarizedProcesses.length <= 0
+    ) {
+      return [];
+    }
+
+    return summarizedProcesses.map(p => {
+      const id: number = p.id;
+      const name: string = p.name;
+
+      const currentProcessIndicators: Array<Indicator> = indicators.filter(i => i && i.id && i.processId && i.processId === id);
+      const indicatorIds: Set<number> = new Set<number>(currentProcessIndicators.map(i => i.id));
+      const totalIndicatorGoal: number = indicatorGoals.filter(
+        g => g.indicator && g.indicator.id && indicatorIds.has(g.indicator.id)
+      ).length;
+
+      let totalIndicatorGoalFeeded = 0;
+      indicatorGoals.forEach(element => {
+        if (element.indicator && element.indicator.id && indicatorIds.has(element.indicator.id)) {
+          let frequencyExpected = 0;
+          switch (element.frequency) {
+            case 'MENSAL':
+              frequencyExpected = 12;
+              break;
+            case 'BIMESTRAL':
+              frequencyExpected = 6;
+              break;
+            case 'TRIMESTRAL':
+              frequencyExpected = 4;
+              break;
+            case 'QUADRIMESTRAL':
+              frequencyExpected = 3;
+              break;
+            case 'SEMESTRAL':
+              frequencyExpected = 2;
+              break;
+            default:
+              frequencyExpected = 1;
+              break;
+          }
+          const feeded = element.measurements.filter(m => m && m != null).length;
+          if (feeded === frequencyExpected) totalIndicatorGoalFeeded += 1;
+        }
+      });
+
+      const value: number = (totalIndicatorGoalFeeded / totalIndicatorGoal) * 100;
 
       return {
         name: name,
@@ -92,10 +187,10 @@ const Dashboard = () => {
             />
           </Box>
           <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
-            <DashboardBody goalsByProcess={indicatorGoalsByProcess} />
+            <DashboardBody goalsByProcess={indicatorGoalsByProcess} indicatorGoalsFeeding={indicatorGoalsFeeding} />
           </Box>
           <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
-            <DashboardBottom />
+            <DashboardBottom comparisonByPeriod={indicatorComparisonByPeriod} />
           </Box>
         </Box>
       </div>

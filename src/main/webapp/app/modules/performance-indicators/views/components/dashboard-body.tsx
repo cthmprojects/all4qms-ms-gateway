@@ -115,9 +115,10 @@ const data02 = [
 
 type DashboardBodyProps = {
   goalsByProcess: Array<Pair>;
+  indicatorGoalsFeeding: Array<Pair>;
 };
 
-const DashboardBody = ({ goalsByProcess }: DashboardBodyProps) => {
+const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding }: DashboardBodyProps) => {
   return (
     <Stack direction="row" spacing={2}>
       <div className="featuredItem">
@@ -139,16 +140,7 @@ const DashboardBody = ({ goalsByProcess }: DashboardBodyProps) => {
       <div style={{ width: '100%', height: 400 }}>
         <ResponsiveContainer>
           <PieChart width={400} height={400} title="Preenchimento dos Indicadores">
-            <Pie
-              data={dataPreenchimentoIndicadores}
-              dataKey="value"
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={80}
-              fill="#3A5AFE"
-              label
-            />
+            <Pie data={indicatorGoalsFeeding} dataKey="value" cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#3A5AFE" label />
             <Tooltip />
           </PieChart>
         </ResponsiveContainer>
