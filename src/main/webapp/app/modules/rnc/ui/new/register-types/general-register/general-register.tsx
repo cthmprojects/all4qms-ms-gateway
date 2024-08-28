@@ -757,7 +757,7 @@ export const GeneralRegister = () => {
     }
 
     const data = decisionEntity.length > 0 ? decisionEntity[0] : decisionEntity;
-    setReadonlyDecision(true);
+    // setReadonlyDecision(true);
 
     const decision: Decision = {
       approved: data.qtdAprovada,

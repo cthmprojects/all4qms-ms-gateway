@@ -62,7 +62,7 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
     setDeadline(new Date());
     setDescription('');
     setResponsible('');
-    setStatus('');
+    setStatus('RETRABALHO');
   };
 
   const onActionAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {

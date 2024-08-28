@@ -28,10 +28,10 @@ export const InternalAuditRegister = ({ audit, onChanged }: InternalAuditRegiste
       return;
     }
 
-    setNc(audit.ncNumber.toString());
+    setNc(audit.ncNumber?.toString() ?? '');
     setNorm(audit.norm);
     setRequirement(audit.normRequirements);
-    setReport(audit.reportNumber.toString());
+    setReport(audit.reportNumber?.toString() ?? '');
   }, [audit]);
 
   const validateNegativeFields = (value: string): string => {
