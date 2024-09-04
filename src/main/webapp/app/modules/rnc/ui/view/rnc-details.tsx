@@ -85,7 +85,7 @@ const RncDetails = () => {
 
             {(nonConformity?.ishikawa || nonConformity?.porques) && (
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <NonConformityCauseInvestigationSummary ishikawa={nonConformity?.ishikawa} reason={nonConformity?.porques} />
+                <NonConformityCauseInvestigationSummary ishikawa={nonConformity?.ishikawa} reasons={nonConformity?.porques} />
               </Box>
             )}
 

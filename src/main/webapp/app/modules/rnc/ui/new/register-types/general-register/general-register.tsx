@@ -202,7 +202,7 @@ export const GeneralRegister = () => {
    * Cause investigation
    */
   const [ishikawaInvestigation, setIshikawaInvestigation] = useState<IshikawaInvestigation>();
-  const [reasonsInvestigation, setReasonsInvestigation] = useState<ReasonsInvestigation>();
+  const [reasonsInvestigations, setReasonsInvestigations] = useState<Array<ReasonsInvestigation>>([]);
 
   /*
    * Decision
@@ -220,7 +220,7 @@ export const GeneralRegister = () => {
   const [newIshikawa, setNewIshikawa] = useState(true);
   const [newFiveWhy, setNewFiveWhy] = useState(true);
   const [ishikawaId, setIshikawaId] = useState(null);
-  const [reasonId, setReasonId] = useState(null);
+  const [reasonIds, setReasonIds] = useState<Array<number>>([]);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -247,18 +247,41 @@ export const GeneralRegister = () => {
           });
         }
 
-        if (res.porques) {
-          setReasonId(res.porques.id);
+        if (res.porques && res.porques.length > 0) {
+          const allReasons: Array<any> = res.porques;
+          const allReasonInvestigations: Array<ReasonsInvestigation> = [];
+          const allReasonIds: Array<number> = [];
+
           setNewFiveWhy(false);
           setCheckedFiveWhy(true);
-          setReasonsInvestigation({
-            first: res.porques.pq1,
-            second: res.porques.pq2,
-            third: res.porques.pq3,
-            fourth: res.porques.pq4,
-            fifth: res.porques.pq5,
-            cause: res.porques.descCausa,
-          });
+
+          for (let i = 0; i < allReasons.length; i++) {
+            const currentReason = allReasons[i];
+
+            allReasonIds.push(currentReason.id);
+            allReasonInvestigations.push({
+              first: currentReason.pq1,
+              second: currentReason.pq2,
+              third: currentReason.pq3,
+              fourth: currentReason.pq4,
+              fifth: currentReason.pq5,
+              cause: currentReason.descCausa,
+            });
+          }
+
+          setReasonIds(allReasonIds);
+          setReasonsInvestigations(allReasonInvestigations);
+        } else {
+          setReasonsInvestigations([
+            {
+              fifth: '',
+              first: '',
+              fourth: '',
+              second: '',
+              third: '',
+              cause: '',
+            },
+          ]);
         }
       });
 
@@ -359,8 +382,8 @@ export const GeneralRegister = () => {
     setIshikawaInvestigation(investigation);
   };
 
-  const onReasonsInvestigationChanged = (investigation: ReasonsInvestigation): void => {
-    setReasonsInvestigation(investigation);
+  const onReasonsInvestigationsChanged = (investigations: Array<ReasonsInvestigation>): void => {
+    setReasonsInvestigations(investigations);
   };
 
   const handleChangeResponsaveisMP = (event: SelectChangeEvent<typeof responsaveisMP>) => {
@@ -445,29 +468,33 @@ export const GeneralRegister = () => {
   };
 
   const valid5why = () => {
-    let counter = 0;
+    for (let i = 0; i < reasonsInvestigations.length; i++) {
+      const reasonsInvestigation = reasonsInvestigations[i];
 
-    if (reasonsInvestigation.first) {
-      counter++;
+      let counter = 0;
+
+      if (reasonsInvestigation.first) {
+        counter++;
+      }
+
+      if (reasonsInvestigation.second) {
+        counter++;
+      }
+
+      if (reasonsInvestigation.third) {
+        counter++;
+      }
+
+      if (reasonsInvestigation.fourth) {
+        counter++;
+      }
+
+      if (reasonsInvestigation.fifth) {
+        counter++;
+      }
+
+      if (counter < 3) return false;
     }
-
-    if (reasonsInvestigation.second) {
-      counter++;
-    }
-
-    if (reasonsInvestigation.third) {
-      counter++;
-    }
-
-    if (reasonsInvestigation.fourth) {
-      counter++;
-    }
-
-    if (reasonsInvestigation.fifth) {
-      counter++;
-    }
-
-    if (counter < 3) return false;
 
     return true;
   };
@@ -559,30 +586,10 @@ export const GeneralRegister = () => {
           );
         }
         if (checkedFiveWhy && !checkedIshikawa) {
-          saveInvestigation(id, null, {
-            cause: reasonsInvestigation?.cause,
-            fifth: reasonsInvestigation?.fifth,
-            first: reasonsInvestigation?.first,
-            forth: reasonsInvestigation?.fourth,
-            problem: descriptionEntity?.detalhesNaoConformidade,
-            second: reasonsInvestigation?.second,
-            third: reasonsInvestigation?.third,
-          });
-        }
+          for (let i = 0; i < reasonsInvestigations.length; i++) {
+            const reasonsInvestigation = reasonsInvestigations[i];
 
-        if (checkedFiveWhy && checkedIshikawa) {
-          saveInvestigation(
-            id,
-            {
-              description: descriptionEntity?.detalhesNaoConformidade,
-              environment: ishikawaInvestigation?.environment.join(';'),
-              machine: ishikawaInvestigation?.machine.join(';'),
-              measurement: ishikawaInvestigation?.measurement.join(';'),
-              method: ishikawaInvestigation?.method.join(';'),
-              rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
-              workforce: ishikawaInvestigation?.manpower.join(';'),
-            },
-            {
+            saveInvestigation(id, null, {
               cause: reasonsInvestigation?.cause,
               fifth: reasonsInvestigation?.fifth,
               first: reasonsInvestigation?.first,
@@ -590,8 +597,34 @@ export const GeneralRegister = () => {
               problem: descriptionEntity?.detalhesNaoConformidade,
               second: reasonsInvestigation?.second,
               third: reasonsInvestigation?.third,
-            }
-          ).then(() => {});
+            });
+          }
+        }
+
+        if (checkedFiveWhy && checkedIshikawa) {
+          saveInvestigation(id, {
+            description: descriptionEntity?.detalhesNaoConformidade,
+            environment: ishikawaInvestigation?.environment.join(';'),
+            machine: ishikawaInvestigation?.machine.join(';'),
+            measurement: ishikawaInvestigation?.measurement.join(';'),
+            method: ishikawaInvestigation?.method.join(';'),
+            rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
+            workforce: ishikawaInvestigation?.manpower.join(';'),
+          }).then(() => {});
+
+          for (let i = 0; i < reasonsInvestigations.length; i++) {
+            const reasonsInvestigation = reasonsInvestigations[i];
+
+            saveInvestigation(id, null, {
+              cause: reasonsInvestigation?.cause,
+              fifth: reasonsInvestigation?.fifth,
+              first: reasonsInvestigation?.first,
+              forth: reasonsInvestigation?.fourth,
+              problem: descriptionEntity?.detalhesNaoConformidade,
+              second: reasonsInvestigation?.second,
+              third: reasonsInvestigation?.third,
+            });
+          }
         }
       }
 
@@ -608,15 +641,20 @@ export const GeneralRegister = () => {
       }
 
       if (!newFiveWhy && checkedFiveWhy) {
-        updateReason(reasonId, {
-          cause: descriptionEntity?.detalhesNaoConformidade,
-          fifth: reasonsInvestigation?.fifth,
-          first: reasonsInvestigation?.first,
-          forth: reasonsInvestigation?.fourth,
-          problem: descriptionEntity?.detalhesNaoConformidade,
-          second: reasonsInvestigation?.second,
-          third: reasonsInvestigation?.third,
-        });
+        for (let i = 0; i < reasonsInvestigations.length; i++) {
+          const reasonsInvestigation = reasonsInvestigations[i];
+          const reasonId = reasonIds[i];
+
+          updateReason(reasonId, {
+            cause: descriptionEntity?.detalhesNaoConformidade,
+            fifth: reasonsInvestigation?.fifth,
+            first: reasonsInvestigation?.first,
+            forth: reasonsInvestigation?.fourth,
+            problem: descriptionEntity?.detalhesNaoConformidade,
+            second: reasonsInvestigation?.second,
+            third: reasonsInvestigation?.third,
+          });
+        }
       }
       // dispatch(
       //   savePlan({
@@ -757,7 +795,7 @@ export const GeneralRegister = () => {
     }
 
     const data = decisionEntity.length > 0 ? decisionEntity[0] : decisionEntity;
-    setReadonlyDecision(true);
+    // setReadonlyDecision(true);
 
     const decision: Decision = {
       approved: data.qtdAprovada,
@@ -830,13 +868,13 @@ export const GeneralRegister = () => {
           <CauseInvestigation
             description={descriptionEntity?.detalhesNaoConformidade}
             onIshikawaInvestigationChanged={onIshikawaInvestigationChanged}
-            onReasonsInvestigationChanged={onReasonsInvestigationChanged}
+            onReasonsInvestigationsChanged={onReasonsInvestigationsChanged}
             checkIshikawa={setCheckedIshikawa}
             checkReasons={setCheckedFiveWhy}
             checkedIshikawa={checkedIshikawa}
             checkedReasons={checkedFiveWhy}
             ishikawa={ishikawaInvestigation}
-            reasons={reasonsInvestigation}
+            reasons={reasonsInvestigations}
             newIshikawa={newIshikawa}
             newReasons={newFiveWhy}
           />
