@@ -499,6 +499,7 @@ const InfodocList = () => {
                         color="primary"
                         disabled={infodoc.doc.enumSituacao != 'H'}
                         onClick={event => onEditClicked(infodoc, event)}
+                        // onClick={event => openDocToValidation(event, infodoc)}
                       >
                         <EditIcon sx={{ color: infodoc.doc.enumSituacao != 'H' ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
