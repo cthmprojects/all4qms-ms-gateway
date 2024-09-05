@@ -317,7 +317,7 @@ export type CompleteNc = {
   acaoImediata: Array<NonConformityImmediateAction>;
   decisao: NonConformityDecision;
   ishikawa: NonConformityCauseEffect;
-  porques: NonConformityReason;
+  porques: Array<NonConformityReason>;
   acaoPlano: Array<NonConformityActionPlan>;
   aprovacao: NonConformityApproval;
 };

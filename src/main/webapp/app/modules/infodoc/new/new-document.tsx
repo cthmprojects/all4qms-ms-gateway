@@ -224,7 +224,7 @@ export const NewDocument = () => {
       idUsuarioCriacao: currentUser.id,
     };
 
-    console.log('userSgq: ', usersSGQ);
+    //     console.log('userSgq: ', usersSGQ);
 
     dispatch(atualizarMovimentacao(novaMovimentacao));
 

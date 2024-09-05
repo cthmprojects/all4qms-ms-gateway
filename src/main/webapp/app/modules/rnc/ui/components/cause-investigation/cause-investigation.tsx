@@ -1,6 +1,7 @@
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
+import { AddOutlined } from '@mui/icons-material';
 import { Textarea, styled } from '@mui/joy';
-import { Autocomplete, Card, CardContent, Checkbox, Chip, FormControlLabel, TextField, Typography } from '@mui/material';
+import { Autocomplete, Button, Card, CardContent, Checkbox, Chip, FormControlLabel, TextField, Typography } from '@mui/material';
 import { IshikawaInvestigation, ReasonsInvestigation } from 'app/modules/rnc/models';
 import React, { useEffect, useState } from 'react';
 
@@ -265,13 +266,15 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
 };
 
 type ReasonsInvestigationProps = {
+  allowAdding?: boolean;
   description?: string;
+  onAdded?: () => void;
   onChanged: (investigation: ReasonsInvestigation) => void;
-  reasons;
-  newReasons;
+  reasons: ReasonsInvestigation;
+  newReasons: boolean;
 };
 
-const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: ReasonsInvestigationProps) => {
+const ReasonsInvestigation = ({ allowAdding, description, onAdded, onChanged, reasons, newReasons }: ReasonsInvestigationProps) => {
   const [firstReason, setFirstReason] = useState<string>(reasons?.first || '');
   const [secondReason, setSecondReason] = useState<string>(reasons?.second || '');
   const [thirdReason, setThirdReason] = useState<string>(reasons?.third || '');
@@ -409,6 +412,11 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
             value={causeReason}
             disabled={!newReasons}
           />
+          {allowAdding && (
+            <Button onClick={onAdded}>
+              <AddOutlined />
+            </Button>
+          )}
         </div>
       </div>
       {invalid && (
@@ -423,21 +431,21 @@ const ReasonsInvestigation = ({ description, onChanged, reasons, newReasons }: R
 type CauseInvestigationProps = {
   description?: string;
   onIshikawaInvestigationChanged: (investigation: IshikawaInvestigation) => void;
-  onReasonsInvestigationChanged: (investigation: ReasonsInvestigation) => void;
+  onReasonsInvestigationsChanged: (investigations: Array<ReasonsInvestigation>) => void;
   checkIshikawa: (check: boolean) => void;
   checkReasons: (check: boolean) => void;
   checkedIshikawa: boolean;
   checkedReasons: boolean;
-  ishikawa;
-  reasons;
-  newIshikawa;
-  newReasons;
+  ishikawa: IshikawaInvestigation;
+  reasons: Array<ReasonsInvestigation>;
+  newIshikawa: boolean;
+  newReasons: boolean;
 };
 
 const CauseInvestigation = ({
   description,
   onIshikawaInvestigationChanged,
-  onReasonsInvestigationChanged,
+  onReasonsInvestigationsChanged,
   checkIshikawa,
   checkReasons,
   checkedIshikawa,
@@ -453,6 +461,12 @@ const CauseInvestigation = ({
 
   const onReasonsChanged = (event: React.SyntheticEvent<Element, Event>, checked: boolean): void => {
     checkReasons(checked);
+  };
+
+  const onReasonsInvestigationChanged = (investigation: ReasonsInvestigation, index: number): void => {
+    const newReasons = [...reasons];
+    newReasons[index] = investigation;
+    onReasonsInvestigationsChanged(newReasons);
   };
 
   return (
@@ -477,12 +491,21 @@ const CauseInvestigation = ({
         )}
 
         {checkedReasons && (
-          <ReasonsInvestigation
-            newReasons={newReasons}
-            reasons={reasons}
-            description={description}
-            onChanged={onReasonsInvestigationChanged}
-          />
+          <>
+            {reasons.map((reason, index) => (
+              <ReasonsInvestigation
+                key={index}
+                allowAdding={index === 0}
+                newReasons={newReasons}
+                reasons={reason}
+                description={description}
+                onAdded={() =>
+                  onReasonsInvestigationsChanged([...reasons, { fifth: '', first: '', fourth: '', second: '', third: '', cause: '' }])
+                }
+                onChanged={investigation => onReasonsInvestigationChanged(investigation, index)}
+              />
+            ))}
+          </>
         )}
       </CardContent>
     </Card>

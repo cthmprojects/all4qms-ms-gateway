@@ -4,7 +4,7 @@ import React from 'react';
 
 type NonConformityCauseInvestigationSummaryProps = {
   ishikawa: NonConformityCauseEffect;
-  reason: NonConformityReason;
+  reasons: Array<NonConformityReason>;
 };
 
 type IshikawaSummaryProps = {
@@ -69,14 +69,14 @@ const ReasonSummary = ({ reason }: ReasonSummaryProps) => {
   );
 };
 
-const NonConformityCauseInvestigationSummary = ({ ishikawa, reason }: NonConformityCauseInvestigationSummaryProps) => {
+const NonConformityCauseInvestigationSummary = ({ ishikawa, reasons }: NonConformityCauseInvestigationSummaryProps) => {
   return (
     <Card>
       <CardHeader title="Investigação de Causas" />
       <CardContent>
         <Stack spacing={2}>
           {ishikawa && <IshikawaSummary ishikawa={ishikawa} />}
-          {reason && <ReasonSummary reason={reason} />}
+          {reasons && reasons.map((reason, index) => <ReasonSummary key={index} reason={reason} />)}
         </Stack>
       </CardContent>
     </Card>
