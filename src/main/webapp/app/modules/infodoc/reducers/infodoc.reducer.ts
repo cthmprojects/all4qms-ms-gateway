@@ -2,7 +2,9 @@ import { createAsyncThunk, isFulfilled, isPending } from '@reduxjs/toolkit';
 import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
 import { Doc, DocumentacaoRequest, InfoDoc } from '../models';
+import { UerSGQ } from '../../../entities/usuario/reducers/usuario.reducer';
 
+const apiNotifyEmailUrl = 'services/all4qmsmsinfodoc/api/infodoc/notificacoes/enviar-email';
 const apiDocumentacaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/documentos';
 
 // Initial State
@@ -26,6 +28,17 @@ interface ListParams {
   size?: number;
   pesquisa?: string;
   idProcesso?: number;
+}
+
+export interface SendEmail {
+  to: string; // Email
+  subject: string;
+  tipo: 'APROVAR' | 'REPROVAR';
+  nomeEmissor: string; // nome
+  tituloDocumento: string;
+  dataCriacao: string;
+  descricao: string;
+  motivoReprovacao: string;
 }
 
 export const listdocs = createAsyncThunk('docs/list', async (params: ListParams) => {
@@ -75,6 +88,41 @@ export const listdocs = createAsyncThunk('docs/list', async (params: ListParams)
 
 export const createInfoDoc = createAsyncThunk('docs/create', async (data: Doc) => {
   return await axios.post<InfoDoc>(apiDocumentacaoUrl, data);
+});
+
+export const notifyEmailInfoDoc = createAsyncThunk('email/send', async (data: SendEmail) => {
+  return await axios.post<InfoDoc>(apiNotifyEmailUrl, data);
+});
+
+export const notifyEmailAllSGQs = createAsyncThunk('email/send/SGQs', async (users: UerSGQ[]) => {
+  const emailsSGQRequests = users.map(user =>
+    axios.post(apiNotifyEmailUrl, {
+      to: user.email, // Email
+      subject: 'Documento aguardando a APROVAÇÃO',
+      tipo: 'APROVAR',
+      nomeEmissor: user.nome, // nome
+      tituloDocumento: 'Documento para APROVAÇÃO',
+      dataCriacao: Date.now(),
+      descricao: '',
+      // motivoReprovacao: string
+    })
+  );
+  axios
+    .all(emailsSGQRequests)
+    .then(
+      axios.spread((...responses) => {
+        // Respostas individuais
+        responses.forEach((response, index) => {
+          console.log(`Response Emails ${index + 1}:`, response.data);
+        });
+        return true;
+      })
+    )
+    .catch(error => {
+      console.error('Erro em uma das requisições:', error);
+      return false;
+    });
+  // return await axios.post<InfoDoc>(apiNotifyEmailUrl, data);
 });
 
 interface updateParams {

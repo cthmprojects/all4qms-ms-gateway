@@ -25,11 +25,13 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import { RejectDocumentDialog } from '../dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../../models';
-import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../../reducers/infodoc.reducer';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao, Process } from '../../models';
+import { createInfoDoc, deleteInfoDoc, getInfoDocById, notifyEmailInfoDoc, updateInfoDoc } from '../../reducers/infodoc.reducer';
 import { cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
+import { IUsuario } from '../../../../shared/model/usuario.model';
+import { UerSGQ } from '../../../../entities/usuario/reducers/usuario.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -82,7 +84,7 @@ export const ApprovalDocument = () => {
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
   const [origin, setOrigin] = useState('externa');
-  const [processes, setProcesses] = useState([]);
+  const [processes, setProcesses] = useState<Process[]>([]);
   const [selectedProcess, setSelectedProcess] = useState('');
   const [noValidate, setNoValidate] = useState(false);
   const [validDate, setValidDate] = useState(new Date());
@@ -95,12 +97,12 @@ export const ApprovalDocument = () => {
   const [keyword, setKeyword] = useState<string>('');
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
-  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const [currentUser, _] = useState<UerSGQ>(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
-    dispatch(getInfoDocById(id));
+    dispatch(getInfoDocById(id || ''));
     getProcesses().then(data => {
       setProcesses(data);
       if (data.length > 0) {
@@ -202,8 +204,21 @@ export const ApprovalDocument = () => {
         idDocumento: id,
         idUsuario: currentUser.id,
       })
-      .then(() => {
+      .then(async () => {
         toast.success('Documento aprovado com sucesso!');
+        const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == emitter)[0];
+        await dispatch(
+          notifyEmailInfoDoc({
+            to: userEmitter?.email || '', // Email
+            subject: 'Documento APROVADO por SGQ',
+            tipo: 'APROVAR',
+            nomeEmissor: userEmitter?.nome || '', // nome
+            tituloDocumento: 'Documento APROVADO',
+            dataCriacao: new Date(Date.now()).toISOString(),
+            descricao: `Documento aprovado por ${currentUser.nome} com o email ${currentUser.email}`,
+            motivoReprovacao: '',
+          })
+        );
         navigate('/infodoc');
       })
       .catch(e => {
@@ -330,7 +345,7 @@ export const ApprovalDocument = () => {
             <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
               <InputLabel>Origem</InputLabel>
               <Select label="Origem" value={origin} disabled onChange={event => setOrigin(event.target.value)}>
-                {originList?.map(e => (
+                {originList?.map((e: any) => (
                   <MenuItem value={e.nome}>{e.valor}</MenuItem>
                 ))}
               </Select>

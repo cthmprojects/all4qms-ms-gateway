@@ -93,6 +93,7 @@ export const UpdateDocument = () => {
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const [isSGQ, setIsSGQ] = useState<Boolean>(false);
   const [infoDocId, setInfoDocId] = useState(0);
   const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
 
@@ -109,6 +110,10 @@ export const UpdateDocument = () => {
         setSelectedProcess(data[0].id);
       }
     });
+
+    const roles = Storage.local.get('ROLE');
+    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(isSGQ);
   }, []);
 
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {

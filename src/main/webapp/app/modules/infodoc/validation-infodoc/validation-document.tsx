@@ -26,10 +26,11 @@ import axios from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
 import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../models';
-import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
+import { createInfoDoc, deleteInfoDoc, getInfoDocById, notifyEmailInfoDoc, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
+import { IUsuario } from '../../../shared/model/usuario.model';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -171,7 +172,7 @@ export const ValidationDocument = () => {
     navigate('/infodoc');
   };
 
-  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const users: IUsuario[] = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
   const actualInfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
@@ -203,8 +204,21 @@ export const ValidationDocument = () => {
         idDocumento: id,
         idUsuario: currentUser.id,
       })
-      .then(() => {
+      .then(async () => {
         toast.success('Documento aprovado com sucesso!');
+        const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == emitter)[0];
+        await dispatch(
+          notifyEmailInfoDoc({
+            to: userEmitter?.email || '', // Email
+            subject: 'Documento APROVADO por SGQ',
+            tipo: 'APROVAR',
+            nomeEmissor: userEmitter?.nome || '', // nome
+            tituloDocumento: 'Documento APROVADO',
+            dataCriacao: new Date(Date.now()).toISOString(),
+            descricao: `Documento aprovado por ${currentUser.firstName} ${currentUser.lastName} com o email ${currentUser.email}`,
+            motivoReprovacao: '',
+          })
+        );
         navigate('/infodoc');
       })
       .catch(e => {

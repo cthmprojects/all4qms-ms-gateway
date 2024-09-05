@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsers, UerSGQ } from 'app/entities/usuario/reducers/usuario.reducer';
 import { IUsuario } from 'app/shared/model/usuario.model';
 import DatePicker from 'react-datepicker';
 import { Textarea, styled } from '@mui/joy';
@@ -23,14 +23,24 @@ import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-re
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { AddCircle } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import downloadFile from '../infodoc-store';
 import { listEnums } from '../reducers/enums.reducer';
-import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
+import {
+  SendEmail,
+  createInfoDoc,
+  deleteInfoDoc,
+  getInfoDocById,
+  notifyEmailAllSGQs,
+  notifyEmailInfoDoc,
+  updateInfoDoc,
+} from '../reducers/infodoc.reducer';
 import { InfoDoc, Doc, Movimentacao, EnumTipoMovDoc, EnumStatusDoc } from '../models';
 import { downloadAnexo } from '../reducers/anexo.reducer';
 import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
+import { getUsersAsAdminSGQ } from '../../administration/user-management/user-management.reducer';
+import { getUsersByProcess } from '../../../entities/usuario/reducers/usuario.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -86,6 +96,7 @@ export const NewDocument = () => {
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const [usersSGQ, setUsersSGQ] = useState<UerSGQ[]>([]);
   const [infoDocId, setInfoDocId] = useState(0);
   const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
@@ -100,9 +111,23 @@ export const NewDocument = () => {
       setProcesses(data);
       if (data.length > 0) {
         setSelectedProcess(data[0].id);
+        getUsersSGQ(data[0].id);
       }
     });
   }, []);
+
+  const getUsersSGQ = async idProcess => {
+    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+    const users_ = (resUsers.payload as AxiosResponse).data || [];
+
+    const resUsersByProcess = await dispatch(getUsersByProcess(idProcess));
+    const usersByProcess_ = (resUsersByProcess.payload as AxiosResponse).data || [];
+
+    const filteredUserByProcess: UerSGQ[] = usersByProcess_.filter((userPro: UerSGQ) =>
+      users_.some(firstUser => firstUser.id === userPro.user.id)
+    );
+    setUsersSGQ(filteredUserByProcess);
+  };
 
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { value } = event.target;
@@ -199,7 +224,11 @@ export const NewDocument = () => {
       idUsuarioCriacao: currentUser.id,
     };
 
+    console.log('userSgq: ', usersSGQ);
+
     dispatch(atualizarMovimentacao(novaMovimentacao));
+
+    dispatch(notifyEmailAllSGQs(usersSGQ));
     navigate('/infodoc');
   };
 
@@ -213,6 +242,11 @@ export const NewDocument = () => {
       setOrigin(enums.origem[0].nome);
     }
   }, [enums]);
+
+  const changeProcess = event => {
+    setSelectedProcess(event.target.value);
+    getUsersSGQ(event.target.value);
+  };
 
   return (
     <>
@@ -323,7 +357,7 @@ export const NewDocument = () => {
 
             <FormControl sx={{ width: '25%' }} className="m-2 me-3">
               <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+              <Select label="Área / Processo" value={selectedProcess} onChange={event => changeProcess(event)}>
                 {processes.map((process, i) => (
                   <MenuItem value={process.id} key={`process-${i}`}>
                     {process.nome}
