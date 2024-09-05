@@ -8,6 +8,7 @@ import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.UsuarioMapper;
+import io.micrometer.core.instrument.binder.db.MetricsDSLContext;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -110,11 +111,6 @@ public class UsuarioService {
      * @param pageable the pagination information.
      * @return the list of entities.
      */
-    //    @Transactional(readOnly = true)
-    //    public Flux<UsuarioDTO> findAll(Pageable pageable) {
-    //        log.debug("Request to get all Usuarios");
-    //        return usuarioRepository.findAllBy(pageable).map(usuarioMapper::toDto);
-    //    }
     @Transactional(readOnly = true)
     public Flux<UsuarioDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Usuarios");
