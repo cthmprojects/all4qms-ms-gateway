@@ -1,6 +1,7 @@
 package com.tellescom.all4qms.web.rest;
 
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
+import com.tellescom.all4qms.domain.request.UsuarioUpdateRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.UsuarioService;
@@ -137,13 +138,13 @@ public class UsuarioResource {
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public Mono<ResponseEntity<UsuarioDTO>> partialUpdateUsuario(
         @PathVariable(value = "id", required = false) final Long id,
-        @NotNull @RequestBody UsuarioDTO usuarioDTO
+        @NotNull @RequestBody UsuarioUpdateRequest request
     ) throws URISyntaxException {
-        log.debug("REST request to partial update Usuario partially : {}, {}", id, usuarioDTO);
-        if (usuarioDTO.getId() == null) {
+        log.debug("REST request to partial update Usuario partially : {}, {}", id, request);
+        if (request.getUsuario().getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, usuarioDTO.getId())) {
+        if (!Objects.equals(id, request.getUsuario().getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -155,7 +156,7 @@ public class UsuarioResource {
                 }
 
                 return usuarioService
-                    .update(usuarioDTO)
+                    .update(request.getUsuario())
                     .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                     .map(result ->
                         ResponseEntity
@@ -163,16 +164,6 @@ public class UsuarioResource {
                             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
                             .body(result)
                     );
-                //                Mono<UsuarioDTO> result = usuarioService.partialUpdate(usuarioDTO);
-                //
-                //                return result
-                //                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                //                    .map(res ->
-                //                        ResponseEntity
-                //                            .ok()
-                //                            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, res.getId().toString()))
-                //                            .body(res)
-                //                    );
             });
     }
 
