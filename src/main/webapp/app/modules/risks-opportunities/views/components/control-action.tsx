@@ -2,7 +2,6 @@ import { Autocomplete, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Configuration } from '../../models';
-import { onAutocompleteChanged } from '../../utils';
 
 type ControlActionProps = {
   allProbabilities: Array<Configuration>;
@@ -11,10 +10,7 @@ type ControlActionProps = {
 };
 
 const ControlAction = ({ allProbabilities, allSeverities, readonly }: ControlActionProps) => {
-  const [description, setDescription] = useState<string>('');
-  const [probability, setProbability] = useState<Configuration | null>(null);
   const [probabilities, setProbabilities] = useState<Array<Configuration>>([]);
-  const [severity, setSeverity] = useState<Configuration | null>(null);
   const [severities, setSeverities] = useState<Array<Configuration>>([]);
 
   const { register, setValue, formState, control, trigger } = useFormContext();

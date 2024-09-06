@@ -60,7 +60,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
           <InputLabel>Emitido por</InputLabel>
           <Select value={user} input={<OutlinedInput label="Emitido por" />} disabled>
             <MenuItem selected value={user}>
-              {user?.firstName}
+              {user?.name}
             </MenuItem>
           </Select>
         </FormControl>

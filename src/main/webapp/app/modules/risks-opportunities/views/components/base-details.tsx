@@ -210,7 +210,7 @@ const BaseDetails = ({
 
     controlActionFormMethods.setValue('probability', probability);
     controlActionFormMethods.setValue('severity', severity);
-  }, [controlActionFormMethods, riskOpportunity]);
+  }, [controlActionFormMethods, riskOpportunity, firstConfigurations, secondConfigurations]);
 
   const fetchAnalysis = async (analysis: RawRiskOpportunityAnalysis): Promise<void> => {
     const approvalId: number = analysis.idAprovacaoNC;
@@ -289,7 +289,7 @@ const BaseDetails = ({
     analysisFormMethods.setValue('severity', severity);
 
     fetchAnalysis(analysis);
-  }, [analysisFormMethods, riskOpportunity]);
+  }, [analysisFormMethods, riskOpportunity, firstConfigurations, secondConfigurations]);
 
   const save = async (): Promise<void> => {
     if (!onSave) {
@@ -302,6 +302,7 @@ const BaseDetails = ({
     const payload = {
       ...rawFormValue,
       senderId: senderId,
+      processId: rawFormValue.process.id,
     };
 
     const controlActionValues = controlActionFormMethods.getValues();
