@@ -34,7 +34,7 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { a11yProps, CustomTabPanel } from 'app/shared/components/tabs';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Configuration, RawRiskOpportunity } from '../../models';
 import { getComplexities } from '../../reducers/complexities.reducer';
@@ -80,6 +80,22 @@ const Home = () => {
     state => state.all4qmsmsgatewayro.probabilities.entities
   );
   const severities: Array<Configuration> = useAppSelector<Array<Configuration>>(state => state.all4qmsmsgatewayro.severities.entities);
+
+  const risks = useMemo<Array<RawRiskOpportunity>>(() => {
+    if (!rolist || rolist.length <= 0) {
+      return [];
+    }
+
+    return rolist.filter(ro => ro.tipoRO === 'R');
+  }, [rolist]);
+
+  const opportunities = useMemo<Array<RawRiskOpportunity>>(() => {
+    if (!rolist || rolist.length <= 0) {
+      return [];
+    }
+
+    return rolist.filter(ro => ro.tipoRO === 'O');
+  }, [rolist]);
 
   const [tab, setTab] = useState(0);
   const [filters, setFilters] = useState({
@@ -132,13 +148,13 @@ const Home = () => {
 
     let type = newValue == 1 ? 'R' : 'O';
 
-    dispatch(
-      listROFiltro({
-        tipoRO: type,
-        page,
-        size: pageSize,
-      })
-    );
+    // dispatch(
+    //   listROFiltro({
+    //     tipoRO: type,
+    //     page,
+    //     size: pageSize,
+    //   })
+    // );
   };
 
   /**
@@ -159,7 +175,7 @@ const Home = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rolist?.map((ro: RawRiskOpportunity) => {
+          {(tab === 0 ? risks : opportunities).map((ro: RawRiskOpportunity) => {
             const {
               atualizadoEm,
               atualizadoPor,
