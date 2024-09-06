@@ -47,8 +47,6 @@ export type MetaResultado = {
 export type Meta = {
   id?: Number;
   descricao: string;
-  indicador: string;
-  medicao: string;
   acao: string;
   avaliacaoResultado: string;
   idProcesso: Number; //entity Processo ( Lista )
@@ -56,6 +54,8 @@ export type Meta = {
   periodo: EnumTemporal;
   recursos: any[];
   metaObjetivo: MetaObjetivo;
+  monitoramentoControle: string;
+  descricaoMonitoramentoControle: string;
 };
 
 export type TargetGoals = {

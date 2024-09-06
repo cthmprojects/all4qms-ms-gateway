@@ -1,4 +1,4 @@
-import { Breadcrumbs, Checkbox, Fab, FormControl, InputLabel, ListItemText, MenuItem, Select, TextField } from '@mui/material';
+import { Box, Breadcrumbs, Checkbox, Fab, FormControl, InputLabel, ListItemText, MenuItem, Select, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
@@ -15,8 +15,6 @@ import { getMeta, saveMetas, updateMeta } from '../../reducers/metas.reducer';
 
 const initMeta = {
   descricao: '',
-  indicador: '',
-  medicao: '',
   acao: '',
   avaliacaoResultado: '',
   idProcesso: 0,
@@ -24,6 +22,8 @@ const initMeta = {
   periodo: EnumTemporal.MENSAL,
   recursos: [],
   metaObjetivo: {},
+  monitoramentoControle: '',
+  descricaoMonitoramentoControle: '',
 };
 
 export const NewGoalObjective = () => {
@@ -83,7 +83,7 @@ export const NewGoalObjective = () => {
     return emitter && emittedDate && documentDescription && code && title && selectedProcess;
   };
 
-  const onChangeInputsMetas = (index, name, value) => {
+  const onChangeInputsMetas = (index, name: keyof typeof initMeta, value) => {
     let _goals = goals;
     _goals[index][name] = value;
 
@@ -107,9 +107,11 @@ export const NewGoalObjective = () => {
         metaObjetivo: _metaObj,
       }));
       const result = await dispatch(saveMetas(_metas));
-      if (result) navigate(`/goals/edit/${_metaObj.id}`); // setGoals([{ id: 0, ...initMeta }]);
+      if (result) navigate(`/goals`); // setGoals([{ id: 0, ...initMeta }]);
     }
   };
+
+  const line = <Box width="70%" borderTop="solid 1px" borderColor="#c6c5c5" margin="auto" />;
 
   return (
     <div>
@@ -234,7 +236,7 @@ export const NewGoalObjective = () => {
             width: '3rem',
             height: '3rem',
             fontSize: '2rem',
-            display: 'flex',
+            display: metaId ? 'none' : 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             position: 'absolute',
@@ -283,180 +285,128 @@ export const NewGoalObjective = () => {
                       width: 'calc(100% + 4rem)',
                     }}
                   ></hr>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexFlow: 'column',
-                      width: '100%',
-                      justifyContent: 'space-between',
-                      alignItems: 'left',
-                      margin: '0.6rem auto',
-                    }}
-                  >
-                    <TextField
-                      multiline
-                      rows={3}
-                      fullWidth
-                      label="Descrição da meta"
-                      value={goal.descricao}
-                      onChange={e => onChangeInputsMetas(index, 'descricao', e.target.value)}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexFlow: 'column',
-                      width: '49%',
-                      justifyContent: 'space-between',
-                      alignItems: 'left',
-                      margin: '0.6rem auto',
-                      marginRight: '1rem',
-                    }}
-                  >
-                    <TextField
-                      multiline
-                      rows={3}
-                      fullWidth
-                      label="Indicadores"
-                      value={goal.indicador || ''}
-                      onChange={e => onChangeInputsMetas(index, 'indicador', e.target.value)}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexFlow: 'row wrap',
-                      width: '49%',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      margin: '0.6rem auto',
-                    }}
-                  >
-                    <TextField
-                      multiline
-                      rows={3}
-                      fullWidth
-                      label="Medição"
-                      value={goal.medicao || ''}
-                      onChange={e => onChangeInputsMetas(index, 'medicao', e.target.value)}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexFlow: 'row wrap',
-                      width: '100%',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      margin: '0.6rem auto',
-                    }}
-                  >
-                    <TextField
-                      multiline
-                      rows={3}
-                      fullWidth
-                      label="Ações"
-                      value={goal.acao || ''}
-                      onChange={e => onChangeInputsMetas(index, 'acao', e.target.value)}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexFlow: 'row wrap',
-                      width: '100%',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      margin: '0.6rem auto',
-                    }}
-                  >
-                    {/* <Textarea
-                    className="w-100"
-                    slots={{ textarea: ResultEvaluation }}
-                    slotProps={{ textarea: { placeholder: '' } }}
-                    sx={{ borderRadius: '6px', minHeight: '3rem' }}
-                    name="ncAreaC"
-                    value={goal.avaliacaoResultado || ''}
-                    onChange={e => onChangeInputsMetas(index, 'avaliacaoResultado', e.target.value)}
-                  /> */}
-                    <TextField
-                      multiline
-                      rows={3}
-                      fullWidth
-                      label="Avaliação do resultado"
-                      value={goal.avaliacaoResultado || ''}
-                      onChange={e => onChangeInputsMetas(index, 'avaliacaoResultado', e.target.value)}
-                    />
-                  </div>
+                  <Box display="flex" flexDirection="column" width="100%" gap="2.2rem">
+                    <Box display="flex" flexDirection="column" width="100%" gap=".8rem">
+                      <TextField
+                        multiline
+                        rows={3}
+                        fullWidth
+                        label="Descrição da meta"
+                        value={goal.descricao}
+                        onChange={e => onChangeInputsMetas(index, 'descricao', e.target.value)}
+                      />
 
-                  {/* DropDowns */}
-                  <div style={{ width: '24%', marginTop: '0.6rem' }}>
-                    <FormControl sx={{ width: '100%' }}>
-                      <InputLabel>Processo</InputLabel>
-                      <Select
-                        label="Processo"
-                        value={goal.idProcesso}
-                        onChange={e => onChangeInputsMetas(index, 'idProcesso', e.target.value)}
-                      >
-                        {processes?.map((process, index) => (
-                          <MenuItem key={index} value={process.id}>
-                            {process.nome}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
+                      <div style={{ width: '24%' }}>
+                        <FormControl sx={{ width: '100%' }}>
+                          <InputLabel>Processo</InputLabel>
+                          <Select
+                            label="Processo"
+                            value={goal.idProcesso}
+                            onChange={e => onChangeInputsMetas(index, 'idProcesso', e.target.value)}
+                          >
+                            {processes?.map((process, index) => (
+                              <MenuItem key={index} value={process.id}>
+                                {process.nome}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </div>
+                    </Box>
 
-                  <div style={{ width: '24%', marginTop: '0.6rem' }}>
-                    <FormControl sx={{ width: '100%' }}>
-                      <InputLabel>Recursos</InputLabel>
-                      <Select
-                        label="Recursos"
-                        multiple
-                        value={goal.recursos}
-                        // input={<OutlinedInput label="Tag" />}
-                        renderValue={(selected: any) => selected.map(item => JSON.parse(item).recursoNome).join(', ')}
-                        onChange={e => onChangeInputsMetas(index, 'recursos', e.target.value)}
-                      >
-                        {resources?.map(resouce => (
-                          <MenuItem key={resouce.id} value={JSON.stringify(resouce)}>
-                            <Checkbox checked={goal.recursos.indexOf(JSON.stringify(resouce)) > -1} />
-                            <ListItemText primary={resouce.recursoNome} />
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
+                    <Box display="flex" flexDirection="column" width="100%" gap=".8rem">
+                      <TextField
+                        fullWidth
+                        label="Monitoramento / Controle"
+                        value={goal.monitoramentoControle}
+                        onChange={e => onChangeInputsMetas(index, 'monitoramentoControle', e.target.value)}
+                      />
 
-                  <div style={{ width: '24%', marginTop: '0.6rem' }}>
-                    <FormControl sx={{ width: '100%' }}>
-                      <InputLabel>Monitoramento</InputLabel>
-                      <Select
-                        label="Monitoramento"
-                        value={goal.monitoramento}
-                        onChange={e => onChangeInputsMetas(index, 'monitoramento', e.target.value)}
-                      >
-                        {monitoring?.map((value, index) => (
-                          <MenuItem key={index} value={value}>
-                            {value}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
+                      <TextField
+                        multiline
+                        rows={3}
+                        fullWidth
+                        label="Descrição Monitoramento / Controle"
+                        value={goal.descricaoMonitoramentoControle || ''}
+                        onChange={e => onChangeInputsMetas(index, 'descricaoMonitoramentoControle', e.target.value)}
+                      />
 
-                  <div style={{ width: '24%', marginTop: '0.6rem' }}>
-                    <FormControl sx={{ width: '100%' }}>
-                      <InputLabel>Avaliação</InputLabel>
-                      <Select label="Avaliação" value={goal.periodo} onChange={e => onChangeInputsMetas(index, 'periodo', e.target.value)}>
-                        {evaluation?.map((value, index) => (
-                          <MenuItem key={index} value={value}>
-                            {value}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
+                      <div style={{ width: '24%' }}>
+                        <FormControl sx={{ width: '100%' }}>
+                          <InputLabel>Frequência (Monitoramento / Controle)</InputLabel>
+                          <Select
+                            label="Frequência(Monitoramento / Controle)"
+                            value={goal.monitoramento}
+                            onChange={e => onChangeInputsMetas(index, 'monitoramento', e.target.value)}
+                          >
+                            {monitoring?.map((value, index) => (
+                              <MenuItem key={index} value={value}>
+                                {value}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </div>
+                    </Box>
+
+                    <Box display="flex" flexDirection="column" width="100%" gap=".8rem">
+                      <TextField
+                        multiline
+                        rows={3}
+                        fullWidth
+                        label="Ações Planejadas"
+                        value={goal.acao || ''}
+                        onChange={e => onChangeInputsMetas(index, 'acao', e.target.value)}
+                      />
+
+                      <div style={{ width: '24%' }}>
+                        <FormControl sx={{ width: '100%' }}>
+                          <InputLabel>Recursos Necessários</InputLabel>
+                          <Select
+                            label="Recursos Necessários"
+                            multiple
+                            value={goal.recursos}
+                            // input={<OutlinedInput label="Tag" />}
+                            renderValue={(selected: any) => selected.map(item => JSON.parse(item).recursoNome).join(', ')}
+                            onChange={e => onChangeInputsMetas(index, 'recursos', e.target.value)}
+                          >
+                            {resources?.map(resouce => (
+                              <MenuItem key={resouce.id} value={JSON.stringify(resouce)}>
+                                <Checkbox checked={goal.recursos.indexOf(JSON.stringify(resouce)) > -1} />
+                                <ListItemText primary={resouce.recursoNome} />
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </div>
+                    </Box>
+                    <Box display="flex" flexDirection="column" width="100%" gap=".8rem">
+                      <TextField
+                        multiline
+                        rows={3}
+                        fullWidth
+                        label="Avaliação de Resultados (Onde / Como verifico os resultados)"
+                        value={goal.avaliacaoResultado || ''}
+                        onChange={e => onChangeInputsMetas(index, 'avaliacaoResultado', e.target.value)}
+                      />
+                      <div style={{ width: '24%' }}>
+                        <FormControl sx={{ width: '100%' }}>
+                          <InputLabel>Frequência (Avaliação dos Resultados)</InputLabel>
+                          <Select
+                            label="Frequência (Avaliação dos Resultados)"
+                            value={goal.periodo}
+                            onChange={e => onChangeInputsMetas(index, 'periodo', e.target.value)}
+                          >
+                            {evaluation?.map((value, index) => (
+                              <MenuItem key={index} value={value}>
+                                {value}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </div>
+                    </Box>
+                  </Box>
                 </div>
               </div>
             ))
