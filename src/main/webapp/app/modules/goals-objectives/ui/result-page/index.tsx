@@ -166,8 +166,22 @@ const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
           </IconButton>
         )}
       </Box>
-      <TextField disabled={isDisabled} multiline rows={3} fullWidth label="Avaliação do Resultado" {...field('avaliacao')} />
-      <TextField disabled={isDisabled} multiline rows={3} fullWidth label="Análise Crítica" {...field('analise')} />
+      <TextField
+        disabled={isDisabled}
+        multiline
+        rows={3}
+        fullWidth
+        label="Descrição dos Resultados (Ações Planejadas)"
+        {...field('avaliacao')}
+      />
+      <TextField
+        disabled={isDisabled}
+        multiline
+        rows={3}
+        fullWidth
+        label="Análise Crítica / Eficácia dos Resultados"
+        {...field('analise')}
+      />
       {!isDisabled && (
         <Box display="flex" justifyContent="flex-end">
           <Button disabled={!formState.isValid} variant="contained" onClick={() => save(formMethods)} color="primary">
