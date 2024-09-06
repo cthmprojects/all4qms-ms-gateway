@@ -16,5 +16,5 @@ public class UsuarioUpdateRequest {
 
     private UsuarioDTO usuario;
     private String login;
-    private Set<Authority> perfils;
+    private Set<String> perfis;
 }
