@@ -184,7 +184,6 @@ public class UserService {
      * @param userDTO user to update.
      * @return updated user.
      */
-    @Transactional
     public Mono<AdminUserDTO> updateUser(AdminUserDTO userDTO) {
         return userRepository
             .findById(userDTO.getId())

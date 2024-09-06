@@ -17,6 +17,12 @@ const initialState: EntityState<IUsuario> = {
 
 const apiUrl = 'api/usuarios';
 
+interface IPayload {
+  usuario: IUsuario;
+  login: string;
+  perfis: Array<string>;
+}
+
 // Actions
 
 export const getEntities = createAsyncThunk('usuario/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
@@ -55,8 +61,12 @@ export const updateEntity = createAsyncThunk(
 
 export const partialUpdateEntity = createAsyncThunk(
   'usuario/partial_update_entity',
-  async (entity: IUsuario, thunkAPI) => {
-    const result = await axios.patch<IUsuario>(`${apiUrl}/${entity.id}`, cleanEntity(entity));
+  async (payload: IPayload, thunkAPI) => {
+    const result = await axios.patch<IUsuario>(`${apiUrl}/${payload.usuario.id}`, {
+      usuario: cleanEntity(payload.usuario),
+      login: payload.login,
+      perfis: payload.perfis,
+    });
     thunkAPI.dispatch(getEntities({}));
     return result;
   },

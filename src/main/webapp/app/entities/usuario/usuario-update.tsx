@@ -260,7 +260,13 @@ export const UsuarioUpdate = () => {
         },
       };
 
-      dispatch(partialUpdateEntity(entity));
+      dispatch(
+        partialUpdateEntity({
+          login: formData.login,
+          perfis: formData.profile,
+          usuario: entity,
+        })
+      );
     }
   };
 
