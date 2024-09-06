@@ -70,6 +70,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
           label="Data"
           selected={otherDate}
           onChange={date => setValue('date', date, { shouldValidate: true })}
+          sx={{ flexGrow: 1 }}
         />
 
         {!isOpportunity && (
@@ -89,6 +90,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
               options={processes}
               getOptionLabel={option => option.name}
               renderInput={params => <TextField {...params} label="Processo" />}
+              sx={{ flexGrow: 1 }}
               value={processForm}
             />
           </>
@@ -97,7 +99,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
 
       <Stack direction="row" spacing={2}>
         <TextField disabled={readonly} label="Fluxo" {...fieldHook('flow')} placeholder="Fluxo" sx={{ flexGrow: 1 }} />
-        <TextField disabled={readonly} label="Atividade" {...fieldHook('activity')} placeholder="Atividade" />
+        <TextField disabled={readonly} label="Atividade" {...fieldHook('activity')} placeholder="Atividade" sx={{ flexGrow: 1 }} />
       </Stack>
 
       <Stack direction="row" spacing={2}>
