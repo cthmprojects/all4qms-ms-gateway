@@ -41,7 +41,7 @@ import { getComplexities } from '../../reducers/complexities.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
-import { listROFiltro, listROs } from '../../reducers/risks-opportunities.reducer';
+import { listROs } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 
 // Example
@@ -130,7 +130,7 @@ const Home = () => {
       //   size: pageSize,
       //   page,
       // })
-      listROs({ page, size: pageSize })
+      listROs({})
     );
 
     dispatch(getComplexities());
@@ -202,6 +202,8 @@ const Home = () => {
 
             const path: string = tipoRO === 'R' ? 'risk' : 'opportunity';
 
+            const process: Process = processes.find(p => p.id === idProcesso);
+
             return (
               <TableRow key={id}>
                 <TableCell>{nomeFluxo ?? '-'}</TableCell>
@@ -209,7 +211,7 @@ const Home = () => {
                 <TableCell>{descricao1 ?? '-'}</TableCell>
                 <TableCell>{descricao2 ?? '-'}</TableCell>
                 <TableCell>{descricao3 ?? '-'}</TableCell>
-                <TableCell>{idProcesso ?? '-'}</TableCell>
+                <TableCell>{process?.nome ?? '-'}</TableCell>
                 <TableCell>{idLinhaConfigControle1 ?? linhaConfigControle1?.descricaoRO ?? '-'}</TableCell>
                 <TableCell>{idLinhaConfigControle2 ?? linhaConfigControle2?.descricaoRO ?? '-'}</TableCell>
                 <TableCell>{descricaoControle ?? '-'}</TableCell>
