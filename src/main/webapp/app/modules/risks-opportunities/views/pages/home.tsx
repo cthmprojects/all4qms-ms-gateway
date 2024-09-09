@@ -34,14 +34,14 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { a11yProps, CustomTabPanel } from 'app/shared/components/tabs';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Configuration, RawRiskOpportunity } from '../../models';
 import { getComplexities } from '../../reducers/complexities.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
-import { listROFiltro, listROs } from '../../reducers/risks-opportunities.reducer';
+import { listROs } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 
 // Example
@@ -81,6 +81,22 @@ const Home = () => {
   );
   const severities: Array<Configuration> = useAppSelector<Array<Configuration>>(state => state.all4qmsmsgatewayro.severities.entities);
 
+  const risks = useMemo<Array<RawRiskOpportunity>>(() => {
+    if (!rolist || rolist.length <= 0) {
+      return [];
+    }
+
+    return rolist.filter(ro => ro.tipoRO === 'R');
+  }, [rolist]);
+
+  const opportunities = useMemo<Array<RawRiskOpportunity>>(() => {
+    if (!rolist || rolist.length <= 0) {
+      return [];
+    }
+
+    return rolist.filter(ro => ro.tipoRO === 'O');
+  }, [rolist]);
+
   const [tab, setTab] = useState(0);
   const [filters, setFilters] = useState({
     idProcesso: null,
@@ -114,7 +130,7 @@ const Home = () => {
       //   size: pageSize,
       //   page,
       // })
-      listROs({ page, size: pageSize })
+      listROs({})
     );
 
     dispatch(getComplexities());
@@ -132,13 +148,13 @@ const Home = () => {
 
     let type = newValue == 1 ? 'R' : 'O';
 
-    dispatch(
-      listROFiltro({
-        tipoRO: type,
-        page,
-        size: pageSize,
-      })
-    );
+    // dispatch(
+    //   listROFiltro({
+    //     tipoRO: type,
+    //     page,
+    //     size: pageSize,
+    //   })
+    // );
   };
 
   /**
@@ -159,7 +175,7 @@ const Home = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rolist?.map((ro: RawRiskOpportunity) => {
+          {(tab === 0 ? risks : opportunities).map((ro: RawRiskOpportunity) => {
             const {
               atualizadoEm,
               atualizadoPor,
@@ -186,6 +202,8 @@ const Home = () => {
 
             const path: string = tipoRO === 'R' ? 'risk' : 'opportunity';
 
+            const process: Process = processes.find(p => p.id === idProcesso);
+
             return (
               <TableRow key={id}>
                 <TableCell>{nomeFluxo ?? '-'}</TableCell>
@@ -193,7 +211,7 @@ const Home = () => {
                 <TableCell>{descricao1 ?? '-'}</TableCell>
                 <TableCell>{descricao2 ?? '-'}</TableCell>
                 <TableCell>{descricao3 ?? '-'}</TableCell>
-                <TableCell>{idProcesso ?? '-'}</TableCell>
+                <TableCell>{process?.nome ?? '-'}</TableCell>
                 <TableCell>{idLinhaConfigControle1 ?? linhaConfigControle1?.descricaoRO ?? '-'}</TableCell>
                 <TableCell>{idLinhaConfigControle2 ?? linhaConfigControle2?.descricaoRO ?? '-'}</TableCell>
                 <TableCell>{descricaoControle ?? '-'}</TableCell>

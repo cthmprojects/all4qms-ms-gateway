@@ -1,13 +1,17 @@
 package com.tellescom.all4qms.service;
 
+import com.tellescom.all4qms.domain.Authority;
 import com.tellescom.all4qms.domain.User;
 import com.tellescom.all4qms.domain.Usuario;
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
+import com.tellescom.all4qms.domain.request.UsuarioUpdateRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.UsuarioMapper;
+import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
+import io.micrometer.core.instrument.binder.db.MetricsDSLContext;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -17,13 +21,17 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tech.jhipster.web.util.HeaderUtil;
 
 /**
  * Service Implementation for managing {@link Usuario}.
@@ -76,12 +84,46 @@ public class UsuarioService {
     /**
      * Update a usuario.
      *
-     * @param usuarioDTO the entity to save.
+     * @param request the entity to save.
      * @return the persisted entity.
      */
-    public Mono<UsuarioDTO> update(UsuarioDTO usuarioDTO) {
-        log.debug("Request to update Usuario : {}", usuarioDTO);
-        return usuarioRepository.save(usuarioMapper.toEntity(usuarioDTO)).map(usuarioMapper::toDto);
+    public Mono<UsuarioDTO> update(UsuarioUpdateRequest request) {
+        log.debug("Request to update Usuario : {}", request);
+        return usuarioRepository
+            .existsById(request.getUsuario().getId())
+            .flatMap(exists -> {
+                if (!exists) {
+                    return Mono.error(new BadRequestAlertException("Entity not found", "usuario", "idnotfound"));
+                }
+                AdminUserDTO adminUserDTO = new AdminUserDTO();
+                adminUserDTO.setId(request.getUsuario().getId());
+                adminUserDTO.setActivated(true);
+                adminUserDTO.setEmail(request.getUsuario().getEmail());
+                String[] nome = request.getUsuario().getNome().split(" ");
+                if (nome.length > 1) {
+                    adminUserDTO.setFirstName(nome[0]);
+                    adminUserDTO.setLastName(nome[1]);
+                }
+                adminUserDTO.setFirstName(nome[0]);
+                adminUserDTO.setLogin(request.getLogin());
+                if (request.getPerfis() != null) {
+                    adminUserDTO.setAuthorities(request.getPerfis());
+                }
+
+                // Encadear as operações reativas
+                return userService
+                    .updateUser(adminUserDTO) // Executa o updateUser primeiro
+                    .flatMap(updatedUser -> { // Após o updateUser ser concluído, continua com o próximo processamento
+                        return usuarioRepository
+                            .save(usuarioMapper.toEntity(request.getUsuario())) // Salva o usuário no repository
+                            .map(usuarioMapper::toDto); // Mapeia o resultado para UsuarioDTO
+                    });
+            });
+    }
+
+    public Mono<UsuarioDTO> updatePut(UsuarioDTO request) {
+        log.debug("Request to update Usuario : {}", request);
+        return usuarioRepository.save(usuarioMapper.toEntity(request)).map(usuarioMapper::toDto);
     }
 
     /**
@@ -110,11 +152,6 @@ public class UsuarioService {
      * @param pageable the pagination information.
      * @return the list of entities.
      */
-    //    @Transactional(readOnly = true)
-    //    public Flux<UsuarioDTO> findAll(Pageable pageable) {
-    //        log.debug("Request to get all Usuarios");
-    //        return usuarioRepository.findAllBy(pageable).map(usuarioMapper::toDto);
-    //    }
     @Transactional(readOnly = true)
     public Flux<UsuarioDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Usuarios");
