@@ -24,7 +24,6 @@ public class Processo implements Serializable {
     @Column("id")
     private Long id;
 
-    @NotNull(message = "must not be null")
     @Column("numero")
     private String numero;
 
