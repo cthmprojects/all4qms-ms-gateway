@@ -96,7 +96,7 @@ public class UsuarioService {
                     return Mono.error(new BadRequestAlertException("Entity not found", "usuario", "idnotfound"));
                 }
                 AdminUserDTO adminUserDTO = new AdminUserDTO();
-                adminUserDTO.setId(request.getUsuario().getId());
+                adminUserDTO.setId(request.getUsuario().getUser().getId());
                 adminUserDTO.setActivated(true);
                 adminUserDTO.setEmail(request.getUsuario().getEmail());
                 String[] nome = request.getUsuario().getNome().split(" ");
