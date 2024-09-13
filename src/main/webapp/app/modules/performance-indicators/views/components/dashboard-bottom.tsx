@@ -2,6 +2,7 @@ import { Title } from '@mui/icons-material';
 import './dashboard-body.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Rectangle } from 'recharts';
 import { GoalMeasured, Pair } from '../../models';
+import { DataChart } from '../../models/charts';
 
 const data = [
   {
@@ -50,9 +51,10 @@ const data = [
 
 type DashboardBottomProps = {
   comparisonByPeriod: Array<GoalMeasured>;
+  metasPeriodo: Array<DataChart>;
 };
 
-const DashboardBottom = ({ comparisonByPeriod }: DashboardBottomProps) => {
+const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomProps) => {
   return (
     <div className="parent">
       <div className="child" style={{ width: '50%', height: 400 }}>
@@ -84,7 +86,7 @@ const DashboardBottom = ({ comparisonByPeriod }: DashboardBottomProps) => {
           <BarChart
             width={500}
             height={300}
-            data={data}
+            data={metasPeriodo}
             title="Metas por Período"
             margin={{
               top: 20,
@@ -98,8 +100,8 @@ const DashboardBottom = ({ comparisonByPeriod }: DashboardBottomProps) => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="Ind1  " stackId="a" fill="#344BFD" />
-            <Bar dataKey="Ind2" stackId="a" fill="#E9ECF1" />
+            <Bar dataKey="meta  " stackId="a" fill="#344BFD" />
+            <Bar dataKey="realizado" stackId="a" fill="#E9ECF1" />
           </BarChart>
         </ResponsiveContainer>
       </div>
