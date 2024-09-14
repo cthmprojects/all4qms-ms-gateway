@@ -41,7 +41,7 @@ const Dashboard = () => {
   const indicators: Array<Indicator> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entities);
   const indicatorGoals: Array<IndicatorGoal> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entities);
   const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
-  const charts: Charts = useAppSelector(state => state.all4qmsmsgatewayrnc.charts.entity);
+  const charts: Charts = useAppSelector(state => state.all4qmsmsgatewaymetaind.charts.entity);
 
   const summarizedProcesses = useMemo<Array<SummarizedProcess>>(() => {
     if (!processes || processes.length <= 0) {
