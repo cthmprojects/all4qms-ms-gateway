@@ -10,5 +10,5 @@ export { default as NonConformityOriginSummary } from './non-conformity-origin-s
 export { default as NonConformityStageSummary } from './non-conformity-stage-summary/non-conformity-stage-summary';
 export { default as NonConformitySummary } from './non-conformity-summary/non-conformity-summary';
 export { default as PlannedActions } from './planned-actions/planned-actions';
-export { default as ProductDecision } from './product-decision/product-decision';
+export { default as ProductDecisions } from './product-decision/product-decision';
 export { default as ScopeAnalysis } from './scope-analysis/scope-analysis';
