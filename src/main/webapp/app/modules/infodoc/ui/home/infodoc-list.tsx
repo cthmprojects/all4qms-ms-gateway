@@ -278,6 +278,9 @@ const InfodocList = () => {
 
     let type: string = '';
     switch (newValue) {
+      case 0:
+        type = 'H';
+        break;
       case 1:
         type = 'E';
         break;
@@ -478,10 +481,9 @@ const InfodocList = () => {
                     </Tooltip>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.titulo}</TableCell>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>
-                      {' '}
-                      {filterUser(infodoc.doc.idUsuarioCriacao)?.nome}
+                      {filterUser(infodoc.doc.idUsuarioCriacao!!)?.nome}
                     </TableCell>
-                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>-</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.revisao}</TableCell>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       {infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}
                     </TableCell>
@@ -497,13 +499,13 @@ const InfodocList = () => {
                     </TableCell> */}
                     <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                       <IconButton
-                        title="Editar"
+                        title="Revisar"
                         color="primary"
-                        disabled={infodoc.doc.enumSituacao != 'H'}
+                        disabled={infodoc.doc.enumSituacao == 'H'}
                         onClick={event => onEditClicked(infodoc, event)}
                         // onClick={event => openDocToValidation(event, infodoc)}
                       >
-                        <EditIcon sx={{ color: infodoc.doc.enumSituacao != 'H' ? '#cacaca' : '#e6b200' }} />
+                        <EditIcon sx={{ color: infodoc.doc.enumSituacao == 'H' ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
                       <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
