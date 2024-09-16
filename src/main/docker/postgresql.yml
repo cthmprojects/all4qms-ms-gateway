@@ -1,13 +1,19 @@
 # This configuration is intended for development purpose, it's **your** responsibility to harden it for production
 version: '3.8'
 services:
-  all4qmsmsgateway-postgresql:
-    image: postgres:14.5
+  postgresql:
+    image: postgres:16.1
     volumes:
-      - ~/volumes/jhipster/all4qmsMsGateway/postgresql/:/var/lib/postgresql/data/
+      - ~/volumes/jhipster/postgresql/:/var/lib/postgresql/data/
+      - ./init-db:/docker-entrypoint-initdb.d/ # Para scripts de inicialização
     environment:
-      - POSTGRES_USER=all4qmsMsGateway
-      - POSTGRES_PASSWORD=
+      - POSTGRES_USER=qms_system # Usuário principal
+      - POSTGRES_PASSWORD= # Senha principal
       - POSTGRES_HOST_AUTH_METHOD=trust
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
       - 5432:5432
