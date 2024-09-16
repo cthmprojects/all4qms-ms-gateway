@@ -325,14 +325,14 @@ export const ApprovalDocument = () => {
             <TextField
               label="Código"
               name="number"
-              className="me-2"
+              className="me-1"
               autoComplete="off"
               value={code}
               disabled
               onChange={e => setCode(e.target.value)}
             />
             <TextField
-              sx={{ width: '30%' }}
+              sx={{ width: '35%' }}
               label="Título"
               name="number"
               className="me-2 ms-2"
@@ -351,7 +351,7 @@ export const ApprovalDocument = () => {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
+            <FormControl sx={{ width: '20%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
               <Select label="Área / Processo" value={selectedProcess} disabled onChange={event => setSelectedProcess(event.target.value)}>
                 {processes.map((process, i) => (

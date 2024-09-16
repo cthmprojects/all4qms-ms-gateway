@@ -4,6 +4,7 @@ import {
   Chip,
   FormControl,
   FormControlLabel,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -41,6 +42,7 @@ import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movime
 import { Storage } from 'react-jhipster';
 import { getUsersAsAdminSGQ } from '../../administration/user-management/user-management.reducer';
 import { getUsersByProcess } from '../../../entities/usuario/reducers/usuario.reducer';
+import { getUsersAsGQ } from '../../../entities/usuario/usuario.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -117,7 +119,7 @@ export const NewDocument = () => {
   }, []);
 
   const getUsersSGQ = async idProcess => {
-    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+    const resUsers = await dispatch(getUsersAsGQ('ROLE_SGQ'));
     const users_ = (resUsers.payload as AxiosResponse).data || [];
 
     const resUsersByProcess = await dispatch(getUsersByProcess(idProcess));
@@ -197,7 +199,7 @@ export const NewDocument = () => {
       titulo: '',
       origem: 'I',
       idProcesso: parseInt(selectedProcess),
-      idArquivo: parseInt(id),
+      idArquivo: parseInt(id!!),
       ignorarValidade: true,
       enumSituacao: 'E',
       tipoDoc: 'MA',
@@ -284,7 +286,7 @@ export const NewDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  em emissão
+                  Edição
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -294,7 +296,7 @@ export const NewDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Edição
+                  Em emissão
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -326,83 +328,76 @@ export const NewDocument = () => {
               Dados do documento
             </h1>
           </div>
-          <div className="mt-4">
-            <TextField
-              label="Código"
-              name="number"
-              className="m-2 ms-0"
-              autoComplete="off"
-              value={code}
-              disabled
-              onChange={e => setCode(e.target.value)}
-            />
-            <TextField
-              sx={{ width: '30%' }}
-              label="Título"
-              name="number"
-              className="m-2"
-              autoComplete="off"
-              disabled
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
-            <FormControl sx={{ width: '15%' }} className="m-2">
-              <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                {originList?.map(e => (
-                  <MenuItem value={e.nome}>{e.valor}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
 
-            <FormControl sx={{ width: '25%' }} className="m-2 me-3">
-              <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} onChange={event => changeProcess(event)}>
-                {processes.map((process, i) => (
-                  <MenuItem value={process.id} key={`process-${i}`}>
-                    {process.nome}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              className="m-2 ms-0"
-              variant="outlined"
-              size="large"
-              onClick={event => onFileClicked(event)}
-              style={{ backgroundColor: '#E0E0E0', height: '55px' }}
-            >
-              <VisibilityIcon className="pe-1 pb-1" />
-              Arquivo
-            </Button>
-          </div>
-          <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
+          <Grid container gap={2}>
+            <Grid item xs={1}>
+              <TextField label="Código" name="number" autoComplete="off" value={code} disabled onChange={e => setCode(e.target.value)} />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                sx={{ width: '100%' }}
+                label="Título"
+                name="number"
+                autoComplete="off"
+                value={title}
+                disabled
+                onChange={e => setTitle(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }}>
+                <InputLabel>Origem</InputLabel>
+                <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
+                  {originList?.map((e: any) => (
+                    <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }}>
+                <InputLabel>Área / Processo</InputLabel>
+                <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+                  {processes.map((process: any, i) => (
+                    <MenuItem value={process.id} key={`process-${i}`}>
+                      {process.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
+                style={{ backgroundColor: '#E0E0E0', height: '55px' }}
+                onClick={event => onFileClicked(event)}
+              >
+                <AttachFileIcon className="pe-1 pb-1" />
+                Arquivo
+              </Button>
+            </Grid>
+          </Grid>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <FormControlLabel
               className="me-2"
-              control={<Checkbox disabled checked={noValidate} onClick={() => onNoValidateChanged()} />}
+              control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
             />
             <FormControl className="me-2 ms-2 mt-4">
-              <DatePicker
-                selected={validDate}
-                onChange={date => setValidDate(date)}
-                className="date-picker"
-                dateFormat={'dd/MM/yyyy'}
-                disabled
-              />
-              <label htmlFor="" className="rnc-date-label">
+              <DatePicker selected={validDate} onChange={date => setValidDate(date)} className="date-picker" dateFormat={'dd/MM/yyyy'} />
+              <label htmlFor="" className="rnc-date-label" style={{ width: '70px' }}>
                 Validade
               </label>
             </FormControl>
-            <FormControl sx={{ width: '15%' }} className="me-2 rnc-form-field ms-2">
+            <FormControl style={{ height: '60px', width: '190px' }}>
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
-                style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd' }}
-                label="Notificar:"
+                style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd', width: '100%' }}
+                label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -430,8 +425,9 @@ export const NewDocument = () => {
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
+              disabled
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>
