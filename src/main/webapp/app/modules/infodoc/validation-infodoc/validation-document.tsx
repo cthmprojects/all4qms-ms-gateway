@@ -22,6 +22,7 @@ import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import FileUploadRoundedIcon from '@mui/icons-material/FileUploadRounded';
 import axios from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
@@ -263,7 +264,7 @@ export const ValidationDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled={false} label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -298,7 +299,7 @@ export const ValidationDocument = () => {
                   onChange={date => setEmittedDate(date)}
                   className="date-picker"
                   dateFormat={'dd/MM/yyyy'}
-                  disabled
+                  disabled={false}
                 />
                 <label htmlFor="" className="rnc-date-label">
                   Data
@@ -312,7 +313,7 @@ export const ValidationDocument = () => {
               sx={{ borderRadius: '6px' }}
               name="ncArea"
               value={description || ''}
-              disabled
+              disabled={false}
               onChange={e => setDescription(e.target.value)}
             />
           </div>
@@ -328,7 +329,7 @@ export const ValidationDocument = () => {
               className="me-2"
               autoComplete="off"
               value={code}
-              disabled
+              disabled={false}
               onChange={e => setCode(e.target.value)}
             />
             <TextField
@@ -338,13 +339,13 @@ export const ValidationDocument = () => {
               className="me-2 ms-2"
               autoComplete="off"
               value={title}
-              disabled
+              disabled={false}
               onChange={e => setTitle(e.target.value)}
             />
 
             <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
               <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} disabled onChange={event => setOrigin(event.target.value)}>
+              <Select label="Origem" value={origin} disabled={false} onChange={event => setOrigin(event.target.value)}>
                 {originList?.map(e => (
                   <MenuItem value={e.nome}>{e.valor}</MenuItem>
                 ))}
@@ -353,7 +354,12 @@ export const ValidationDocument = () => {
 
             <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} disabled onChange={event => setSelectedProcess(event.target.value)}>
+              <Select
+                label="Área / Processo"
+                value={selectedProcess}
+                disabled={false}
+                onChange={event => setSelectedProcess(event.target.value)}
+              >
                 {processes.map((process, i) => (
                   <MenuItem value={process.id} key={`process-${i}`}>
                     {process.nome}
@@ -370,7 +376,18 @@ export const ValidationDocument = () => {
               onClick={event => onFileClicked(event)}
             >
               <VisibilityIcon className="pe-1 pb-1" />
-              Arquivo
+              Ver
+            </Button>
+
+            <Button
+              className="ms-2"
+              variant="outlined"
+              size="large"
+              style={{ backgroundColor: idNewFile ? '#e6b200' : '#E0E0E0', color: '#4e4d4d', height: '55px' }}
+              onClick={event => onFileClicked(event)}
+            >
+              <FileUploadRoundedIcon className="pe-1 pb-1" />
+              Novo
             </Button>
           </div>
           <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
@@ -378,7 +395,7 @@ export const ValidationDocument = () => {
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
-              disabled
+              disabled={false}
             />
             <FormControl className="me-2 ms-2 mt-4">
               <DatePicker
@@ -386,7 +403,7 @@ export const ValidationDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled
+                disabled={false}
               />
               <label htmlFor="" className="rnc-date-label">
                 Validade
@@ -399,7 +416,7 @@ export const ValidationDocument = () => {
                 label="Notificar:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled
+                disabled={false}
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -416,7 +433,7 @@ export const ValidationDocument = () => {
             sx={{ borderRadius: '6px' }}
             name="ncArea"
             value={documentDescription || ''}
-            disabled
+            disabled={false}
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
@@ -427,9 +444,9 @@ export const ValidationDocument = () => {
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
-              disabled
+              disabled={false}
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled={false}>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>
