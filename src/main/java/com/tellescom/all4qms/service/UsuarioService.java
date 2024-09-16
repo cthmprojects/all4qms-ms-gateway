@@ -8,6 +8,7 @@ import com.tellescom.all4qms.domain.request.UsuarioUpdateRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
+import com.tellescom.all4qms.service.dto.UserDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.UsuarioMapper;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
@@ -302,5 +303,9 @@ public class UsuarioService {
                         })
                 )
         );
+    }
+
+    public Mono<ResponseEntity<Flux<UserDTO>>> getByRole(String role) {
+        return userService.countManagedUsers().map(headers -> ResponseEntity.ok().body(userService.getUsersByAuthority(role)));
     }
 }
