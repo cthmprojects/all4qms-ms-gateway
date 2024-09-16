@@ -1,51 +1,34 @@
-import {
-  Breadcrumbs,
-  Button,
-  Card,
-  FormControl,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  SelectChangeEvent,
-  TextField,
-  Typography,
-} from '@mui/material';
-import Checkbox from '@mui/material/Checkbox';
+import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Action, ActionPlan, IshikawaInvestigation, Plan, ReasonsInvestigation, Rnc } from 'app/modules/rnc/models';
+import { Decision } from 'app/modules/rnc/models/decision';
+import { findDecisionByRnc, saveDecision, updateDecision } from 'app/modules/rnc/reducers/decision.reducer';
+import { getDescriptionByRNCId } from 'app/modules/rnc/reducers/description.reducer';
+import { getImmediateActionByRnc, removeImmediateAction } from 'app/modules/rnc/reducers/immediate-action.reducer';
+import { getInvestigationByRnc, getPlanoByRnc } from 'app/modules/rnc/reducers/investigation.reducer';
+import { formatDate, savePlan, updatePlan } from 'app/modules/rnc/reducers/plan.reducer';
+import { rangeList } from 'app/modules/rnc/reducers/range.reducer';
 import {
-  saveEffectCause,
-  saveImmediateAction,
-  saveRange,
-  saveReason,
   getById,
-  update,
+  saveImmediateAction,
   saveInvestigation,
+  saveRange,
+  update,
   updateEffectCause,
   updateReason,
 } from 'app/modules/rnc/reducers/rnc.reducer';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import DatePicker from 'react-datepicker';
+import axios from 'axios';
+import { useEffect, useMemo, useState } from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
+import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
-import { CauseInvestigation, ImmediateActions, PlannedActions, ProductDecision, ScopeAnalysis } from '../../../components';
-import './general-register.css';
-import { listEnums } from '../../../../reducers/enums.reducer';
 import { Enums } from '../../../../models';
-import { formatDate, savePlan, updatePlan } from 'app/modules/rnc/reducers/plan.reducer';
-import { rangeList } from 'app/modules/rnc/reducers/range.reducer';
-import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import { Storage } from 'react-jhipster';
-import { getImmediateActionByRnc, removeImmediateAction } from 'app/modules/rnc/reducers/immediate-action.reducer';
-import { getInvestigationByRnc, getPlanoByRnc } from 'app/modules/rnc/reducers/investigation.reducer';
-import { getDescriptionByRNCId } from 'app/modules/rnc/reducers/description.reducer';
-import { Decision } from 'app/modules/rnc/models/decision';
-import { findDecisionByRnc, saveDecision } from 'app/modules/rnc/reducers/decision.reducer';
-import axios from 'axios';
+import { listEnums } from '../../../../reducers/enums.reducer';
+import { CauseInvestigation, ImmediateActions, PlannedActions, ProductDecisions, ScopeAnalysis } from '../../../components';
+import './general-register.css';
 
 const sendNotification = async (title: string, user: any) => {
   let url = '/api/pendencias';
@@ -207,15 +190,15 @@ export const GeneralRegister = () => {
   /*
    * Decision
    */
-  const [decision, setDecision] = useState<Decision | null>();
+  const [decisions, setDecisions] = useState<Array<Decision>>([]);
   const [readonlyDecision, setReadonlyDecision] = useState<boolean>(false);
 
   const [responsaveisMP, setResponsaveisMP] = useState<Array<string>>([]);
   const [responsaveis, setResponsaveis] = useState([]);
   const [plans, setPlans] = useState<Array<Plan>>([]);
   const [listaAcoesCorretivas, setListaAcoesCorretivas] = useState<Array<ActionPlan>>([]);
-  const [checkedIshikawa, setCheckedIshikawa] = useState(false);
-  const [checkedFiveWhy, setCheckedFiveWhy] = useState(false);
+  const [checkedIshikawa, setCheckedIshikawa] = useState(true);
+  const [checkedFiveWhy, setCheckedFiveWhy] = useState(true);
   const [showPlanoAcaoCorretiva, setShowPlanoAcaoCorretiva] = useState(false);
   const [newIshikawa, setNewIshikawa] = useState(true);
   const [newFiveWhy, setNewFiveWhy] = useState(true);
@@ -232,58 +215,6 @@ export const GeneralRegister = () => {
       dispatch(findDecisionByRnc(id));
 
       loadImmediateActions();
-      getInvestigationByRnc(id).then(res => {
-        if (res.ishikawa) {
-          setCheckedIshikawa(true);
-          setNewIshikawa(false);
-          setIshikawaId(res.ishikawa.id);
-          setIshikawaInvestigation({
-            environment: res.ishikawa?.meioAmbiente.length > 0 ? res.ishikawa?.meioAmbiente.split(';') : [],
-            machine: res.ishikawa?.maquina.length > 0 ? res.ishikawa?.maquina.split(';') : [],
-            measurement: res.ishikawa?.medicao.length > 0 ? res.ishikawa?.medicao.split(';') : [],
-            method: res.ishikawa?.metodo.length > 0 ? res.ishikawa?.metodo.split(';') : [],
-            rawMaterial: res.ishikawa?.materiaPrima.length > 0 ? res.ishikawa?.materiaPrima.split(';') : [],
-            manpower: res.ishikawa?.maoDeObra.length > 0 ? res.ishikawa?.maoDeObra.split(';') : [],
-          });
-        }
-
-        if (res.porques && res.porques.length > 0) {
-          const allReasons: Array<any> = res.porques;
-          const allReasonInvestigations: Array<ReasonsInvestigation> = [];
-          const allReasonIds: Array<number> = [];
-
-          setNewFiveWhy(false);
-          setCheckedFiveWhy(true);
-
-          for (let i = 0; i < allReasons.length; i++) {
-            const currentReason = allReasons[i];
-
-            allReasonIds.push(currentReason.id);
-            allReasonInvestigations.push({
-              first: currentReason.pq1,
-              second: currentReason.pq2,
-              third: currentReason.pq3,
-              fourth: currentReason.pq4,
-              fifth: currentReason.pq5,
-              cause: currentReason.descCausa,
-            });
-          }
-
-          setReasonIds(allReasonIds);
-          setReasonsInvestigations(allReasonInvestigations);
-        } else {
-          setReasonsInvestigations([
-            {
-              fifth: '',
-              first: '',
-              fourth: '',
-              second: '',
-              third: '',
-              cause: '',
-            },
-          ]);
-        }
-      });
 
       getPlanoByRnc(id).then(res => {
         if (res.length > 0) {
@@ -569,66 +500,36 @@ export const GeneralRegister = () => {
     saveProductDecision();
 
     if (_rnc && !showPlanoAcaoCorretiva) {
-      if (newIshikawa && newFiveWhy) {
-        if (checkedIshikawa && !checkedFiveWhy) {
-          saveInvestigation(
-            id,
-            {
-              description: descriptionEntity?.detalhesNaoConformidade,
-              environment: ishikawaInvestigation?.environment.join(';'),
-              machine: ishikawaInvestigation?.machine.join(';'),
-              measurement: ishikawaInvestigation?.measurement.join(';'),
-              method: ishikawaInvestigation?.method.join(';'),
-              rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
-              workforce: ishikawaInvestigation?.manpower.join(';'),
-            },
-            null
-          );
-        }
-        if (checkedFiveWhy && !checkedIshikawa) {
-          for (let i = 0; i < reasonsInvestigations.length; i++) {
-            const reasonsInvestigation = reasonsInvestigations[i];
+      for (let i = 0; i < reasonsInvestigations.length; i++) {
+        const reasonInvestigation: ReasonsInvestigation = reasonsInvestigations[i];
+        const shouldUpdate: boolean = i < reasonIds.length;
 
-            saveInvestigation(id, null, {
-              cause: reasonsInvestigation?.cause,
-              fifth: reasonsInvestigation?.fifth,
-              first: reasonsInvestigation?.first,
-              forth: reasonsInvestigation?.fourth,
-              problem: descriptionEntity?.detalhesNaoConformidade,
-              second: reasonsInvestigation?.second,
-              third: reasonsInvestigation?.third,
-            });
-          }
-        }
+        if (shouldUpdate) {
+          const reasonId: number = reasonIds[i];
 
-        if (checkedFiveWhy && checkedIshikawa) {
-          saveInvestigation(id, {
-            description: descriptionEntity?.detalhesNaoConformidade,
-            environment: ishikawaInvestigation?.environment.join(';'),
-            machine: ishikawaInvestigation?.machine.join(';'),
-            measurement: ishikawaInvestigation?.measurement.join(';'),
-            method: ishikawaInvestigation?.method.join(';'),
-            rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
-            workforce: ishikawaInvestigation?.manpower.join(';'),
-          }).then(() => {});
-
-          for (let i = 0; i < reasonsInvestigations.length; i++) {
-            const reasonsInvestigation = reasonsInvestigations[i];
-
-            saveInvestigation(id, null, {
-              cause: reasonsInvestigation?.cause,
-              fifth: reasonsInvestigation?.fifth,
-              first: reasonsInvestigation?.first,
-              forth: reasonsInvestigation?.fourth,
-              problem: descriptionEntity?.detalhesNaoConformidade,
-              second: reasonsInvestigation?.second,
-              third: reasonsInvestigation?.third,
-            });
-          }
+          updateReason(reasonId, {
+            cause: descriptionEntity?.detalhesNaoConformidade,
+            fifth: reasonInvestigation?.fifth,
+            first: reasonInvestigation?.first,
+            forth: reasonInvestigation?.fourth,
+            problem: descriptionEntity?.detalhesNaoConformidade,
+            second: reasonInvestigation?.second,
+            third: reasonInvestigation?.third,
+          });
+        } else {
+          saveInvestigation(id, null, {
+            cause: reasonInvestigation?.cause,
+            fifth: reasonInvestigation?.fifth,
+            first: reasonInvestigation?.first,
+            forth: reasonInvestigation?.fourth,
+            problem: descriptionEntity?.detalhesNaoConformidade,
+            second: reasonInvestigation?.second,
+            third: reasonInvestigation?.third,
+          });
         }
       }
 
-      if (!newIshikawa && checkedIshikawa) {
+      if (ishikawaId) {
         updateEffectCause(ishikawaId, {
           description: descriptionEntity?.detalhesNaoConformidade,
           environment: ishikawaInvestigation?.environment.join(';'),
@@ -638,24 +539,109 @@ export const GeneralRegister = () => {
           rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
           workforce: ishikawaInvestigation?.manpower.join(';'),
         });
+      } else {
+        saveInvestigation(
+          id,
+          {
+            description: descriptionEntity?.detalhesNaoConformidade,
+            environment: ishikawaInvestigation?.environment.join(';'),
+            machine: ishikawaInvestigation?.machine.join(';'),
+            measurement: ishikawaInvestigation?.measurement.join(';'),
+            method: ishikawaInvestigation?.method.join(';'),
+            rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
+            workforce: ishikawaInvestigation?.manpower.join(';'),
+          },
+          null
+        );
       }
 
-      if (!newFiveWhy && checkedFiveWhy) {
-        for (let i = 0; i < reasonsInvestigations.length; i++) {
-          const reasonsInvestigation = reasonsInvestigations[i];
-          const reasonId = reasonIds[i];
+      // if (newIshikawa && newFiveWhy) {
+      //   if (checkedIshikawa && !checkedFiveWhy) {
+      //     saveInvestigation(
+      //       id,
+      //       {
+      //         description: descriptionEntity?.detalhesNaoConformidade,
+      //         environment: ishikawaInvestigation?.environment.join(';'),
+      //         machine: ishikawaInvestigation?.machine.join(';'),
+      //         measurement: ishikawaInvestigation?.measurement.join(';'),
+      //         method: ishikawaInvestigation?.method.join(';'),
+      //         rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
+      //         workforce: ishikawaInvestigation?.manpower.join(';'),
+      //       },
+      //       null
+      //     );
+      //   }
+      //   if (checkedFiveWhy && !checkedIshikawa) {
+      //     for (let i = 0; i < reasonsInvestigations.length; i++) {
+      //       const reasonsInvestigation = reasonsInvestigations[i];
 
-          updateReason(reasonId, {
-            cause: descriptionEntity?.detalhesNaoConformidade,
-            fifth: reasonsInvestigation?.fifth,
-            first: reasonsInvestigation?.first,
-            forth: reasonsInvestigation?.fourth,
-            problem: descriptionEntity?.detalhesNaoConformidade,
-            second: reasonsInvestigation?.second,
-            third: reasonsInvestigation?.third,
-          });
-        }
-      }
+      //       saveInvestigation(id, null, {
+      //         cause: reasonsInvestigation?.cause,
+      //         fifth: reasonsInvestigation?.fifth,
+      //         first: reasonsInvestigation?.first,
+      //         forth: reasonsInvestigation?.fourth,
+      //         problem: descriptionEntity?.detalhesNaoConformidade,
+      //         second: reasonsInvestigation?.second,
+      //         third: reasonsInvestigation?.third,
+      //       });
+      //     }
+      //   }
+
+      //   if (checkedFiveWhy && checkedIshikawa) {
+      //     saveInvestigation(id, {
+      //       description: descriptionEntity?.detalhesNaoConformidade,
+      //       environment: ishikawaInvestigation?.environment.join(';'),
+      //       machine: ishikawaInvestigation?.machine.join(';'),
+      //       measurement: ishikawaInvestigation?.measurement.join(';'),
+      //       method: ishikawaInvestigation?.method.join(';'),
+      //       rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
+      //       workforce: ishikawaInvestigation?.manpower.join(';'),
+      //     }).then(() => {});
+
+      //     for (let i = 0; i < reasonsInvestigations.length; i++) {
+      //       const reasonsInvestigation = reasonsInvestigations[i];
+
+      //       saveInvestigation(id, null, {
+      //         cause: reasonsInvestigation?.cause,
+      //         fifth: reasonsInvestigation?.fifth,
+      //         first: reasonsInvestigation?.first,
+      //         forth: reasonsInvestigation?.fourth,
+      //         problem: descriptionEntity?.detalhesNaoConformidade,
+      //         second: reasonsInvestigation?.second,
+      //         third: reasonsInvestigation?.third,
+      //       });
+      //     }
+      //   }
+      // }
+
+      // if (!newIshikawa && checkedIshikawa) {
+      //   updateEffectCause(ishikawaId, {
+      //     description: descriptionEntity?.detalhesNaoConformidade,
+      //     environment: ishikawaInvestigation?.environment.join(';'),
+      //     machine: ishikawaInvestigation?.machine.join(';'),
+      //     measurement: ishikawaInvestigation?.measurement.join(';'),
+      //     method: ishikawaInvestigation?.method.join(';'),
+      //     rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
+      //     workforce: ishikawaInvestigation?.manpower.join(';'),
+      //   });
+      // }
+
+      // if (!newFiveWhy && checkedFiveWhy) {
+      //   for (let i = 0; i < reasonsInvestigations.length; i++) {
+      //     const reasonsInvestigation = reasonsInvestigations[i];
+      //     const reasonId = reasonIds[i];
+
+      //     updateReason(reasonId, {
+      //       cause: descriptionEntity?.detalhesNaoConformidade,
+      //       fifth: reasonsInvestigation?.fifth,
+      //       first: reasonsInvestigation?.first,
+      //       forth: reasonsInvestigation?.fourth,
+      //       problem: descriptionEntity?.detalhesNaoConformidade,
+      //       second: reasonsInvestigation?.second,
+      //       third: reasonsInvestigation?.third,
+      //     });
+      //   }
+      // }
       // dispatch(
       //   savePlan({
       //     actionPlans: listaAcoesCorretivas,
@@ -699,7 +685,6 @@ export const GeneralRegister = () => {
           sendNotifications();
         });
       }
-      navigate('/rnc');
     }
   };
 
@@ -711,18 +696,25 @@ export const GeneralRegister = () => {
     }
   };
 
-  const onDecisionChanged = (decision: Decision): void => {
-    setDecision(decision);
+  const onDecisionsChanged = (decisions: Array<Decision>): void => {
+    setDecisions(decisions);
   };
 
   const saveProductDecision = (): void => {
-    if (!decision) {
+    if (!decisions || decisions.length <= 0) {
       return;
     }
 
-    decision.rncId = _rnc.id;
+    for (let i = 0; i < decisions.length; i++) {
+      const decision: Decision = decisions[i];
+      decision.rncId = _rnc.id;
 
-    dispatch(saveDecision(decision));
+      if (!decision.id) {
+        dispatch(saveDecision(decision));
+      } else {
+        dispatch(updateDecision(decision));
+      }
+    }
   };
 
   const sendNotificationToSGQs = async () => {
@@ -788,6 +780,29 @@ export const GeneralRegister = () => {
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const descriptionEntity = useAppSelector(state => state.all4qmsmsgateway.description.entity);
   const decisionEntity = useAppSelector(state => state.all4qmsmsgateway.decision.entity);
+  const decisionEntities = useAppSelector(state => state.all4qmsmsgateway.decision.entities);
+
+  useEffect(() => {
+    setDecisions(
+      decisionEntities.map(decision => {
+        return {
+          approved: decision.qtdAprovada,
+          createdAt: decision.criadoEm,
+          current: decision.qtdAtual,
+          date: decision.dataDecisao,
+          decisionId: decision.idDecisaoAtual,
+          description: decision.descricaoDecisao,
+          id: decision.id,
+          rejected: decision.qtdRejeitada,
+          reproved: decision.qtdReprovada,
+          responsibles: decision.responsaveis,
+          rncId: decision.idNaoConformidade,
+          type: decision.tipoDecisao,
+          updatedAt: decision.atualizadoEm,
+        };
+      })
+    );
+  }, [decisionEntities]);
 
   const getDecisionInitialData = useMemo((): Decision | null => {
     if (!decisionEntity || decisionEntity.length <= 0) {
@@ -816,6 +831,69 @@ export const GeneralRegister = () => {
     if (_rnc?.statusAtual == 'ELABORACAO') {
       setShowPlanoAcaoCorretiva(true);
     }
+  }, [_rnc]);
+
+  useEffect(() => {
+    if (!_rnc) {
+      return;
+    }
+
+    getInvestigationByRnc(id).then(res => {
+      if (res.ishikawa) {
+        setCheckedIshikawa(true);
+        // setNewIshikawa(false);
+        setIshikawaId(res.ishikawa.id);
+        setIshikawaInvestigation({
+          environment: res.ishikawa?.meioAmbiente.length > 0 ? res.ishikawa?.meioAmbiente.split(';') : [],
+          machine: res.ishikawa?.maquina.length > 0 ? res.ishikawa?.maquina.split(';') : [],
+          measurement: res.ishikawa?.medicao.length > 0 ? res.ishikawa?.medicao.split(';') : [],
+          method: res.ishikawa?.metodo.length > 0 ? res.ishikawa?.metodo.split(';') : [],
+          rawMaterial: res.ishikawa?.materiaPrima.length > 0 ? res.ishikawa?.materiaPrima.split(';') : [],
+          manpower: res.ishikawa?.maoDeObra.length > 0 ? res.ishikawa?.maoDeObra.split(';') : [],
+        });
+      }
+
+      if (res.porques && res.porques.length > 0) {
+        const allReasons: Array<any> = res.porques;
+        const allReasonInvestigations: Array<ReasonsInvestigation> = [];
+        const allReasonIds: Array<number> = [];
+
+        // setNewFiveWhy(false);
+        setCheckedFiveWhy(true);
+
+        for (let i = 0; i < allReasons.length; i++) {
+          const currentReason = allReasons[i];
+
+          allReasonIds.push(currentReason.id);
+          allReasonInvestigations.push({
+            first: currentReason.pq1,
+            second: currentReason.pq2,
+            third: currentReason.pq3,
+            fourth: currentReason.pq4,
+            fifth: currentReason.pq5,
+            cause: currentReason.descCausa,
+          });
+        }
+
+        setReasonIds(allReasonIds);
+        setReasonsInvestigations(allReasonInvestigations);
+      } else {
+        const allReasonInvestigations: Array<ReasonsInvestigation> = [];
+
+        for (let i = 0; i < _rnc.qtdPorques; i++) {
+          allReasonInvestigations.push({
+            fifth: '',
+            first: '',
+            fourth: '',
+            second: '',
+            third: '',
+            cause: '',
+          });
+        }
+
+        setReasonsInvestigations(allReasonInvestigations);
+      }
+    });
   }, [_rnc]);
 
   return (
@@ -856,13 +934,16 @@ export const GeneralRegister = () => {
           <ImmediateActions actions={actions} onAdded={onActionAdded} onRemoved={onActionRemoved} users={users.map(u => u.nome)} />
 
           {(_rnc?.origemNC == 'MATERIA_PRIMA_INSUMO' || _rnc?.origemNC == 'PRODUTO_ACABADO') && (
-            <ProductDecision
-              initialData={getDecisionInitialData}
-              onChanged={onDecisionChanged}
-              readonly={readonlyDecision}
-              title={getDecisionTitle()}
-              users={users.map(u => u.nome)}
-            />
+            <>
+              <ProductDecisions
+                allowAdding={_rnc?.origemNC == 'MATERIA_PRIMA_INSUMO'}
+                decisions={decisions}
+                onChanged={onDecisionsChanged}
+                readonly={readonlyDecision}
+                title={getDecisionTitle()}
+                users={users.map(u => u.nome)}
+              />
+            </>
           )}
 
           <CauseInvestigation
@@ -877,6 +958,7 @@ export const GeneralRegister = () => {
             reasons={reasonsInvestigations}
             newIshikawa={newIshikawa}
             newReasons={newFiveWhy}
+            minimumReasons={_rnc?.qtdPorques ?? 0}
           />
 
           {showPlanoAcaoCorretiva && <div className="fake-card mt-2">{renderListaAcoesCorretivas()}</div>}

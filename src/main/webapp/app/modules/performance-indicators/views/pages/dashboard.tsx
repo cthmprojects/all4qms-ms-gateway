@@ -10,7 +10,14 @@ import { getAllIndicators } from '../../reducers/indicators.reducer';
 import { DashboardHeader } from '../components';
 import DashboardBody from '../components/dashboard-body';
 import DashboardBottom from '../components/dashboard-bottom';
-import { toIndicatorGoal } from '../../mappers';
+import { Charts } from '../../models/charts';
+import {
+  getMetasPeriodo,
+  getComparacaoPeriodo,
+  getMetasProcesso,
+  getPreenchimentoIndicadores,
+  getQualidadeProducao,
+} from '../../reducers/charts.reducer';
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
@@ -20,6 +27,11 @@ const Dashboard = () => {
     dispatch(getProcesses());
     dispatch(getAllIndicators());
     dispatch(getAllIndicatorGoals());
+    dispatch(getMetasPeriodo({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
+    dispatch(getQualidadeProducao({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
+    dispatch(getComparacaoPeriodo({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
+    dispatch(getMetasProcesso({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
+    dispatch(getPreenchimentoIndicadores({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
   }, []);
 
   const goToAnalytics = (): void => {
@@ -29,6 +41,7 @@ const Dashboard = () => {
   const indicators: Array<Indicator> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entities);
   const indicatorGoals: Array<IndicatorGoal> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entities);
   const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
+  const charts: Charts = useAppSelector(state => state.all4qmsmsgatewaymetaind.charts.entity);
 
   const summarizedProcesses = useMemo<Array<SummarizedProcess>>(() => {
     if (!processes || processes.length <= 0) {
@@ -64,8 +77,8 @@ const Dashboard = () => {
 
       const value: number = indicatorGoals.filter(g => g.indicator && g.indicator.id && indicatorIds.has(g.indicator.id)).length;
       return {
-        name: name,
-        value: value,
+        name,
+        value,
       };
     });
   }, [indicators, indicatorGoals, summarizedProcesses]);
@@ -165,6 +178,8 @@ const Dashboard = () => {
     });
   }, [indicators, indicatorGoals, summarizedProcesses]);
 
+  const metasPeriodo = charts.metaPeriodo;
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -190,7 +205,7 @@ const Dashboard = () => {
             <DashboardBody goalsByProcess={indicatorGoalsByProcess} indicatorGoalsFeeding={indicatorGoalsFeeding} />
           </Box>
           <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
-            <DashboardBottom comparisonByPeriod={indicatorComparisonByPeriod} />
+            <DashboardBottom comparisonByPeriod={indicatorComparisonByPeriod} metasPeriodo={metasPeriodo} />
           </Box>
         </Box>
       </div>

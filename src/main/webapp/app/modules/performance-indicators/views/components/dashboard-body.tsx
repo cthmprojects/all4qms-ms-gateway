@@ -145,31 +145,6 @@ const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding }: DashboardBodyP
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div style={{ width: '100%', height: 400 }}>
-        <ResponsiveContainer>
-          <ComposedChart
-            width={500}
-            height={400}
-            data={dataComposedBarLine}
-            title="Defeito A - 2024"
-            margin={{
-              top: 20,
-              right: 20,
-              bottom: 20,
-              left: 20,
-            }}
-          >
-            <CartesianGrid stroke="#f5f5f5" />
-            <XAxis dataKey="name" scale="band" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            {/* <Area type="monotone" dataKey="Ind3" fill="#344BFD" stroke="#1F2D97" /> */}
-            <Bar dataKey="Ind2" barSize={20} fill="#2841FD" />
-            <Line type="monotone" dataKey="Ind1" stroke="#344BFD" />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
     </Stack>
   );
 };

@@ -24,6 +24,7 @@ export type Rnc = {
   vinculoDocAnterior?: Array<number>;
   vinculoProduto?: number;
   aprovacao?: AprovacaoNC;
+  qtdPorques: number;
 };
 
 export type RNC = {
