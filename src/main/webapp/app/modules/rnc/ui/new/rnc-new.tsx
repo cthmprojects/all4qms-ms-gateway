@@ -110,6 +110,10 @@ export const RNCNew = () => {
       value: '',
       error: false,
     },
+    reasons: {
+      value: '0',
+      error: false,
+    },
   });
 
   const [typeBreadcrumbLabel, setTypeBreadcrumbLabel] = useState('');
@@ -225,6 +229,7 @@ export const RNCNew = () => {
       const statusAtual = 'PREENCHIMENTO';
       const tipoNC = firstForm.type.value;
       const idEmissorNC = users.find(user => user.user.login == Storage.session.get('LOGIN'))?.id;
+      const pqs = parseInt(firstForm.reasons.value);
 
       dispatch(
         update({
@@ -240,6 +245,7 @@ export const RNCNew = () => {
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
           vinculoDocAnterior: null,
+          qtdPorques: pqs,
         })
       );
 
@@ -258,6 +264,7 @@ export const RNCNew = () => {
       const processoNC = parseInt(firstForm.processTarget.value);
       const statusAtual = 'PREENCHIMENTO';
       const tipoNC = firstForm.type.value;
+      const pqs = parseInt(firstForm.reasons.value);
 
       dispatch(
         save({
@@ -272,6 +279,7 @@ export const RNCNew = () => {
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
           vinculoDocAnterior: null,
+          qtdPorques: pqs,
         })
       );
 
@@ -486,7 +494,9 @@ export const RNCNew = () => {
         }
       }
 
-      dispatch(update({ ...stateRnc, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })).then(() => {
+      dispatch(
+        update({ ...stateRnc, ncOutros: others, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })
+      ).then(() => {
         navigate('/rnc');
       });
     }
@@ -521,6 +531,7 @@ export const RNCNew = () => {
         processTarget: { value: String(rnc?.processoNC) || '', error: false },
         type: { value: rnc.tipoNC || '', error: false },
         origin: { value: rnc.origemNC || '', error: false },
+        reasons: { value: rnc.qtdPorques?.toString() || '', error: false },
       });
 
       setOthers(rnc.ncOutros);
@@ -800,6 +811,25 @@ export const RNCNew = () => {
                       </MenuItem>
                     ))}
                   </Select>
+                </FormControl>
+
+                <FormControl className="mb-2 rnc-form-field me-2">
+                  <TextField
+                    disabled={secondForm}
+                    label="Qtd de porquês"
+                    onChange={event => {
+                      const eventValue: string = event.target.value;
+                      const value: number = parseInt(eventValue);
+
+                      if (value >= 0) {
+                        setFirstForm({ ...firstForm, reasons: { value: eventValue, error: firstForm.reasons.error } });
+                      }
+                    }}
+                    placeholder="Qtd de porquês"
+                    type="number"
+                    value={firstForm.reasons.value}
+                    variant="outlined"
+                  />
                 </FormControl>
               </div>
               {secondForm ? null : (
