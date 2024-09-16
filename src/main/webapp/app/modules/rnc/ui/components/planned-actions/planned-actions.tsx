@@ -221,7 +221,14 @@ type PlannedActionsProps = {
 };
 
 const PlannedActions = ({ actionPlans, onUpdated, statuses, users }: PlannedActionsProps) => {
-  useEffect(() => {}, [actionPlans]);
+  useEffect(() => {
+    if (actionPlans.length > 0) {
+      return;
+    }
+
+    onAdded(null);
+  }, [actionPlans]);
+
   const onAdded = (_: React.MouseEvent<HTMLButtonElement>): void => {
     const newActionPlans: Array<ActionPlan> = [...actionPlans];
     newActionPlans.push({

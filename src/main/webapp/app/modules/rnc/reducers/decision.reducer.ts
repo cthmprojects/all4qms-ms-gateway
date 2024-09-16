@@ -41,6 +41,7 @@ export const updateDecision = createAsyncThunk('decision/update', async (entity:
     qtdReprovada: entity.reproved,
     qtdRejeitada: entity.rejected,
     responsaveis: entity.responsibles,
+    id: entity.id,
     idDecisaoAtual: 0,
     tipoDecisao: entity.type.toUpperCase(),
     idNaoConformidade: entity.rncId,
@@ -82,6 +83,7 @@ const RncDecision = createEntitySlice({
     builder.addMatcher(isFulfilled(findDecisionByRnc), (state, action) => {
       state.loading = false;
       state.entity = action.payload.data;
+      state.entities = action.payload.data;
     });
   },
 });

@@ -202,12 +202,13 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
               sx={{ width: '10% !important' }}
             />
             <TextField
-              value={rawMaterial.rejectionRate}
+              value={(rawMaterial.defects / rawMaterial.samples) * 100}
               onChange={e => setRawMaterial({ ...rawMaterial, rejectionRate: parseInt(e.target.value.slice(0, 10), 10) })}
               label="% Rejeição"
               name="rejection-rate"
               type="number"
               className="m-2"
+              disabled
               sx={{ width: '10% !important' }}
             />
           </div>
