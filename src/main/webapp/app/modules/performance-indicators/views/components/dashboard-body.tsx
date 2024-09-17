@@ -116,17 +116,19 @@ const data02 = [
 type DashboardBodyProps = {
   goalsByProcess: Array<Pair>;
   indicatorGoalsFeeding: Array<Pair>;
+  qualityProductionValue: number;
+  productionVariation: number;
 };
 
-const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding }: DashboardBodyProps) => {
+const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding, qualityProductionValue, productionVariation }: DashboardBodyProps) => {
   return (
     <Stack direction="row" spacing={2}>
       <div className="featuredItem">
         <span className="featuredTitle"> Qualidade Geral de Produção</span>
         <div className="featuredMoneyContainer">
-          <span className="featuredMoney"> 99,22% </span>
+          <span className="featuredMoney"> {qualityProductionValue}% </span>
           <span className="featuredMoneyRate">
-            5,33 <ArrowDownward className="featuredIcon negative" />
+            {productionVariation} <ArrowDownward className="featuredIcon negative" />
           </span>
         </div>
       </div>

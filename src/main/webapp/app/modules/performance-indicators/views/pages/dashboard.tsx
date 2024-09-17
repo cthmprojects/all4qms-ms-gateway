@@ -179,6 +179,9 @@ const Dashboard = () => {
   }, [indicators, indicatorGoals, summarizedProcesses]);
 
   const metasPeriodo = charts.metaPeriodo;
+  // console.log("Charts Values: " +charts);
+  const qualityProductionValue = charts.qualidadeProducao;
+  const productionVariation = charts.variacao;
 
   return (
     <div className="padding-container">
@@ -202,7 +205,12 @@ const Dashboard = () => {
             />
           </Box>
           <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
-            <DashboardBody goalsByProcess={indicatorGoalsByProcess} indicatorGoalsFeeding={indicatorGoalsFeeding} />
+            <DashboardBody
+              goalsByProcess={indicatorGoalsByProcess}
+              indicatorGoalsFeeding={indicatorGoalsFeeding}
+              qualityProductionValue={qualityProductionValue}
+              productionVariation={productionVariation}
+            />
           </Box>
           <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
             <DashboardBottom comparisonByPeriod={indicatorComparisonByPeriod} metasPeriodo={metasPeriodo} />
