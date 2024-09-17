@@ -385,13 +385,13 @@ export const NewDocument = () => {
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
             />
-            <FormControl className="me-2 ms-2 mt-4">
+            <FormControl className="me-2 ms-2 mt-4" disabled>
               <DatePicker selected={validDate} onChange={date => setValidDate(date)} className="date-picker" dateFormat={'dd/MM/yyyy'} />
               <label htmlFor="" className="rnc-date-label" style={{ width: '70px' }}>
                 Validade
               </label>
             </FormControl>
-            <FormControl style={{ height: '60px', width: '190px' }}>
+            <FormControl style={{ height: '60px', width: '190px' }} disabled>
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
                 style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd', width: '100%' }}

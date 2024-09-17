@@ -501,11 +501,11 @@ const InfodocList = () => {
                       <IconButton
                         title="Revisar"
                         color="primary"
-                        disabled={infodoc.doc.enumSituacao == 'H'}
+                        disabled={infodoc.doc.enumSituacao != 'H'}
                         onClick={event => onEditClicked(infodoc, event)}
                         // onClick={event => openDocToValidation(event, infodoc)}
                       >
-                        <EditIcon sx={{ color: infodoc.doc.enumSituacao == 'H' ? '#cacaca' : '#e6b200' }} />
+                        <EditIcon sx={{ color: infodoc.doc.enumSituacao != 'H' ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
                       <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
