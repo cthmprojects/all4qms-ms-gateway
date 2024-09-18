@@ -13,6 +13,7 @@ type UploadFileModalProps = {
   open: boolean;
   handleClose: () => void;
   id: number;
+  SetFile?: React.Dispatch<React.SetStateAction<File>>;
 };
 
 const UploadInfoFileUpdate = ({ open, handleClose, id }: UploadFileModalProps) => {
@@ -69,8 +70,15 @@ const UploadInfoFileUpdate = ({ open, handleClose, id }: UploadFileModalProps) =
                 if (fileInputRef.current) fileInputRef.current.click();
               }}
             >
-              <FontAwesomeIcon icon="folder-open" />
-              <span>Selecionar ou soltar um arquivo do computador</span>
+              <FontAwesomeIcon icon="folder-open" /> <br />
+              <span
+                style={{
+                  fontSize: '25px',
+                  lineHeight: '1px',
+                }}
+              >
+                Selecionar ou soltar um arquivo do computador
+              </span>
             </button>
           )}
 

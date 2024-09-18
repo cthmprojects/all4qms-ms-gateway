@@ -7,13 +7,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from 'app/config/store';
 import { UploadAnexo } from 'app/modules/infodoc/models';
 import { uploadAnexo } from 'app/modules/infodoc/reducers/anexo.reducer';
+import { Doc } from '../../../models/infodoc';
+import { updateInfoDoc } from '../../../reducers/infodoc.reducer';
 
 type UploadFileModalProps = {
   open: boolean;
   handleClose: () => void;
+  origin?: 'new' | 'edit';
+  setIdNewFile?: React.Dispatch<React.SetStateAction<number>>;
+  SetFile?: React.Dispatch<React.SetStateAction<File>>;
 };
 
-const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
+const UploadInfoFile = ({ open, handleClose, origin, setIdNewFile, SetFile }: UploadFileModalProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [files, setFiles] = useState<Array<File>>([]);
@@ -36,6 +41,7 @@ const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
     const newFile: UploadAnexo = {
       arquivo: files[0],
     };
+    SetFile && SetFile(files[0]);
 
     dispatch(uploadAnexo(newFile)).then(
       (response: any) => {
@@ -45,7 +51,11 @@ const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
         }
 
         if (response.payload?.data?.id) {
-          navigate(`/infodoc/upload-file/new/${response.payload?.data?.id}`);
+          if (!origin || origin == 'new') navigate(`/infodoc/upload-file/new/${response.payload?.data?.id}`);
+          else {
+            setIdNewFile && setIdNewFile(parseInt(response.payload?.data?.id));
+            handleClose();
+          }
         }
 
         handleClose();
@@ -72,8 +82,15 @@ const UploadInfoFile = ({ open, handleClose }: UploadFileModalProps) => {
                 if (fileInputRef.current) fileInputRef.current.click();
               }}
             >
-              <FontAwesomeIcon icon="folder-open" />
-              <span>Selecionar ou soltar um arquivo do computador</span>
+              <FontAwesomeIcon icon="folder-open" /> <br />
+              <span
+                style={{
+                  fontSize: '25px',
+                  lineHeight: '1px',
+                }}
+              >
+                Selecionar ou soltar um arquivo do computador
+              </span>
             </button>
           )}
 

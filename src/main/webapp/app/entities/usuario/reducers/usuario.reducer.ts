@@ -5,8 +5,8 @@ import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { IProcesso } from 'app/shared/model/processo.model';
 
-const apiUrl = 'services/all4qmsmsgateway/api/usuarios/';
-const apiByProcessUrl = 'services/all4qmsmsgateway/api/usuarios/byprocesso';
+const apiUrl = 'api/usuarios/';
+const apiByProcessUrl = 'api/usuarios/byprocesso';
 
 // Initial State
 const initialState: EntityState<IUsuario> = {
