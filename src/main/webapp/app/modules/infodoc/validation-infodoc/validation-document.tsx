@@ -497,7 +497,7 @@ export const ValidationDocument = () => {
                 <MenuItem value="60d">60 dias antes</MenuItem>
               </Select>
             </FormControl>
-            <LoadingButton
+            {/*<LoadingButton
               variant="outlined"
               size="large"
               loading={loadingIA}
@@ -505,7 +505,7 @@ export const ValidationDocument = () => {
               onClick={handleGetResume}
             >
               Gerar Resumo IA documento
-            </LoadingButton>
+            </LoadingButton>*/}
           </Box>
           <Textarea
             className="w-100"
