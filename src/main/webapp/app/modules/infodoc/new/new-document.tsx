@@ -1,4 +1,5 @@
 import {
+  Box,
   Breadcrumbs,
   Checkbox,
   Chip,
@@ -180,7 +181,7 @@ export const NewDocument = () => {
       setValidDate(new Date());
     } else {
       setNoValidate(true);
-      setValidDate(new Date(2999, 11, 31));
+      setValidDate(new Date(9999, 11, 31));
       setNotificationPreviousDate('0');
     }
   };
@@ -379,14 +380,21 @@ export const NewDocument = () => {
               </Button>
             </Grid>
           </Grid>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 2, gap: 2 }}>
             <FormControlLabel
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
+              disabled
             />
-            <FormControl className="me-2 ms-2 mt-4" disabled>
-              <DatePicker selected={validDate} onChange={date => setValidDate(date)} className="date-picker" dateFormat={'dd/MM/yyyy'} />
+            <FormControl style={{ height: '60px', width: '190px' }} disabled>
+              <DatePicker
+                selected={validDate}
+                onChange={date => setValidDate(date)}
+                className="date-picker"
+                dateFormat={'dd/MM/yyyy'}
+                disabled
+              />
               <label htmlFor="" className="rnc-date-label" style={{ width: '70px' }}>
                 Validade
               </label>
@@ -394,6 +402,7 @@ export const NewDocument = () => {
             <FormControl style={{ height: '60px', width: '190px' }} disabled>
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
+                disabled
                 style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd', width: '100%' }}
                 label="Notificar antes de:"
                 value={notificationPreviousDate}
@@ -406,7 +415,7 @@ export const NewDocument = () => {
                 <MenuItem value="60d">60 dias antes</MenuItem>
               </Select>
             </FormControl>
-          </div>
+          </Box>
           <Textarea
             className="w-100"
             slots={{ textarea: DocumentDescription }}

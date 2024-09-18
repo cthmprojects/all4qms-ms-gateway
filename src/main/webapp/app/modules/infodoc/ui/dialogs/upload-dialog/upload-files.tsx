@@ -15,9 +15,10 @@ type UploadFileModalProps = {
   handleClose: () => void;
   origin?: 'new' | 'edit';
   setIdNewFile?: React.Dispatch<React.SetStateAction<number>>;
+  SetFile?: React.Dispatch<React.SetStateAction<File>>;
 };
 
-const UploadInfoFile = ({ open, handleClose, origin, setIdNewFile }: UploadFileModalProps) => {
+const UploadInfoFile = ({ open, handleClose, origin, setIdNewFile, SetFile }: UploadFileModalProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [files, setFiles] = useState<Array<File>>([]);
@@ -40,6 +41,7 @@ const UploadInfoFile = ({ open, handleClose, origin, setIdNewFile }: UploadFileM
     const newFile: UploadAnexo = {
       arquivo: files[0],
     };
+    SetFile && SetFile(files[0]);
 
     dispatch(uploadAnexo(newFile)).then(
       (response: any) => {

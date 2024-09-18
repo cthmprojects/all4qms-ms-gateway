@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import {
+  Box,
   Breadcrumbs,
   Button,
   Checkbox,
@@ -31,10 +32,12 @@ import { listEnums } from '../reducers/enums.reducer';
 import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, notifyEmailInfoDoc, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
+import { LoadingButton } from '@mui/lab';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 import { IUsuario } from '../../../shared/model/usuario.model';
 import UploadInfoFile from '../ui/dialogs/upload-dialog/upload-files';
+import { getResumeIA } from '../reducers/anexo.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -95,9 +98,11 @@ export const ValidationDocument = () => {
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [originList, setOriginList] = useState([]);
   const [idNewFile, setIdNewFile] = useState<number>(-1);
+  const [fileUploaded, SetFile] = useState<File>();
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+  const [loadingIA, setLoadingIA] = useState<boolean>(false);
 
   const [openUploadFile, setOpenUploadFile] = useState(false);
   const [openRejectModal, setOpenRejectModal] = useState(false);
@@ -151,6 +156,14 @@ export const ValidationDocument = () => {
 
   const validateFields = () => {
     return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+  };
+
+  const handleGetResume = async () => {
+    setLoadingIA(true);
+    const resumeIA = await dispatch(getResumeIA(fileUploaded));
+    setLoadingIA(false);
+
+    console.log('resumeIA: ', resumeIA);
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -288,8 +301,14 @@ export const ValidationDocument = () => {
         currentDocument={actualInfoDoc}
         documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
       ></RejectDocumentDialog>
-      <UploadInfoFile open={openUploadFile} handleClose={() => setOpenUploadFile(false)} origin="edit" setIdNewFile={setIdNewFile} />
-      <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
+      <UploadInfoFile
+        open={openUploadFile}
+        handleClose={() => setOpenUploadFile(false)}
+        origin="edit"
+        setIdNewFile={setIdNewFile}
+        SetFile={SetFile}
+      />
+      <Box style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
         <Row className="justify-content-center mt-5">
           <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">
             <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
@@ -323,7 +342,7 @@ export const ValidationDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Edição
+                  Em validação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -333,7 +352,7 @@ export const ValidationDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em validação
+                  {actualInfoDoc?.doc?.revisao && actualInfoDoc?.doc?.revisao > 1 ? 'Revisão' : 'Edição'}
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -443,7 +462,7 @@ export const ValidationDocument = () => {
               )}
             </Grid>
           </Grid>
-          <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 2, gap: 2 }}>
             <FormControlLabel
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
@@ -456,9 +475,9 @@ export const ValidationDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled={!isSGQ}
+                disabled={!isSGQ || (isSGQ && noValidate)}
               />
-              <label htmlFor="" className="rnc-date-label">
+              <label htmlFor="" className="rnc-date-label" style={{ width: '70px' }}>
                 Validade
               </label>
             </FormControl>
@@ -466,7 +485,7 @@ export const ValidationDocument = () => {
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
                 style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd' }}
-                label="Notificar:"
+                label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
                 disabled={!isSGQ}
@@ -478,7 +497,16 @@ export const ValidationDocument = () => {
                 <MenuItem value="60d">60 dias antes</MenuItem>
               </Select>
             </FormControl>
-          </div>
+            <LoadingButton
+              variant="outlined"
+              size="large"
+              loading={loadingIA}
+              sx={{ backgroundColor: '#0EBDCE', color: '#000', height: '60px' }}
+              onClick={handleGetResume}
+            >
+              Gerar Resumo IA documento
+            </LoadingButton>
+          </Box>
           <Textarea
             className="w-100"
             slots={{ textarea: DocumentDescription }}
@@ -512,7 +540,7 @@ export const ValidationDocument = () => {
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button
               variant="contained"
-              sx={{ backgroundColor: '#d9d9d9', color: '#4e4d4d', width: '100px' }}
+              sx={{ backgroundColor: '#0EBDCE', color: '#4e4d4d', width: '100px' }}
               onClick={() => cancelUpdate()}
             >
               VOLTAR
@@ -547,7 +575,7 @@ export const ValidationDocument = () => {
             </Button>
           </div>
         </div>
-      </div>
+      </Box>
     </>
   );
 };
