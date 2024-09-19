@@ -57,6 +57,7 @@ import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
 import axios, { AxiosResponse } from 'axios';
+import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -198,7 +199,7 @@ const InfodocList = () => {
   }, [page]);
 
   const getUsersSGQ = async () => {
-    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+    const resUsers = await dispatch(getUsersAsGQ('ROLE_SGQ'));
     const users_ = (resUsers.payload as AxiosResponse).data || [];
 
     const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
@@ -219,8 +220,9 @@ const InfodocList = () => {
       })
     );
 
-    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    getUsersSGQ();
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' })).then(() => {
+      getUsersSGQ();
+    });
     dispatch(getProcesses());
     dispatch(listEnums());
   }, []);
@@ -276,6 +278,9 @@ const InfodocList = () => {
 
     let type: string = '';
     switch (newValue) {
+      case 0:
+        type = 'H';
+        break;
       case 1:
         type = 'E';
         break;
@@ -476,10 +481,9 @@ const InfodocList = () => {
                     </Tooltip>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.titulo}</TableCell>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>
-                      {' '}
-                      {filterUser(infodoc.doc.idUsuarioCriacao)?.nome}
+                      {filterUser(infodoc.doc.idUsuarioCriacao!!)?.nome}
                     </TableCell>
-                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>-</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.revisao}</TableCell>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       {infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}
                     </TableCell>
@@ -495,7 +499,7 @@ const InfodocList = () => {
                     </TableCell> */}
                     <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                       <IconButton
-                        title="Editar"
+                        title="Revisar"
                         color="primary"
                         disabled={infodoc.doc.enumSituacao != 'H'}
                         onClick={event => onEditClicked(infodoc, event)}

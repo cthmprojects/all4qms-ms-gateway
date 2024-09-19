@@ -277,7 +277,7 @@ export const UpdateDocument = () => {
               Informações documentadas
             </Link>
             <Link to={'/infodoc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Editar
+              Revisar
             </Link>
             {/* <Typography style={{ color: '#606060' }}>Ficha de estoque</Typography> */}
           </Breadcrumbs>
@@ -301,7 +301,7 @@ export const UpdateDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em edição
+                  Em Revisão
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -311,7 +311,7 @@ export const UpdateDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Edição
+                  Revisão
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -372,7 +372,7 @@ export const UpdateDocument = () => {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
+            <FormControl sx={{ width: '22%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
               <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
                 {processes.map((process, i) => (
@@ -399,6 +399,7 @@ export const UpdateDocument = () => {
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
+              disabled
             />
             <FormControl className="me-2 ms-2 mt-4">
               <DatePicker
@@ -406,7 +407,7 @@ export const UpdateDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled={noValidate}
+                disabled
               />
               <label htmlFor="" className="rnc-date-label">
                 Validade
@@ -419,7 +420,7 @@ export const UpdateDocument = () => {
                 label="Notificar:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled={noValidate}
+                disabled
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -446,8 +447,9 @@ export const UpdateDocument = () => {
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
+              disabled
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>

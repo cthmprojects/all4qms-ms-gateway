@@ -39,6 +39,11 @@ export const getEntity = createAsyncThunk(
   { serializeError: serializeAxiosError }
 );
 
+export const getUsersAsGQ = createAsyncThunk('userManagement/fetch_users_as_sgq', async (role: any) => {
+  const requestUrl = `${apiUrl}/users-by-role${role ? `?role=${role}` : ''}`;
+  return axios.get<IUsuario[]>(requestUrl);
+});
+
 export const createEntity = createAsyncThunk(
   'usuario/create_entity',
   async (entity: IUsuario, thunkAPI) => {

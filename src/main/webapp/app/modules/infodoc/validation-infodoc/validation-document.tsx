@@ -1,10 +1,13 @@
 /* eslint-disable no-console */
 import {
+  Box,
   Breadcrumbs,
+  Button,
   Checkbox,
   Chip,
   FormControl,
   FormControlLabel,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -14,7 +17,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Button, Row } from 'reactstrap';
+import { Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import DatePicker from 'react-datepicker';
@@ -22,15 +25,19 @@ import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import FileUploadRoundedIcon from '@mui/icons-material/FileUploadRounded';
 import axios from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../models';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, notifyEmailInfoDoc, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
+import { LoadingButton } from '@mui/lab';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 import { IUsuario } from '../../../shared/model/usuario.model';
+import UploadInfoFile from '../ui/dialogs/upload-dialog/upload-files';
+import { getResumeIA } from '../reducers/anexo.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -90,24 +97,32 @@ export const ValidationDocument = () => {
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [originList, setOriginList] = useState([]);
-  const [idNewFile, setIdNewFile] = useState<number>();
+  const [idNewFile, setIdNewFile] = useState<number>(-1);
+  const [fileUploaded, SetFile] = useState<File>();
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+  const [loadingIA, setLoadingIA] = useState<boolean>(false);
 
+  const [openUploadFile, setOpenUploadFile] = useState(false);
   const [openRejectModal, setOpenRejectModal] = useState(false);
+  const [isSGQ, setIsSGQ] = useState(false);
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
-    dispatch(getInfoDocById(id));
+    dispatch(getInfoDocById(id!!));
     getProcesses().then(data => {
       setProcesses(data);
       if (data.length > 0) {
         setSelectedProcess(data[0].id);
       }
     });
+
+    const roles = Storage.local.get('ROLE');
+    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(isSGQ);
   }, []);
 
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -143,6 +158,14 @@ export const ValidationDocument = () => {
     return emitter && emittedDate && documentDescription && code && title && selectedProcess;
   };
 
+  const handleGetResume = async () => {
+    setLoadingIA(true);
+    const resumeIA = await dispatch(getResumeIA(fileUploaded));
+    setLoadingIA(false);
+
+    console.log('resumeIA: ', resumeIA);
+  };
+
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (actualInfoDoc) {
       const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc?.idArquivo}`;
@@ -172,20 +195,55 @@ export const ValidationDocument = () => {
     navigate('/infodoc');
   };
 
+  const saveDoc = (): Doc => {
+    const newInfoDoc: Doc = {
+      ...actualInfoDoc.doc,
+      idUsuarioCriacao: parseInt(emitter),
+      dataCricao: emittedDate,
+      descricaoDoc: description,
+      justificativa: documentDescription,
+      codigo: code,
+      titulo: title,
+      origem: origin,
+      idArquivo: idNewFile,
+      idProcesso: parseInt(selectedProcess),
+      ignorarValidade: true,
+      enumSituacao: 'R',
+      tipoDoc: 'MA',
+      revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1,
+      idDocumentacaoAnterior: parseInt(id!!),
+    };
+
+    if (!noValidate) {
+      newInfoDoc.ignorarValidade = false;
+      newInfoDoc.dataValidade = validDate;
+    }
+
+    return newInfoDoc;
+  };
+
+  const saveDocument = () => {
+    const newInfoDoc = saveDoc();
+
+    dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! })).then((res: any) => {
+      dispatch(getInfoDocById(id!!));
+    });
+  };
+
   const users: IUsuario[] = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
-  const actualInfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
+  const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
   useEffect(() => {
     if (actualInfoDoc) {
-      setCode(actualInfoDoc.doc?.codigo);
-      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+      setCode(actualInfoDoc.doc?.codigo!!);
+      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao?.toString()!!);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
-      setDescription(actualInfoDoc.doc?.descricaoDoc);
-      setDocumentDescription(actualInfoDoc.doc?.justificativa);
-      setTitle(actualInfoDoc.doc?.titulo);
-      setOrigin(actualInfoDoc.doc?.origem);
-      setSelectedProcess(actualInfoDoc.doc?.idProcesso);
+      setDescription(actualInfoDoc.doc?.descricaoDoc!!);
+      setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
+      setTitle(actualInfoDoc.doc?.titulo!!);
+      setOrigin(actualInfoDoc.doc?.origem!!);
+      setSelectedProcess(actualInfoDoc.doc?.idProcesso?.toString()!!);
 
       if (actualInfoDoc.doc?.dataValidade) {
         setNoValidate(false);
@@ -205,17 +263,17 @@ export const ValidationDocument = () => {
         idUsuario: currentUser.id,
       })
       .then(async () => {
-        toast.success('Documento aprovado com sucesso!');
+        toast.success('Documento enviado para aprovação!');
         const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == emitter)[0];
         await dispatch(
           notifyEmailInfoDoc({
             to: userEmitter?.email || '', // Email
-            subject: 'Documento APROVADO por SGQ',
+            subject: 'Documento requerendo APROVAÇãO',
             tipo: 'APROVAR',
             nomeEmissor: userEmitter?.nome || '', // nome
-            tituloDocumento: 'Documento APROVADO',
+            tituloDocumento: 'Documento em APROVADO',
             dataCriacao: new Date(Date.now()).toISOString(),
-            descricao: `Documento aprovado por ${currentUser.firstName} ${currentUser.lastName} com o email ${currentUser.email}`,
+            descricao: `Documento a ser aprovado por ${currentUser.firstName} ${currentUser.lastName} com o email ${currentUser.email}`,
             motivoReprovacao: '',
           })
         );
@@ -243,7 +301,14 @@ export const ValidationDocument = () => {
         currentDocument={actualInfoDoc}
         documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
       ></RejectDocumentDialog>
-      <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
+      <UploadInfoFile
+        open={openUploadFile}
+        handleClose={() => setOpenUploadFile(false)}
+        origin="edit"
+        setIdNewFile={setIdNewFile}
+        SetFile={SetFile}
+      />
+      <Box style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
         <Row className="justify-content-center mt-5">
           <Breadcrumbs aria-label="breadcrumb" className="pt-3 ms-5">
             <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
@@ -263,7 +328,7 @@ export const ValidationDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled={!isSGQ} label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -277,7 +342,7 @@ export const ValidationDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Validação
+                  Em validação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -287,7 +352,7 @@ export const ValidationDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em validação
+                  {actualInfoDoc?.doc?.revisao && actualInfoDoc?.doc?.revisao > 1 ? 'Revisão' : 'Edição'}
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -298,7 +363,7 @@ export const ValidationDocument = () => {
                   onChange={date => setEmittedDate(date)}
                   className="date-picker"
                   dateFormat={'dd/MM/yyyy'}
-                  disabled
+                  disabled={!isSGQ}
                 />
                 <label htmlFor="" className="rnc-date-label">
                   Data
@@ -312,7 +377,7 @@ export const ValidationDocument = () => {
               sx={{ borderRadius: '6px' }}
               name="ncArea"
               value={description || ''}
-              disabled
+              disabled={!isSGQ}
               onChange={e => setDescription(e.target.value)}
             />
           </div>
@@ -321,64 +386,88 @@ export const ValidationDocument = () => {
               Dados do documento
             </h1>
           </div>
-          <div className="mt-4">
-            <TextField
-              label="Código"
-              name="number"
-              className="me-2"
-              autoComplete="off"
-              value={code}
-              disabled
-              onChange={e => setCode(e.target.value)}
-            />
-            <TextField
-              sx={{ width: '30%' }}
-              label="Título"
-              name="number"
-              className="me-2 ms-2"
-              autoComplete="off"
-              value={title}
-              disabled
-              onChange={e => setTitle(e.target.value)}
-            />
-
-            <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
-              <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} disabled onChange={event => setOrigin(event.target.value)}>
-                {originList?.map(e => (
-                  <MenuItem value={e.nome}>{e.valor}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
-              <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} disabled onChange={event => setSelectedProcess(event.target.value)}>
-                {processes.map((process, i) => (
-                  <MenuItem value={process.id} key={`process-${i}`}>
-                    {process.nome}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              className="ms-2"
-              variant="outlined"
-              size="large"
-              style={{ backgroundColor: idNewFile ? '#e6b200' : '#E0E0E0', color: '#4e4d4d', height: '55px' }}
-              onClick={event => onFileClicked(event)}
-            >
-              <VisibilityIcon className="pe-1 pb-1" />
-              Arquivo
-            </Button>
-          </div>
-          <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
+          <Grid container gap={2}>
+            <Grid item xs={1}>
+              <TextField
+                label="Código"
+                name="number"
+                autoComplete="off"
+                value={code}
+                disabled={!isSGQ}
+                onChange={e => setCode(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                sx={{ width: '100%' }}
+                label="Título"
+                name="number"
+                autoComplete="off"
+                value={title}
+                disabled={!isSGQ}
+                onChange={e => setTitle(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }}>
+                <InputLabel>Origem</InputLabel>
+                <Select label="Origem" value={origin} disabled={!isSGQ} onChange={event => setOrigin(event.target.value)}>
+                  {originList?.map((e: any) => (
+                    <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }}>
+                <InputLabel>Área / Processo</InputLabel>
+                <Select
+                  label="Área / Processo"
+                  value={selectedProcess}
+                  disabled={!isSGQ}
+                  onChange={event => setSelectedProcess(event.target.value)}
+                >
+                  {processes.map((process: any, i) => (
+                    <MenuItem value={process.id} key={`process-${i}`}>
+                      {process.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={1}>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
+                style={{ backgroundColor: '#E0E0E0', color: '#4e4d4d', height: '55px' }}
+                onClick={event => onFileClicked(event)}
+              >
+                <VisibilityIcon className="pe-1 pb-1" />
+                Ver
+              </Button>
+            </Grid>
+            <Grid item xs={1}>
+              {isSGQ && (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  size="large"
+                  style={{ backgroundColor: idNewFile > 0 ? '#e6b200' : '#E0E0E0', color: '#4e4d4d', height: '55px' }}
+                  onClick={event => setOpenUploadFile(true)}
+                >
+                  <FileUploadRoundedIcon className="pe-1 pb-1" />
+                  Novo
+                </Button>
+              )}
+            </Grid>
+          </Grid>
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 2, gap: 2 }}>
             <FormControlLabel
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
-              disabled
+              disabled={!isSGQ}
             />
             <FormControl className="me-2 ms-2 mt-4">
               <DatePicker
@@ -386,9 +475,9 @@ export const ValidationDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled
+                disabled={!isSGQ || (isSGQ && noValidate)}
               />
-              <label htmlFor="" className="rnc-date-label">
+              <label htmlFor="" className="rnc-date-label" style={{ width: '70px' }}>
                 Validade
               </label>
             </FormControl>
@@ -396,10 +485,10 @@ export const ValidationDocument = () => {
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
                 style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd' }}
-                label="Notificar:"
+                label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled
+                disabled={!isSGQ}
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -408,7 +497,16 @@ export const ValidationDocument = () => {
                 <MenuItem value="60d">60 dias antes</MenuItem>
               </Select>
             </FormControl>
-          </div>
+            {/*<LoadingButton
+              variant="outlined"
+              size="large"
+              loading={loadingIA}
+              sx={{ backgroundColor: '#0EBDCE', color: '#000', height: '60px' }}
+              onClick={handleGetResume}
+            >
+              Gerar Resumo IA documento
+            </LoadingButton>*/}
+          </Box>
           <Textarea
             className="w-100"
             slots={{ textarea: DocumentDescription }}
@@ -416,7 +514,7 @@ export const ValidationDocument = () => {
             sx={{ borderRadius: '6px' }}
             name="ncArea"
             value={documentDescription || ''}
-            disabled
+            disabled={!isSGQ}
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
@@ -427,9 +525,9 @@ export const ValidationDocument = () => {
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
-              disabled
+              disabled={!isSGQ}
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled={!isSGQ}>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>
@@ -440,15 +538,28 @@ export const ValidationDocument = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
-            <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: '#0EBDCE', color: '#4e4d4d', width: '100px' }}
+              onClick={() => cancelUpdate()}
+            >
               VOLTAR
             </Button>
             <Button
               className="ms-3"
+              disabled={!validateFields()}
+              onClick={() => saveDocument()}
+              sx={{ border: validateFields() ? '1px solid #000' : '', color: '#000', width: '100px' }}
+            >
+              SALVAR
+            </Button>
+            <Button
+              className="ms-3"
               variant="contained"
-              color="primary"
-              style={{ background: '#A23900', color: '#fff' }}
+              color="warning"
+              sx={{ backgroundColor: '#A23900', color: '#fff', width: '100px' }}
               onClick={() => setOpenRejectModal(true)}
+              disabled={!isSGQ}
             >
               Reprovar
             </Button>
@@ -457,13 +568,14 @@ export const ValidationDocument = () => {
               variant="contained"
               color="primary"
               onClick={() => approveDocument()}
-              style={{ background: '#e6b200', color: '#4e4d4d' }}
+              sx={{ backgroundColor: '#e6b200', color: '#4e4d4d', width: '100px' }}
+              disabled={!isSGQ}
             >
               Aprovar
             </Button>
           </div>
         </div>
-      </div>
+      </Box>
     </>
   );
 };

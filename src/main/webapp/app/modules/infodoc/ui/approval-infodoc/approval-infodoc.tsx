@@ -277,7 +277,7 @@ export const ApprovalDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Aprovação
+                  Em Aprovação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -287,7 +287,7 @@ export const ApprovalDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em aprovação
+                  {actualInfoDoc?.doc?.revisao && actualInfoDoc?.doc?.revisao > 1 ? 'Revisão' : 'Edição'}
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -325,14 +325,14 @@ export const ApprovalDocument = () => {
             <TextField
               label="Código"
               name="number"
-              className="me-2"
+              className="me-1"
               autoComplete="off"
               value={code}
               disabled
               onChange={e => setCode(e.target.value)}
             />
             <TextField
-              sx={{ width: '30%' }}
+              sx={{ width: '35%' }}
               label="Título"
               name="number"
               className="me-2 ms-2"
@@ -351,7 +351,7 @@ export const ApprovalDocument = () => {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
+            <FormControl sx={{ width: '20%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
               <Select label="Área / Processo" value={selectedProcess} disabled onChange={event => setSelectedProcess(event.target.value)}>
                 {processes.map((process, i) => (

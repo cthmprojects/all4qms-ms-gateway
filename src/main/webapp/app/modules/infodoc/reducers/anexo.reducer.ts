@@ -5,6 +5,7 @@ import { Doc, DocAttachment, DocumentacaoRequest, InfoDoc, UploadAnexo } from '.
 
 const apiAttachmentUrl = 'services/all4qmsmsinfodoc/api/infodoc/anexos';
 const apiAttachmentDownloadUrl = 'services/all4qmsmsinfodoc/api/infodoc/anexos/download/';
+const apiDocPromptIA = 'https://api-llm-all4qms.cthmprojetos.com/api/docPrompt';
 
 // Initial State
 const initialState: EntityState<DocAttachment> = {
@@ -32,6 +33,43 @@ export const downloadAnexo = createAsyncThunk('anexos/get', async (id: number) =
 export const getById = createAsyncThunk('anexos/get', async (id: number) => {
   const url = apiAttachmentUrl + '/' + id;
   return axios.get<DocAttachment>(url);
+});
+
+export const getResumeIA = createAsyncThunk('anexo/get/resume-ia', async (arquivo: File | undefined) => {
+  if (!arquivo) {
+    return null;
+  }
+  try {
+    const formData = new FormData();
+
+    formData.append('file', arquivo);
+    // formData.append('idDocumentacao', String(anexo.idDocumentacao));
+
+    // const response = await axios.post(apiDocPromptIA, formData, {
+    //   headers: {
+    //     'Content-Type': 'multipart/form-data',
+    //   },
+    // });
+    const response = await fetch(apiDocPromptIA, {
+      method: 'POST', // Método que permite envio de dados
+      body: formData, // Dados multipart/form-data
+      headers: {
+        // Não defina `Content-Type` explicitamente ao usar FormData.
+        // O navegador definirá o cabeçalho correto, incluindo o boundary.
+      },
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Arquivo enviado com sucesso:', result);
+    } else {
+      console.error('Erro ao enviar o arquivo:', response.statusText);
+    }
+
+    return response;
+  } catch (err) {
+    console.error('API getResumeIA: ', err);
+  }
 });
 
 export const uploadAnexo = createAsyncThunk('anexos/post', async (anexo: UploadAnexo) => {
