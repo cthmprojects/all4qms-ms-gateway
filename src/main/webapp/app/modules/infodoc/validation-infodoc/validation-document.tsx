@@ -272,7 +272,7 @@ export const ValidationDocument = () => {
             tipo: 'APROVAR',
             nomeEmissor: userEmitter?.nome || '', // nome
             tituloDocumento: 'Documento em APROVADO',
-            dataCriacao: new Date(Date.now()).toISOString(),
+            dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
             descricao: `Documento a ser aprovado por ${currentUser.firstName} ${currentUser.lastName} com o email ${currentUser.email}`,
             motivoReprovacao: '',
           })

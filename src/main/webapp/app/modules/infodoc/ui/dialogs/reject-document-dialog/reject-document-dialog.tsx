@@ -54,7 +54,7 @@ export const RejectDocumentDialog = ({ open, handleClose, documentTitle, current
             tipo: 'REPROVAR',
             nomeEmissor: userEmitter?.nome || '', // nome
             tituloDocumento: 'Documento REPROVADO',
-            dataCriacao: new Date(Date.now()).toISOString(),
+            dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
             descricao: `Documento rejeitado por ${currentUser.nome} com o email ${currentUser.email}`,
             motivoReprovacao: '',
           })
