@@ -269,13 +269,7 @@ const InfodocList = () => {
 
   //---------------------------------------------------------------
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    // E - Edição
-    // R - revisão
-    // H - homolog
-    // O - obsoleto
-    // C - cancelado
-
+  const switchSituationByTab = newValue => {
     let type: string = '';
     switch (newValue) {
       case 0:
@@ -294,6 +288,18 @@ const InfodocList = () => {
         type = 'C';
         break;
     }
+
+    return type;
+  };
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    // E - Edição
+    // R - revisão
+    // H - homolog
+    // O - obsoleto
+    // C - cancelado
+
+    let type: string = switchSituationByTab(newValue);
 
     const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
     dispatch(
@@ -434,13 +440,15 @@ const InfodocList = () => {
   const handleApplyFilters = () => {
     const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa } = filters;
 
+    const _situacao = switchSituationByTab(value);
+
     dispatch(
       listdocs({
         dtIni: dtIni?.toISOString(),
         dtFim: dtFim?.toISOString(),
         idProcesso,
         origem,
-        situacao,
+        situacao: _situacao,
         size: pageSize,
         pesquisa,
         page: page,
@@ -454,7 +462,7 @@ const InfodocList = () => {
       dtFim: null,
       idProcesso: 0,
       origem: null,
-      situacao: null,
+      situacao: switchSituationByTab(value),
       pesquisa: null,
     });
   };
