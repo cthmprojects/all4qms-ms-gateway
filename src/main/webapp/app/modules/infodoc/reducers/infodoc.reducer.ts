@@ -102,7 +102,7 @@ export const notifyEmailAllSGQs = createAsyncThunk('email/send/SGQs', async (use
       tipo: 'APROVAR',
       nomeEmissor: user.nome, // nome
       tituloDocumento: 'Documento para APROVAÇÃO',
-      dataCriacao: Date.now(),
+      dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
       descricao: '',
       // motivoReprovacao: string
     })

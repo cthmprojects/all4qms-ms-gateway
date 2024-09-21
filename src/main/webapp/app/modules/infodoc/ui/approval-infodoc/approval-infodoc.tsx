@@ -214,7 +214,7 @@ export const ApprovalDocument = () => {
             tipo: 'APROVAR',
             nomeEmissor: userEmitter?.nome || '', // nome
             tituloDocumento: 'Documento APROVADO',
-            dataCriacao: new Date(Date.now()).toISOString(),
+            dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
             descricao: `Documento aprovado por ${currentUser.nome} com o email ${currentUser.email}`,
             motivoReprovacao: '',
           })

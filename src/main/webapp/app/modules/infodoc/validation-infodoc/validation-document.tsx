@@ -98,6 +98,7 @@ export const ValidationDocument = () => {
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [originList, setOriginList] = useState([]);
   const [idNewFile, setIdNewFile] = useState<number>(-1);
+  const [idOldFile, setIdOldFile] = useState<number>(-1);
   const [fileUploaded, SetFile] = useState<File>();
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
@@ -168,7 +169,8 @@ export const ValidationDocument = () => {
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (actualInfoDoc) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc?.idArquivo}`;
+      const idFile = idOldFile > 0 ? idOldFile : actualInfoDoc.doc?.idArquivo;
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${idFile}`;
 
       await axios
         .request({
@@ -272,7 +274,7 @@ export const ValidationDocument = () => {
             tipo: 'APROVAR',
             nomeEmissor: userEmitter?.nome || '', // nome
             tituloDocumento: 'Documento em APROVADO',
-            dataCriacao: new Date(Date.now()).toISOString(),
+            dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
             descricao: `Documento a ser aprovado por ${currentUser.firstName} ${currentUser.lastName} com o email ${currentUser.email}`,
             motivoReprovacao: '',
           })
@@ -454,7 +456,10 @@ export const ValidationDocument = () => {
                   variant="outlined"
                   size="large"
                   style={{ backgroundColor: idNewFile > 0 ? '#e6b200' : '#E0E0E0', color: '#4e4d4d', height: '55px' }}
-                  onClick={event => setOpenUploadFile(true)}
+                  onClick={event => {
+                    setIdOldFile(actualInfoDoc.doc?.idArquivo!!);
+                    setOpenUploadFile(true);
+                  }}
                 >
                   <FileUploadRoundedIcon className="pe-1 pb-1" />
                   Novo
