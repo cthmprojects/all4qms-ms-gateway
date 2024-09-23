@@ -1,4 +1,16 @@
-import { Box, Breadcrumbs, Checkbox, Fab, FormControl, InputLabel, ListItemText, MenuItem, Select, TextField } from '@mui/material';
+import {
+  Box,
+  Breadcrumbs,
+  Checkbox,
+  Fab,
+  FormControl,
+  IconButton,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+  TextField,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
@@ -12,6 +24,7 @@ import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { EnumTemporal } from '../../models/enums';
 import { saveMetaObjetivo } from '../../reducers/meta-objetivo.reducer';
 import { getMeta, saveMetas, updateMeta } from '../../reducers/metas.reducer';
+import { RemoveCircleOutline } from '@mui/icons-material';
 
 const initMeta = {
   descricao: '',
@@ -75,7 +88,7 @@ export const NewGoalObjective = () => {
   };
 
   const addNewGoal = () => {
-    const _meta = { id: goals.length, ...initMeta };
+    const _meta = { id: 0, ...initMeta };
     setGoals([...goals, _meta]);
   };
 
@@ -88,6 +101,10 @@ export const NewGoalObjective = () => {
     _goals[index][name] = value;
 
     setGoals([..._goals]);
+  };
+
+  const removeLocalArray = (idx: number) => {
+    setGoals(goals.filter((_, index) => index != idx));
   };
 
   const saveGoalsObj = async () => {
@@ -110,8 +127,6 @@ export const NewGoalObjective = () => {
       if (result) navigate(`/goals`); // setGoals([{ id: 0, ...initMeta }]);
     }
   };
-
-  const line = <Box width="70%" borderTop="solid 1px" borderColor="#c6c5c5" margin="auto" />;
 
   return (
     <div>
@@ -273,9 +288,22 @@ export const NewGoalObjective = () => {
                     justifyContent: 'space-between',
                   }}
                 >
-                  <h1 className="mt-1" style={{ fontSize: '1.5rem', margin: '0 auto 0 0', padding: '0', width: '100%' }}>
-                    Meta {index + 1}
-                  </h1>
+                  <div
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <h1 className="mt-1" style={{ fontSize: '1.5rem', margin: '0 auto 0 0', padding: '0', width: '100%' }}>
+                      Meta {index + 1}
+                    </h1>
+                    {!goal.id && index > 0 && (
+                      <IconButton onClick={() => removeLocalArray(index)}>
+                        <RemoveCircleOutline />
+                      </IconButton>
+                    )}
+                  </div>
                   <hr
                     style={{
                       margin: '1rem -2rem',
