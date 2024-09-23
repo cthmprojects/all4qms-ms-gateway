@@ -21,7 +21,7 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
     description: '',
     name: '',
     opNumber: '',
-    order: '',
+    order: '', // ---> Provavelmente não utilizado
     productName: '',
     rejected: 0,
     requestNumber: 0,
@@ -41,19 +41,7 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
     }
 
     setClient({
-      batch: initialData.batch,
-      batchAmount: initialData.batchAmount,
-      code: initialData.code,
-      defects: initialData.defects,
-      description: initialData.description,
-      name: initialData.name,
-      opNumber: initialData.opNumber,
-      order: initialData.order,
-      productName: initialData.productName,
-      rejected: initialData.rejected,
-      requestNumber: initialData.requestNumber,
-      samples: initialData.samples,
-      supplier: initialData.supplier,
+      ...initialData,
       traceability: {
         deliveredAt: new Date(initialData.traceability.deliveredAt),
         identifier: initialData.traceability.identifier,
@@ -61,7 +49,7 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
         rncId: initialData.traceability.rncId,
       },
     });
-  }, [initialData]);
+  }, []);
 
   useEffect(() => {
     onChanged(client);
@@ -101,8 +89,8 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
               sx={{ width: '10% !important' }}
             />
             <TextField
-              value={client.description}
-              onChange={e => setClient({ ...client, description: e.target.value })}
+              value={client.productName}
+              onChange={e => setClient({ ...client, productName: e.target.value })}
               label="Descrição do produto"
               name="product-description"
               className="m-2"
@@ -145,7 +133,13 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
             </div> */}
           </div>
           <div style={{ display: 'flex', width: '100%' }}>
-            <TextField label="Lote" name="lot" className="ms-3 m-2" sx={{ width: '20% !important' }} />
+            <TextField
+              label="Lote"
+              name="lot"
+              className="ms-3 m-2"
+              sx={{ width: '20% !important' }}
+              onChange={e => setClient({ ...client, batch: e.target.value })}
+            />
             <FormControl className="m-2">
               <DatePicker
                 // locale='pt-BR'
