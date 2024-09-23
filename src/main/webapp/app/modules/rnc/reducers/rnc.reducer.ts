@@ -208,15 +208,15 @@ export const axiosSaveClient = async (client: RncClient, id?: number) => {
 
   const response = await axios.post(url, {
     codigoProduto: client.code,
-    nomeProduto: client.productName,
+    nomeProduto: client.productName, //
     nomeFornecedor: client.supplier,
     lote: client.batch,
     qtdLote: client.batchAmount,
-    nqa: client.description,
-    qtdAmostra: client.samples,
+    nqa: client.description, // nqa parece não ser utilizada...
+    qtdAmostra: client.samples, //
     qtdDefeito: client.defects,
     qtdRejeicao: client.rejected,
-    numPedido: client.order,
+    numPedido: client.requestNumber,
     numOP: client.opNumber,
     idRastreabilidadesRegistro: traceabilityResponse.data.id,
   });
