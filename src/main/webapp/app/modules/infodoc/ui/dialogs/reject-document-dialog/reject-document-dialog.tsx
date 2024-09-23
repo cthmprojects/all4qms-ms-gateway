@@ -47,7 +47,7 @@ export const RejectDocumentDialog = ({ open, handleClose, documentTitle, current
       .then(async () => {
         toast.success('Documento rejeitado!');
         const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == currentDocument.doc?.idUsuarioCriacao)[0];
-        await dispatch(
+        dispatch(
           notifyEmailInfoDoc({
             to: userEmitter?.email || '', // Email
             subject: 'Documento REPROVADO por SGQ',

@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
 import {
+  Box,
   Breadcrumbs,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Grid,
@@ -99,6 +101,7 @@ export const ApprovalDocument = () => {
   const [keyword, setKeyword] = useState<string>('');
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [currentUser, _] = useState<UerSGQ>(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   useEffect(() => {
@@ -201,6 +204,7 @@ export const ApprovalDocument = () => {
   }, [actualInfoDoc]);
 
   const approveDocument = async () => {
+    setIsLoading(true);
     await axios
       .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/homologacao/${id}`, {
         idDocumento: id,
@@ -209,7 +213,7 @@ export const ApprovalDocument = () => {
       .then(async () => {
         toast.success('Documento aprovado com sucesso!');
         const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == emitter)[0];
-        await dispatch(
+        dispatch(
           notifyEmailInfoDoc({
             to: userEmitter?.email || '', // Email
             subject: 'Documento APROVADO por SGQ',
@@ -221,11 +225,14 @@ export const ApprovalDocument = () => {
             motivoReprovacao: '',
           })
         );
+        setIsLoading(false);
         navigate('/infodoc');
       })
       .catch(e => {
         toast.error('Erro ao aprovar documento.');
+        setIsLoading(false);
       });
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -464,6 +471,25 @@ export const ApprovalDocument = () => {
           </div>
         </div>
       </div>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };

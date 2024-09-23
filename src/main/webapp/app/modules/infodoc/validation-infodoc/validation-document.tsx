@@ -5,6 +5,7 @@ import {
   Button,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Grid,
@@ -104,6 +105,7 @@ export const ValidationDocument = () => {
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [loadingIA, setLoadingIA] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [openUploadFile, setOpenUploadFile] = useState(false);
   const [openRejectModal, setOpenRejectModal] = useState(false);
@@ -207,7 +209,7 @@ export const ValidationDocument = () => {
       codigo: code,
       titulo: title,
       origem: origin,
-      idArquivo: idNewFile,
+      idArquivo: idNewFile > 0 ? idNewFile : actualInfoDoc.doc?.idArquivo,
       idProcesso: parseInt(selectedProcess),
       ignorarValidade: true,
       enumSituacao: 'R',
@@ -225,10 +227,12 @@ export const ValidationDocument = () => {
   };
 
   const saveDocument = () => {
+    setIsLoading(true);
     const newInfoDoc = saveDoc();
 
     dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! })).then((res: any) => {
       dispatch(getInfoDocById(id!!));
+      setIsLoading(false);
     });
   };
 
@@ -259,6 +263,7 @@ export const ValidationDocument = () => {
   }, [actualInfoDoc]);
 
   const approveDocument = async () => {
+    setIsLoading(true);
     await axios
       .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/aprovacao-sgq/${id}`, {
         idDocumento: id,
@@ -267,7 +272,7 @@ export const ValidationDocument = () => {
       .then(async () => {
         toast.success('Documento enviado para aprovação!');
         const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == emitter)[0];
-        await dispatch(
+        dispatch(
           notifyEmailInfoDoc({
             to: userEmitter?.email || '', // Email
             subject: 'Documento requerendo APROVAÇãO',
@@ -280,9 +285,11 @@ export const ValidationDocument = () => {
           })
         );
         navigate('/infodoc');
+        setIsLoading(false);
       })
       .catch(e => {
         toast.error('Erro ao aprovar documento.');
+        setIsLoading(false);
       });
   };
 
@@ -581,6 +588,25 @@ export const ValidationDocument = () => {
           </div>
         </div>
       </Box>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };

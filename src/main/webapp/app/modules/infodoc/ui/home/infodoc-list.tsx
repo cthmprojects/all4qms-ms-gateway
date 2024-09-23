@@ -281,10 +281,10 @@ const InfodocList = () => {
       case 2:
         type = 'R';
         break;
-      case 4:
+      case 3:
         type = 'O';
         break;
-      case 5:
+      case 4:
         type = 'C';
         break;
     }

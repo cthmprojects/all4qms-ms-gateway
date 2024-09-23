@@ -3,6 +3,7 @@ import {
   Breadcrumbs,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Grid,
@@ -104,6 +105,7 @@ export const NewDocument = () => {
   const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -147,6 +149,7 @@ export const NewDocument = () => {
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsLoading(true);
     if (id) {
       const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
 
@@ -167,8 +170,10 @@ export const NewDocument = () => {
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
           fileDownload(file, `${fileName}`);
+          setIsLoading(false);
         });
     }
+    setIsLoading(false);
   };
 
   const cancelDocument = () => {
@@ -191,6 +196,7 @@ export const NewDocument = () => {
   };
 
   const saveDocument = () => {
+    setIsLoading(true);
     const newInfoDoc: Doc = {
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
@@ -212,13 +218,20 @@ export const NewDocument = () => {
       newInfoDoc.dataValidade = validDate;
     }
 
-    dispatch(createInfoDoc(newInfoDoc)).then((res: any) => {
-      setInfoDocId(parseInt(res.payload.data?.doc?.id));
-      setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
-    });
+    dispatch(createInfoDoc(newInfoDoc))
+      .then((res: any) => {
+        setIsLoading(false);
+        setInfoDocId(parseInt(res.payload.data?.doc?.id));
+        setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
+      })
+      .catch(err => {
+        console.error('Error new document:', err);
+        setIsLoading(false);
+      });
   };
 
   const fowardDocument = () => {
+    setIsLoading(true);
     const novaMovimentacao: Movimentacao = {
       id: infoDocMovimentacao,
       enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
@@ -232,6 +245,7 @@ export const NewDocument = () => {
     dispatch(atualizarMovimentacao(novaMovimentacao));
 
     dispatch(notifyEmailAllSGQs(usersSGQ));
+    setIsLoading(false);
     navigate('/infodoc');
   };
 
@@ -471,6 +485,25 @@ export const NewDocument = () => {
           </div>
         </div>
       </div>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };
