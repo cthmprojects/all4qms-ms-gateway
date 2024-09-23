@@ -5,6 +5,7 @@ import {
   Chip,
   FormControl,
   FormControlLabel,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -22,6 +23,7 @@ import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import axios from 'axios';
 import { RejectDocumentDialog } from '../dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../../reducers/enums.reducer';
@@ -321,58 +323,56 @@ export const ApprovalDocument = () => {
               Dados do documento
             </h1>
           </div>
-          <div className="mt-4">
-            <TextField
-              label="Código"
-              name="number"
-              className="me-1"
-              autoComplete="off"
-              value={code}
-              disabled
-              onChange={e => setCode(e.target.value)}
-            />
-            <TextField
-              sx={{ width: '35%' }}
-              label="Título"
-              name="number"
-              className="me-2 ms-2"
-              autoComplete="off"
-              value={title}
-              disabled
-              onChange={e => setTitle(e.target.value)}
-            />
-
-            <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
-              <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} disabled onChange={event => setOrigin(event.target.value)}>
-                {originList?.map((e: any) => (
-                  <MenuItem value={e.nome}>{e.valor}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl sx={{ width: '20%' }} className="me-2 ms-2">
-              <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} disabled onChange={event => setSelectedProcess(event.target.value)}>
-                {processes.map((process, i) => (
-                  <MenuItem value={process.id} key={`process-${i}`}>
-                    {process.nome}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              className="ms-2"
-              variant="outlined"
-              size="large"
-              style={{ backgroundColor: idNewFile ? '#e6b200' : '#E0E0E0', color: '#4e4d4d', height: '55px' }}
-              onClick={event => onFileClicked(event)}
-            >
-              <VisibilityIcon className="pe-1 pb-1" />
-              Arquivo
-            </Button>
-          </div>
+          <Grid container gap={2}>
+            <Grid item xs={1}>
+              <TextField label="Código" name="number" autoComplete="off" value={code} disabled onChange={e => setCode(e.target.value)} />
+            </Grid>
+            <Grid item xs>
+              <TextField
+                sx={{ width: '100%' }}
+                label="Título"
+                name="number"
+                autoComplete="off"
+                value={title}
+                disabled
+                onChange={e => setTitle(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }} disabled>
+                <InputLabel>Origem</InputLabel>
+                <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
+                  {originList?.map((e: any) => (
+                    <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }} disabled>
+                <InputLabel>Área / Processo</InputLabel>
+                <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+                  {processes.map((process: any, i) => (
+                    <MenuItem value={process.id} key={`process-${i}`}>
+                      {process.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
+                style={{ backgroundColor: '#E0E0E0', height: '55px' }}
+                onClick={event => onFileClicked(event)}
+              >
+                <AttachFileIcon className="pe-1 pb-1" />
+                Arquivo
+              </Button>
+            </Grid>
+          </Grid>
           <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
             <FormControlLabel
               className="me-2"

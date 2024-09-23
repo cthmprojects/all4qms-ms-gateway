@@ -206,6 +206,7 @@ export const UpdateDocument = () => {
     dispatch(createInfoDoc(newInfoDoc)).then((res: any) => {
       setInfoDocId(parseInt(res.payload.data?.doc?.id));
       setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
+      dispatch(updateInfoDoc({ data: { ...actualInfoDoc, enumSituacao: 'O' }, id: id!! })); // deixando documento anterioir como obsoleto
     });
   };
 
