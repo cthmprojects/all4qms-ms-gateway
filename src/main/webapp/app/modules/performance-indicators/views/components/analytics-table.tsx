@@ -22,6 +22,14 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
     return filteredProcesses.length > 0 ? filteredProcesses[0] : null;
   };
 
+  const getColor = (measurement: number | null, goal: number): string => {
+    if (!measurement || measurement < goal) {
+      return 'red';
+    } else {
+      return 'green';
+    }
+  };
+
   return (
     <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
       <Table sx={{ width: '100%' }}>
@@ -62,18 +70,18 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
                 <TableCell>{process?.name ?? '-'}</TableCell>
                 <TableCell>{goal ?? '-'}</TableCell> {/* Metas */}
                 <TableCell>{0 ?? '-'}</TableCell> {/* Acumulado */}
-                <TableCell>{measurements[0] ?? '-'}</TableCell> {/* JAN */}
-                <TableCell>{measurements[1] ?? '-'}</TableCell> {/* FEV */}
-                <TableCell>{measurements[2] ?? '-'}</TableCell> {/* MAR */}
-                <TableCell>{measurements[3] ?? '-'}</TableCell> {/* ABR */}
-                <TableCell>{measurements[4] ?? '-'}</TableCell> {/* MAI */}
-                <TableCell>{measurements[5] ?? '-'}</TableCell> {/* JUN */}
-                <TableCell>{measurements[6] ?? '-'}</TableCell> {/* JUL */}
-                <TableCell>{measurements[7] ?? '-'}</TableCell> {/* AGO */}
-                <TableCell>{measurements[8] ?? '-'}</TableCell> {/* SET */}
-                <TableCell>{measurements[9] ?? '-'}</TableCell> {/* OUT */}
-                <TableCell>{measurements[10] ?? '-'}</TableCell> {/* NOV */}
-                <TableCell>{measurements[11] ?? '-'}</TableCell> {/* DEZ */}
+                <TableCell sx={{ color: getColor(measurements[0], goal) }}>{measurements[0] ?? '-'}</TableCell> {/* JAN */}
+                <TableCell sx={{ color: getColor(measurements[1], goal) }}>{measurements[1] ?? '-'}</TableCell> {/* FEV */}
+                <TableCell sx={{ color: getColor(measurements[2], goal) }}>{measurements[2] ?? '-'}</TableCell> {/* MAR */}
+                <TableCell sx={{ color: getColor(measurements[3], goal) }}>{measurements[3] ?? '-'}</TableCell> {/* ABR */}
+                <TableCell sx={{ color: getColor(measurements[4], goal) }}>{measurements[4] ?? '-'}</TableCell> {/* MAI */}
+                <TableCell sx={{ color: getColor(measurements[5], goal) }}>{measurements[5] ?? '-'}</TableCell> {/* JUN */}
+                <TableCell sx={{ color: getColor(measurements[6], goal) }}>{measurements[6] ?? '-'}</TableCell> {/* JUL */}
+                <TableCell sx={{ color: getColor(measurements[7], goal) }}>{measurements[7] ?? '-'}</TableCell> {/* AGO */}
+                <TableCell sx={{ color: getColor(measurements[8], goal) }}>{measurements[8] ?? '-'}</TableCell> {/* SET */}
+                <TableCell sx={{ color: getColor(measurements[9], goal) }}>{measurements[9] ?? '-'}</TableCell> {/* OUT */}
+                <TableCell sx={{ color: getColor(measurements[10], goal) }}>{measurements[10] ?? '-'}</TableCell> {/* NOV */}
+                <TableCell sx={{ color: getColor(measurements[11], goal) }}>{measurements[11] ?? '-'}</TableCell> {/* DEZ */}
                 <TableCell>
                   <Tooltip title="Editar">
                     <IconButton color="primary" onClick={() => onManageMeasurementsRequested(id)}>
