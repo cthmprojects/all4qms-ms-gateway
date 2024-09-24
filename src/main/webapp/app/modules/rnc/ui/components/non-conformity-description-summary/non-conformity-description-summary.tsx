@@ -20,7 +20,7 @@ const NonConformityDescriptionSummary = ({ description }: NonConformityDescripti
             value={description?.requisitoDescumprido ?? ''}
           />
           <Stack spacing={2}>
-            {description?.evidencias.map((evidence, index) => (
+            {description?.evidencias?.map((evidence, index) => (
               <Stack>
                 <TextField disabled label="Evidência objetiva" placeholder="Evidência objetiva" value={evidence.evidencia ?? ''} />
                 {evidence.nomeAnexo && evidence.idAnexo && (

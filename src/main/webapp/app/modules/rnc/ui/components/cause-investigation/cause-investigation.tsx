@@ -173,7 +173,7 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
             <Textarea
               slots={{ textarea: InnerTextareaNC }}
               slotProps={{ textarea: { placeholder: 'NC' } }}
-              sx={{ borderRadius: '6px' }}
+              sx={{ borderRadius: '6px', overflowY: 'scroll' }}
               name="ncArea"
               value={description || ''}
               readOnly
