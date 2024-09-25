@@ -27,7 +27,7 @@ import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-re
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import FileUploadRoundedIcon from '@mui/icons-material/FileUploadRounded';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
 import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
@@ -38,7 +38,7 @@ import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 import { IUsuario } from '../../../shared/model/usuario.model';
 import UploadInfoFile from '../ui/dialogs/upload-dialog/upload-files';
-import { getResumeIA } from '../reducers/anexo.reducer';
+import { getResumeIaByToken, getTokenResumeIA } from '../reducers/anexo.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -80,6 +80,10 @@ const getDocById = async (id: any) => {
   return data;
 };
 
+type resIAType = {
+  Status: number;
+  LLMResponse: string;
+};
 export const ValidationDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -101,6 +105,7 @@ export const ValidationDocument = () => {
   const [idNewFile, setIdNewFile] = useState<number>(-1);
   const [idOldFile, setIdOldFile] = useState<number>(-1);
   const [fileUploaded, SetFile] = useState<File>();
+  const [timerGetIA, SetTimerGetIA] = useState<any>();
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
@@ -161,12 +166,62 @@ export const ValidationDocument = () => {
     return emitter && emittedDate && documentDescription && code && title && selectedProcess;
   };
 
-  const handleGetResume = async () => {
-    setLoadingIA(true);
-    const resumeIA = await dispatch(getResumeIA(fileUploaded));
-    setLoadingIA(false);
+  const consultResumeIA = async tokenResumeIA => {
+    const resResume = await dispatch(getResumeIaByToken({ token: tokenResumeIA }));
+    const resumeIA: resIAType = (resResume.payload as AxiosResponse).data;
 
-    console.log('resumeIA: ', resumeIA);
+    // PROCESSING = 1,
+    // PENDING = 2,
+    // DONE = 3,
+    // FAILED = 4,
+    // DO_NOT_EXISTS = 5,
+    // TOKEN_AND_FILENAME_MISSING = 6
+
+    switch (resumeIA.Status) {
+      case 1:
+        return;
+      case 2:
+        return;
+      case 3:
+        clearInterval(timerGetIA);
+        setDocumentDescription(resumeIA.LLMResponse);
+        setLoadingIA(false);
+        break;
+      case 4:
+        clearInterval(timerGetIA);
+        setDocumentDescription('Não foi possivel carregar o documento automaticamente. Tente novamente mais tarde.');
+        console.error('Erro ao carrecar IA resume: ', resumeIA.LLMResponse);
+        setLoadingIA(false);
+        break;
+      case 5:
+        clearInterval(timerGetIA);
+        setDocumentDescription('Não foi possivel carregar o documento automaticamente. Tente novamente mais tarde.');
+        console.error('Erro ao carrecar IA resume: ', resumeIA.LLMResponse);
+        setLoadingIA(false);
+        break;
+      default:
+        clearInterval(timerGetIA);
+        setDocumentDescription('Não foi possivel carregar o documento automaticamente. Tente novamente mais tarde.');
+        setLoadingIA(false);
+        return;
+    }
+    // setLoadingIA(false);
+    // console.log('resumeIA: ', tokenResumeIA);
+  };
+  const handleGetResume = async () => {
+    try {
+      setLoadingIA(true);
+      const resToken = await dispatch(getTokenResumeIA(fileUploaded));
+      const tokenResumeIA = (resToken.payload as AxiosResponse).data;
+
+      setDocumentDescription('Resumo da descrição do documento anexado, sendo gerado automaticamente, aguarde...');
+      const _timerGetIA = setInterval(() => consultResumeIA(tokenResumeIA), 5000);
+      SetTimerGetIA(_timerGetIA);
+    } catch (err) {
+      console.error('Error handleGetResume: ', err);
+      clearInterval(timerGetIA);
+      setLoadingIA(false);
+    }
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -509,15 +564,15 @@ export const ValidationDocument = () => {
                 <MenuItem value="60d">60 dias antes</MenuItem>
               </Select>
             </FormControl>
-            {/*<LoadingButton
+            <LoadingButton
               variant="outlined"
               size="large"
               loading={loadingIA}
               sx={{ backgroundColor: '#0EBDCE', color: '#000', height: '60px' }}
-              onClick={handleGetResume}
+              onClick={() => handleGetResume()}
             >
               Gerar Resumo IA documento
-            </LoadingButton>*/}
+            </LoadingButton>
           </Box>
           <Textarea
             className="w-100"

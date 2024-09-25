@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsers, UerSGQ } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsers, UserQMS } from 'app/entities/usuario/reducers/usuario.reducer';
 import { IUsuario } from 'app/shared/model/usuario.model';
 import DatePicker from 'react-datepicker';
 import { Textarea, styled } from '@mui/joy';
@@ -100,7 +100,7 @@ export const NewDocument = () => {
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
-  const [usersSGQ, setUsersSGQ] = useState<UerSGQ[]>([]);
+  const [usersSGQ, setUsersSGQ] = useState<UserQMS[]>([]);
   const [infoDocId, setInfoDocId] = useState(0);
   const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
@@ -128,7 +128,7 @@ export const NewDocument = () => {
     const resUsersByProcess = await dispatch(getUsersByProcess(idProcess));
     const usersByProcess_ = (resUsersByProcess.payload as AxiosResponse).data || [];
 
-    const filteredUserByProcess: UerSGQ[] = usersByProcess_.filter((userPro: UerSGQ) =>
+    const filteredUserByProcess: UserQMS[] = usersByProcess_.filter((userPro: UserQMS) =>
       users_.some(firstUser => firstUser.id === userPro.user.id)
     );
     setUsersSGQ(filteredUserByProcess);

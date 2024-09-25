@@ -35,7 +35,7 @@ import { cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 import { IUsuario } from '../../../../shared/model/usuario.model';
-import { UerSGQ } from '../../../../entities/usuario/reducers/usuario.reducer';
+import { UserQMS } from '../../../../entities/usuario/reducers/usuario.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -102,7 +102,7 @@ export const ApprovalDocument = () => {
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentUser, _] = useState<UerSGQ>(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const [currentUser, _] = useState<UserQMS>(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));

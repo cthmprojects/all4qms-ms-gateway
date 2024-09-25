@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
 import { IUsuario } from '../../../../../shared/model/usuario.model';
 import { notifyEmailInfoDoc } from '../../../reducers/infodoc.reducer';
-import { UerSGQ } from '../../../../../entities/usuario/reducers/usuario.reducer';
+import { UserQMS } from '../../../../../entities/usuario/reducers/usuario.reducer';
 
 const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
   const id = React.useId();
@@ -27,7 +27,7 @@ type RejectDialogProps = {
   open: boolean;
   handleClose: () => void;
   documentTitle: string;
-  currentUser: UerSGQ;
+  currentUser: UserQMS;
   currentDocument: InfoDoc;
 };
 export const RejectDocumentDialog = ({ open, handleClose, documentTitle, currentUser, currentDocument }: RejectDialogProps) => {
