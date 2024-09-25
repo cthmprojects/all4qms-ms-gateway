@@ -11,12 +11,13 @@ import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import PageNotFound from 'app/shared/error/page-not-found';
 import Loadable from 'react-loadable';
 import { Route } from 'react-router-dom';
+import GoalsObjectivesRoutes from './modules/goals-objectives';
 import { Home } from './modules/home/home';
 import InfodocRoutes from './modules/infodoc';
 import PerformanceIndicatorsRoutes from './modules/performance-indicators';
 import RisksOpportunitiesRoutes from './modules/risks-opportunities';
 import RncRoutes from './modules/rnc';
-import GoalsObjectivesRoutes from './modules/goals-objectives';
+import StrategicPlaningRoutes from './modules/strategic-planning';
 
 const loading = <div>loading ...</div>;
 
@@ -53,6 +54,7 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="risks-opportunities/*" element={<RisksOpportunitiesRoutes />} />
         <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
         <Route path="performance-indicators/*" element={<PerformanceIndicatorsRoutes />} />
+        <Route path="strategic-planning/*" element={<StrategicPlaningRoutes />} />
 
         <Route path="account">
           <Route
