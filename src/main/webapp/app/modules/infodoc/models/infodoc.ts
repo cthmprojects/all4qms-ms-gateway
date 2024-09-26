@@ -28,7 +28,7 @@ export type Doc = {
   revisao?: number;
   descricaoDoc?: string;
   idArquivo?: number;
-  enumSituacao?: string;
+  enumSituacao?: 'E' | 'H' | 'R' | 'O' | 'C';
   origem?: string;
   tipoDoc?: string;
   idProcesso?: number;

@@ -55,6 +55,14 @@ module.exports = async options =>
           secure: false,
           changeOrigin: options.tls,
         },
+        {
+          // Para a API externa
+          context: ['/external-api'], // Defina um contexto específico para diferenciar da API local
+          target: 'https://api-llm-all4qms.cthmprojetos.com',
+          secure: false,
+          changeOrigin: true,
+          pathRewrite: { '^/external-api': '' }, // Remove o prefixo '/external-api' ao redirecionar
+        },
       ],
       https: options.tls,
       historyApiFallback: true,

@@ -4,12 +4,13 @@ import IndicatorValues from './indicator-values';
 
 type IndicatorMeasurementsProps = {
   frequencies: Array<string>;
+  initialFrequency?: string;
   initialValues?: Array<Array<number | null>>;
   unit: string;
   onChanged: (measurements: Array<Array<number | null>>) => void;
 };
 
-const IndicatorMeasurements = ({ frequencies, initialValues, unit, onChanged }: IndicatorMeasurementsProps) => {
+const IndicatorMeasurements = ({ frequencies, initialFrequency, initialValues, unit, onChanged }: IndicatorMeasurementsProps) => {
   const [frequency, setFrequency] = useState<string | null>(null);
   const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([
     [null, , null, null, null, null, null, null, null, null, null, null, null],
@@ -44,6 +45,7 @@ const IndicatorMeasurements = ({ frequencies, initialValues, unit, onChanged }: 
         <IndicatorValues
           allowAdding={false}
           frequencies={frequencies}
+          initialFrequency={initialFrequency}
           initialValues={[...measurement]}
           inputOnly
           onChanged={(frequency, year, values) => onIndicatorValuesChanged(frequency, year, values, idx)}

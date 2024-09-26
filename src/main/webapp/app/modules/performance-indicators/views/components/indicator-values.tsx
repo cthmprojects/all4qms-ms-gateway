@@ -241,7 +241,7 @@ const IndicatorValues = ({
           disabled={inputOnly}
           onChange={(event, value, reason, details) => {
             onAutocompleteChanged(event, value, reason, details, setFrequency);
-            onChanged(value, year, values);
+            onChanged(value, year, [null, null, null, null, null, null, null, null, null, null, null, null]);
           }}
           options={frequencies}
           renderInput={params => <TextField {...params} label="Frequência" />}
