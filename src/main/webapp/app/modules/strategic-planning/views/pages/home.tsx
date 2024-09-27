@@ -184,7 +184,7 @@ const Home = () => {
             variant="contained"
             className="infodoc-list-form-field"
             style={{ marginRight: '10px', height: '54px', width: '100px', backgroundColor: isSGQ ? '#e6b200' : '#a3a3a3' }}
-            onClick={event => navigate(`/goals/new`)}
+            onClick={event => navigate(`/strategic-planning/swot`)}
             title="Novo Registro"
             disabled={!isSGQ}
           >
@@ -194,7 +194,7 @@ const Home = () => {
             variant="outlined"
             className="infodoc-list-form-field"
             style={{ marginRight: '10px', height: '54px', width: '100px' }}
-            onClick={event => navigate(`/goals/new`)}
+            onClick={event => navigate(`/strategic-planning/institutional`)}
             title="Novo Registro"
             disabled={!isSGQ}
           >

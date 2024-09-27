@@ -6,6 +6,7 @@ import { combineReducers, ReducersMapObject } from 'redux';
 import strategicPlanningReducers from './reducers';
 import { Institutional } from './views';
 import Home from './views/pages/home';
+import Swot from './views/pages/swot';
 
 const StrategicPlaningRoutes = () => {
   const store = getStore();
@@ -16,7 +17,7 @@ const StrategicPlaningRoutes = () => {
       <ErrorBoundaryRoutes>
         <Route path="" element={<Home />} />
         <Route path="institutional" element={<Institutional />} />
-        <Route path="swot" element={<>SWOT</>} />
+        <Route path="swot" element={<Swot />} />
       </ErrorBoundaryRoutes>
     </>
   );

@@ -14,6 +14,8 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { Box, Button, Grid, Stack, Switch, TextField } from '@mui/material';
+import { AddOutlined, DeleteOutlined } from '@mui/icons-material';
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -43,55 +45,92 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   ],
 }));
 
-const Swot = () => {
-  const [expanded, setExpanded] = React.useState(false);
+type SwotEixoProps = {
+  onAdded?: () => void;
+  onChanged?: (newValue: string) => void;
+  onRemoved?: () => void;
+  valueEdit?: string;
+  listSwotEixo?: { desc: string; isRO: boolean }[];
+  setListSwotEixo?: React.Dispatch<React.SetStateAction<{ desc: string; isRO: boolean }[]>>;
+};
+const SwotEixo = ({ onAdded, onChanged, onRemoved, valueEdit, listSwotEixo, setListSwotEixo }: SwotEixoProps) => {
+  const [expanded, setExpanded] = React.useState(true);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
 
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <Card sx={{}}>
       <CardHeader
-        avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-            R
-          </Avatar>
-        }
         action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
+          <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
+            <ExpandMoreIcon />
+          </ExpandMore>
         }
-        title="Shrimp and Chorizo Paella"
-        subheader="September 14, 2016"
+        onClick={handleExpandClick}
+        title="Strengths / Pontos Fortes"
+        titleTypographyProps={{ fontSize: '16px', fontWeight: 700 }}
       />
-      <CardContent>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along
-          with the mussels, if you like.
-        </Typography>
-      </CardContent>
-      <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
-        </IconButton>
-        <IconButton aria-label="share">
-          <ShareIcon />
-        </IconButton>
-        <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
-          <ExpandMoreIcon />
-        </ExpandMore>
-      </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
-          <Typography sx={{ marginBottom: 2 }}>Method:</Typography>
-          <Typography sx={{ marginBottom: 2 }}>
-            Heat 1/2 cup of the broth in a pot until simmering, add saffron and set aside for 10 minutes.
-          </Typography>
+          <Stack direction="column" spacing={2}>
+            {listSwotEixo &&
+              listSwotEixo?.length > 0 &&
+              listSwotEixo?.map((swotEixo, index) => (
+                <Stack key={index} direction="row" spacing={2}>
+                  <TextField
+                    // disabled={readonly}
+                    fullWidth
+                    label={'Strenghts / Forças'}
+                    // onChange={(e) => onChanged(e.target.value)}
+                    placeholder={'Descreva aqui as forças'}
+                    multiline
+                    minRows={2}
+                    value={valueEdit}
+                    variant="outlined"
+                    sx={{ flexGrow: 1 }}
+                  />
+                  <Stack direction="column">
+                    <Typography fontSize={11} textAlign={'center'}>
+                      Analisar
+                    </Typography>
+                    <Switch defaultChecked />
+                  </Stack>
+                  <IconButton onClick={onRemoved} style={{ height: '50px', width: '50px' }}>
+                    <DeleteOutlined htmlColor="#A23900" style={{ height: '30px', width: '30px' }} />
+                  </IconButton>
+                </Stack>
+              ))}
+            <Stack direction="row" spacing={2}>
+              <TextField
+                // disabled={readonly}
+                fullWidth
+                label={'Strenghts / Forças'}
+                // onChange={(e) => onChanged(e.target.value)}
+                placeholder={'Descreva aqui as forças'}
+                multiline
+                minRows={2}
+                value={valueEdit}
+                variant="outlined"
+                sx={{ flexGrow: 1 }}
+              />
+              <Stack direction="column">
+                <Typography fontSize={11} textAlign={'center'}>
+                  Analisar
+                </Typography>
+                <Switch defaultChecked />
+              </Stack>
+              <Box sx={{ boxShadow: 3, borderRadius: '50%', height: '50px', width: '50px', bgcolor: '#E0E0E0' }}>
+                <IconButton disabled={'0'.length <= 0} onClick={onAdded} style={{ height: '50px', width: '50px' }}>
+                  <AddOutlined />
+                </IconButton>
+              </Box>
+            </Stack>
+          </Stack>
         </CardContent>
       </Collapse>
     </Card>
   );
 };
-export default Swot;
+export default SwotEixo;
