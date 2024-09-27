@@ -1,6 +1,8 @@
+import React from 'react';
 import getStore from 'app/config/store';
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import { Route } from 'react-router-dom';
+import Home from './views/pages/home';
 
 const StrategicPlaningRoutes = () => {
   const store = getStore();
@@ -8,7 +10,7 @@ const StrategicPlaningRoutes = () => {
   return (
     <>
       <ErrorBoundaryRoutes>
-        <Route path="" element={<>Home</>} />
+        <Route path="" element={<Home />} />
         <Route path="institutional" element={<>Institucional</>} />
         <Route path="swot" element={<>SWOT</>} />
       </ErrorBoundaryRoutes>
