@@ -1,136 +1,76 @@
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
-import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Box, Button, Grid, Stack, Switch, TextField } from '@mui/material';
-import { AddOutlined, DeleteOutlined } from '@mui/icons-material';
+import React from 'react';
+import { Box, Breadcrumbs, Button, Stack, Typography } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import { InstitutionalMission, InstitutionalPolicy, InstitutionalValues, InstitutionalVision } from '../components';
+import { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { EixosSwot } from '../../models/swot';
+import SwotEixoItem from '../components/swot-eixo-item';
 
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
+const Swot = () => {
+  const [strenths, setStrenths] = useState<Array<EixosSwot>>([]);
+  const [weaknesses, setWeaknesses] = useState<Array<EixosSwot>>([]);
+  const [opportunities, setOpportunities] = useState<Array<EixosSwot>>([]);
+  const [threats, setThreats] = useState<Array<EixosSwot>>([]);
 
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme }) => ({
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
-  variants: [
-    {
-      props: ({ expand }) => !expand,
-      style: {
-        transform: 'rotate(0deg)',
-      },
-    },
-    {
-      props: ({ expand }) => !!expand,
-      style: {
-        transform: 'rotate(180deg)',
-      },
-    },
-  ],
-}));
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-type SwotEixoProps = {
-  onAdded?: () => void;
-  onChanged?: (newValue: string) => void;
-  onRemoved?: () => void;
-  valueEdit?: string;
-  listSwotEixo?: { desc: string; isRO: boolean }[];
-  setListSwotEixo?: React.Dispatch<React.SetStateAction<{ desc: string; isRO: boolean }[]>>;
-};
-const SwotEixo = ({ onAdded, onChanged, onRemoved, valueEdit, listSwotEixo, setListSwotEixo }: SwotEixoProps) => {
-  const [expanded, setExpanded] = React.useState(true);
+  useEffect(() => {
+    // dispatch);
+  }, []);
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
+  const onBackClicked = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    navigate('/strategic-planning');
+  };
+
+  const onSaveClicked = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    // dispatch(
+    // );
   };
 
   return (
-    <Card sx={{}}>
-      <CardHeader
-        action={
-          <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
-            <ExpandMoreIcon />
-          </ExpandMore>
-        }
-        onClick={handleExpandClick}
-        title="Strengths / Pontos Fortes"
-        titleTypographyProps={{ fontSize: '16px', fontWeight: 700 }}
-      />
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
+    <div className="padding-container">
+      <div className="container-style">
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+            Home
+          </Link>
+          <Link to={'/strategic-planning'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+            Planejamento Estratégico
+          </Link>
+          <Typography className="link">SWOT</Typography>
+        </Breadcrumbs>
+
+        <Box sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <h2 className="title">SWOT</h2>
+          </Box>
           <Stack direction="column" spacing={2}>
-            {listSwotEixo &&
-              listSwotEixo?.length > 0 &&
-              listSwotEixo?.map((swotEixo, index) => (
-                <Stack key={index} direction="row" spacing={2}>
-                  <TextField
-                    // disabled={readonly}
-                    fullWidth
-                    label={'Strenghts / Forças'}
-                    // onChange={(e) => onChanged(e.target.value)}
-                    placeholder={'Descreva aqui as forças'}
-                    multiline
-                    minRows={2}
-                    value={valueEdit}
-                    variant="outlined"
-                    sx={{ flexGrow: 1 }}
-                  />
-                  <Stack direction="column">
-                    <Typography fontSize={11} textAlign={'center'}>
-                      Analisar
-                    </Typography>
-                    <Switch defaultChecked />
-                  </Stack>
-                  <IconButton onClick={onRemoved} style={{ height: '50px', width: '50px' }}>
-                    <DeleteOutlined htmlColor="#A23900" style={{ height: '30px', width: '30px' }} />
-                  </IconButton>
-                </Stack>
-              ))}
-            <Stack direction="row" spacing={2}>
-              <TextField
-                // disabled={readonly}
-                fullWidth
-                label={'Strenghts / Forças'}
-                // onChange={(e) => onChanged(e.target.value)}
-                placeholder={'Descreva aqui as forças'}
-                multiline
-                minRows={2}
-                value={valueEdit}
-                variant="outlined"
-                sx={{ flexGrow: 1 }}
-              />
-              <Stack direction="column">
-                <Typography fontSize={11} textAlign={'center'}>
-                  Analisar
-                </Typography>
-                <Switch defaultChecked />
-              </Stack>
-              <Box sx={{ boxShadow: 3, borderRadius: '50%', height: '50px', width: '50px', bgcolor: '#E0E0E0' }}>
-                <IconButton disabled={'0'.length <= 0} onClick={onAdded} style={{ height: '50px', width: '50px' }}>
-                  <AddOutlined />
-                </IconButton>
-              </Box>
-            </Stack>
+            <SwotEixoItem title={'Strengths / Pontos Fortes'} setListSwotEixo={setStrenths} listSwotEixo={strenths} />
+            <SwotEixoItem title={'Weaknesses / Fraquezas'} setListSwotEixo={setWeaknesses} listSwotEixo={weaknesses} />
+            <SwotEixoItem title={'Opportunities / Oportunidades'} setListSwotEixo={setOpportunities} listSwotEixo={opportunities} />
+            <SwotEixoItem title={'Threats / Ameaças'} setListSwotEixo={setThreats} listSwotEixo={threats} />
           </Stack>
-        </CardContent>
-      </Collapse>
-    </Card>
+
+          <Stack justifyContent="flex-end" gap="20px" flexDirection="row" sx={{ marginTop: '20px' }}>
+            <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={onBackClicked}>
+              Voltar
+            </Button>
+            <Button
+              type="submit"
+              onClick={onSaveClicked}
+              variant="contained"
+              color="primary"
+              style={{ background: '#e6b200', color: '#4e4d4d' }}
+            >
+              Salvar
+            </Button>
+          </Stack>
+        </Box>
+      </div>
+    </div>
   );
 };
-export default SwotEixo;
+
+export default Swot;

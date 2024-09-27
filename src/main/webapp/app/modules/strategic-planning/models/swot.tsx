@@ -6,12 +6,13 @@ export type SwotInstitucional = {
   ameacas: EixosSwot[];
 };
 export type EixosSwot = {
-  id: number;
-  idRO: number;
-  descEixo: number;
-  eixo: 'FORCA' | 'FRAQUEZA' | 'OPORTUNIDADE' | 'AMEACA';
-  criadoEm: Date;
-  atualizadoEm: Date;
+  id?: number;
+  idRO?: number;
+  isEnableRO?: boolean;
+  descEixo?: string;
+  eixo?: 'FORCA' | 'FRAQUEZA' | 'OPORTUNIDADE' | 'AMEACA';
+  criadoEm?: Date;
+  atualizadoEm?: Date;
 };
 
 export interface SwotList {
