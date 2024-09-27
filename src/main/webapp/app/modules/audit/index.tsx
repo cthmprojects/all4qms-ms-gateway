@@ -5,6 +5,7 @@ import { combineReducers, ReducersMapObject } from 'redux';
 import rncReducers from '../rnc/reducers';
 import { HomeAudit } from './pages/home-audit';
 import { PlanningNewEdit } from './pages/planning-new-edit';
+import { ModelAuditNewEdit } from './pages/model-audit-new-edit';
 
 export const AuditRoutes = () => {
   const store = getStore();
@@ -20,7 +21,7 @@ export const AuditRoutes = () => {
         <Route path="planning/edit/:idPlanning" element={<></>} />
         <Route path="auditorship/new" element={<></>} />
         <Route path="auditorship/edit/:idAuditorship" element={<></>} />
-        <Route path="model/new" element={<></>} />
+        <Route path="model/new" element={<ModelAuditNewEdit />} />
         <Route path="model/edit/:idmodel" element={<></>} />
       </ErrorBoundaryRoutes>
     </>
