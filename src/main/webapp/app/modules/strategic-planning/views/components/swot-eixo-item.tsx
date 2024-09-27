@@ -61,18 +61,18 @@ const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title }: SwotEixoProps) =
   };
   const onChangeDescAdded = (value: string, index) => {
     const newListSwotEixo = [...listSwotEixo];
-    newListSwotEixo[index] = { ...newListSwotEixo[index], descEixo: value };
+    newListSwotEixo[index] = { ...newListSwotEixo[index], descricao: value };
     setListSwotEixo(newListSwotEixo);
   };
   const onChangeIsROAdded = (value: boolean, index) => {
     const newListSwotEixo = [...listSwotEixo];
-    newListSwotEixo[index] = { ...newListSwotEixo[index], isEnableRO: value };
+    newListSwotEixo[index] = { ...newListSwotEixo[index], isAnalisar: value };
     setListSwotEixo(newListSwotEixo);
   };
   const removeItem = (index: number) => setListSwotEixo(prev => prev.filter((_, i) => i !== index));
 
   const onAddSwot = () => {
-    setListSwotEixo(prevState => [...prevState, { descEixo: descEixo, isEnableRO: isRoEixo }]);
+    setListSwotEixo(prevState => [...prevState, { descricao: descEixo, isAnalisar: isRoEixo, status: 'PENDENTE' }]);
     setDescEixo('');
     setIsRO(false);
   };
@@ -104,7 +104,7 @@ const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title }: SwotEixoProps) =
                     placeholder={'Descreva aqui as forças'}
                     multiline
                     minRows={2}
-                    value={swotEixo.descEixo}
+                    value={swotEixo.descricao}
                     variant="outlined"
                     sx={{ flexGrow: 1 }}
                   />
@@ -112,7 +112,7 @@ const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title }: SwotEixoProps) =
                     <Typography fontSize={11} textAlign={'center'}>
                       Analisar
                     </Typography>
-                    <Switch checked={swotEixo.isEnableRO} onChange={e => onChangeIsROAdded(e.target.checked, index)} />
+                    <Switch checked={swotEixo.isAnalisar} onChange={e => onChangeIsROAdded(e.target.checked, index)} />
                   </Stack>
                   <IconButton onClick={() => removeItem(index)} style={{ height: '50px', width: '50px' }}>
                     <DeleteOutlined htmlColor="#A23900" style={{ height: '30px', width: '30px' }} />

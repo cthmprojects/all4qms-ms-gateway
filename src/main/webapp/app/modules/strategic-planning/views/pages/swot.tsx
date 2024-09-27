@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { EixosSwot } from '../../models/swot';
 import SwotEixoItem from '../components/swot-eixo-item';
+import { saveLoteSwot } from '../../reducers/swot.reducer';
 
 const Swot = () => {
   const [strenths, setStrenths] = useState<Array<EixosSwot>>([]);
@@ -16,17 +17,37 @@ const Swot = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  // const swots: Array<EixosSwot> = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.entities);
+  const swot: EixosSwot = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.entitie);
+
   useEffect(() => {
     // dispatch);
   }, []);
+
+  useEffect(() => {
+    // dispatch);
+    switch (swot.eixo) {
+      case 'FORCA':
+        setStrenths([swot]);
+        break;
+      case 'FRAQUEZA':
+        setWeaknesses([swot]);
+        break;
+      case 'OPORTUNIDADE':
+        setOpportunities([swot]);
+        break;
+      case 'AMEACA':
+        setThreats([swot]);
+        break;
+    }
+  }, [swot]);
 
   const onBackClicked = (event: React.MouseEvent<HTMLButtonElement>): void => {
     navigate('/strategic-planning');
   };
 
   const onSaveClicked = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    // dispatch(
-    // );
+    dispatch(saveLoteSwot([...strenths, ...weaknesses, ...opportunities, ...threats]));
   };
 
   return (
@@ -47,10 +68,16 @@ const Swot = () => {
             <h2 className="title">SWOT</h2>
           </Box>
           <Stack direction="column" spacing={2}>
-            <SwotEixoItem title={'Strengths / Pontos Fortes'} setListSwotEixo={setStrenths} listSwotEixo={strenths} />
-            <SwotEixoItem title={'Weaknesses / Fraquezas'} setListSwotEixo={setWeaknesses} listSwotEixo={weaknesses} />
-            <SwotEixoItem title={'Opportunities / Oportunidades'} setListSwotEixo={setOpportunities} listSwotEixo={opportunities} />
-            <SwotEixoItem title={'Threats / Ameaças'} setListSwotEixo={setThreats} listSwotEixo={threats} />
+            {strenths.length > 0 && (
+              <SwotEixoItem title={'Strengths / Pontos Fortes'} setListSwotEixo={setStrenths} listSwotEixo={strenths} />
+            )}
+            {weaknesses.length > 0 && (
+              <SwotEixoItem title={'Weaknesses / Fraquezas'} setListSwotEixo={setWeaknesses} listSwotEixo={weaknesses} />
+            )}
+            {opportunities.length > 0 && (
+              <SwotEixoItem title={'Opportunities / Oportunidades'} setListSwotEixo={setOpportunities} listSwotEixo={opportunities} />
+            )}
+            {threats.length > 0 && <SwotEixoItem title={'Threats / Ameaças'} setListSwotEixo={setThreats} listSwotEixo={threats} />}
           </Stack>
 
           <Stack justifyContent="flex-end" gap="20px" flexDirection="row" sx={{ marginTop: '20px' }}>

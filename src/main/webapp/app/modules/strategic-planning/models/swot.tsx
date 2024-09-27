@@ -7,10 +7,11 @@ export type SwotInstitucional = {
 };
 export type EixosSwot = {
   id?: number;
-  idRO?: number;
-  isEnableRO?: boolean;
-  descEixo?: string;
+  idRiscoOportunidade?: number;
+  isAnalisar?: boolean;
+  descricao?: string;
   eixo?: 'FORCA' | 'FRAQUEZA' | 'OPORTUNIDADE' | 'AMEACA';
+  status?: 'PENDENTE' | 'CONTROLADO' | 'EMTRATATIVA';
   criadoEm?: Date;
   atualizadoEm?: Date;
 };
