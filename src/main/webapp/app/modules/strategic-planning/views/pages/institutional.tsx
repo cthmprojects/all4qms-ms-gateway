@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { InstitutionalMission, InstitutionalPolicy, InstitutionalValues, InstitutionalVision } from '../components';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getAllInstitutionalPlans, saveInstitutionalPlan } from '../../reducers/institutional-plan.reducer';
+import { getAllInstitutionalPlans, saveInstitutionalPlan, updateInstitutionalPlan } from '../../reducers/institutional-plan.reducer';
 import { InstitutionalPlan } from '../../models';
 
 const Institutional = () => {
@@ -26,7 +26,12 @@ const Institutional = () => {
       return;
     }
 
-    // TODO: Update values
+    const institutionalPlan: InstitutionalPlan = institutionalPlans[0];
+
+    setMission(institutionalPlan.mission);
+    setPolicy(institutionalPlan.policy);
+    setValues(institutionalPlan.values);
+    setVision(institutionalPlan.vision);
   }, [institutionalPlans]);
 
   const onBackClicked = (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -34,15 +39,29 @@ const Institutional = () => {
   };
 
   const onSaveClicked = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    dispatch(
-      saveInstitutionalPlan({
-        mission: mission,
-        policy: policy,
-        values: values,
-        vision: vision,
-        // TODO: Add ID if it exists
-      })
-    );
+    if (institutionalPlans.length > 0) {
+      const institutionalPlan: InstitutionalPlan = institutionalPlans[0];
+      const id: number = institutionalPlan.id;
+
+      dispatch(
+        updateInstitutionalPlan({
+          id: id,
+          mission: mission,
+          policy: policy,
+          values: values,
+          vision: vision,
+        })
+      );
+    } else {
+      dispatch(
+        saveInstitutionalPlan({
+          mission: mission,
+          policy: policy,
+          values: values,
+          vision: vision,
+        })
+      );
+    }
   };
 
   return (
