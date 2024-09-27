@@ -19,8 +19,10 @@ import AppRoutes from 'app/routes';
 import 'react-datepicker/dist/react-datepicker.css';
 import { registerLocale } from 'react-datepicker';
 import ptBR from 'date-fns/locale/pt-BR';
+import axios from 'axios';
 
 const baseHref = document.querySelector('base').getAttribute('href').replace(/\/$/, '');
+axios.defaults.baseURL = 'http://localhost:3000';
 
 export const App = () => {
   const dispatch = useAppDispatch();

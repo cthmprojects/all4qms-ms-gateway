@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TimelineTabContent } from '../components/timeline-tab-content';
 import { PlanningTabContent } from '../components/planning-tab-content';
+import { ModelTabContent } from '../components/model-tab-content';
+import { ModelListContent } from '../components/model-list-content';
 
 export const HomeAudit = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -38,7 +40,8 @@ export const HomeAudit = () => {
             Item Three
           </CustomTabPanel>
           <CustomTabPanel value={tabIndex} index={3}>
-            Item Four
+            <ModelTabContent />
+            <ModelListContent />
           </CustomTabPanel>
         </div>
       </div>
