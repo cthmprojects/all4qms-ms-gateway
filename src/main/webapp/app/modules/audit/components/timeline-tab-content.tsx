@@ -1,7 +1,9 @@
 import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { Button } from 'reactstrap';
 
 export const TimelineTabContent = () => {
+  const navigate = useNavigate();
   return (
     <div>
       <div style={{ paddingBottom: '30px', display: 'inline-flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
@@ -9,10 +11,10 @@ export const TimelineTabContent = () => {
           variant="contained"
           className="primary-button me-2 infodoc-list-form-field"
           style={{ marginRight: '10px', height: '58px' }}
-          onClick={null}
+          onClick={() => navigate('/audit/timeline/new')}
           title="Novo Registro"
         >
-          Novo Registro
+          Novo Cronograma
         </Button>
 
         <div style={{ flexGrow: 0.4, display: 'inline-flex' }}>
