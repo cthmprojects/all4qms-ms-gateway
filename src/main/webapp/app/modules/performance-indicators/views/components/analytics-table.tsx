@@ -76,7 +76,7 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
             const sumGoals = goals.reduce((acc, value) => acc + value);
             console.log('sumgoals ', sumGoals);
             console.log('filteredGoals.length ', validGoalsQty.length);
-            const goal: number = goals.length > 0 ? sumGoals / validGoalsQty.length : 0;
+            const goal: number = goals.length > 0 && validGoalsQty.length > 0 ? sumGoals / validGoalsQty.length : 0;
 
             const filteredGoals: Array<number> = avgs.filter(g => g > 0);
             const accumulated = filteredGoals.length > 0 ? filteredGoals.reduce((acc, value) => acc + value) / validGoalsQty.length : 0;
