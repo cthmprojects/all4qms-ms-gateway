@@ -5,6 +5,9 @@ import { Doc, DocAttachment, DocumentacaoRequest, InfoDoc, UploadAnexo } from '.
 
 const apiAttachmentUrl = 'services/all4qmsmsinfodoc/api/infodoc/anexos';
 const apiAttachmentDownloadUrl = 'services/all4qmsmsinfodoc/api/infodoc/anexos/download/';
+// const apiInputDocIA = 'https://api-llm-all4qms.cthmprojetos.com/api/inputDoc';
+const apiInputDocIA = '/external-api/api/inputDoc';
+const apiGetLLMResultIA = '/external-api/api/getLLMResult';
 
 // Initial State
 const initialState: EntityState<DocAttachment> = {
@@ -31,6 +34,41 @@ export const downloadAnexo = createAsyncThunk('anexos/get', async (id: number) =
 
 export const getById = createAsyncThunk('anexos/get', async (id: number) => {
   const url = apiAttachmentUrl + '/' + id;
+  return axios.get<DocAttachment>(url);
+});
+
+export const getTokenResumeIA = createAsyncThunk('anexo/get/resume-ia', async (arquivo: File | undefined) => {
+  if (!arquivo) {
+    return null;
+  }
+  try {
+    const formData = new FormData();
+
+    formData.append('file', arquivo);
+    // formData.append('idDocumentacao', String(anexo.idDocumentacao));
+
+    const response = await axios.post(apiInputDocIA, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  } catch (err) {
+    console.error('API getResumeIA: ', err);
+    return false;
+  }
+});
+export interface Iquery {
+  token?: string;
+  nameFile?: string;
+}
+export const getResumeIaByToken = createAsyncThunk('anexos/get', async (params: Iquery) => {
+  let _query = '';
+
+  if (params?.token) _query = `token=${params?.token}`;
+  else _query = `filename=${params?.nameFile}`;
+
+  const url = `${apiGetLLMResultIA}?${_query}`;
   return axios.get<DocAttachment>(url);
 });
 

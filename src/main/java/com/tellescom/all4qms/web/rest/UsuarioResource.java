@@ -4,7 +4,9 @@ import com.tellescom.all4qms.domain.request.UsuarioRequest;
 import com.tellescom.all4qms.domain.request.UsuarioUpdateRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
+import com.tellescom.all4qms.security.AuthoritiesConstants;
 import com.tellescom.all4qms.service.UsuarioService;
+import com.tellescom.all4qms.service.dto.UserDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -271,5 +274,15 @@ public class UsuarioResource {
     @GetMapping("/byprocesso/{id}")
     public Flux<UsuarioDTO> getByProcessoId(@PathVariable("id") Long id) {
         return usuarioService.processarUsuariosPorIdProcesso(id);
+    }
+
+    @GetMapping("/users-by-role")
+    public Mono<ResponseEntity<Flux<UserDTO>>> getAllUsersByAuthority(@RequestParam(required = true) String role) {
+        log.debug("REST request to get all User for an admin");
+        if (role == null || role.isBlank()) {
+            throw new BadRequestAlertException("O parametro role é obrigatório", "user", "emptyparam");
+        }
+
+        return usuarioService.getByRole(role);
     }
 }

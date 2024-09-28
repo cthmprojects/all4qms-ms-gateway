@@ -52,9 +52,11 @@ const Analytics = () => {
     <div className="padding-container">
       <div className="container-style">
         <Breadcrumbs aria-label="breadcrumb">
+          {/* 
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
+          */}
           <Typography className="link">Indicadores Analíticos</Typography>
         </Breadcrumbs>
 

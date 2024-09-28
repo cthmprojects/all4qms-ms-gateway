@@ -131,6 +131,7 @@ const Measurements = () => {
 
               <IndicatorMeasurements
                 frequencies={frequencies}
+                initialFrequency={indicatorGoal?.frequency}
                 initialValues={initialMeasurementValues}
                 onChanged={onIndicatorMeasurementsChanged}
                 unit="PERCENTUAL"

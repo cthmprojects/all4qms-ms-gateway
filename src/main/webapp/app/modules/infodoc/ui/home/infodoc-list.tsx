@@ -50,13 +50,14 @@ import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-d
 import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
 import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
 import { Storage } from 'react-jhipster';
-import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsers, UserQMS } from 'app/entities/usuario/reducers/usuario.reducer';
 import { getUsersAsAdminSGQ } from 'app/modules/administration/user-management/user-management.reducer';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
 import axios, { AxiosResponse } from 'axios';
+import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -143,9 +144,11 @@ const InfodocList = () => {
   const dispatch = useAppDispatch();
   const statusValues = Object.keys(StatusEnum) as Array<keyof typeof StatusEnum>;
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
+  const [userQMS, setUserQMS] = useState<UserQMS>(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const [uploadFileUpdate, setUploadFileUpdate] = useState(false);
   const [usersSGQ, setUsersSGQ] = useState<[]>([]);
   const [idDocUpdating, setIdDocUpdating] = useState(0);
+  const [isSGQ, setIsSGQ] = useState(false);
   const [currentInfodoc, setCurrentInfodoc] = useState<InfoDoc>();
 
   const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
@@ -198,7 +201,7 @@ const InfodocList = () => {
   }, [page]);
 
   const getUsersSGQ = async () => {
-    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+    const resUsers = await dispatch(getUsersAsGQ('ROLE_SGQ'));
     const users_ = (resUsers.payload as AxiosResponse).data || [];
 
     const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
@@ -219,10 +222,15 @@ const InfodocList = () => {
       })
     );
 
-    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    getUsersSGQ();
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' })).then(() => {
+      getUsersSGQ();
+    });
     dispatch(getProcesses());
     dispatch(listEnums());
+
+    const roles = Storage.local.get('ROLE');
+    const _isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(_isSGQ);
   }, []);
 
   useEffect(() => {
@@ -265,7 +273,32 @@ const InfodocList = () => {
     return '-';
   };
 
-  //---------------------------------------------------------------
+  // ---------------------------------------------------------------
+
+  const switchSituationByTab = (newValue: number) => {
+    let type = '';
+    switch (newValue) {
+      case 0:
+        type = 'H';
+        break;
+      case 1:
+        type = 'E';
+        break;
+      case 2:
+        type = 'R';
+        break;
+      case 3:
+        type = 'O';
+        break;
+      case 4:
+        type = 'C';
+        break;
+      default:
+        return '';
+    }
+
+    return type;
+  };
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     // E - Edição
@@ -274,21 +307,7 @@ const InfodocList = () => {
     // O - obsoleto
     // C - cancelado
 
-    let type: string = '';
-    switch (newValue) {
-      case 1:
-        type = 'E';
-        break;
-      case 2:
-        type = 'R';
-        break;
-      case 4:
-        type = 'O';
-        break;
-      case 5:
-        type = 'C';
-        break;
-    }
+    const type: string = switchSituationByTab(newValue);
 
     const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
     dispatch(
@@ -361,14 +380,14 @@ const InfodocList = () => {
   const openDocToValidation = (event, infodoc: InfoDoc) => {
     console.log(infodoc);
 
-    if (infodoc?.movimentacao?.enumStatus == EnumStatusDoc.VALIDACAO || infodoc?.movimentacao?.enumStatus == EnumStatusDoc.VALIDAREV) {
+    if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDACAO || infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDAREV) {
       navigate(`/infodoc/validation/${infodoc.doc.id}`);
     } else if (
-      infodoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVACAO ||
-      infodoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVAREV
+      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVACAO ||
+      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVAREV
     ) {
       navigate(`/infodoc/approval/${infodoc.doc.id}`);
-    } else if (infodoc?.movimentacao?.enumStatus == EnumStatusDoc.EMISSAO) {
+    } else if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.EMISSAO) {
       navigate(`upload-file/update/${infodoc.doc.id}/${infodoc.doc.idArquivo}`);
     }
   };
@@ -408,7 +427,7 @@ const InfodocList = () => {
           },
         })
         .then(result => {
-          var fileDownload = require('js-file-download');
+          const fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
 
@@ -429,16 +448,18 @@ const InfodocList = () => {
   const handleApplyFilters = () => {
     const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa } = filters;
 
+    const _situacao = switchSituationByTab(value);
+
     dispatch(
       listdocs({
         dtIni: dtIni?.toISOString(),
         dtFim: dtFim?.toISOString(),
         idProcesso,
         origem,
-        situacao,
+        situacao: _situacao,
         size: pageSize,
         pesquisa,
-        page: page,
+        page,
       })
     );
   };
@@ -449,10 +470,12 @@ const InfodocList = () => {
       dtFim: null,
       idProcesso: 0,
       origem: null,
-      situacao: null,
+      situacao: switchSituationByTab(value),
       pesquisa: null,
     });
   };
+
+  // const verifyUser = (doc: InfoDoc) => doc.doc.idUsuarioCriacao == userLoginID
 
   const renderTable = () => {
     if (infodocs?.length > 0) {
@@ -476,10 +499,9 @@ const InfodocList = () => {
                     </Tooltip>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.titulo}</TableCell>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>
-                      {' '}
                       {filterUser(infodoc.doc.idUsuarioCriacao)?.nome}
                     </TableCell>
-                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>-</TableCell>
+                    <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.revisao}</TableCell>
                     <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       {infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}
                     </TableCell>
@@ -495,13 +517,13 @@ const InfodocList = () => {
                     </TableCell> */}
                     <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                       <IconButton
-                        title="Editar"
+                        title="Revisar"
                         color="primary"
-                        disabled={infodoc.doc.enumSituacao != 'H'}
+                        disabled={infodoc.doc.enumSituacao !== 'H' || !isSGQ}
                         onClick={event => onEditClicked(infodoc, event)}
                         // onClick={event => openDocToValidation(event, infodoc)}
                       >
-                        <EditIcon sx={{ color: infodoc.doc.enumSituacao != 'H' ? '#cacaca' : '#e6b200' }} />
+                        <EditIcon sx={{ color: infodoc.doc.enumSituacao !== 'H' || !isSGQ ? '#cacaca' : '#e6b200' }} />
                       </IconButton>
                       <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
                         <VisibilityIcon sx={{ color: '#0EBDCE' }} />
@@ -517,15 +539,32 @@ const InfodocList = () => {
                         {/* <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} /> */}
                         <PrintIcon sx={{ color: '#cacaca' }} />
                       </IconButton>
-                      <IconButton
-                        id="btn-cancel"
-                        title="Cancelar"
-                        color="primary"
-                        onClick={event => onCancelClicked(infodoc, event)}
-                        disabled={infodoc.doc.enumSituacao == 'C'}
-                      >
-                        <CancelIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#FF0000' }} />
-                      </IconButton>
+                      <Tooltip title="Somente SGQ e usuario criador podem cancelar">
+                        <Box>
+                          <IconButton
+                            id="btn-cancel"
+                            title="Cancelar"
+                            color="primary"
+                            onClick={event => onCancelClicked(infodoc, event)}
+                            disabled={
+                              infodoc.doc.enumSituacao === 'C' ||
+                              (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
+                              (infodoc.doc.enumSituacao === 'H' && !isSGQ)
+                            }
+                          >
+                            <CancelIcon
+                              sx={{
+                                color:
+                                  infodoc.doc.enumSituacao === 'C' ||
+                                  (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
+                                  (infodoc.doc.enumSituacao === 'H' && !isSGQ)
+                                    ? '#cacaca'
+                                    : '#FF0000',
+                              }}
+                            />
+                          </IconButton>
+                        </Box>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -576,7 +615,7 @@ const InfodocList = () => {
   };
 
   return (
-    //////////////////////////////////////
+    // ////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
         <UploadInfoFileUpdate open={uploadFileUpdate} handleClose={handleCloseUpdateModal} id={idDocUpdating} />
@@ -681,8 +720,8 @@ const InfodocList = () => {
               <Tab label="Lista Mestra" {...a11yProps(0)} />
               <Tab label="Edição" {...a11yProps(1)} />
               <Tab label="Revisão" {...a11yProps(2)} />
-              <Tab label="Obsoleto" {...a11yProps(4)} />
-              <Tab label="Cancelado" {...a11yProps(5)} />
+              <Tab label="Obsoleto" {...a11yProps(3)} />
+              <Tab label="Cancelado" {...a11yProps(4)} />
             </Tabs>
           </Box>
           <CustomTabPanel value={value} index={0}>
@@ -694,10 +733,10 @@ const InfodocList = () => {
           <CustomTabPanel value={value} index={2}>
             {renderTable()}
           </CustomTabPanel>
-          <CustomTabPanel value={value} index={4}>
+          <CustomTabPanel value={value} index={3}>
             {renderTable()}
           </CustomTabPanel>
-          <CustomTabPanel value={value} index={5}>
+          <CustomTabPanel value={value} index={4}>
             {renderTable()}
           </CustomTabPanel>
         </Box>

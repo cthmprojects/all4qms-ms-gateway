@@ -5,8 +5,8 @@ import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { IProcesso } from 'app/shared/model/processo.model';
 
-const apiUrl = 'services/all4qmsmsgateway/api/usuarios/';
-const apiByProcessUrl = 'services/all4qmsmsgateway/api/usuarios/byprocesso';
+const apiUrl = 'api/usuarios/';
+const apiByProcessUrl = 'api/usuarios/byprocesso';
 
 // Initial State
 const initialState: EntityState<IUsuario> = {
@@ -20,7 +20,7 @@ const initialState: EntityState<IUsuario> = {
   totalItems: 0,
 };
 
-export interface UerSGQ {
+export interface UserQMS {
   id: number;
   nome: string;
   email: string;
@@ -84,13 +84,13 @@ export const getUsers = createAsyncThunk('usuario', async ({ page, query, size, 
 
   const queryParams: string = params.join('&');
 
-  const url: string = `${apiUrl}${queryParams ? `?${queryParams}` : ''}`;
+  const url = `${apiUrl}${queryParams ? `?${queryParams}` : ''}`;
 
   return axios.get<Array<IUsuario>>(url, { data: {}, params: {} });
 });
 
 export const getUsersByProcess = createAsyncThunk('usuario/get-byprocess', async (id: number | string) => {
-  return await axios.get<UerSGQ[]>(`${apiByProcessUrl}/${id}`);
+  return await axios.get<UserQMS[]>(`${apiByProcessUrl}/${id}`);
 });
 
 const RncSlice = createEntitySlice({

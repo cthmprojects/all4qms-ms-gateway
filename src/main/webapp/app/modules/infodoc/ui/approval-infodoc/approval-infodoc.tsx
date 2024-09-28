@@ -1,10 +1,13 @@
 /* eslint-disable no-console */
 import {
+  Box,
   Breadcrumbs,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -22,6 +25,7 @@ import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import axios from 'axios';
 import { RejectDocumentDialog } from '../dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../../reducers/enums.reducer';
@@ -31,7 +35,7 @@ import { cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 import { IUsuario } from '../../../../shared/model/usuario.model';
-import { UerSGQ } from '../../../../entities/usuario/reducers/usuario.reducer';
+import { UserQMS } from '../../../../entities/usuario/reducers/usuario.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -97,7 +101,8 @@ export const ApprovalDocument = () => {
   const [keyword, setKeyword] = useState<string>('');
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
-  const [currentUser, _] = useState<UerSGQ>(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentUser, _] = useState<UserQMS>(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -199,6 +204,7 @@ export const ApprovalDocument = () => {
   }, [actualInfoDoc]);
 
   const approveDocument = async () => {
+    setIsLoading(true);
     await axios
       .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/homologacao/${id}`, {
         idDocumento: id,
@@ -207,23 +213,26 @@ export const ApprovalDocument = () => {
       .then(async () => {
         toast.success('Documento aprovado com sucesso!');
         const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == emitter)[0];
-        await dispatch(
+        dispatch(
           notifyEmailInfoDoc({
             to: userEmitter?.email || '', // Email
             subject: 'Documento APROVADO por SGQ',
             tipo: 'APROVAR',
             nomeEmissor: userEmitter?.nome || '', // nome
             tituloDocumento: 'Documento APROVADO',
-            dataCriacao: new Date(Date.now()).toISOString(),
+            dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
             descricao: `Documento aprovado por ${currentUser.nome} com o email ${currentUser.email}`,
             motivoReprovacao: '',
           })
         );
+        setIsLoading(false);
         navigate('/infodoc');
       })
       .catch(e => {
         toast.error('Erro ao aprovar documento.');
+        setIsLoading(false);
       });
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -277,7 +286,7 @@ export const ApprovalDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Aprovação
+                  Em Aprovação
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -287,7 +296,7 @@ export const ApprovalDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em aprovação
+                  {actualInfoDoc?.doc?.revisao && actualInfoDoc?.doc?.revisao > 1 ? 'Revisão' : 'Edição'}
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -321,58 +330,56 @@ export const ApprovalDocument = () => {
               Dados do documento
             </h1>
           </div>
-          <div className="mt-4">
-            <TextField
-              label="Código"
-              name="number"
-              className="me-2"
-              autoComplete="off"
-              value={code}
-              disabled
-              onChange={e => setCode(e.target.value)}
-            />
-            <TextField
-              sx={{ width: '30%' }}
-              label="Título"
-              name="number"
-              className="me-2 ms-2"
-              autoComplete="off"
-              value={title}
-              disabled
-              onChange={e => setTitle(e.target.value)}
-            />
-
-            <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
-              <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} disabled onChange={event => setOrigin(event.target.value)}>
-                {originList?.map((e: any) => (
-                  <MenuItem value={e.nome}>{e.valor}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
-              <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} disabled onChange={event => setSelectedProcess(event.target.value)}>
-                {processes.map((process, i) => (
-                  <MenuItem value={process.id} key={`process-${i}`}>
-                    {process.nome}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              className="ms-2"
-              variant="outlined"
-              size="large"
-              style={{ backgroundColor: idNewFile ? '#e6b200' : '#E0E0E0', color: '#4e4d4d', height: '55px' }}
-              onClick={event => onFileClicked(event)}
-            >
-              <VisibilityIcon className="pe-1 pb-1" />
-              Arquivo
-            </Button>
-          </div>
+          <Grid container gap={2}>
+            <Grid item xs={1}>
+              <TextField label="Código" name="number" autoComplete="off" value={code} disabled onChange={e => setCode(e.target.value)} />
+            </Grid>
+            <Grid item xs>
+              <TextField
+                sx={{ width: '100%' }}
+                label="Título"
+                name="number"
+                autoComplete="off"
+                value={title}
+                disabled
+                onChange={e => setTitle(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }} disabled>
+                <InputLabel>Origem</InputLabel>
+                <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
+                  {originList?.map((e: any) => (
+                    <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }} disabled>
+                <InputLabel>Área / Processo</InputLabel>
+                <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+                  {processes.map((process: any, i) => (
+                    <MenuItem value={process.id} key={`process-${i}`}>
+                      {process.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
+                style={{ backgroundColor: '#E0E0E0', height: '55px' }}
+                onClick={event => onFileClicked(event)}
+              >
+                <AttachFileIcon className="pe-1 pb-1" />
+                Arquivo
+              </Button>
+            </Grid>
+          </Grid>
           <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
             <FormControlLabel
               className="me-2"
@@ -464,6 +471,25 @@ export const ApprovalDocument = () => {
           </div>
         </div>
       </div>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };

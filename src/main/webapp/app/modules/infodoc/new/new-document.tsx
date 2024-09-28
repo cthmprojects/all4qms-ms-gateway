@@ -1,9 +1,12 @@
 import {
+  Box,
   Breadcrumbs,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -15,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsers, UerSGQ } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsers, UserQMS } from 'app/entities/usuario/reducers/usuario.reducer';
 import { IUsuario } from 'app/shared/model/usuario.model';
 import DatePicker from 'react-datepicker';
 import { Textarea, styled } from '@mui/joy';
@@ -41,6 +44,7 @@ import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movime
 import { Storage } from 'react-jhipster';
 import { getUsersAsAdminSGQ } from '../../administration/user-management/user-management.reducer';
 import { getUsersByProcess } from '../../../entities/usuario/reducers/usuario.reducer';
+import { getUsersAsGQ } from '../../../entities/usuario/usuario.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -96,11 +100,12 @@ export const NewDocument = () => {
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
-  const [usersSGQ, setUsersSGQ] = useState<UerSGQ[]>([]);
+  const [usersSGQ, setUsersSGQ] = useState<UserQMS[]>([]);
   const [infoDocId, setInfoDocId] = useState(0);
   const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -117,13 +122,13 @@ export const NewDocument = () => {
   }, []);
 
   const getUsersSGQ = async idProcess => {
-    const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
+    const resUsers = await dispatch(getUsersAsGQ('ROLE_SGQ'));
     const users_ = (resUsers.payload as AxiosResponse).data || [];
 
     const resUsersByProcess = await dispatch(getUsersByProcess(idProcess));
     const usersByProcess_ = (resUsersByProcess.payload as AxiosResponse).data || [];
 
-    const filteredUserByProcess: UerSGQ[] = usersByProcess_.filter((userPro: UerSGQ) =>
+    const filteredUserByProcess: UserQMS[] = usersByProcess_.filter((userPro: UserQMS) =>
       users_.some(firstUser => firstUser.id === userPro.user.id)
     );
     setUsersSGQ(filteredUserByProcess);
@@ -144,6 +149,7 @@ export const NewDocument = () => {
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsLoading(true);
     if (id) {
       const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
 
@@ -164,8 +170,10 @@ export const NewDocument = () => {
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
           fileDownload(file, `${fileName}`);
+          setIsLoading(false);
         });
     }
+    setIsLoading(false);
   };
 
   const cancelDocument = () => {
@@ -178,7 +186,7 @@ export const NewDocument = () => {
       setValidDate(new Date());
     } else {
       setNoValidate(true);
-      setValidDate(new Date(2999, 11, 31));
+      setValidDate(new Date(9999, 11, 31));
       setNotificationPreviousDate('0');
     }
   };
@@ -188,6 +196,7 @@ export const NewDocument = () => {
   };
 
   const saveDocument = () => {
+    setIsLoading(true);
     const newInfoDoc: Doc = {
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
@@ -197,7 +206,7 @@ export const NewDocument = () => {
       titulo: '',
       origem: 'I',
       idProcesso: parseInt(selectedProcess),
-      idArquivo: parseInt(id),
+      idArquivo: parseInt(id!!),
       ignorarValidade: true,
       enumSituacao: 'E',
       tipoDoc: 'MA',
@@ -209,13 +218,20 @@ export const NewDocument = () => {
       newInfoDoc.dataValidade = validDate;
     }
 
-    dispatch(createInfoDoc(newInfoDoc)).then((res: any) => {
-      setInfoDocId(parseInt(res.payload.data?.doc?.id));
-      setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
-    });
+    dispatch(createInfoDoc(newInfoDoc))
+      .then((res: any) => {
+        setIsLoading(false);
+        setInfoDocId(parseInt(res.payload.data?.doc?.id));
+        setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
+      })
+      .catch(err => {
+        console.error('Error new document:', err);
+        setIsLoading(false);
+      });
   };
 
   const fowardDocument = () => {
+    setIsLoading(true);
     const novaMovimentacao: Movimentacao = {
       id: infoDocMovimentacao,
       enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
@@ -229,6 +245,7 @@ export const NewDocument = () => {
     dispatch(atualizarMovimentacao(novaMovimentacao));
 
     dispatch(notifyEmailAllSGQs(usersSGQ));
+    setIsLoading(false);
     navigate('/infodoc');
   };
 
@@ -284,7 +301,7 @@ export const NewDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  em emissão
+                  Em emissão
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -326,64 +343,65 @@ export const NewDocument = () => {
               Dados do documento
             </h1>
           </div>
-          <div className="mt-4">
-            <TextField
-              label="Código"
-              name="number"
-              className="m-2 ms-0"
-              autoComplete="off"
-              value={code}
-              disabled
-              onChange={e => setCode(e.target.value)}
-            />
-            <TextField
-              sx={{ width: '30%' }}
-              label="Título"
-              name="number"
-              className="m-2"
-              autoComplete="off"
-              disabled
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
-            <FormControl sx={{ width: '15%' }} className="m-2">
-              <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                {originList?.map(e => (
-                  <MenuItem value={e.nome}>{e.valor}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
 
-            <FormControl sx={{ width: '25%' }} className="m-2 me-3">
-              <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} onChange={event => changeProcess(event)}>
-                {processes.map((process, i) => (
-                  <MenuItem value={process.id} key={`process-${i}`}>
-                    {process.nome}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              className="m-2 ms-0"
-              variant="outlined"
-              size="large"
-              onClick={event => onFileClicked(event)}
-              style={{ backgroundColor: '#E0E0E0', height: '55px' }}
-            >
-              <VisibilityIcon className="pe-1 pb-1" />
-              Arquivo
-            </Button>
-          </div>
-          <div className="mt-4" style={{ display: 'flex', alignItems: 'center' }}>
+          <Grid container gap={2}>
+            <Grid item xs={1}>
+              <TextField label="Código" name="number" autoComplete="off" value={code} disabled onChange={e => setCode(e.target.value)} />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                sx={{ width: '100%' }}
+                label="Título"
+                name="number"
+                autoComplete="off"
+                value={title}
+                disabled
+                onChange={e => setTitle(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }}>
+                <InputLabel>Origem</InputLabel>
+                <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
+                  {originList?.map((e: any) => (
+                    <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <FormControl style={{ width: '100%' }}>
+                <InputLabel>Área / Processo</InputLabel>
+                <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+                  {processes.map((process: any, i) => (
+                    <MenuItem value={process.id} key={`process-${i}`}>
+                      {process.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
+                style={{ backgroundColor: '#E0E0E0', height: '55px' }}
+                onClick={event => onFileClicked(event)}
+              >
+                <AttachFileIcon className="pe-1 pb-1" />
+                Arquivo
+              </Button>
+            </Grid>
+          </Grid>
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 2, gap: 2 }}>
             <FormControlLabel
               className="me-2"
-              control={<Checkbox disabled checked={noValidate} onClick={() => onNoValidateChanged()} />}
+              control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
+              disabled
             />
-            <FormControl className="me-2 ms-2 mt-4">
+            <FormControl style={{ height: '60px', width: '190px' }} disabled>
               <DatePicker
                 selected={validDate}
                 onChange={date => setValidDate(date)}
@@ -391,18 +409,18 @@ export const NewDocument = () => {
                 dateFormat={'dd/MM/yyyy'}
                 disabled
               />
-              <label htmlFor="" className="rnc-date-label">
+              <label htmlFor="" className="rnc-date-label" style={{ width: '70px' }}>
                 Validade
               </label>
             </FormControl>
-            <FormControl sx={{ width: '15%' }} className="me-2 rnc-form-field ms-2">
+            <FormControl style={{ height: '60px', width: '190px' }} disabled>
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
-                style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd' }}
-                label="Notificar:"
+                disabled
+                style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd', width: '100%' }}
+                label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -411,7 +429,7 @@ export const NewDocument = () => {
                 <MenuItem value="60d">60 dias antes</MenuItem>
               </Select>
             </FormControl>
-          </div>
+          </Box>
           <Textarea
             className="w-100"
             slots={{ textarea: DocumentDescription }}
@@ -430,8 +448,9 @@ export const NewDocument = () => {
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
+              disabled
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>
@@ -466,6 +485,25 @@ export const NewDocument = () => {
           </div>
         </div>
       </div>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };

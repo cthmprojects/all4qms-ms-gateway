@@ -2,36 +2,39 @@ import { Box, Breadcrumbs, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoalMeasured, Indicator, IndicatorGoal, Pair, SummarizedProcess } from '../../models';
+import { Charts } from '../../models/charts';
+import {
+  getComparacaoPeriodo,
+  getMetasPeriodo,
+  getMetasProcesso,
+  getPreenchimentoIndicadores,
+  getQualidadeProducao,
+} from '../../reducers/charts.reducer';
 import { getAllIndicatorGoals } from '../../reducers/indicator-goals.reducer';
 import { getAllIndicators } from '../../reducers/indicators.reducer';
 import { DashboardHeader } from '../components';
 import DashboardBody from '../components/dashboard-body';
 import DashboardBottom from '../components/dashboard-bottom';
-import { Charts } from '../../models/charts';
-import {
-  getMetasPeriodo,
-  getComparacaoPeriodo,
-  getMetasProcesso,
-  getPreenchimentoIndicadores,
-  getQualidadeProducao,
-} from '../../reducers/charts.reducer';
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
+    const now: Date = new Date();
+    const year: number = now.getFullYear();
+
     dispatch(getProcesses());
     dispatch(getAllIndicators());
     dispatch(getAllIndicatorGoals());
-    dispatch(getMetasPeriodo({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
-    dispatch(getQualidadeProducao({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
-    dispatch(getComparacaoPeriodo({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
-    dispatch(getMetasProcesso({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
-    dispatch(getPreenchimentoIndicadores({ idIndicador: 1, idProcesso: 1, anoIndicador: '2024' }));
+    dispatch(getMetasPeriodo({ idIndicador: 1, idProcesso: 1, anoIndicador: year.toString() }));
+    dispatch(getQualidadeProducao({ idIndicador: 1, idProcesso: 1, anoIndicador: year.toString() }));
+    dispatch(getComparacaoPeriodo({ idIndicador: 1, idProcesso: 1, anoIndicador: year.toString() }));
+    dispatch(getMetasProcesso({ idIndicador: 1, idProcesso: 1, anoIndicador: year.toString() }));
+    dispatch(getPreenchimentoIndicadores({ idIndicador: 1, idProcesso: 1, anoIndicador: year.toString() }));
   }, []);
 
   const goToAnalytics = (): void => {
@@ -130,52 +133,55 @@ const Dashboard = () => {
       return [];
     }
 
-    return summarizedProcesses.map(p => {
-      const id: number = p.id;
-      const name: string = p.name;
+    const indicatorsCount: number = indicators.length;
 
-      const currentProcessIndicators: Array<Indicator> = indicators.filter(i => i && i.id && i.processId && i.processId === id);
-      const indicatorIds: Set<number> = new Set<number>(currentProcessIndicators.map(i => i.id));
-      const totalIndicatorGoal: number = indicatorGoals.filter(
-        g => g.indicator && g.indicator.id && indicatorIds.has(g.indicator.id)
-      ).length;
+    let completedIndicators: number = 0;
 
-      let totalIndicatorGoalFeeded = 0;
-      indicatorGoals.forEach(element => {
-        if (element.indicator && element.indicator.id && indicatorIds.has(element.indicator.id)) {
-          let frequencyExpected = 0;
-          switch (element.frequency) {
-            case 'MENSAL':
-              frequencyExpected = 12;
-              break;
-            case 'BIMESTRAL':
-              frequencyExpected = 6;
-              break;
-            case 'TRIMESTRAL':
-              frequencyExpected = 4;
-              break;
-            case 'QUADRIMESTRAL':
-              frequencyExpected = 3;
-              break;
-            case 'SEMESTRAL':
-              frequencyExpected = 2;
-              break;
-            default:
-              frequencyExpected = 1;
-              break;
-          }
-          const feeded = element.measurements.filter(m => m && m != null).length;
-          if (feeded === frequencyExpected) totalIndicatorGoalFeeded += 1;
-        }
-      });
+    for (let i = 0; i < indicators.length; i++) {
+      const indicator: Indicator = indicators[i];
 
-      const value: number = (totalIndicatorGoalFeeded / totalIndicatorGoal) * 100;
+      if (!indicator.id) {
+        continue;
+      }
 
-      return {
-        name: name,
-        value: value,
-      };
-    });
+      const indicatorGoal: IndicatorGoal | null = indicatorGoals.find(ig => ig.indicator && ig.indicator.id === indicator.id);
+
+      if (!indicatorGoal) {
+        continue;
+      }
+
+      let expectedMeasurements: number = 0;
+      if (indicatorGoal.frequency === 'MENSAL') {
+        expectedMeasurements = 12;
+      } else if (indicatorGoal.frequency === 'BIMESTRAL') {
+        expectedMeasurements = 6;
+      } else if (indicatorGoal.frequency === 'TRIMESTRAL') {
+        expectedMeasurements = 4;
+      } else if (indicatorGoal.frequency === 'QUADRIMESTRAL') {
+        expectedMeasurements = 3;
+      } else if (indicatorGoal.frequency === 'SEMESTRAL') {
+        expectedMeasurements = 2;
+      } else {
+        expectedMeasurements = 1;
+      }
+
+      const measurements: number = indicatorGoal.measurements.filter(m => m).length;
+
+      if (measurements === expectedMeasurements) {
+        completedIndicators++;
+      }
+    }
+
+    return [
+      {
+        name: 'Preenchidos',
+        value: completedIndicators,
+      },
+      {
+        name: 'Pendentes',
+        value: indicatorsCount - completedIndicators,
+      },
+    ];
   }, [indicators, indicatorGoals, summarizedProcesses]);
 
   const metasPeriodo = charts.metaPeriodo;
@@ -190,6 +196,7 @@ const Dashboard = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
+
           <Typography className="link">Indicadores</Typography>
         </Breadcrumbs>
 
