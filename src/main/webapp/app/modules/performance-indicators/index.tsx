@@ -15,7 +15,7 @@ const PerformanceIndicatorsRoutes = () => {
   return (
     <>
       <ErrorBoundaryRoutes>
-        <Route path="" element={<Dashboard />} />
+        <Route path="" element={<Analytics />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="indicator" element={<AddIndicator />} />
         <Route path="indicator/:id" element={<>Edit indicator</>} />

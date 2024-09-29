@@ -60,7 +60,7 @@ const AnalyticsHeader = ({ onAddIndicatorRequested, onDashboardRequested, onSear
         Novo Registro
       </Button>
 
-      <Button
+      {/* <Button
         onClick={_ => onDashboardRequested()}
         startIcon={<BarChartOutlined />}
         sx={{
@@ -74,7 +74,7 @@ const AnalyticsHeader = ({ onAddIndicatorRequested, onDashboardRequested, onSear
         variant="outlined"
       >
         Indicadores
-      </Button>
+      </Button> */}
 
       <Autocomplete
         disableClearable
