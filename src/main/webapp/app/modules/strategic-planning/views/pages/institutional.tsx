@@ -1,10 +1,11 @@
 import { Box, Breadcrumbs, Button, Stack, Typography } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
-import { InstitutionalMission, InstitutionalPolicy, InstitutionalValues, InstitutionalVision } from '../components';
-import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getAllInstitutionalPlans, saveInstitutionalPlan, updateInstitutionalPlan } from '../../reducers/institutional-plan.reducer';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { InstitutionalPlan } from '../../models';
+import { getAllInstitutionalPlans, saveInstitutionalPlan, updateInstitutionalPlan } from '../../reducers/institutional-plan.reducer';
+import { InstitutionalMission, InstitutionalPolicy, InstitutionalValues, InstitutionalVision } from '../components';
 
 const Institutional = () => {
   const [mission, setMission] = useState<string>('');
@@ -52,6 +53,7 @@ const Institutional = () => {
           vision: vision,
         })
       );
+      toast.success('Institucional atualizado com sucesso!');
     } else {
       dispatch(
         saveInstitutionalPlan({
@@ -61,6 +63,7 @@ const Institutional = () => {
           vision: vision,
         })
       );
+      toast.success('Institucional salvo com sucesso!');
     }
   };
 
