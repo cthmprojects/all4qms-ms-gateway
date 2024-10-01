@@ -89,7 +89,7 @@ export const RegisterNewEdit = () => {
         </Stack>
       </FormProvider>
       <Stack justifyContent="flex-end" gap="2.5rem" flexDirection="row" mt="20px">
-        <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => navigate('/audit')}>
+        <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => navigate(-1)}>
           Voltar
         </Button>
 

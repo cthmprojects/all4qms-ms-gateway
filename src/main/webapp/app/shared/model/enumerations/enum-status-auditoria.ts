@@ -1,5 +1,5 @@
 export enum EnumStatusAuditoria {
-  PROGRAMADO = 'Programado',
-  REALIZADO = 'Realizado',
-  REPROGRAMADO = 'Reprogramado',
+  PROGRAMADO = 'PROGRAMADO',
+  REALIZADO = 'REALIZADO',
+  REPROGRAMADO = 'REPROGRAMADO',
 }
