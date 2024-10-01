@@ -55,6 +55,7 @@ const Analytics = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
+
           <Typography className="link">Indicadores Analíticos</Typography>
         </Breadcrumbs>
 
