@@ -9,6 +9,7 @@ import { TimelineNewEdit } from './pages/timeline-new-edit';
 import { ModelAuditNewEdit } from './pages/model-audit-new-edit';
 import { RegisterNewEdit } from './pages/register-new-edit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuditMaintenance } from './pages/audit-maintenance';
 
 export const queryClientAudit = new QueryClient();
 
@@ -29,6 +30,7 @@ export const AuditRoutes = () => {
           <Route path="auditorship/edit/:idAuditorship" element={<></>} />
           <Route path="model/new" element={<ModelAuditNewEdit />} />
           <Route path="model/edit/:idmodel" element={<></>} />
+          <Route path="maintenance" element={<AuditMaintenance />} />
         </ErrorBoundaryRoutes>
       </QueryClientProvider>
     </>
