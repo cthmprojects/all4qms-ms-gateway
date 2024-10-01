@@ -9,7 +9,7 @@ import { OnlyRequired } from 'app/shared/model/util';
 import { Rnc } from 'app/modules/rnc/models';
 import { generateRnc } from '../audit-service';
 import { useState } from 'react';
-import { naoConformidadeToRncMs } from '../rnc-helper';
+import { naoConformidadeToRncMs } from '../audit-helper';
 
 type RegisterNcOmItemProps = {
   isNC: boolean;

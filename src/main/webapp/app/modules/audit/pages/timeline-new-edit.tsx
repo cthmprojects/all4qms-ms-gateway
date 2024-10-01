@@ -2,43 +2,59 @@ import { Box, Breadcrumbs, MenuItem, TextField, Typography, Stack } from '@mui/m
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 import { MaterialSelect } from 'app/shared/components/select/material-select';
 import { EnumStatusAuditoria } from 'app/shared/model/enumerations/enum-status-auditoria';
-import { EnumPartes } from 'app/shared/model/enumerations/enun-partes';
+import { EnumPartes } from 'app/shared/model/enumerations/enum-partes';
 import { formField } from 'app/shared/util/form-utils';
 import { useEffect } from 'react';
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from 'reactstrap';
-
-const tste = {
-  id: null,
-  modeloAuditoria: '',
-  dataInicio: new Date('2024-09-09T04:00:00.000Z'),
-  dataFim: new Date('2024-09-20T04:00:00.000Z'),
-  parte: '2ª Parte',
-  status: 'Realizado',
-  escopo: 'TESTE',
-};
+import { queryClientAudit } from '..';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { getCronogramaById, getPaginatedModelos, saveCronograma, updateCronograma } from '../audit-service';
+import { CronogramaAuditoria, ModeloAuditoria } from '../audit-models';
+import { capitalize } from 'lodash';
+import { PartesAdutoria } from 'app/shared/model/constants';
+import { renderValueModelo } from '../audit-helper';
 
 export const TimelineNewEdit = () => {
   const { idTimeline } = useParams();
   const navigate = useNavigate();
 
   // TODO: Nada aqui é o nome real, isso é apenas um exemplo. Por favor facilitar a vida e usar o mesmo nome e props que o backend utilizar
-  const { control, register, setValue, getValues, trigger } = useForm({
-    defaultValues: idTimeline
-      ? tste
-      : {
-          id: null,
-          modeloAuditoria: '',
-          dataInicio: null,
-          dataFim: null,
-          parte: '',
-          status: '',
-          escopo: '',
-        },
+  const { control, register, setValue, getValues, trigger, reset } = useForm<CronogramaAuditoria>({
+    defaultValues: {
+      id: null,
+      modelo: '' as unknown as ModeloAuditoria,
+      periodoInicial: null,
+      periodoFinal: null,
+      parte: '' as EnumPartes,
+      status: '' as EnumStatusAuditoria,
+      escopo: '',
+    },
     mode: 'onBlur',
     reValidateMode: 'onChange',
   });
+
+  const {
+    data: timeline,
+    isPending: isLoadingtimeline,
+    mutate: getTimeline,
+  } = useMutation({
+    mutationFn: () => getCronogramaById(Number(idTimeline)),
+  });
+
+  const { data: auditModels, mutate: getModels } = useMutation({
+    mutationFn: () => getPaginatedModelos({}),
+  });
+
+  useEffect(() => {
+    idTimeline && getTimeline();
+    getModels();
+  }, []);
+
+  useEffect(() => {
+    timeline && reset(timeline);
+  }, [timeline]);
 
   const formr = (name: keyof typeof control._defaultValues) => ({
     ...register(name, { required: 'Campo obrigatório' }),
@@ -48,38 +64,56 @@ export const TimelineNewEdit = () => {
   });
 
   useEffect(() => {
-    register('dataInicio', { required: 'Data inicial obrigatória' });
-    register('dataFim', { required: 'Data final obrigatória' });
+    register('periodoInicial', { required: 'Data inicial obrigatória' });
+    register('periodoFinal', { required: 'Data final obrigatória' });
   }, []);
 
   const { isValid, errors } = useFormState({ control });
 
-  const startDate = useWatch({ control, name: 'dataInicio' });
-  const endDate = useWatch({ control, name: 'dataFim' });
+  const startDate = useWatch({ control, name: 'periodoInicial' });
+  const endDate = useWatch({ control, name: 'periodoFinal' });
 
   const onChangePicker = ([startDate, endDate]) => {
-    setValue('dataInicio', startDate, { shouldValidate: true, shouldTouch: true });
-    setValue('dataFim', endDate, { shouldValidate: true, shouldTouch: true });
+    setValue('periodoInicial', startDate, { shouldValidate: true, shouldTouch: true });
+    setValue('periodoFinal', endDate, { shouldValidate: true, shouldTouch: true });
     onBlurPicker();
   };
   const onBlurPicker = () => {
-    trigger('dataFim');
-    trigger('dataInicio');
+    trigger('periodoInicial');
+    trigger('periodoFinal');
   };
 
-  const doUpdate = () => {};
+  const whenSave = () => {
+    queryClientAudit.invalidateQueries({ queryKey: ['timeline/list'] }); // Invalida as queries para atualizar a lista de registros
+    // onClose();
+    // toast.success('Recurso salvo com sucesso');
+  };
 
-  const doRegister = () => {};
+  const createMutation = useMutation({
+    mutationFn: saveCronograma,
+    onSuccess: whenSave,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateCronograma,
+    onSuccess: whenSave,
+  });
+
+  const doUpdate = () => {
+    updateMutation.mutate(getValues());
+  };
+
+  const doRegister = () => {
+    createMutation.mutate(getValues());
+  };
 
   const save = () => {
-    const payload = getValues();
-    console.log('#### payload', payload);
     if (idTimeline) doUpdate();
     else doRegister();
   };
 
   const contextTitle = `${idTimeline ? 'Editar' : 'Cadastrar'} Cronograma`;
-  const someDateError = errors?.dataInicio?.message || errors?.dataFim?.message;
+  const someDateError = errors?.periodoInicial?.message || errors?.periodoFinal?.message;
 
   return (
     <div className="padding-container">
@@ -98,7 +132,7 @@ export const TimelineNewEdit = () => {
         <Box display="flex" flexDirection="column" gap="24px">
           <Box display="flex" gap="24px" justifyContent="space-between">
             <Controller
-              name="modeloAuditoria"
+              name="modelo"
               control={control}
               rules={{ required: 'Campo obrigatório' }}
               render={renderPayload => (
@@ -106,12 +140,16 @@ export const TimelineNewEdit = () => {
                   variant="outlined"
                   label="Modelo de Auditoria"
                   fullWidth
+                  renderValue={renderValueModelo}
                   {...formField(renderPayload)}
                   sx={{ minWidth: '215px' }}
                 >
-                  <MenuItem key={0} value={1}>
-                    Auditoria Externa XPTO
-                  </MenuItem>
+                  {auditModels?.content?.map(item => (
+                    //@ts-ignore - necessary to load object into value
+                    <MenuItem key={item.id} value={item}>
+                      {item.nomeAuditoria} - {capitalize(item.tipo)} - {capitalize(item.frequencia)}
+                    </MenuItem>
+                  ))}
                 </MaterialSelect>
               )}
             />
@@ -139,9 +177,9 @@ export const TimelineNewEdit = () => {
               rules={{ required: 'Campo obrigatório' }}
               render={renderPayload => (
                 <MaterialSelect variant="outlined" label="Parte" fullWidth {...formField(renderPayload)} sx={{ minWidth: '215px' }}>
-                  {Object.values(EnumPartes).map((value, idx) => (
-                    <MenuItem key={idx} value={value}>
-                      {value}
+                  {PartesAdutoria.map((item, idx) => (
+                    <MenuItem key={idx} value={item.value}>
+                      {item.name}
                     </MenuItem>
                   ))}
                 </MaterialSelect>
@@ -156,23 +194,29 @@ export const TimelineNewEdit = () => {
                 <MaterialSelect variant="outlined" label="Status" fullWidth {...formField(renderPayload)} sx={{ minWidth: '215px' }}>
                   {Object.values(EnumStatusAuditoria).map((value, idx) => (
                     <MenuItem key={idx} value={value}>
-                      {value}
+                      {capitalize(value)}
                     </MenuItem>
                   ))}
                 </MaterialSelect>
               )}
             />
           </Box>
-          <TextField multiline rows="3" fullWidth label="Escopo" {...formr('escopo')} />
+
+          <Controller
+            name="escopo"
+            control={control}
+            rules={{ required: 'Campo obrigatório' }}
+            render={renderPayload => <TextField multiline rows="3" fullWidth label="Escopo" {...formField(renderPayload)} />}
+          />
         </Box>
       </div>
-      <Stack justifyContent="flex-end" gap="20px" flexDirection="row" mt="20px">
-        <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => navigate('/audit')}>
+      <Stack justifyContent="flex-end" gap="2.5rem" flexDirection="row" mt="20px">
+        <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => navigate(-1)}>
           Voltar
         </Button>
 
         <Button
-          disabled={!isValid}
+          disabled={!isValid || createMutation.isPending || updateMutation.isPending}
           type="submit"
           onClick={save}
           variant="contained"

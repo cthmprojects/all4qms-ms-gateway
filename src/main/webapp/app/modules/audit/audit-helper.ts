@@ -1,3 +1,7 @@
+import { EnumPartes } from 'app/shared/model/enumerations/enum-partes';
+import { ModeloAuditoria } from './audit-models';
+import { capitalize } from 'lodash';
+
 export function naoConformidadeToRncMs(payload: any) {
   return {
     detalhesNaoConformidade: payload.descricao,
@@ -5,6 +9,20 @@ export function naoConformidadeToRncMs(payload: any) {
     evidenciaObjetiva: payload.evidencia,
   };
 }
+
+export function partesLabel(name: EnumPartes) {
+  const itens = {
+    PARTE1: '1ª Parte',
+    PARTE2: '2ª Parte',
+    PARTE3: '3ª Parte',
+  };
+  return itens[name];
+}
+
+export const renderValueModelo = (modelo: ModeloAuditoria) => {
+  return `${modelo.nomeAuditoria} - ${capitalize(modelo.tipo)} - ${capitalize(modelo.frequencia)}`;
+};
+
 /**
  * primeiro salva NC/Não conformidade, enviar apenas
  * dtNC (alguma data)

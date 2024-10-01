@@ -8,6 +8,9 @@ import { PlanningNewEdit } from './pages/planning-new-edit';
 import { TimelineNewEdit } from './pages/timeline-new-edit';
 import { ModelAuditNewEdit } from './pages/model-audit-new-edit';
 import { RegisterNewEdit } from './pages/register-new-edit';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+export const queryClientAudit = new QueryClient();
 
 export const AuditRoutes = () => {
   const store = getStore();
@@ -15,17 +18,19 @@ export const AuditRoutes = () => {
 
   return (
     <>
-      <ErrorBoundaryRoutes>
-        <Route path="" element={<HomeAudit />} />
-        <Route path="timeline/new" element={<TimelineNewEdit />} />
-        <Route path="timeline/edit/:idTimeline" element={<TimelineNewEdit />} />
-        <Route path="planning/new" element={<PlanningNewEdit />} />
-        <Route path="planning/edit/:idPlanning" element={<></>} />
-        <Route path="auditorship/new" element={<RegisterNewEdit />} />
-        <Route path="auditorship/edit/:idAuditorship" element={<></>} />
-        <Route path="model/new" element={<ModelAuditNewEdit />} />
-        <Route path="model/edit/:idmodel" element={<></>} />
-      </ErrorBoundaryRoutes>
+      <QueryClientProvider client={queryClientAudit}>
+        <ErrorBoundaryRoutes>
+          <Route path="" element={<HomeAudit />} />
+          <Route path="timeline/new" element={<TimelineNewEdit />} />
+          <Route path="timeline/edit/:idTimeline" element={<TimelineNewEdit />} />
+          <Route path="planning/new" element={<PlanningNewEdit />} />
+          <Route path="planning/edit/:idPlanning" element={<></>} />
+          <Route path="auditorship/new" element={<RegisterNewEdit />} />
+          <Route path="auditorship/edit/:idAuditorship" element={<></>} />
+          <Route path="model/new" element={<ModelAuditNewEdit />} />
+          <Route path="model/edit/:idmodel" element={<></>} />
+        </ErrorBoundaryRoutes>
+      </QueryClientProvider>
     </>
   );
 };
