@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Row } from 'reactstrap';
-import EditIcon from '@mui/icons-material/Edit';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import { Link, useNavigate } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
@@ -33,7 +33,8 @@ import ptBR from 'date-fns/locale/pt-BR';
 
 import { Storage } from 'react-jhipster';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
-import { SwotList } from '../../models/swot';
+import { EixosSwot, SwotList } from '../../models/swot';
+import { getSwotAll } from '../../reducers/swot.reducer';
 
 // Registra a localidade
 registerLocale('pt-BR', ptBR);
@@ -51,7 +52,7 @@ const Home = () => {
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   // const [usersSGQ, setUsersSGQ] = useState<[]>([]);
   const [isSGQ, setIsSGQ] = useState<Boolean>(false);
-  const [swotList, setSwotList] = useState<SwotList[]>([]);
+  // const [swotList, setSwotList] = useState<SwotList[]>([]);
   /**
    * Filters
    */
@@ -59,6 +60,8 @@ const Home = () => {
 
   // const { page, pageSize, paginator } = usePaginator(metasLista.totalElements);
   const { page, pageSize, paginator } = usePaginator(0);
+
+  const swotList: Array<EixosSwot> = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.entities);
 
   useEffect(() => {
     if (page <= 0) {
@@ -72,6 +75,8 @@ const Home = () => {
     const roles = Storage.local.get('ROLE');
     const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
     setIsSGQ(isSGQ);
+
+    dispatch(getSwotAll());
   }, []);
 
   useEffect(() => {
@@ -110,39 +115,39 @@ const Home = () => {
             <Table sx={{ width: '100%' }}>
               <TableHead>
                 <TableRow>
-                  {columns.map(col => (
-                    // eslint-disable-next-line react/jsx-key
-                    <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
+                  {columns.map((col, indx) => (
+                    <TableCell key={indx} align={col != 'Ações' ? 'left' : 'center'}>
+                      {col}
+                    </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {swotList.map((swotItem: SwotList, index) => (
-                  // <Tooltip title={goalResult.meta.metaObjetivo.desdobramentoSGQ}>
-                  <Tooltip title={''}>
+                {swotList &&
+                  swotList.map((swotItem: EixosSwot, index) => (
+                    // <Tooltip title={goalResult.meta.metaObjetivo.desdobramentoSGQ}>
                     <TableRow className="table-row" key={index}>
-                      <TableCell onClick={event => null}>{swotItem.swot}</TableCell>
-                      <TableCell onClick={event => null}>{swotItem.desc}</TableCell>
+                      <TableCell onClick={event => null}>{swotItem.eixo}</TableCell>
+                      <TableCell onClick={event => null}>{swotItem.descricao}</TableCell>
                       <TableCell onClick={event => null}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Switch checked={swotItem.isEnable} />
+                          <Switch checked={swotItem.isAnalisar} />
                         </Box>
                       </TableCell>
                       <TableCell onClick={event => null}>{swotItem.status}</TableCell>
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                         {isSGQ && (
                           <IconButton
-                            title="Editar"
+                            title="Criar Risco e Oportunidade"
                             color="primary"
-                            // onClick={() => navigate(`/goals/edit/${swotItem.idMeta}`, { state: swotItem })}
+                            onClick={() => navigate('/risks-opportunities/risk', { state: { from: 'strategic-planning', data: swotItem } })}
                           >
-                            <EditIcon sx={{ color: '#e6b200' }} />
+                            <EditNoteIcon sx={{ color: '#e6b200' }} />
                           </IconButton>
                         )}
                       </TableCell>
                     </TableRow>
-                  </Tooltip>
-                ))}
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -228,7 +233,7 @@ const Home = () => {
                 label="Status"
               >
                 <MenuItem value={''}>Selecionar</MenuItem>
-                {['PENDENTE', 'CONTROLADO', 'EMTRATATIVA']?.map((status, index) => (
+                {['PENDENTE', 'CONTROLADO', 'TRATATIVA']?.map((status, index) => (
                   <MenuItem key={index} value={status}>
                     {status}
                   </MenuItem>

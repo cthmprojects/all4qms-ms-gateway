@@ -7,10 +7,11 @@ export type SwotInstitucional = {
 };
 export type EixosSwot = {
   id?: number;
-  idRO?: number;
-  isEnableRO?: boolean;
-  descEixo?: string;
-  eixo?: 'FORCA' | 'FRAQUEZA' | 'OPORTUNIDADE' | 'AMEACA';
+  idRiscoOportunidade?: number;
+  isAnalisar?: boolean;
+  descricao?: string;
+  eixo?: 'FORCAS' | 'FRAQUEZAS' | 'OPORTUNIDADES' | 'AMEACAS';
+  status?: 'PENDENTE' | 'CONTROLADO' | 'TRATATIVA';
   criadoEm?: Date;
   atualizadoEm?: Date;
 };
@@ -19,5 +20,5 @@ export interface SwotList {
   swot: string;
   desc: string;
   isEnable: boolean;
-  status: 'PENDENTE' | 'CONTROLADO' | 'EMTRATATIVA';
+  status: 'PENDENTE' | 'CONTROLADO' | 'TRATATIVA';
 }
