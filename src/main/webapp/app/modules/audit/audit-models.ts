@@ -17,3 +17,9 @@ export type ModeloAuditoria = {
   nomeAuditoria: string;
   tipo: string;
 };
+
+export type Auditor = {
+  id?: number;
+  nomeAuditor: string;
+  emailAuditor: string;
+};
