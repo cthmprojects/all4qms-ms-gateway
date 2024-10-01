@@ -71,6 +71,7 @@ export const saveLoteSwot = createAsyncThunk('save/swot-lote', async (listEixoSw
     .catch(error => {
       // Lidar com erros
       console.error('Erro ao fazer as requisições:', error);
+      return [];
     });
 });
 

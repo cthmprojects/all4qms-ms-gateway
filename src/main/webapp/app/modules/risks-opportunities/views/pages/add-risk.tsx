@@ -4,7 +4,7 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ActionPlanEfficacy,
   ActionPlanImplementation,
@@ -13,6 +13,7 @@ import {
   Configuration,
   Enums,
   Ishikawa,
+  RawCompleteAnalysis,
   RawMap,
   RawRiskOpportunity,
   Reason,
@@ -25,10 +26,21 @@ import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { saveRiskOpportunity } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 import { BaseDetails } from '../components';
+import { EixosSwot } from '../../../strategic-planning/models/swot';
+import { AxiosResponse } from 'axios';
+import { toast } from 'react-toastify';
+import { updateSwot } from '../../../strategic-planning/reducers/swot.reducer';
+
+type redirectDataType = {
+  from?: string;
+  data?: EixosSwot;
+};
 
 const AddRisk = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectData = location?.state as redirectDataType;
 
   useEffect(() => {
     dispatch(getProcesses());
@@ -80,7 +92,8 @@ const AddRisk = () => {
   };
 
   const onBack = (): void => {
-    navigate('/risks-opportunities/');
+    if (redirectData.from) navigate(`/${redirectData.from}`);
+    else navigate('/risks-opportunities/');
   };
 
   const onSave = async (
@@ -106,9 +119,17 @@ const AddRisk = () => {
         riskOpportunity: rawRiskOpportunity,
         senderId,
       })
-    );
+    ).then(res => {
+      const resRo: RawCompleteAnalysis = (res.payload as AxiosResponse).data;
+      if (resRo) {
+        toast.error('Riscos & Oportunidades salvos com sucesso!.');
 
-    navigate('/risks-opportunities/');
+        if (redirectData.data) {
+          dispatch(updateSwot({ ...redirectData.data, idRiscoOportunidade: resRo.analise.id }));
+          navigate(`/${redirectData.from}`);
+        } else navigate('/risks-opportunities/');
+      } else toast.error('Tente novamente mais tarde documento.');
+    });
   };
 
   return (
@@ -133,6 +154,7 @@ const AddRisk = () => {
           processes={getSummarizedProcesses()}
           secondConfigurations={severities}
           users={getSummarizedUsers()}
+          swotData={redirectData.data}
           onBack={onBack}
           onSave={onSave}
         />

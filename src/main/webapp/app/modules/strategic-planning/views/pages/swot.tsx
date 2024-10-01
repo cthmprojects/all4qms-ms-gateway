@@ -1,21 +1,24 @@
 import React from 'react';
 import { Box, Breadcrumbs, Button, Stack, Typography } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { InstitutionalMission, InstitutionalPolicy, InstitutionalValues, InstitutionalVision } from '../components';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { EixosSwot } from '../../models/swot';
 import SwotEixoItem from '../components/swot-eixo-item';
 import { saveLoteSwot } from '../../reducers/swot.reducer';
+import { toast } from 'react-toastify';
+import { AxiosResponse } from 'axios';
 
 const Swot = () => {
+  const { idSwot } = useParams();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const [strenths, setStrenths] = useState<Array<EixosSwot>>([]);
   const [weaknesses, setWeaknesses] = useState<Array<EixosSwot>>([]);
   const [opportunities, setOpportunities] = useState<Array<EixosSwot>>([]);
   const [threats, setThreats] = useState<Array<EixosSwot>>([]);
-
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
 
   // const swots: Array<EixosSwot> = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.entities);
   const swot: EixosSwot = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.entitie);
@@ -26,17 +29,19 @@ const Swot = () => {
 
   useEffect(() => {
     // dispatch);
+    if (!swot) return;
+
     switch (swot.eixo) {
-      case 'FORCA':
+      case 'FORCAS':
         setStrenths([swot]);
         break;
-      case 'FRAQUEZA':
+      case 'FRAQUEZAS':
         setWeaknesses([swot]);
         break;
-      case 'OPORTUNIDADE':
+      case 'OPORTUNIDADES':
         setOpportunities([swot]);
         break;
-      case 'AMEACA':
+      case 'AMEACAS':
         setThreats([swot]);
         break;
     }
@@ -47,7 +52,13 @@ const Swot = () => {
   };
 
   const onSaveClicked = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    dispatch(saveLoteSwot([...strenths, ...weaknesses, ...opportunities, ...threats]));
+    dispatch(saveLoteSwot([...strenths, ...weaknesses, ...opportunities, ...threats])).then(res => {
+      const res_ = (res.payload as AxiosResponse).data || [];
+      if (res_?.length > 0) {
+        toast.error('SWOTs salvos com sucesso!.');
+        onBackClicked(event);
+      } else toast.error('Tente novamente mais tarde documento.');
+    });
   };
 
   return (
@@ -68,16 +79,23 @@ const Swot = () => {
             <h2 className="title">SWOT</h2>
           </Box>
           <Stack direction="column" spacing={2}>
-            {strenths.length > 0 && (
-              <SwotEixoItem title={'Strengths / Pontos Fortes'} setListSwotEixo={setStrenths} listSwotEixo={strenths} />
+            {(strenths.length > 0 || !idSwot) && (
+              <SwotEixoItem title={'Strengths / Pontos Fortes'} setListSwotEixo={setStrenths} listSwotEixo={strenths} eixo="FORCAS" />
             )}
-            {weaknesses.length > 0 && (
-              <SwotEixoItem title={'Weaknesses / Fraquezas'} setListSwotEixo={setWeaknesses} listSwotEixo={weaknesses} />
+            {(weaknesses.length > 0 || !idSwot) && (
+              <SwotEixoItem title={'Weaknesses / Fraquezas'} setListSwotEixo={setWeaknesses} listSwotEixo={weaknesses} eixo="FRAQUEZAS" />
             )}
-            {opportunities.length > 0 && (
-              <SwotEixoItem title={'Opportunities / Oportunidades'} setListSwotEixo={setOpportunities} listSwotEixo={opportunities} />
+            {(opportunities.length > 0 || !idSwot) && (
+              <SwotEixoItem
+                title={'Opportunities / Oportunidades'}
+                setListSwotEixo={setOpportunities}
+                listSwotEixo={opportunities}
+                eixo="OPORTUNIDADES"
+              />
             )}
-            {threats.length > 0 && <SwotEixoItem title={'Threats / Ameaças'} setListSwotEixo={setThreats} listSwotEixo={threats} />}
+            {(threats.length > 0 || !idSwot) && (
+              <SwotEixoItem title={'Threats / Ameaças'} setListSwotEixo={setThreats} listSwotEixo={threats} eixo="AMEACAS" />
+            )}
           </Stack>
 
           <Stack justifyContent="flex-end" gap="20px" flexDirection="row" sx={{ marginTop: '20px' }}>

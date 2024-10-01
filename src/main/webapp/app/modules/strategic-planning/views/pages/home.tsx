@@ -34,6 +34,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { Storage } from 'react-jhipster';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
 import { EixosSwot, SwotList } from '../../models/swot';
+import { getSwotAll } from '../../reducers/swot.reducer';
 
 // Registra a localidade
 registerLocale('pt-BR', ptBR);
@@ -74,6 +75,8 @@ const Home = () => {
     const roles = Storage.local.get('ROLE');
     const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
     setIsSGQ(isSGQ);
+
+    dispatch(getSwotAll());
   }, []);
 
   useEffect(() => {
@@ -112,9 +115,10 @@ const Home = () => {
             <Table sx={{ width: '100%' }}>
               <TableHead>
                 <TableRow>
-                  {columns.map(col => (
-                    // eslint-disable-next-line react/jsx-key
-                    <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
+                  {columns.map((col, indx) => (
+                    <TableCell key={indx} align={col != 'Ações' ? 'left' : 'center'}>
+                      {col}
+                    </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
@@ -122,29 +126,27 @@ const Home = () => {
                 {swotList &&
                   swotList.map((swotItem: EixosSwot, index) => (
                     // <Tooltip title={goalResult.meta.metaObjetivo.desdobramentoSGQ}>
-                    <Tooltip title={''}>
-                      <TableRow className="table-row" key={index}>
-                        <TableCell onClick={event => null}>{swotItem.eixo}</TableCell>
-                        <TableCell onClick={event => null}>{swotItem.descricao}</TableCell>
-                        <TableCell onClick={event => null}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Switch checked={swotItem.isAnalisar} />
-                          </Box>
-                        </TableCell>
-                        <TableCell onClick={event => null}>{swotItem.status}</TableCell>
-                        <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
-                          {isSGQ && (
-                            <IconButton
-                              title="Editar"
-                              color="primary"
-                              // onClick={() => navigate(`/goals/edit/${swotItem.idMeta}`, { state: swotItem })}
-                            >
-                              <EditNoteIcon sx={{ color: '#e6b200' }} />
-                            </IconButton>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    </Tooltip>
+                    <TableRow className="table-row" key={index}>
+                      <TableCell onClick={event => null}>{swotItem.eixo}</TableCell>
+                      <TableCell onClick={event => null}>{swotItem.descricao}</TableCell>
+                      <TableCell onClick={event => null}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Switch checked={swotItem.isAnalisar} />
+                        </Box>
+                      </TableCell>
+                      <TableCell onClick={event => null}>{swotItem.status}</TableCell>
+                      <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
+                        {isSGQ && (
+                          <IconButton
+                            title="Criar Risco e Oportunidade"
+                            color="primary"
+                            onClick={() => navigate('/risks-opportunities/risk', { state: { from: 'strategic-planning', data: swotItem } })}
+                          >
+                            <EditNoteIcon sx={{ color: '#e6b200' }} />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
                   ))}
               </TableBody>
             </Table>
@@ -231,7 +233,7 @@ const Home = () => {
                 label="Status"
               >
                 <MenuItem value={''}>Selecionar</MenuItem>
-                {['PENDENTE', 'CONTROLADO', 'EMTRATATIVA']?.map((status, index) => (
+                {['PENDENTE', 'CONTROLADO', 'TRATATIVA']?.map((status, index) => (
                   <MenuItem key={index} value={status}>
                     {status}
                   </MenuItem>

@@ -50,8 +50,9 @@ type SwotEixoProps = {
   title?: string;
   listSwotEixo: EixosSwot[];
   setListSwotEixo: React.Dispatch<React.SetStateAction<EixosSwot[]>>;
+  eixo: 'FORCAS' | 'FRAQUEZAS' | 'OPORTUNIDADES' | 'AMEACAS';
 };
-const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title }: SwotEixoProps) => {
+const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title, eixo }: SwotEixoProps) => {
   const [expanded, setExpanded] = React.useState(true);
   const [descEixo, setDescEixo] = React.useState('');
   const [isRoEixo, setIsRO] = React.useState(false);
@@ -72,7 +73,7 @@ const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title }: SwotEixoProps) =
   const removeItem = (index: number) => setListSwotEixo(prev => prev.filter((_, i) => i !== index));
 
   const onAddSwot = () => {
-    setListSwotEixo(prevState => [...prevState, { descricao: descEixo, isAnalisar: isRoEixo, status: 'PENDENTE' }]);
+    setListSwotEixo(prevState => [...prevState, { descricao: descEixo, isAnalisar: isRoEixo, status: 'PENDENTE', eixo }]);
     setDescEixo('');
     setIsRO(false);
   };
