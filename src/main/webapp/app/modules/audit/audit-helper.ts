@@ -23,6 +23,18 @@ export const renderValueModelo = (modelo: ModeloAuditoria) => {
   return `${modelo.nomeAuditoria} - ${capitalize(modelo.tipo)} - ${capitalize(modelo.frequencia)}`;
 };
 
+export const handleFilter = (payload: Record<string, any>) => {
+  const itens = Object.values(payload).filter(value => !!value);
+  if (!itens.length) return {};
+
+  const params = {};
+  for (const key of Object.keys(payload)) {
+    const value = payload[key];
+    if (value) params[key] = value;
+  }
+  return params;
+};
+
 /**
  * primeiro salva NC/Não conformidade, enviar apenas
  * dtNC (alguma data)

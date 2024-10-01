@@ -2,7 +2,7 @@ import { OnlyRequired } from 'app/shared/model/util';
 import { NonConformityAudit, NonConformityDescriptionSummary, Rnc } from '../rnc/models';
 import axios from 'axios';
 import { PaginatedResponse } from 'app/shared/model/page.model';
-import { CronogramaAuditoria, ModeloAuditoria } from './audit-models';
+import { Auditor, CronogramaAuditoria, ModeloAuditoria } from './audit-models';
 
 type NaoConformidadeRaw = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'>;
 type NaoConformidade = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'> & {
@@ -59,7 +59,7 @@ export async function generateRnc({ auditoria, naoConformidade, raizNaoConformid
 
 // AUDIT REQUESTS
 export const getPaginatedCronograma = async (params: Record<string, number | string>) => {
-  const { data } = await axios.get<PaginatedResponse<CronogramaAuditoria>>(`${AuditBaseUrl}/auditoria/cronogramas`, {
+  const { data } = await axios.get<PaginatedResponse<CronogramaAuditoria>>(`${AuditBaseUrl}/auditoria/cronogramas/filter`, {
     params,
   });
 
@@ -88,3 +88,21 @@ export const getPaginatedModelos = async (params: Record<string, number | string
 
   return data;
 };
+
+export const getPaginatedAuditor = async (params: Record<string, number | string>) => {
+  const { data } = await axios.get<PaginatedResponse<Auditor>>(`${AuditBaseUrl}/auditoria/auditores`, {
+    params,
+  });
+
+  return data;
+};
+
+export async function saveAuditor(auditor: Auditor) {
+  const { data } = await axios.post<Auditor>(`${AuditBaseUrl}/auditoria/auditores`, auditor);
+  return data;
+}
+
+export async function updateAuditor(auditor: Auditor) {
+  const { data } = await axios.put<Auditor>(`${AuditBaseUrl}/auditoria/auditores/${auditor.id}`, auditor);
+  return data;
+}

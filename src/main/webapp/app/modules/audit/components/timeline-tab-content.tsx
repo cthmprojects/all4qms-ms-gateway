@@ -1,11 +1,8 @@
 import {
   Box,
-  FormControl,
   IconButton,
-  InputLabel,
   MenuItem,
   Paper,
-  Select,
   Stack,
   TableBody,
   TableCell,
@@ -28,8 +25,9 @@ import { Edit as EditIcon } from '@mui/icons-material';
 import { EnumStatusAuditoria } from 'app/shared/model/enumerations/enum-status-auditoria';
 
 import DatePicker from 'react-datepicker';
-import { partesLabel, renderValueModelo } from '../audit-helper';
-
+import { handleFilter, partesLabel, renderValueModelo } from '../audit-helper';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useDebounce } from 'use-debounce';
 const columns = ['Modelo de auditoria', 'Data', 'Parte', 'Status', 'Ações'];
 
 const Custom = forwardRef(({ children, onClick }: any, ref) => (
@@ -43,7 +41,7 @@ export const TimelineTabContent = () => {
 
   const { data: timelineList, isLoading: isLoadingtimelineList } = useQuery({
     queryKey: ['timeline/list'],
-    queryFn: () => getPaginatedCronograma({ page, size: pageSize, ...(false ? {} : {}) }),
+    queryFn: () => getPaginatedCronograma({ page, size: pageSize, ...handleFilter(getValues()) }),
     staleTime: 60000, // Dados ficam atualizados por 1 minuto,
   });
 
@@ -51,9 +49,22 @@ export const TimelineTabContent = () => {
 
   const { page, pageSize, paginator } = usePaginator(totaItens);
 
+  const { control, register, getValues, reset } = useForm({
+    defaultValues: {
+      search: '',
+      tipoAuditoria: '',
+      status: '',
+    },
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
+  });
+
+  const form = useWatch({ control });
+  const [filtro] = useDebounce(form, 400);
+
   useEffect(() => {
     queryClientAudit.invalidateQueries({ queryKey: ['timeline/list'] });
-  }, [page, pageSize]);
+  }, [page, pageSize, filtro]);
 
   return (
     <div>
@@ -69,32 +80,44 @@ export const TimelineTabContent = () => {
         </Button>
 
         <Stack gap="12px" flexDirection="row" sx={{ flexGrow: 0.4, display: 'inline-flex' }}>
-          <MaterialSelect onChange={null} label="Tipo de auditoria" fullWidth sx={{ minWidth: '190px' }}>
-            {TiposAuditoria.map(item => (
-              <MenuItem key={item.name} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </MaterialSelect>
+          <Controller
+            name="tipoAuditoria"
+            control={control}
+            render={({ field }) => (
+              <MaterialSelect onChange={null} label="Tipo de auditoria" fullWidth {...field} sx={{ minWidth: '190px' }}>
+                {TiposAuditoria.map(item => (
+                  <MenuItem key={item.name} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </MaterialSelect>
+            )}
+          />
 
-          <MaterialSelect variant="outlined" label="Status" fullWidth sx={{ minWidth: '190px' }}>
-            {Object.values(EnumStatusAuditoria).map((value, idx) => (
-              <MenuItem key={idx} value={value}>
-                {value}
-              </MenuItem>
-            ))}
-          </MaterialSelect>
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <MaterialSelect variant="outlined" label="Status" fullWidth {...field} sx={{ minWidth: '190px' }}>
+                {Object.values(EnumStatusAuditoria).map((value, idx) => (
+                  <MenuItem key={idx} value={value}>
+                    {value}
+                  </MenuItem>
+                ))}
+              </MaterialSelect>
+            )}
+          />
 
-          <TextField label="Pesquisa" style={{ minWidth: '16vw' }} onChange={null} placeholder="Descrição" value={null} />
+          <TextField label="Pesquisa" style={{ minWidth: '16vw' }} placeholder="Descrição" {...register('search')} />
 
           <Button
             variant="contained"
             className="secondary-button rnc-list-form-field"
             style={{ height: '49px' }}
-            onClick={null}
+            onClick={() => reset()}
             title="Pesquisar"
           >
-            Pesquisar
+            LIMPAR
           </Button>
         </Stack>
       </div>
