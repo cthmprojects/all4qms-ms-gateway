@@ -1,24 +1,88 @@
-import { Box, Breadcrumbs, TextField, Typography } from '@mui/material';
-import { Control, useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Autocomplete, Box, Breadcrumbs, Chip, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Controller, useForm } from 'react-hook-form';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Auditor, CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
+import { MaterialSelect } from 'app/shared/components/select/material-select';
+import { formField } from 'app/shared/util/form-utils';
+import { isEqual, renderValueCronograma } from '../audit-helper';
+import { useMutation } from '@tanstack/react-query';
+import { getPaginatedAuditor, getPaginatedCronograma, getPlanejamentoById, persistPlanejamento } from '../audit-service';
+import { SyntheticEvent, useEffect, useState } from 'react';
+import { useDebounce } from 'use-debounce';
+import { Button } from 'reactstrap';
+
+const defaultRule = { required: 'Campo obrigatório' };
+
+function renderOption(auditor: Auditor) {
+  return `${auditor.nomeAuditor} - ${auditor.emailAuditor}`;
+}
 
 export const PlanningNewEdit = () => {
+  const { idPlanning } = useParams();
+
   // TODO: Nada aqui é o nome real, isso é apenas um exemplo. Por favor facilitar a vida e usar o mesmo nome e props que o backend utilizar
-  const { control, register } = useForm({
+  const { control, getValues, reset } = useForm<PlanejamentoAuditoria>({
     defaultValues: {
       id: null,
-      objetivo: '',
-      criterio: null,
+      identificadorPlanejamento: '',
+      objetivoAuditoria: '',
+      criteriosNormas: '',
       auditores: [],
       requisitos: '',
       metodo: '',
       escopo: '',
+      cronograma: '' as unknown as CronogramaAuditoria,
     },
     mode: 'all',
     reValidateMode: 'onChange',
   });
 
-  const formr = (name: keyof typeof control._defaultValues) => ({ ...register(name, { required: 'Campo obrigatório' }), required: true });
+  const navigate = useNavigate();
+
+  const { data: timelines, mutate: getTimelines } = useMutation({
+    mutationFn: () => getPaginatedCronograma({ search: searchCronograma }),
+  });
+
+  const { data: auditors, mutate: getAuditors } = useMutation({
+    mutationFn: () => getPaginatedAuditor({ search }),
+  });
+
+  const { mutate: savePlanejamento } = useMutation({
+    mutationFn: () => persistPlanejamento(getValues()),
+    onSuccess: whenSave,
+  });
+
+  function whenSave(planning: PlanejamentoAuditoria) {
+    !idPlanning && navigate(`/audit/planning/edit/${planning.id}`, { replace: true });
+  }
+
+  const [auditorInput, setAuditorInput] = useState('');
+  const [search] = useDebounce(auditorInput, 400);
+
+  const [cronogramaInput, setCronogramaInput] = useState('');
+  const [searchCronograma] = useDebounce(cronogramaInput, 400);
+
+  const { data: planning, mutate: getPlanning } = useMutation({
+    mutationFn: () => getPlanejamentoById(Number(idPlanning)),
+  });
+
+  useEffect(getAuditors, [search]);
+  useEffect(getTimelines, [searchCronograma]);
+
+  useEffect(() => {
+    idPlanning && getPlanning();
+  }, []);
+
+  useEffect(() => {
+    planning && reset(planning);
+  }, [planning]);
+
+  const location = useLocation();
+
+  function crumbCLick(e: SyntheticEvent) {
+    e.stopPropagation();
+    navigate(-1);
+  }
 
   return (
     <div className="padding-container">
@@ -27,22 +91,146 @@ export const PlanningNewEdit = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Link to={'/audit'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-            Auditoria
-          </Link>
-          <Typography className="link">Cadastrar Planejamento</Typography>
+          <span onClick={crumbCLick}>
+            <Link to="" style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+              Auditoria
+            </Link>
+          </span>
+
+          <Typography className="link">{idPlanning ? 'Editar' : 'Cadastrar'} Planejamento</Typography>
         </Breadcrumbs>
 
-        <h2 className="title">Novo Planejamento</h2>
+        <h2 className="title">{idPlanning ? 'Editar' : 'Novo'} Planejamento</h2>
         <Box display="flex" flexDirection="column" gap="24px">
-          <div></div>
-          <TextField multiline rows="3" fullWidth label="Objetivo da auditoria" {...formr('objetivo')} />
-          <TextField multiline rows="3" fullWidth label="Critérios da Auditoria / Norma de referência" {...formr('criterio')} />
-          <TextField multiline rows="3" fullWidth label="Requisitos" {...formr('requisitos')} />
-          <TextField multiline rows="3" fullWidth label="Método" {...formr('metodo')} />
-          <TextField multiline rows="3" fullWidth label="Escopo" {...formr('escopo')} />
+          <Stack flexDirection="row" gap="4rem">
+            <Controller
+              name="identificadorPlanejamento"
+              control={control}
+              render={renderPayload => (
+                <TextField label="ID Planejamento" {...formField(renderPayload)} disabled sx={{ flexBasis: '35%' }} />
+              )}
+            />
+
+            <Controller
+              name="cronograma"
+              control={control}
+              rules={defaultRule}
+              render={renderPayload => (
+                <MaterialSelect
+                  fullWidth
+                  variant="outlined"
+                  label="Cronograma"
+                  renderValue={renderValueCronograma}
+                  {...formField(renderPayload)}
+                  sx={{ minWidth: '215px' }}
+                >
+                  {timelines?.content?.map(item => (
+                    //@ts-ignore - necessary to load object into value
+                    <MenuItem key={item?.id} value={item}>
+                      {renderValueCronograma(item)}
+                    </MenuItem>
+                  ))}
+                </MaterialSelect>
+              )}
+            />
+          </Stack>
+          <Controller
+            name="objetivoAuditoria"
+            control={control}
+            rules={defaultRule}
+            render={renderPayload => <TextField multiline rows="3" fullWidth label="Objetivo da auditoria" {...formField(renderPayload)} />}
+          />
+          <Controller
+            name="criteriosNormas"
+            control={control}
+            rules={defaultRule}
+            render={renderPayload => (
+              <TextField multiline rows="3" fullWidth label="Critérios da Auditoria / Norma de referência" {...formField(renderPayload)} />
+            )}
+          />
+          <Controller
+            name="requisitos"
+            control={control}
+            rules={defaultRule}
+            render={renderPayload => <TextField multiline rows="3" fullWidth label="Requisitos" {...formField(renderPayload)} />}
+          />
+
+          <Controller
+            name="auditores"
+            control={control}
+            rules={{
+              validate: value => (value && value.length > 0) || 'Selecione pelo menos um auditor',
+            }}
+            render={({ field, fieldState }) => (
+              <Autocomplete
+                multiple
+                filterOptions={x => x} // Evita o filtro padrão
+                getOptionLabel={renderOption}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      {...getTagProps({ index })}
+                      label={option.nomeAuditor} // Customiza o conteúdo da tag (Chip)
+                    />
+                  ))
+                }
+                onInputChange={(_, newInputValue) => {
+                  if (newInputValue.length >= 3) {
+                    setAuditorInput(newInputValue);
+                  }
+                }}
+                options={(auditors as unknown as Auditor[]) || []}
+                filterSelectedOptions
+                onChange={(_, val) => field.onChange(val)}
+                onBlur={field.onBlur}
+                value={field.value}
+                isOptionEqualToValue={isEqual}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label="Auditores"
+                    placeholder="Digite o nome do auditor"
+                    error={!!fieldState?.error?.message}
+                    helperText={fieldState?.error?.message}
+                  />
+                )}
+              />
+            )}
+          />
+
+          <Typography variant="h6">Conhecimentos aplicados</Typography>
+
+          <Controller
+            name="metodo"
+            control={control}
+            rules={defaultRule}
+            render={renderPayload => <TextField multiline rows="3" fullWidth label="Método" {...formField(renderPayload)} />}
+          />
+
+          <Controller
+            name="escopo"
+            control={control}
+            rules={defaultRule}
+            render={renderPayload => <TextField multiline rows="3" fullWidth label="Escopo" {...formField(renderPayload)} />}
+          />
         </Box>
       </div>
+      <Stack justifyContent="flex-end" gap="2.5rem" flexDirection="row" mt="20px">
+        <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => navigate(-1)}>
+          Voltar
+        </Button>
+
+        <Button
+          /* disabled={!isValid || createMutation.isPending || updateMutation.isPending} */
+          type="submit"
+          onClick={() => savePlanejamento()}
+          variant="contained"
+          color="primary"
+          style={{ background: '#e6b200', color: '#4e4d4d' }}
+        >
+          Salvar
+        </Button>
+      </Stack>
     </div>
   );
 };

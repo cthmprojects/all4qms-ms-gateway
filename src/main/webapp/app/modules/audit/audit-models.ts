@@ -23,3 +23,15 @@ export type Auditor = {
   nomeAuditor: string;
   emailAuditor: string;
 };
+
+export type PlanejamentoAuditoria = {
+  id?: number;
+  identificadorPlanejamento?: string;
+  objetivoAuditoria: string;
+  criteriosNormas: string;
+  requisitos: string;
+  metodo: string;
+  escopo: string;
+  cronograma: Partial<CronogramaAuditoria>;
+  auditores: Auditor[];
+};

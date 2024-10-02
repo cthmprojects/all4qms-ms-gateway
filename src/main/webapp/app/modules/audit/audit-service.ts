@@ -2,7 +2,7 @@ import { OnlyRequired } from 'app/shared/model/util';
 import { NonConformityAudit, NonConformityDescriptionSummary, Rnc } from '../rnc/models';
 import axios from 'axios';
 import { PaginatedResponse } from 'app/shared/model/page.model';
-import { Auditor, CronogramaAuditoria, ModeloAuditoria } from './audit-models';
+import { Auditor, CronogramaAuditoria, ModeloAuditoria, PlanejamentoAuditoria } from './audit-models';
 
 type NaoConformidadeRaw = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'>;
 type NaoConformidade = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'> & {
@@ -26,6 +26,13 @@ function parseRawCronograma(payload: any) {
     periodoInicial: new Date(payload.periodoInicial),
     periodoFinal: new Date(payload.periodoFinal),
   } as CronogramaAuditoria;
+}
+
+function parseRawPlanejamento(payload: any) {
+  return {
+    ...payload,
+    cronograma: parseRawCronograma(payload.cronograma),
+  } as PlanejamentoAuditoria;
 }
 
 // RNC REQUESTS
@@ -105,4 +112,30 @@ export async function saveAuditor(auditor: Auditor) {
 export async function updateAuditor(auditor: Auditor) {
   const { data } = await axios.put<Auditor>(`${AuditBaseUrl}/auditoria/auditores/${auditor.id}`, auditor);
   return data;
+}
+
+export const getPaginatedPlanejamento = async (params: Record<string, number | string>) => {
+  const { data } = await axios.get<PaginatedResponse<PlanejamentoAuditoria>>(`${AuditBaseUrl}/auditoria/planejamentos/filter`, {
+    params,
+  });
+  return { ...data, content: data.content.map(parseRawPlanejamento) };
+};
+
+async function savePlanejamento(planejamento: PlanejamentoAuditoria) {
+  const { data } = await axios.post<PlanejamentoAuditoria>(`${AuditBaseUrl}/auditoria/planejamentos`, planejamento);
+  return data;
+}
+
+async function updatePlanejamento(planejamento: PlanejamentoAuditoria) {
+  const { data } = await axios.put<PlanejamentoAuditoria>(`${AuditBaseUrl}/auditoria/planejamentos/${planejamento.id}`, planejamento);
+  return data;
+}
+
+export async function persistPlanejamento(planejamento: PlanejamentoAuditoria) {
+  return await (planejamento?.id ? updatePlanejamento(planejamento) : savePlanejamento(planejamento));
+}
+
+export async function getPlanejamentoById(id: number) {
+  const { data } = await axios.get<PlanejamentoAuditoria>(`${AuditBaseUrl}/auditoria/planejamentos/${id}`);
+  return parseRawPlanejamento(data);
 }
