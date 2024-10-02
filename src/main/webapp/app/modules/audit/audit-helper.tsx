@@ -1,6 +1,7 @@
 import { EnumPartes } from 'app/shared/model/enumerations/enum-partes';
-import { ModeloAuditoria } from './audit-models';
+import { CronogramaAuditoria, ModeloAuditoria } from './audit-models';
 import { capitalize } from 'lodash';
+import { Stack } from '@mui/material';
 
 export function naoConformidadeToRncMs(payload: any) {
   return {
@@ -20,7 +21,18 @@ export function partesLabel(name: EnumPartes) {
 }
 
 export const renderValueModelo = (modelo: ModeloAuditoria) => {
-  return `${modelo.nomeAuditoria} - ${capitalize(modelo.tipo)} - ${capitalize(modelo.frequencia)}`;
+  return `${modelo.nomeAuditoria}, ${capitalize(modelo.tipo)}, ${capitalize(modelo.frequencia)}`;
+};
+
+export const renderValueCronograma = (cron: CronogramaAuditoria) => {
+  // return `CRONOGRAMA: "${partesLabel(cron.parte)}, ${capitalize(cron.status)}" | MODELO: "${renderValueModelo(cron.modelo)}"`;
+
+  return (
+    <Stack>
+      <span>{`CRONOGRAMA: "${partesLabel(cron.parte)}, ${capitalize(cron.status)}"`}</span>
+      <span>{`MODELO: "${renderValueModelo(cron.modelo)}"`}</span>
+    </Stack>
+  );
 };
 
 export const handleFilter = (payload: Record<string, any>) => {
@@ -34,6 +46,10 @@ export const handleFilter = (payload: Record<string, any>) => {
   }
   return params;
 };
+
+export function isEqual(option: any, value: any) {
+  return option.id == value.id;
+}
 
 /**
  * primeiro salva NC/Não conformidade, enviar apenas

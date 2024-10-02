@@ -25,7 +25,7 @@ export const AuditRoutes = () => {
           <Route path="timeline/new" element={<TimelineNewEdit />} />
           <Route path="timeline/edit/:idTimeline" element={<TimelineNewEdit />} />
           <Route path="planning/new" element={<PlanningNewEdit />} />
-          <Route path="planning/edit/:idPlanning" element={<></>} />
+          <Route path="planning/edit/:idPlanning" element={<PlanningNewEdit />} />
           <Route path="auditorship/new" element={<RegisterNewEdit />} />
           <Route path="auditorship/edit/:idAuditorship" element={<></>} />
           <Route path="model/new" element={<ModelAuditNewEdit />} />

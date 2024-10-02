@@ -9,7 +9,7 @@ const ButtonList = () => {
     { icon: <FontAwesomeIcon icon="calendar-check" />, link: 'goals/', legenda: 'Objetivos e Metas', disabled: false },
     { icon: <FontAwesomeIcon icon="file-lines" />, link: '/infodoc', legenda: 'Informação Documentada' },
     { icon: <FontAwesomeIcon icon="crosshairs" />, link: '/risks-opportunities', legenda: 'Riscos e Oportunidades' },
-    { icon: <FontAwesomeIcon icon="location-crosshairs" />, link: '/audit', legenda: 'Auditorias', disabled: false },
+    { icon: <FontAwesomeIcon icon="location-crosshairs" />, link: '/audit?tab=0', legenda: 'Auditorias', disabled: false },
     { icon: <FontAwesomeIcon icon="file-circle-check" />, link: '/rnc', legenda: 'RNC / OM' },
     { icon: <FontAwesomeIcon icon="file-circle-exclamation" />, link: '/performance-indicators', legenda: 'Indicadores de Desempenho' },
     { icon: <FontAwesomeIcon icon="chart-line" />, link: '/strategic-planning', legenda: 'Planejamento Estratégico' },
