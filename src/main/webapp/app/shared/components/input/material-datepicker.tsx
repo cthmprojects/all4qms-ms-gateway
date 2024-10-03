@@ -18,6 +18,8 @@ export const MaterialDatepicker = ({
   selectsRange,
   showMonthDropdown,
   showYearDropdown,
+  showTimeSelect,
+  showTimeSelectOnly,
   error,
   helperText,
   onBlur,
@@ -55,6 +57,8 @@ export const MaterialDatepicker = ({
       showYearDropdown={showYearDropdown}
       required={required}
       onBlur={onBlur}
+      showTimeSelect={showTimeSelect}
+      showTimeSelectOnly={showTimeSelectOnly}
       locale="pt-BR"
       {...(hideHeader ? { renderCustomHeader: () => null } : {})}
       customInput={

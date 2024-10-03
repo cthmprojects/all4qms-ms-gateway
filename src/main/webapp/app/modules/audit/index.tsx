@@ -10,6 +10,7 @@ import { ModelAuditNewEdit } from './pages/model-audit-new-edit';
 import { RegisterNewEdit } from './pages/register-new-edit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuditMaintenance } from './pages/audit-maintenance';
+import { ScheduleNewEdit } from './pages/schedule-new-edit';
 
 export const queryClientAudit = new QueryClient();
 
@@ -26,8 +27,8 @@ export const AuditRoutes = () => {
           <Route path="timeline/edit/:idTimeline" element={<TimelineNewEdit />} />
           <Route path="planning/new" element={<PlanningNewEdit />} />
           <Route path="planning/edit/:idPlanning" element={<PlanningNewEdit />} />
-          <Route path="auditorship/new" element={<RegisterNewEdit />} />
-          <Route path="auditorship/edit/:idAuditorship" element={<></>} />
+          <Route path="planning/:idPlanning/schedule" element={<ScheduleNewEdit />} />
+          <Route path="auditorship/edit/:idSchedule" element={<RegisterNewEdit />} />
           <Route path="model/new" element={<ModelAuditNewEdit />} />
           <Route path="model/edit/:idmodel" element={<ModelAuditNewEdit />} />
           <Route path="maintenance" element={<AuditMaintenance />} />

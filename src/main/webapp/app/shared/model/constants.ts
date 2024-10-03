@@ -8,3 +8,5 @@ export const PartesAdutoria = [
   { value: 'PARTE2', name: '2ª Parte' },
   { value: 'PARTE3', name: '3ª Parte' },
 ];
+
+export const defaultRule = { required: 'Campo obrigatório' };

@@ -2,7 +2,8 @@ import { OnlyRequired } from 'app/shared/model/util';
 import { NonConformityAudit, NonConformityDescriptionSummary, Rnc } from '../rnc/models';
 import axios from 'axios';
 import { PaginatedResponse } from 'app/shared/model/page.model';
-import { Auditor, CronogramaAuditoria, ModeloAuditoria, PlanejamentoAuditoria } from './audit-models';
+import { AgendamentoAuditoria, Auditor, CronogramaAuditoria, ModeloAuditoria, PlanejamentoAuditoria } from './audit-models';
+import { Process } from '../infodoc/models';
 
 type NaoConformidadeRaw = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'>;
 type NaoConformidade = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'> & {
@@ -40,6 +41,15 @@ function parseRawModelo(payload: any) {
     ...payload,
     modelo: parseRawModelo(payload.modelo),
   } as ModeloAuditoria;
+}
+
+function parseRawAgendamento(payload: any) {
+  return {
+    ...payload,
+    dataAuditoria: new Date(payload.dataAuditoria),
+    horaFinal: new Date(payload.horaFinal),
+    horaInicial: new Date(payload.horaInicial),
+  } as AgendamentoAuditoria;
 }
 
 // RNC REQUESTS
@@ -82,7 +92,7 @@ export const getPaginatedCronograma = async (params: Record<string, number | str
 
 export async function saveCronograma(cronograma: CronogramaAuditoria) {
   const { data } = await axios.post<CronogramaAuditoria>(`${AuditBaseUrl}/auditoria/cronogramas`, cronograma);
-  return data;
+  return parseRawCronograma(data);
 }
 
 export async function getCronogramaById(id: number) {
@@ -92,7 +102,7 @@ export async function getCronogramaById(id: number) {
 
 export async function updateCronograma(cronograma: CronogramaAuditoria) {
   const { data } = await axios.put<CronogramaAuditoria>(`${AuditBaseUrl}/auditoria/cronogramas/${cronograma.id}`, cronograma);
-  return data;
+  return parseRawCronograma(data);
 }
 
 export const getPaginatedModelos = async (params: Record<string, number | string>) => {
@@ -150,4 +160,33 @@ export async function getPlanejamentoById(id: number) {
 export async function getModelById(id: number) {
   const { data } = await axios.get<ModeloAuditoria>(`${AuditBaseUrl}/auditoria/modelos/${id}`);
   return parseRawModelo(data);
+}
+
+export async function getProcessos() {
+  const { data } = await axios.get<Array<Process>>(`services/all4qmsmsgateway/api/processos`);
+  return data;
+}
+
+export async function getProcessoById(id: number) {
+  const { data } = await axios.get<Process>(`services/all4qmsmsgateway/api/processos/${id}`);
+  return data;
+}
+
+export const getPaginatedAgendamento = async (params: Record<string, number | string>) => {
+  const { data } = await axios.get<PaginatedResponse<AgendamentoAuditoria>>(`${AuditBaseUrl}/auditoria/agendamentos`, {
+    params,
+  });
+  return { ...data, content: data.content.map(parseRawAgendamento) };
+};
+
+export async function saveAgendamento(agendamento: AgendamentoAuditoria) {
+  const { data } = await axios.post<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos`, agendamento);
+  return parseRawAgendamento(data);
+}
+
+export async function getAgendamentoById(id: number) {
+  const { data } = await axios.get<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos/${id}`);
+  const planejamento = await getPlanejamentoById(data.planejamento.id);
+  data.planejamento = planejamento;
+  return parseRawAgendamento(data);
 }
