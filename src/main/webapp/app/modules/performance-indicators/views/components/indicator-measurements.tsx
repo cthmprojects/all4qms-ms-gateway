@@ -7,17 +7,26 @@ type IndicatorMeasurementsProps = {
   initialFrequency?: string;
   initialValues?: Array<Array<number | null>>;
   unit: string;
+  indicatorYear: string;
   onChanged: (measurements: Array<Array<number | null>>) => void;
 };
 
-const IndicatorMeasurements = ({ frequencies, initialFrequency, initialValues, unit, onChanged }: IndicatorMeasurementsProps) => {
+const IndicatorMeasurements = ({
+  frequencies,
+  initialFrequency,
+  initialValues,
+  indicatorYear,
+  unit,
+  onChanged,
+}: IndicatorMeasurementsProps) => {
   const [frequency, setFrequency] = useState<string | null>(null);
   const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([
-    [null, , null, null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null, null, null],
   ]);
   const [year, setYear] = useState<number | null>(null);
 
   useEffect(() => {
+    console.log('indicatorYear', indicatorYear);
     onChanged(measurements);
   }, [measurements]);
 
@@ -30,6 +39,8 @@ const IndicatorMeasurements = ({ frequencies, initialFrequency, initialValues, u
   }, [initialValues]);
 
   const onIndicatorValuesChanged = (frequency: string, year: number, values: Array<number | null>, idx: number): void => {
+    setYear(year);
+    setFrequency(frequency);
     updateMeasurements(values, idx);
   };
 
@@ -47,6 +58,7 @@ const IndicatorMeasurements = ({ frequencies, initialFrequency, initialValues, u
           frequencies={frequencies}
           initialFrequency={initialFrequency}
           initialValues={[...measurement]}
+          initialYear={indicatorYear}
           inputOnly
           onChanged={(frequency, year, values) => onIndicatorValuesChanged(frequency, year, values, idx)}
           unit={unit}

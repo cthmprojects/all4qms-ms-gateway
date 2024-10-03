@@ -149,6 +149,7 @@ const Measurements = () => {
                     frequencies={frequencies}
                     initialFrequency={indicatorGoal?.frequency}
                     initialValues={initialGoalValues}
+                    indicatorYear={indicatorGoal?.year}
                     onChanged={onIndicatorGoalsChanged}
                     unit="PERCENTUAL"
                   />
@@ -162,6 +163,7 @@ const Measurements = () => {
                     frequencies={frequencies}
                     initialFrequency={indicatorGoal?.frequency}
                     initialValues={initialMeasurementValues}
+                    indicatorYear={indicatorGoal?.year}
                     onChanged={onIndicatorMeasurementsChanged}
                     unit="PERCENTUAL"
                   />

@@ -9,7 +9,7 @@ type IndicatorValuesProps = {
   allowRemoving?: boolean;
   initialFrequency?: string | null;
   initialValues?: Array<number | null>;
-  initialYear?: number | null;
+  initialYear?: string | null;
   inputOnly?: boolean;
   frequencies: Array<string>;
   unit: string;
@@ -68,14 +68,14 @@ const IndicatorValues = ({
       return;
     }
 
-    setYear(initialYear);
+    setYear(Number(initialYear));
   }, [initialYear]);
 
   useEffect(() => {
     if (!years || years.length <= 0 || year) {
       return;
     }
-
+    //setYear(initialYear);
     const now: Date = new Date();
     const currentYear: number = now.getFullYear();
 
