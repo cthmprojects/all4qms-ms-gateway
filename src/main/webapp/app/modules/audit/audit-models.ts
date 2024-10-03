@@ -35,3 +35,26 @@ export type PlanejamentoAuditoria = {
   cronograma: Partial<CronogramaAuditoria>;
   auditores: Auditor[];
 };
+
+export type AgendamentoAuditoria = {
+  id?: number;
+  idProcesso: number;
+  nomeProcesso: string;
+  dataAuditoria: Date;
+  horaInicial: string;
+  horaFinal: string;
+  responsavelAuditoria: number;
+  isReagendado: boolean;
+  justificativaReagendamento?: string;
+  isFinalizado: boolean;
+  planejamento: PlanejamentoAuditoria;
+  auditores: Auditor[];
+  registro?: RegistroAuditoria;
+};
+
+export type RegistroAuditoria = {
+  id?: number;
+  resumoAuditoria: string;
+  numeroNC: string;
+  numeroRelatorio: string;
+};

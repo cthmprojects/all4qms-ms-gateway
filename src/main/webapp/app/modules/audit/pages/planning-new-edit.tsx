@@ -33,8 +33,8 @@ export const PlanningNewEdit = () => {
       escopo: '',
       cronograma: '' as unknown as CronogramaAuditoria,
     },
-    mode: 'all',
-    reValidateMode: 'onChange',
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
   });
 
   const navigate = useNavigate();
@@ -179,7 +179,7 @@ export const PlanningNewEdit = () => {
                     setAuditorInput(newInputValue);
                   }
                 }}
-                options={(auditors as unknown as Auditor[]) || []}
+                options={auditors?.content || []}
                 filterSelectedOptions
                 onChange={(_, val) => field.onChange(val)}
                 onBlur={field.onBlur}
