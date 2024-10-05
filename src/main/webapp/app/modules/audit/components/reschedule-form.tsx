@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { AgendamentoAuditoria } from '../audit-models';
 import { useMutation } from '@tanstack/react-query';
-import { saveAgendamento } from '../audit-service';
 import { useNavigate } from 'react-router-dom';
+import { persistAgendamento } from '../audit-service';
 
 type RescheduleFormProps = {
   onClose: () => void;
@@ -21,7 +21,7 @@ export const RescheduleForm = forwardRef(({ agendamento, onClose }: RescheduleFo
   const navigate = useNavigate();
 
   const { mutate: saveScheduling, isPending: pendingRequest } = useMutation({
-    mutationFn: () => saveAgendamento(getValues()),
+    mutationFn: () => persistAgendamento(getValues()),
     onSuccess: (schedule: AgendamentoAuditoria) => {
       onClose();
       agendamento.id && navigate(`/audit/planning/${schedule.planejamento.id}/schedule?idSchedule=${schedule.id}`, { replace: true });

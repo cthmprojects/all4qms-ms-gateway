@@ -326,6 +326,11 @@ http://stackoverflow.com/questions/23436430/bootstrap-3-input-group-100-width */
   color: #4e4d4d;
 }
 
+.MuiButton-containedSecondary:not(.Mui-disabled) {
+  background-color: #d9d9d9 !important;
+  color: #4e4d4d;
+}
+
 .periodo {
   width: 150px !important;
 }

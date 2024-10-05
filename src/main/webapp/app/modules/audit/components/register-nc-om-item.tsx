@@ -1,38 +1,40 @@
-import { IconButton, Stack, TextField } from '@mui/material';
+import { Button, IconButton, Stack, TextField, Tooltip } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Button } from 'reactstrap';
-import { Controller, useFormContext, useFormState } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { formField } from 'app/shared/util/form-utils';
 import { OnlyRequired } from 'app/shared/model/util';
 import { Rnc } from 'app/modules/rnc/models';
 import { generateRnc } from '../audit-service';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { naoConformidadeToRncMs } from '../audit-helper';
+import { RegistrarAuditoriaForm } from '../audit-models';
 
 type RegisterNcOmItemProps = {
   isNC: boolean;
-  fieldPrefix: string;
+  fieldPrefix: `${'ncList' | 'omList'}.${number}`;
   raizNaoConformidade: OnlyRequired<Rnc>;
+  showGenerateNcButton?: boolean;
 };
 
 const defaultRules = { required: 'Campo obrigatório' };
 
-export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade }: RegisterNcOmItemProps) => {
-  const { control, register, getValues } = useFormContext();
-  const { errors } = useFormState({ control });
+export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade, showGenerateNcButton }: RegisterNcOmItemProps) => {
+  const { control, getValues } = useFormContext<RegistrarAuditoriaForm>();
+  const form = useWatch({ control, name: fieldPrefix });
   const [savedRnc, setSavedRnc] = useState('');
 
-  const formr = (name: keyof typeof control._defaultValues) => ({
-    ...register(name, { required: 'Campo obrigatório' }),
-    required: true,
-    error: !!errors?.[name]?.message,
-    helperText: errors?.[name]?.message as string,
-  });
+  const isInvalid = useMemo(() => Object.values(form || {}).some(val => !val), [form]);
+
+  const tooltip = useMemo(() => {
+    if (!form?.id || isInvalid) return 'Para liberar preencha e salve os três campos ao lado';
+    return '';
+  }, [form, isInvalid]);
 
   async function generateHandler() {
-    const { numeroNC, numeroRelatorio } = getValues();
+    const { base } = getValues();
+    const { numeroNC, numeroRelatorio } = base;
     const auditoria = {
       ocorrenciaAuditoria: numeroNC,
       processoAuditoria: Number(numeroRelatorio),
@@ -82,9 +84,15 @@ export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade }: Reg
           </IconButton>
         </Stack>
         <TextField disabled value={savedRnc} label={`Número da ${isNC ? 'RNC' : 'ROM'}`} />
-        <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={generateHandler}>
-          GERAR {isNC ? 'RNC' : 'ROM'}
-        </Button>
+        {showGenerateNcButton && (
+          <Tooltip title={tooltip}>
+            <span>
+              <Button color="secondary" variant="contained" size="large" disabled={isInvalid} onClick={generateHandler}>
+                GERAR {isNC ? 'RNC' : 'ROM'}
+              </Button>
+            </span>
+          </Tooltip>
+        )}
       </Stack>
     </Stack>
   );
