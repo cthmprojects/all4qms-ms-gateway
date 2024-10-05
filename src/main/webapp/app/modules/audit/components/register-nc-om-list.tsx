@@ -6,15 +6,16 @@ import AddIcon from '@mui/icons-material/Add';
 import { RegisterNcOmItem } from './register-nc-om-item';
 import { OnlyRequired } from 'app/shared/model/util';
 import { Rnc } from 'app/modules/rnc/models';
+import { RegistroAuditoria } from '../audit-models';
 
 type RegisterAuditNcOmListProps = {
-  audit: any;
+  audit: RegistroAuditoria;
   type: 'NC' | 'OM';
   previousList: any[];
   raizNcParcial: OnlyRequired<Omit<Rnc, 'tipoNC'>>;
 };
 
-export const RegisterAuditNcOmList = ({ type, raizNcParcial }: RegisterAuditNcOmListProps) => {
+export const RegisterAuditNcOmList = ({ type, raizNcParcial, audit }: RegisterAuditNcOmListProps) => {
   const isNC = type == 'NC';
   const fieldName = isNC ? 'ncList' : 'omList';
 
@@ -22,10 +23,12 @@ export const RegisterAuditNcOmList = ({ type, raizNcParcial }: RegisterAuditNcOm
   const { fields, prepend } = useFieldArray({ control, name: fieldName });
 
   const add = () => {
-    prepend({});
+    prepend({ descricao: '', requisito: '', evidencia: '' });
   };
   useEffect(() => {
-    if (!fields.length) add();
+    setTimeout(() => {
+      if (!fields.length) add();
+    }, 300);
   }, []);
   return (
     <Box>
@@ -43,6 +46,7 @@ export const RegisterAuditNcOmList = ({ type, raizNcParcial }: RegisterAuditNcOm
                 isNC={isNC}
                 fieldPrefix={`${fieldName}.${index}`}
                 raizNaoConformidade={{ ...raizNcParcial, tipoNC: type }}
+                showGenerateNcButton={!!audit?.id}
               />
             </CardContent>
           </Card>

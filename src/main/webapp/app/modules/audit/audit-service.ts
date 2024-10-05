@@ -2,8 +2,17 @@ import { OnlyRequired } from 'app/shared/model/util';
 import { NonConformityAudit, NonConformityDescriptionSummary, Rnc } from '../rnc/models';
 import axios from 'axios';
 import { PaginatedResponse } from 'app/shared/model/page.model';
-import { AgendamentoAuditoria, Auditor, CronogramaAuditoria, ModeloAuditoria, PlanejamentoAuditoria } from './audit-models';
+import {
+  AgendamentoAuditoria,
+  Auditor,
+  CronogramaAuditoria,
+  ModeloAuditoria,
+  PlanejamentoAuditoria,
+  RegistrarAuditoriaForm,
+  RegistroAuditoria,
+} from './audit-models';
 import { Process } from '../infodoc/models';
+import { IUsuario } from 'app/shared/model/usuario.model';
 
 type NaoConformidadeRaw = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'>;
 type NaoConformidade = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'> & {
@@ -167,6 +176,12 @@ export async function getProcessos() {
   return data;
 }
 
+export async function getUsuarios() {
+  const params = { page: 0, size: 100 };
+  const { data } = await axios.get<Array<IUsuario>>(`/api/usuarios`, { params });
+  return data;
+}
+
 export async function getProcessoById(id: number) {
   const { data } = await axios.get<Process>(`services/all4qmsmsgateway/api/processos/${id}`);
   return data;
@@ -179,14 +194,65 @@ export const getPaginatedAgendamento = async (params: Record<string, number | st
   return { ...data, content: data.content.map(parseRawAgendamento) };
 };
 
-export async function saveAgendamento(agendamento: AgendamentoAuditoria) {
+async function saveAgendamento(agendamento: AgendamentoAuditoria) {
   const { data } = await axios.post<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos`, agendamento);
   return parseRawAgendamento(data);
+}
+
+async function updateAgendamento(agendamento: AgendamentoAuditoria) {
+  const { data } = await axios.put<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos/${agendamento.id}`, agendamento);
+  return parseRawAgendamento(data);
+}
+
+export async function persistAgendamento(agendamento: AgendamentoAuditoria) {
+  const result = await (agendamento?.id ? updateAgendamento(agendamento) : saveAgendamento(agendamento));
+  return result;
+}
+
+export async function getRegistroById(id: number) {
+  const { data } = await axios.get<RegistroAuditoria>(`${AuditBaseUrl}/auditoria/registros/${id}`);
+  return data;
 }
 
 export async function getAgendamentoById(id: number) {
   const { data } = await axios.get<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos/${id}`);
   const planejamento = await getPlanejamentoById(data.planejamento.id);
   data.planejamento = planejamento;
+  if (data.registro?.id) {
+    const registro = await getRegistroById(data.registro?.id);
+    data.registro = registro;
+  }
   return parseRawAgendamento(data);
+}
+
+async function saveRegistro(registro: RegistroAuditoria) {
+  const { data } = await axios.post<RegistroAuditoria>(`${AuditBaseUrl}/auditoria/registros`, registro);
+  return data;
+}
+
+async function updateRegistro(registro: RegistroAuditoria) {
+  const { data } = await axios.put<RegistroAuditoria>(`${AuditBaseUrl}/auditoria/registros/${registro.id}`, registro);
+  return data;
+}
+
+async function persistRegistro(registro: RegistroAuditoria) {
+  const result = await (registro?.id ? updateRegistro(registro) : saveRegistro(registro));
+  return result;
+}
+
+async function saveRegistroAuditoria({ agendamento, base, ncList, omList }: RegistrarAuditoriaForm) {
+  const registro = await persistRegistro(base);
+  const newAgendamento = updateAgendamento({ ...agendamento, registro });
+  return parseRawAgendamento({ ...newAgendamento, registro });
+}
+
+async function updateRegistroAuditoria({ agendamento, base, ncList, omList }: RegistrarAuditoriaForm) {
+  const registro = await persistRegistro(base);
+  const newAgendamento = { ...agendamento, registro };
+  return parseRawAgendamento(newAgendamento);
+}
+
+export async function persistRegistroAuditoria(form: RegistrarAuditoriaForm) {
+  const result = await (form.base?.id ? updateRegistroAuditoria(form) : saveRegistroAuditoria(form));
+  return result;
 }

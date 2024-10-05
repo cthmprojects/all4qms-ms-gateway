@@ -41,8 +41,8 @@ export type AgendamentoAuditoria = {
   idProcesso: number;
   nomeProcesso: string;
   dataAuditoria: Date;
-  horaInicial: string;
-  horaFinal: string;
+  horaInicial: Date;
+  horaFinal: Date;
   responsavelAuditoria: number;
   isReagendado: boolean;
   justificativaReagendamento?: string;
@@ -57,4 +57,11 @@ export type RegistroAuditoria = {
   resumoAuditoria: string;
   numeroNC: string;
   numeroRelatorio: string;
+};
+
+export type RegistrarAuditoriaForm = {
+  agendamento: AgendamentoAuditoria;
+  base: RegistroAuditoria;
+  ncList: any[];
+  omList: any[];
 };

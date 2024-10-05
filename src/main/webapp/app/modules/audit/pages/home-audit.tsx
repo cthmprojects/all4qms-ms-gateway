@@ -1,11 +1,12 @@
 import { Box, Breadcrumbs, Tab, Tabs, Typography } from '@mui/material';
 import { CustomTabPanel } from 'app/shared/components/tabs';
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TimelineTabContent } from '../components/timeline-tab-content';
 import { PlanningTabContent } from '../components/planning-tab-content';
 import { ModelTabContent } from '../components/model-tab-content';
 import { ModelListContent } from '../components/model-list-content';
+import { AuditorshipTabContent } from '../components/auditorship-tab-content';
 
 export const HomeAudit = () => {
   const query = new URLSearchParams(location.search);
@@ -44,7 +45,7 @@ export const HomeAudit = () => {
             <PlanningTabContent />
           </CustomTabPanel>
           <CustomTabPanel value={tabIndex} index={2}>
-            Item Three
+            <AuditorshipTabContent />
           </CustomTabPanel>
           <CustomTabPanel value={tabIndex} index={3}>
             <ModelTabContent />

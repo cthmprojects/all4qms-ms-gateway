@@ -1,62 +1,110 @@
 import { Box, Breadcrumbs, CardHeader, Stack, TextField, Typography } from '@mui/material';
-import { FormProvider, useForm, useFormState, Path } from 'react-hook-form';
+import { FormProvider, useForm, Controller, useWatch } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { RegisterAuditNcOmList } from '../components/register-nc-om-list';
 import { Rnc } from 'app/modules/rnc/models';
 import { OnlyRequired } from 'app/shared/model/util';
 import { Button } from 'reactstrap';
+import { useMutation } from '@tanstack/react-query';
+import { getAgendamentoById, getProcessos, getUsuarios, persistRegistroAuditoria } from '../audit-service';
+import { AgendamentoAuditoria, RegistrarAuditoriaForm, RegistroAuditoria } from '../audit-models';
+import { useEffect, useMemo } from 'react';
+import { ScheduleForm } from '../components/schedule-form';
+import { formField } from 'app/shared/util/form-utils';
+import { defaultRule } from 'app/shared/model/constants';
 // import { useMemo } from 'react';
 
 export const RegisterNewEdit = () => {
-  const { idTimeline } = useParams();
+  const { idSchedule } = useParams();
   const navigate = useNavigate();
 
-  // TODO: Nada aqui é o nome real, isso é apenas um exemplo. Por favor facilitar a vida e usar o mesmo nome e props que o backend utilizar
-  const localForm = useForm({
+  const localForm = useForm<Omit<RegistrarAuditoriaForm, 'base'>>({
     defaultValues: {
-      base: { resumoAuditoria: '', numeroNC: '', numeroRelatorio: '' },
       ncList: [],
       omList: [],
     },
+    mode: 'all',
+    reValidateMode: 'onChange',
+  });
+  const { control, register, getValues, getFieldState, reset, trigger } = localForm;
+
+  const {
+    control: baseControl,
+    formState: baseFormState,
+    getValues: baseGetValues,
+    reset: baseReset,
+  } = useForm<RegistroAuditoria>({
+    defaultValues: { resumoAuditoria: '', numeroNC: '', numeroRelatorio: '' },
     mode: 'onBlur',
     reValidateMode: 'onChange',
   });
-  const { control, register, getValues, getFieldState } = localForm;
+  const audit = useWatch({ control: baseControl }) as RegistroAuditoria;
 
-  const { isValid, errors } = useFormState({ control });
+  useEffect(() => {
+    register('ncList');
+    register('omList');
+  }, []);
 
-  const formr = (name: Path<typeof control._defaultValues>) => {
-    const { error } = getFieldState(name);
-    return {
-      ...register(name, { required: 'Campo obrigatório' }),
-      required: true,
-      error: !!error?.message,
-      helperText: error?.message,
-    };
-  };
+  function onSuccess(agendamento: AgendamentoAuditoria) {
+    agendamento.id && formSchedule.reset(agendamento);
+    reset({ agendamento });
+    agendamento?.registro?.id && baseReset(agendamento.registro);
+  }
+
+  const { mutate: getSchedule, data: schedule } = useMutation({
+    mutationFn: () => getAgendamentoById(Number(idSchedule)),
+    onSuccess,
+  });
+
+  const { data: processes, mutate: listProcesses } = useMutation({
+    mutationFn: () => getProcessos(),
+  });
+
+  const { data: users, mutate: listUsers } = useMutation({
+    mutationFn: () => getUsuarios(),
+  });
+
+  const {
+    data: savedRegister,
+    mutate: saveRegister,
+    isPending,
+  } = useMutation({
+    mutationFn: () => persistRegistroAuditoria({ ...getValues(), base: baseGetValues() }),
+    onSuccess: whenSaveAudit,
+  });
+
+  function whenSaveAudit(scheduleReturn: AgendamentoAuditoria) {
+    reset({ agendamento: scheduleReturn });
+    baseReset(scheduleReturn.registro);
+  }
 
   const raizNaoConformidade: OnlyRequired<Omit<Rnc, 'tipoNC'>> = {
-    dtNC: new Date(),
-    idEmissorNC: 1,
-    idReceptorNC: 1,
-    idUsuarioAtual: 1,
+    dtNC: schedule?.dataAuditoria,
+    idEmissorNC: 1, // talvez usuário atual
+    idReceptorNC: 1, // TODO reponsável agendamento:
+    idUsuarioAtual: 1, //
     possuiReincidencia: true,
     qtdPorques: 0,
-    origemNC: 'AUDITORIA_INTERNA',
-    processoEmissor: 1,
-    processoNC: 1,
+    origemNC: schedule?.planejamento?.cronograma?.modelo?.tipo,
+    processoEmissor: schedule?.idProcesso,
+    processoNC: schedule?.idProcesso,
     statusAtual: 'PREENCHIMENTO',
   };
 
-  // TODO: Verificar se realmente é obrigatório NC e OM
-  /* const { invalid: isBaseInvalid } = getFieldState('base');
-  const { invalid: isNcListInvalid } = getFieldState('ncList');
-  const { invalid: isOmListInvalid } = getFieldState('omList');
+  const formSchedule = useForm<AgendamentoAuditoria>({});
 
-  const isDisabled = useMemo(() => {
-    const {ncList, omList} = getValues()
+  useEffect(() => {
+    listProcesses();
+    listUsers();
+    idSchedule && getSchedule();
+  }, []);
 
-  }, [isBaseInvalid, isNcListInvalid, isOmListInvalid]) */
+  const isSaveButtonDisabled = useMemo(() => {
+    if (audit.id && !baseFormState.isDirty) return true;
+    if (!audit?.id && !baseFormState.isValid) return true;
+
+    return false;
+  }, [baseFormState.isValid, baseFormState.isDirty]);
 
   return (
     <Stack gap="24px" className="padding-container" paddingLeft="3rem" paddingRight="2rem">
@@ -70,23 +118,46 @@ export const RegisterNewEdit = () => {
           </Link>
           <Typography className="link">Registro</Typography>
         </Breadcrumbs>
+        <h2 className="title">Agendamento</h2>
+        <Box>
+          {schedule?.id && (
+            <ScheduleForm formObject={formSchedule} planning={schedule?.planejamento} processes={processes} users={users} disabled />
+          )}
+        </Box>
       </Stack>
 
       <Stack className="container-style">
         <CardHeader title="Registro" />
         <Stack flexDirection="column" gap="26px">
-          <TextField multiline rows="3" fullWidth label="Resumo da auditoria" {...formr('base.resumoAuditoria')} />
+          <Controller
+            name="resumoAuditoria"
+            control={baseControl}
+            rules={defaultRule}
+            render={renderPayload => <TextField multiline rows="3" fullWidth label="Resumo da auditoria" {...formField(renderPayload)} />}
+          />
           <Stack flexDirection="row" gap="26px">
-            <TextField fullWidth label="Número da NC" {...formr('base.numeroNC')} sx={{ flexBasis: '33%' }} />
-            <TextField type="number" fullWidth label="Número do Relatório" {...formr('base.numeroRelatorio')} sx={{ flexBasis: '33%' }} />
+            <Controller
+              name="numeroNC"
+              control={baseControl}
+              rules={defaultRule}
+              render={renderPayload => <TextField fullWidth label="Número da NC" {...formField(renderPayload)} />}
+            />
+            <Controller
+              name="numeroRelatorio"
+              control={baseControl}
+              rules={defaultRule}
+              render={renderPayload => <TextField type="number" fullWidth label="Número do Relatório" {...formField(renderPayload)} />}
+            />
           </Stack>
         </Stack>
       </Stack>
       <FormProvider {...localForm}>
-        <Stack gap="24px">
-          <RegisterAuditNcOmList audit={{}} previousList={[]} type="NC" raizNcParcial={raizNaoConformidade} />
-          <RegisterAuditNcOmList audit={{}} previousList={[]} type="OM" raizNcParcial={raizNaoConformidade} />
-        </Stack>
+        {!isPending && (
+          <Stack gap="24px">
+            <RegisterAuditNcOmList audit={audit} previousList={[]} type="NC" raizNcParcial={raizNaoConformidade} />
+            <RegisterAuditNcOmList audit={audit} previousList={[]} type="OM" raizNcParcial={raizNaoConformidade} />
+          </Stack>
+        )}
       </FormProvider>
       <Stack justifyContent="flex-end" gap="2.5rem" flexDirection="row" mt="20px">
         <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => navigate(-1)}>
@@ -94,9 +165,9 @@ export const RegisterNewEdit = () => {
         </Button>
 
         <Button
-          disabled={!isValid}
+          disabled={isSaveButtonDisabled}
           type="submit"
-          onClick={null}
+          onClick={() => saveRegister()}
           variant="contained"
           color="primary"
           style={{ background: '#e6b200', color: '#4e4d4d' }}
