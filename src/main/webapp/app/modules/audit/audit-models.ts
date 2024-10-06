@@ -32,7 +32,7 @@ export type PlanejamentoAuditoria = {
   requisitos: string;
   metodo: string;
   escopo: string;
-  cronograma: Partial<CronogramaAuditoria>;
+  cronograma: CronogramaAuditoria;
   auditores: Auditor[];
 };
 

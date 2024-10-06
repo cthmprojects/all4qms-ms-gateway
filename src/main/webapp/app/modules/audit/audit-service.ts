@@ -13,6 +13,7 @@ import {
 } from './audit-models';
 import { Process } from '../infodoc/models';
 import { IUsuario } from 'app/shared/model/usuario.model';
+import { addToast } from 'app/shared/util/add-toast';
 
 type NaoConformidadeRaw = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'>;
 type NaoConformidade = Pick<NonConformityDescriptionSummary, 'detalhesNaoConformidade' | 'evidenciaObjetiva' | 'requisitoDescumprido'> & {
@@ -91,61 +92,97 @@ export async function generateRnc({ auditoria, naoConformidade, raizNaoConformid
 }
 
 // AUDIT REQUESTS
-export const getPaginatedCronograma = async (params: Record<string, number | string>) => {
-  const { data } = await axios.get<PaginatedResponse<CronogramaAuditoria>>(`${AuditBaseUrl}/auditoria/cronogramas/filter`, {
-    params,
-  });
+export const getPaginatedCronograma = addToast(
+  async (params: Record<string, any>) => {
+    const { data } = await axios.get<PaginatedResponse<CronogramaAuditoria>>(`${AuditBaseUrl}/auditoria/cronogramas/filter`, {
+      params,
+    });
 
-  return { ...data, content: data.content.map(parseRawCronograma) };
-};
+    return { ...data, content: data.content.map(parseRawCronograma) };
+  },
+  '',
+  'Erro ao consultar cronogramas'
+);
 
-export async function saveCronograma(cronograma: CronogramaAuditoria) {
-  const { data } = await axios.post<CronogramaAuditoria>(`${AuditBaseUrl}/auditoria/cronogramas`, cronograma);
-  return parseRawCronograma(data);
-}
+export const saveCronograma = addToast(
+  async (cronograma: CronogramaAuditoria) => {
+    const { data } = await axios.post<CronogramaAuditoria>(`${AuditBaseUrl}/auditoria/cronogramas`, cronograma);
+    return parseRawCronograma(data);
+  },
+  'Cronograma salvo com sucesso',
+  'Erro ao salvar cronograma'
+);
 
-export async function getCronogramaById(id: number) {
-  const { data } = await axios.get<CronogramaAuditoria>(`${AuditBaseUrl}/auditoria/cronogramas/${id}`);
-  return parseRawCronograma(data);
-}
+export const getCronogramaById = addToast(
+  async (id: number) => {
+    const { data } = await axios.get<CronogramaAuditoria>(`${AuditBaseUrl}/auditoria/cronogramas/${id}`);
+    return parseRawCronograma(data);
+  },
+  '',
+  'Erro ao buscar cronograma'
+);
 
-export async function updateCronograma(cronograma: CronogramaAuditoria) {
-  const { data } = await axios.put<CronogramaAuditoria>(`${AuditBaseUrl}/auditoria/cronogramas/${cronograma.id}`, cronograma);
-  return parseRawCronograma(data);
-}
+export const updateCronograma = addToast(
+  async (cronograma: CronogramaAuditoria) => {
+    const { data } = await axios.put<CronogramaAuditoria>(`${AuditBaseUrl}/auditoria/cronogramas/${cronograma.id}`, cronograma);
+    return parseRawCronograma(data);
+  },
+  'Cronograma salvo com sucesso',
+  'Erro ao atualizar cronograma'
+);
 
-export const getPaginatedModelos = async (params: Record<string, number | string>) => {
-  const { data } = await axios.get<PaginatedResponse<ModeloAuditoria>>(`${AuditBaseUrl}/auditoria/modelos`, {
-    params,
-  });
+export const getPaginatedModelos = addToast(
+  async (params: Record<string, number | string>) => {
+    const { data } = await axios.get<PaginatedResponse<ModeloAuditoria>>(`${AuditBaseUrl}/auditoria/modelos`, {
+      params,
+    });
 
-  return data;
-};
+    return data;
+  },
+  '',
+  'Erro ao consultar modelos'
+);
 
-export const getPaginatedAuditor = async (params: Record<string, number | string>) => {
-  const { data } = await axios.get<PaginatedResponse<Auditor>>(`${AuditBaseUrl}/auditoria/auditores`, {
-    params,
-  });
+export const getPaginatedAuditor = addToast(
+  async (params: Record<string, number | string>) => {
+    const { data } = await axios.get<PaginatedResponse<Auditor>>(`${AuditBaseUrl}/auditoria/auditores`, {
+      params,
+    });
 
-  return data;
-};
+    return data;
+  },
+  '',
+  'Erro ao consultar auditores'
+);
 
-export async function saveAuditor(auditor: Auditor) {
-  const { data } = await axios.post<Auditor>(`${AuditBaseUrl}/auditoria/auditores`, auditor);
-  return data;
-}
+export const saveAuditor = addToast(
+  async (auditor: Auditor) => {
+    const { data } = await axios.post<Auditor>(`${AuditBaseUrl}/auditoria/auditores`, auditor);
+    return data;
+  },
+  'Auditor salvo com sucesso',
+  'Erro ao salvar auditor'
+);
 
-export async function updateAuditor(auditor: Auditor) {
-  const { data } = await axios.put<Auditor>(`${AuditBaseUrl}/auditoria/auditores/${auditor.id}`, auditor);
-  return data;
-}
+export const updateAuditor = addToast(
+  async (auditor: Auditor) => {
+    const { data } = await axios.put<Auditor>(`${AuditBaseUrl}/auditoria/auditores/${auditor.id}`, auditor);
+    return data;
+  },
+  'Auditor salvo com sucesso',
+  'Erro ao atualizar auditor'
+);
 
-export const getPaginatedPlanejamento = async (params: Record<string, number | string>) => {
-  const { data } = await axios.get<PaginatedResponse<PlanejamentoAuditoria>>(`${AuditBaseUrl}/auditoria/planejamentos/filter`, {
-    params,
-  });
-  return { ...data, content: data.content.map(parseRawPlanejamento) };
-};
+export const getPaginatedPlanejamento = addToast(
+  async (params: Record<string, number | string>) => {
+    const { data } = await axios.get<PaginatedResponse<PlanejamentoAuditoria>>(`${AuditBaseUrl}/auditoria/planejamentos/filter`, {
+      params,
+    });
+    return { ...data, content: data.content.map(parseRawPlanejamento) };
+  },
+  '',
+  'Erro ao consultar planejamentos'
+);
 
 async function savePlanejamento(planejamento: PlanejamentoAuditoria) {
   const { data } = await axios.post<PlanejamentoAuditoria>(`${AuditBaseUrl}/auditoria/planejamentos`, planejamento);
@@ -157,42 +194,65 @@ async function updatePlanejamento(planejamento: PlanejamentoAuditoria) {
   return data;
 }
 
-export async function persistPlanejamento(planejamento: PlanejamentoAuditoria) {
-  return await (planejamento?.id ? updatePlanejamento(planejamento) : savePlanejamento(planejamento));
-}
+export const getPlanejamentoById = addToast(
+  async (id: number) => {
+    const { data } = await axios.get<PlanejamentoAuditoria>(`${AuditBaseUrl}/auditoria/planejamentos/${id}`);
+    return parseRawPlanejamento(data);
+  },
+  '',
+  'Erro ao buscar planejamento'
+);
 
-export async function getPlanejamentoById(id: number) {
-  const { data } = await axios.get<PlanejamentoAuditoria>(`${AuditBaseUrl}/auditoria/planejamentos/${id}`);
-  return parseRawPlanejamento(data);
-}
+export const persistPlanejamento = addToast(
+  async (planejamento: PlanejamentoAuditoria) => {
+    return await (planejamento?.id ? updatePlanejamento(planejamento) : savePlanejamento(planejamento));
+  },
+  'Planejamento salvo com sucesso',
+  'Erro ao salvar planejamento'
+);
 
 export async function getModelById(id: number) {
   const { data } = await axios.get<ModeloAuditoria>(`${AuditBaseUrl}/auditoria/modelos/${id}`);
   return parseRawModelo(data);
 }
+export const getProcessos = addToast(
+  async () => {
+    const { data } = await axios.get<Array<Process>>(`services/all4qmsmsgateway/api/processos`);
+    return data;
+  },
+  '',
+  'Erro ao consultar processos'
+);
 
-export async function getProcessos() {
-  const { data } = await axios.get<Array<Process>>(`services/all4qmsmsgateway/api/processos`);
-  return data;
-}
+export const getUsuarios = addToast(
+  async () => {
+    const params = { page: 0, size: 100 };
+    const { data } = await axios.get<Array<IUsuario>>(`/api/usuarios`, { params });
+    return data;
+  },
+  '',
+  'Erro ao consultar usuários'
+);
 
-export async function getUsuarios() {
-  const params = { page: 0, size: 100 };
-  const { data } = await axios.get<Array<IUsuario>>(`/api/usuarios`, { params });
-  return data;
-}
+export const getProcessoById = addToast(
+  async (id: number) => {
+    const { data } = await axios.get<Process>(`services/all4qmsmsgateway/api/processos/${id}`);
+    return data;
+  },
+  '',
+  'Erro ao buscar processo'
+);
 
-export async function getProcessoById(id: number) {
-  const { data } = await axios.get<Process>(`services/all4qmsmsgateway/api/processos/${id}`);
-  return data;
-}
-
-export const getPaginatedAgendamento = async (params: Record<string, number | string>) => {
-  const { data } = await axios.get<PaginatedResponse<AgendamentoAuditoria>>(`${AuditBaseUrl}/auditoria/agendamentos`, {
-    params,
-  });
-  return { ...data, content: data.content.map(parseRawAgendamento) };
-};
+export const getPaginatedAgendamento = addToast(
+  async (params: Record<string, number | string>) => {
+    const { data } = await axios.get<PaginatedResponse<AgendamentoAuditoria>>(`${AuditBaseUrl}/auditoria/agendamentos`, {
+      params,
+    });
+    return { ...data, content: data.content.map(parseRawAgendamento) };
+  },
+  '',
+  'Erro ao consultar agendamentos'
+);
 
 async function saveAgendamento(agendamento: AgendamentoAuditoria) {
   const { data } = await axios.post<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos`, agendamento);
@@ -204,26 +264,38 @@ async function updateAgendamento(agendamento: AgendamentoAuditoria) {
   return parseRawAgendamento(data);
 }
 
-export async function persistAgendamento(agendamento: AgendamentoAuditoria) {
-  const result = await (agendamento?.id ? updateAgendamento(agendamento) : saveAgendamento(agendamento));
-  return result;
-}
+export const persistAgendamento = addToast(
+  async (agendamento: AgendamentoAuditoria) => {
+    const result = await (agendamento?.id ? updateAgendamento(agendamento) : saveAgendamento(agendamento));
+    return result;
+  },
+  'Agendamento salvo com sucesso',
+  'Erro ao salvar agendamento'
+);
 
-export async function getRegistroById(id: number) {
-  const { data } = await axios.get<RegistroAuditoria>(`${AuditBaseUrl}/auditoria/registros/${id}`);
-  return data;
-}
+export const getRegistroById = addToast(
+  async (id: number) => {
+    const { data } = await axios.get<RegistroAuditoria>(`${AuditBaseUrl}/auditoria/registros/${id}`);
+    return data;
+  },
+  '',
+  'Erro ao buscar registro'
+);
 
-export async function getAgendamentoById(id: number) {
-  const { data } = await axios.get<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos/${id}`);
-  const planejamento = await getPlanejamentoById(data.planejamento.id);
-  data.planejamento = planejamento;
-  if (data.registro?.id) {
-    const registro = await getRegistroById(data.registro?.id);
-    data.registro = registro;
-  }
-  return parseRawAgendamento(data);
-}
+export const getAgendamentoById = addToast(
+  async (id: number) => {
+    const { data } = await axios.get<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos/${id}`);
+    const planejamento = await getPlanejamentoById(data.planejamento.id);
+    data.planejamento = planejamento;
+    if (data.registro?.id) {
+      const registro = await getRegistroById(data.registro?.id);
+      data.registro = registro;
+    }
+    return parseRawAgendamento(data);
+  },
+  '',
+  'Erro ao buscar agendamento'
+);
 
 async function saveRegistro(registro: RegistroAuditoria) {
   const { data } = await axios.post<RegistroAuditoria>(`${AuditBaseUrl}/auditoria/registros`, registro);
@@ -252,7 +324,11 @@ async function updateRegistroAuditoria({ agendamento, base, ncList, omList }: Re
   return parseRawAgendamento(newAgendamento);
 }
 
-export async function persistRegistroAuditoria(form: RegistrarAuditoriaForm) {
-  const result = await (form.base?.id ? updateRegistroAuditoria(form) : saveRegistroAuditoria(form));
-  return result;
-}
+export const persistRegistroAuditoria = addToast(
+  async (form: RegistrarAuditoriaForm) => {
+    const result = await (form.base?.id ? updateRegistroAuditoria(form) : saveRegistroAuditoria(form));
+    return result;
+  },
+  'Registro de auditoria salvo com sucesso',
+  'Erro ao salvar registro de auditoria'
+);

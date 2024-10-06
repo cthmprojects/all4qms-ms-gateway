@@ -122,7 +122,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
         <Controller
           name="responsavelAuditoria"
           control={control}
-          rules={defaultRule}
+          rules={{ ...defaultRule, min: { value: 1, message: 'Campo obrigatório' } }}
           render={renderPayload => (
             <MaterialSelect
               variant="outlined"

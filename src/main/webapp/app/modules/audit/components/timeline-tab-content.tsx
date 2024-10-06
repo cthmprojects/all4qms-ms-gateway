@@ -128,7 +128,9 @@ export const TimelineTabContent = () => {
             <TableRow>
               {columns.map(col => (
                 // eslint-disable-next-line react/jsx-key
-                <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
+                <TableCell key={col} align={col != 'Ações' ? 'left' : 'center'}>
+                  {col}
+                </TableCell>
               ))}
             </TableRow>
           </TableHead>
