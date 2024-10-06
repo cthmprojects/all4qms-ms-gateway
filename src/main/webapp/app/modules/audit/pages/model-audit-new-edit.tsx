@@ -1,9 +1,29 @@
 import { Box, Breadcrumbs, FormControl, InputLabel, MenuItem, Select, Tab, Tabs, TextField, Typography } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { EnumTemporal } from 'app/modules/goals-objectives/models/enums';
+import { EnumPartes } from 'app/shared/model/enumerations/enum-partes';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from 'reactstrap';
+import { TiposAuditoria } from 'app/shared/model/constants';
+import { ModeloAuditoria } from '../audit-models';
+import { useForm } from 'react-hook-form';
+
+const defaultRule = { required: 'Campo obrigatório' };
 
 export const ModelAuditNewEdit = () => {
   const navigate = useNavigate();
+  const { idModel } = useParams();
+
+  const { control, reset, getValues } = useForm<ModeloAuditoria>({
+    defaultValues: {
+      id: null,
+      tipo: '',
+      nomeAuditoria: '',
+      frequencia: '',
+    },
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
+  });
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -32,20 +52,22 @@ export const ModelAuditNewEdit = () => {
           <FormControl className="me-2" variant="outlined" fullWidth>
             <InputLabel>Frequência</InputLabel>
             <Select value={null} onChange={null} label="Selecionar" fullWidth>
-              <MenuItem value={0}>Selecionar</MenuItem>
-              <MenuItem key={0} value={1}>
-                Menu 1
-              </MenuItem>
+              {Object.values(EnumTemporal).map((value, idx) => (
+                <MenuItem key={idx} value={value}>
+                  {value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl className="me-2" variant="outlined" fullWidth>
             <InputLabel>Tipo</InputLabel>
             <Select value={null} onChange={null} label="Selecionar" fullWidth>
-              <MenuItem value={0}>Selecionar</MenuItem>
-              <MenuItem key={0} value={1}>
-                Menu 1
-              </MenuItem>
+              {TiposAuditoria.map(item => (
+                <MenuItem key={item.name} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </div>

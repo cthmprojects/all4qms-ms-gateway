@@ -48,7 +48,6 @@ export const HomeAudit = () => {
           </CustomTabPanel>
           <CustomTabPanel value={tabIndex} index={3}>
             <ModelTabContent />
-            <ModelListContent />
           </CustomTabPanel>
         </div>
       </div>

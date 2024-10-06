@@ -35,6 +35,13 @@ function parseRawPlanejamento(payload: any) {
   } as PlanejamentoAuditoria;
 }
 
+function parseRawModelo(payload: any) {
+  return {
+    ...payload,
+    modelo: parseRawModelo(payload.modelo),
+  } as ModeloAuditoria;
+}
+
 // RNC REQUESTS
 async function saveRaizNaoConformidade(raizNaoConformidade: OnlyRequired<Rnc>) {
   const { data } = await axios.post<Rnc>(`${RncBaseUrl}/nao-conformidades`, raizNaoConformidade);
@@ -138,4 +145,9 @@ export async function persistPlanejamento(planejamento: PlanejamentoAuditoria) {
 export async function getPlanejamentoById(id: number) {
   const { data } = await axios.get<PlanejamentoAuditoria>(`${AuditBaseUrl}/auditoria/planejamentos/${id}`);
   return parseRawPlanejamento(data);
+}
+
+export async function getModelById(id: number) {
+  const { data } = await axios.get<ModeloAuditoria>(`${AuditBaseUrl}/auditoria/modelos/${id}`);
+  return parseRawModelo(data);
 }
