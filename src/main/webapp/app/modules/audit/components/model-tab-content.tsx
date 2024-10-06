@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, IconButton, MenuItem, Stack, TextField } from '@mui/material';
 import { Button } from 'reactstrap';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { MaterialSelect } from 'app/shared/components/select/material-select';
 import { TiposAuditoria } from 'app/shared/model/constants';
 import { EnumTemporal } from 'app/modules/goals-objectives/models/enums';
@@ -11,9 +11,10 @@ import { getPaginatedModelos } from '../audit-service';
 import { handleFilter } from '../audit-helper';
 import { Row } from 'reactstrap';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ModeloAuditoria } from '../audit-models';
 import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
+import { queryClientAudit } from '..';
 
 export const ModelTabContent = () => {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ export const ModelTabContent = () => {
     reValidateMode: 'onBlur',
   });
 
+  const filtro = useWatch({ control });
+
   const columns = ['Tipo de Auditoria', 'Frequência', 'Tipo', 'Ações'];
 
   const { data: modelList, isLoading: isLoadingmodelList } = useQuery({
@@ -38,6 +41,10 @@ export const ModelTabContent = () => {
 
   const totaItens = useMemo(() => modelList?.totalElements || 0, [modelList?.totalElements]);
   const { page, pageSize, paginator } = usePaginator(totaItens);
+
+  useEffect(() => {
+    queryClientAudit.invalidateQueries({ queryKey: ['model/list'] });
+  }, [page, pageSize, filtro]);
 
   return (
     <div>
@@ -55,7 +62,7 @@ export const ModelTabContent = () => {
         <div style={{ flexGrow: 0.4, display: 'inline-flex' }}>
           <Stack gap="12px" flexDirection="row" sx={{ flexGrow: 0.4, display: 'inline-flex' }}>
             <Controller
-              name="tipoAuditoria"
+              name="tipo"
               control={control}
               render={({ field }) => (
                 <MaterialSelect onChange={null} label="Tipo de auditoria" fullWidth {...field} sx={{ minWidth: '190px' }}>
@@ -95,36 +102,38 @@ export const ModelTabContent = () => {
             </Button>
           </Stack>
         </div>
-
-        <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
-          <Table sx={{ width: '100%' }}>
-            <TableHead>
-              <TableRow>
-                {columns.map(col => (
-                  // eslint-disable-next-line react/jsx-key
-                  <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {modelList?.content.map((model: ModeloAuditoria, index) => (
-                <TableRow className="table-row" key={model.id}>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <IconButton title="Editar" color="primary" onClick={() => navigate(`/audit/model/edit/${model.id}`)}>
-                        <EditIcon sx={{ color: '#e6b200' }} />
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
-          {paginator}
-        </Row>
       </div>
+      <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
+        <Table sx={{ width: '100%' }}>
+          <TableHead>
+            <TableRow>
+              {columns.map(col => (
+                // eslint-disable-next-line react/jsx-key
+                <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {modelList?.content.map((model: ModeloAuditoria, index) => (
+              <TableRow className="table-row" key={model.id}>
+                <TableCell>{model.nomeAuditoria}</TableCell>
+                <TableCell>{model.frequencia}</TableCell>
+                <TableCell>{model.tipo}</TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <IconButton title="Editar" color="primary" onClick={() => navigate(`/audit/model/edit/${model.id}`)}>
+                      <EditIcon sx={{ color: '#e6b200' }} />
+                    </IconButton>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
+        {paginator}
+      </Row>
     </div>
   );
 };

@@ -1,13 +1,15 @@
-import { Box, Breadcrumbs, FormControl, InputLabel, MenuItem, Select, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Breadcrumbs, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { EnumTemporal } from 'app/modules/goals-objectives/models/enums';
-import { EnumPartes } from 'app/shared/model/enumerations/enum-partes';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from 'reactstrap';
 import { TiposAuditoria } from 'app/shared/model/constants';
 import { ModeloAuditoria } from '../audit-models';
-import { useForm } from 'react-hook-form';
-
-const defaultRule = { required: 'Campo obrigatório' };
+import { Controller, useForm } from 'react-hook-form';
+import { MaterialSelect } from 'app/shared/components/select/material-select';
+import { formField } from 'app/shared/util/form-utils';
+import { useMutation } from '@tanstack/react-query';
+import { getModelById, getPaginatedModelos, persistModelo } from '../audit-service';
+import { useEffect } from 'react';
 
 export const ModelAuditNewEdit = () => {
   const navigate = useNavigate();
@@ -15,7 +17,6 @@ export const ModelAuditNewEdit = () => {
 
   const { control, reset, getValues } = useForm<ModeloAuditoria>({
     defaultValues: {
-      id: null,
       tipo: '',
       nomeAuditoria: '',
       frequencia: '',
@@ -23,6 +24,38 @@ export const ModelAuditNewEdit = () => {
     mode: 'onBlur',
     reValidateMode: 'onBlur',
   });
+
+  const {
+    data: model,
+    isPending: isLoadingModel,
+    mutate: getModel,
+  } = useMutation({
+    mutationFn: () => getModelById(Number(idModel)),
+    onSuccess: (modelo: ModeloAuditoria) => {
+      reset(modelo);
+    },
+  });
+
+  const {
+    data: savedModel,
+    isPending: isLoadingSavedModel,
+    mutate: saveModel,
+  } = useMutation({
+    mutationFn: () => persistModelo(getValues()),
+    onSuccess: (modelo: ModeloAuditoria) => {
+      reset(modelo);
+      navigate(`/audit/model/edit/${modelo.id}`, { replace: true });
+    },
+  });
+
+  useEffect(() => idModel && getModel(), []);
+
+  const nameValidate = async (value: string) => {
+    const result = await getPaginatedModelos({ search: value });
+
+    const filtered = result.content.filter(model => model.nomeAuditoria.toLowerCase() == value.toLowerCase());
+    return filtered.length ? 'Auditoria já cadastrada' : true;
+  };
 
   return (
     <div className="padding-container">
@@ -34,43 +67,57 @@ export const ModelAuditNewEdit = () => {
           <Link to={'/audit'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Auditoria
           </Link>
-          <Typography className="link">Cadastrar Modelo</Typography>
+          <Typography className="link">{idModel ? 'Editar' : 'Cadastrar'} Modelo</Typography>
         </Breadcrumbs>
 
-        <h2 className="title">Cadastrar Modelos de Auditoria</h2>
+        <h2 className="title">{idModel ? 'Editar' : 'Cadastrar'} Modelo de Auditoria</h2>
 
-        <div style={{ flexGrow: 0.4, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
-          <TextField
-            className="me-2"
-            label="Nome da Auditoria"
-            style={{ minWidth: '20vw' }}
-            onChange={null}
-            placeholder="Auditoria"
-            value={null}
+        <Stack flexDirection="row" gap="24px">
+          <Controller
+            name="nomeAuditoria"
+            control={control}
+            rules={{ required: 'Campo obrigatório', validate: nameValidate }}
+            render={renderPayload => (
+              <TextField
+                className="me-2"
+                label="Nome da Auditoria"
+                style={{ minWidth: '20vw' }}
+                placeholder="Auditoria"
+                {...formField(renderPayload)}
+              />
+            )}
           />
 
-          <FormControl className="me-2" variant="outlined" fullWidth>
-            <InputLabel>Frequência</InputLabel>
-            <Select value={null} onChange={null} label="Selecionar" fullWidth>
-              {Object.values(EnumTemporal).map((value, idx) => (
-                <MenuItem key={idx} value={value}>
-                  {value}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Controller
+            name="frequencia"
+            control={control}
+            rules={{ required: 'Campo obrigatório' }}
+            render={renderPayload => (
+              <MaterialSelect variant="outlined" label="Frequência" fullWidth {...formField(renderPayload)}>
+                {Object.values(EnumTemporal).map((value, idx) => (
+                  <MenuItem key={idx} value={value}>
+                    {value}
+                  </MenuItem>
+                ))}
+              </MaterialSelect>
+            )}
+          />
 
-          <FormControl className="me-2" variant="outlined" fullWidth>
-            <InputLabel>Tipo</InputLabel>
-            <Select value={null} onChange={null} label="Selecionar" fullWidth>
-              {TiposAuditoria.map(item => (
-                <MenuItem key={item.name} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </div>
+          <Controller
+            name="tipo"
+            control={control}
+            rules={{ required: 'Campo obrigatório' }}
+            render={renderPayload => (
+              <MaterialSelect variant="outlined" label="Tipo" fullWidth {...formField(renderPayload)}>
+                {TiposAuditoria.map(item => (
+                  <MenuItem key={item.name} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </MaterialSelect>
+            )}
+          />
+        </Stack>
         <hr></hr>
         <div style={{ display: 'flex', justifyContent: 'end' }} className="ms-3 me-2 mt-3">
           <Button
@@ -83,7 +130,12 @@ export const ModelAuditNewEdit = () => {
           >
             Voltar
           </Button>
-          <Button variant="contained" color="primary" style={{ width: '115px', background: '#e6b200', color: '#4e4d4d' }} onClick={null}>
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ width: '115px', background: '#e6b200', color: '#4e4d4d' }}
+            onClick={() => saveModel()}
+          >
             Salvar
           </Button>
         </div>
