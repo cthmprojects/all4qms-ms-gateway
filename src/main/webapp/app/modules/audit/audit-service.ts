@@ -211,10 +211,6 @@ export const persistPlanejamento = addToast(
   'Erro ao salvar planejamento'
 );
 
-export async function getModelById(id: number) {
-  const { data } = await axios.get<ModeloAuditoria>(`${AuditBaseUrl}/auditoria/modelos/${id}`);
-  return parseRawModelo(data);
-}
 export const getProcessos = addToast(
   async () => {
     const { data } = await axios.get<Array<Process>>(`services/all4qmsmsgateway/api/processos`);
@@ -331,4 +327,32 @@ export const persistRegistroAuditoria = addToast(
   },
   'Registro de auditoria salvo com sucesso',
   'Erro ao salvar registro de auditoria'
+);
+
+export const getModelById = addToast(
+  async (id: number) => {
+    const { data } = await axios.get<ModeloAuditoria>(`${AuditBaseUrl}/auditoria/modelos/${id}`);
+    return data;
+  },
+  '',
+  'Erro ao buscar modelo de auditoria'
+);
+
+async function saveModelo(modelo: ModeloAuditoria) {
+  const { data } = await axios.post<ModeloAuditoria>(`${AuditBaseUrl}/auditoria/modelos`, modelo);
+  return data;
+}
+
+async function updateModelo(modelo: ModeloAuditoria) {
+  const { data } = await axios.put<ModeloAuditoria>(`${AuditBaseUrl}/auditoria/modelos/${modelo.id}`, modelo);
+  return data;
+}
+
+export const persistModelo = addToast(
+  async (modelo: ModeloAuditoria) => {
+    const result = await (modelo?.id ? updateModelo(modelo) : saveModelo(modelo));
+    return result;
+  },
+  'Modelo de auditoria salvo com sucesso',
+  'Erro ao salvar modelo de auditoria'
 );

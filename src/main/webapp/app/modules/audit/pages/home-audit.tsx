@@ -5,7 +5,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { TimelineTabContent } from '../components/timeline-tab-content';
 import { PlanningTabContent } from '../components/planning-tab-content';
 import { ModelTabContent } from '../components/model-tab-content';
-import { ModelListContent } from '../components/model-list-content';
 import { AuditorshipTabContent } from '../components/auditorship-tab-content';
 
 export const HomeAudit = () => {

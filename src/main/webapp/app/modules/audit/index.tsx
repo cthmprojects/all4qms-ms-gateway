@@ -30,7 +30,7 @@ export const AuditRoutes = () => {
           <Route path="planning/:idPlanning/schedule" element={<ScheduleNewEdit />} />
           <Route path="auditorship/edit/:idSchedule" element={<RegisterNewEdit />} />
           <Route path="model/new" element={<ModelAuditNewEdit />} />
-          <Route path="model/edit/:idmodel" element={<ModelAuditNewEdit />} />
+          <Route path="model/edit/:idModel" element={<ModelAuditNewEdit />} />
           <Route path="maintenance" element={<AuditMaintenance />} />
         </ErrorBoundaryRoutes>
       </QueryClientProvider>
