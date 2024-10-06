@@ -26,7 +26,7 @@ export const ScheduleNewEdit = () => {
       planejamento: '' as unknown as PlanejamentoAuditoria,
       auditores: [],
       dataAuditoria: '' as unknown as Date,
-      responsavelAuditoria: 0,
+      responsavelAuditoria: '' as unknown as number,
       horaInicial: '' as unknown as Date,
       horaFinal: '' as unknown as Date,
       idProcesso: '' as unknown as number,
@@ -127,7 +127,7 @@ export const ScheduleNewEdit = () => {
       <Stack justifyContent="flex-end" gap="2.5rem" flexDirection="row" mt="20px">
         {currentSchedule?.id && (
           <Button
-            disabled={!formState.isDirty}
+            disabled={!formState.isDirty || !formState.isValid}
             type="submit"
             onClick={reschedule}
             variant="contained"
@@ -143,7 +143,7 @@ export const ScheduleNewEdit = () => {
 
         {currentSchedule?.id ? (
           <Button
-            disabled={formState.isDirty}
+            disabled={formState.isDirty || !formState.isValid}
             type="submit"
             onClick={() => setOpenValidate(true)}
             variant="contained"

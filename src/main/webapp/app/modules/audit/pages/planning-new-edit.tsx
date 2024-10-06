@@ -1,10 +1,10 @@
 import { Autocomplete, Box, Breadcrumbs, Chip, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Auditor, CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
 import { MaterialSelect } from 'app/shared/components/select/material-select';
 import { formField } from 'app/shared/util/form-utils';
-import { isEqual, renderValueCronograma } from '../audit-helper';
+import { isEqual, renderValueAuditor, renderValueCronograma } from '../audit-helper';
 import { useMutation } from '@tanstack/react-query';
 import { getPaginatedAuditor, getPaginatedCronograma, getPlanejamentoById, persistPlanejamento } from '../audit-service';
 import { SyntheticEvent, useEffect, useState } from 'react';
@@ -12,10 +12,6 @@ import { useDebounce } from 'use-debounce';
 import { Button } from 'reactstrap';
 
 const defaultRule = { required: 'Campo obrigatório' };
-
-function renderOption(auditor: Auditor) {
-  return `${auditor.nomeAuditor} - ${auditor.emailAuditor}`;
-}
 
 export const PlanningNewEdit = () => {
   const { idPlanning } = useParams();
@@ -53,6 +49,7 @@ export const PlanningNewEdit = () => {
   });
 
   function whenSave(planning: PlanejamentoAuditoria) {
+    reset(planning);
     !idPlanning && navigate(`/audit/planning/edit/${planning.id}`, { replace: true });
   }
 
@@ -76,8 +73,6 @@ export const PlanningNewEdit = () => {
   useEffect(() => {
     planning && reset(planning);
   }, [planning]);
-
-  const location = useLocation();
 
   function crumbCLick(e: SyntheticEvent) {
     e.stopPropagation();
@@ -165,7 +160,7 @@ export const PlanningNewEdit = () => {
               <Autocomplete
                 multiple
                 filterOptions={x => x} // Evita o filtro padrão
-                getOptionLabel={renderOption}
+                getOptionLabel={renderValueAuditor}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
                     <Chip

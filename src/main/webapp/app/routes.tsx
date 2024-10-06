@@ -54,7 +54,14 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="risks-opportunities/*" element={<RisksOpportunitiesRoutes />} />
         <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
         <Route path="performance-indicators/*" element={<PerformanceIndicatorsRoutes />} />
-        <Route path="audit/*" element={<AuditRoutes />} />
+        <Route
+          path="audit/*"
+          element={
+            <PrivateRoute hasAnyAuthorities={[AUTHORITIES.SGQ]}>
+              <AuditRoutes />
+            </PrivateRoute>
+          }
+        />
 
         <Route path="account">
           <Route
