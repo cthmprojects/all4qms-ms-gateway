@@ -4,17 +4,19 @@ import { MaterialSelect } from 'app/shared/components/select/material-select';
 import { EnumStatusAuditoria } from 'app/shared/model/enumerations/enum-status-auditoria';
 import { EnumPartes } from 'app/shared/model/enumerations/enum-partes';
 import { formField } from 'app/shared/util/form-utils';
-import { useEffect } from 'react';
+import { SyntheticEvent, useEffect } from 'react';
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from 'reactstrap';
 import { queryClientAudit } from '..';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { getCronogramaById, getPaginatedModelos, saveCronograma, updateCronograma } from '../audit-service';
 import { CronogramaAuditoria, ModeloAuditoria } from '../audit-models';
 import { capitalize } from 'lodash';
 import { PartesAdutoria } from 'app/shared/model/constants';
 import { renderValueModelo } from '../audit-helper';
+
+const sx = { minWidth: { xs: '215px', md: '300px', lg: '360px', xl: '380px' } };
 
 export const TimelineNewEdit = () => {
   const { idTimeline } = useParams();
@@ -56,13 +58,6 @@ export const TimelineNewEdit = () => {
     timeline && reset(timeline);
   }, [timeline]);
 
-  const formr = (name: keyof typeof control._defaultValues) => ({
-    ...register(name, { required: 'Campo obrigatório' }),
-    required: true,
-    error: !!errors?.[name]?.message,
-    helperText: errors?.[name]?.message as string,
-  });
-
   useEffect(() => {
     register('periodoInicial', { required: 'Data inicial obrigatória' });
     register('periodoFinal', { required: 'Data final obrigatória' });
@@ -83,8 +78,10 @@ export const TimelineNewEdit = () => {
     trigger('periodoFinal');
   };
 
-  const whenSave = () => {
+  const whenSave = (timeline: CronogramaAuditoria) => {
+    reset(timeline);
     queryClientAudit.invalidateQueries({ queryKey: ['timeline/list'] }); // Invalida as queries para atualizar a lista de registros
+    !idTimeline && navigate(`/audit/timeline/edit/${timeline.id}`, { replace: true });
     // onClose();
     // toast.success('Recurso salvo com sucesso');
   };
@@ -115,6 +112,11 @@ export const TimelineNewEdit = () => {
   const contextTitle = `${idTimeline ? 'Editar' : 'Cadastrar'} Cronograma`;
   const someDateError = errors?.periodoInicial?.message || errors?.periodoFinal?.message;
 
+  function crumbCLick(e: SyntheticEvent) {
+    e.stopPropagation();
+    navigate(-1);
+  }
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -122,15 +124,17 @@ export const TimelineNewEdit = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Link to={'/audit'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-            Auditoria
-          </Link>
+          <span onClick={crumbCLick}>
+            <Link to="" style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+              Auditoria
+            </Link>
+          </span>
           <Typography className="link">{contextTitle}</Typography>
         </Breadcrumbs>
 
         <h2 className="title">{contextTitle}</h2>
         <Box display="flex" flexDirection="column" gap="24px">
-          <Box display="flex" gap="24px" justifyContent="space-between">
+          <Box display="flex" gap="24px" justifyContent="space-between" flexWrap="wrap">
             <Controller
               name="modelo"
               control={control}
@@ -139,10 +143,9 @@ export const TimelineNewEdit = () => {
                 <MaterialSelect
                   variant="outlined"
                   label="Modelo de Auditoria"
-                  fullWidth
                   renderValue={renderValueModelo}
                   {...formField(renderPayload)}
-                  sx={{ minWidth: '215px' }}
+                  sx={sx}
                 >
                   {auditModels?.content?.map(item => (
                     //@ts-ignore - necessary to load object into value
@@ -168,7 +171,7 @@ export const TimelineNewEdit = () => {
               onBlur={onBlurPicker}
               error={!!someDateError}
               helperText={someDateError as string}
-              sx={{ minWidth: '215px' }}
+              sx={sx}
             />
 
             <Controller
@@ -176,7 +179,7 @@ export const TimelineNewEdit = () => {
               control={control}
               rules={{ required: 'Campo obrigatório' }}
               render={renderPayload => (
-                <MaterialSelect variant="outlined" label="Parte" fullWidth {...formField(renderPayload)} sx={{ minWidth: '215px' }}>
+                <MaterialSelect variant="outlined" label="Parte" {...formField(renderPayload)} sx={sx}>
                   {PartesAdutoria.map((item, idx) => (
                     <MenuItem key={idx} value={item.value}>
                       {item.name}
@@ -191,7 +194,7 @@ export const TimelineNewEdit = () => {
               control={control}
               rules={{ required: 'Campo obrigatório' }}
               render={renderPayload => (
-                <MaterialSelect variant="outlined" label="Status" fullWidth {...formField(renderPayload)} sx={{ minWidth: '215px' }}>
+                <MaterialSelect variant="outlined" label="Status" {...formField(renderPayload)} sx={sx}>
                   {Object.values(EnumStatusAuditoria).map((value, idx) => (
                     <MenuItem key={idx} value={value}>
                       {capitalize(value)}

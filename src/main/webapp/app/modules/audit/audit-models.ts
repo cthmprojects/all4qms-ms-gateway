@@ -32,6 +32,36 @@ export type PlanejamentoAuditoria = {
   requisitos: string;
   metodo: string;
   escopo: string;
-  cronograma: Partial<CronogramaAuditoria>;
+  cronograma: CronogramaAuditoria;
   auditores: Auditor[];
+};
+
+export type AgendamentoAuditoria = {
+  id?: number;
+  idProcesso: number;
+  nomeProcesso: string;
+  dataAuditoria: Date;
+  horaInicial: Date;
+  horaFinal: Date;
+  responsavelAuditoria: number;
+  isReagendado: boolean;
+  justificativaReagendamento?: string;
+  isFinalizado: boolean;
+  planejamento: PlanejamentoAuditoria;
+  auditores: Auditor[];
+  registro?: RegistroAuditoria;
+};
+
+export type RegistroAuditoria = {
+  id?: number;
+  resumoAuditoria: string;
+  numeroNC: string;
+  numeroRelatorio: string;
+};
+
+export type RegistrarAuditoriaForm = {
+  agendamento: AgendamentoAuditoria;
+  base: RegistroAuditoria;
+  ncList: any[];
+  omList: any[];
 };

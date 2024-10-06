@@ -1,5 +1,5 @@
 import { EnumPartes } from 'app/shared/model/enumerations/enum-partes';
-import { CronogramaAuditoria, ModeloAuditoria } from './audit-models';
+import { Auditor, CronogramaAuditoria, ModeloAuditoria, PlanejamentoAuditoria } from './audit-models';
 import { capitalize } from 'lodash';
 import { Stack } from '@mui/material';
 
@@ -24,6 +24,10 @@ export const renderValueModelo = (modelo: ModeloAuditoria) => {
   return `${modelo.nomeAuditoria}, ${capitalize(modelo.tipo)}, ${capitalize(modelo.frequencia)}`;
 };
 
+export function renderValueAuditor(auditor: Auditor) {
+  return `${auditor.nomeAuditor} - ${auditor.emailAuditor}`;
+}
+
 export const renderValueCronograma = (cron: CronogramaAuditoria) => {
   // return `CRONOGRAMA: "${partesLabel(cron.parte)}, ${capitalize(cron.status)}" | MODELO: "${renderValueModelo(cron.modelo)}"`;
 
@@ -34,6 +38,12 @@ export const renderValueCronograma = (cron: CronogramaAuditoria) => {
     </Stack>
   );
 };
+
+export const renderValuePlanejamento = (planejamento: PlanejamentoAuditoria) => {
+  return planejamento.metodo;
+};
+
+export const renderValueMultipleAuditores = (auditors: Auditor[]) => auditors.map(item => item.nomeAuditor).join(', ');
 
 export const handleFilter = (payload: Record<string, any>) => {
   const itens = Object.values(payload).filter(value => !!value);
