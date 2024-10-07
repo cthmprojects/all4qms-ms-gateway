@@ -19,6 +19,10 @@ const Analytics = () => {
     dispatch(getAllIndicatorGoals());
   }, []);
 
+  const indicators: Array<Indicator> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entities);
+  const indicatorGoals: Array<IndicatorGoal> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entities);
+  const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
+
   const goToAddIndicator = (): void => {
     navigate('../indicator');
   };
@@ -27,13 +31,13 @@ const Analytics = () => {
     navigate('../');
   };
 
+  const doSearch = (): Array<Indicator> => {
+    return indicators;
+  };
+
   const goToManageMeasurements = (id: number): void => {
     navigate(`../indicator/${id}/measurements`);
   };
-
-  const indicators: Array<Indicator> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entities);
-  const indicatorGoals: Array<IndicatorGoal> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entities);
-  const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
 
   const summarizedProcesses = useMemo<Array<SummarizedProcess>>(() => {
     if (!processes || processes.length <= 0) {

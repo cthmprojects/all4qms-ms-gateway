@@ -75,7 +75,7 @@ const IndicatorValues = ({
     if (!years || years.length <= 0 || year) {
       return;
     }
-    //setYear(initialYear);
+
     const now: Date = new Date();
     const currentYear: number = now.getFullYear();
 
