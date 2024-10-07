@@ -1,6 +1,6 @@
 import { Autocomplete, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { Configuration } from '../../models';
 
 type ControlActionProps = {
@@ -56,14 +56,20 @@ const ControlAction = ({ allProbabilities, allSeverities, readonly }: ControlAct
       <Typography variant="h6">Controle / Ação</Typography>
 
       <Stack direction="row" spacing={2}>
-        <TextField
-          disabled={readonly}
-          label="Descrição do controle"
-          multiline
-          placeholder="Descrição do controle"
-          rows={5}
-          sx={{ flexGrow: 1 }}
-          {...fieldHook('description')}
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              disabled={readonly}
+              label="Descrição do controle"
+              multiline
+              placeholder="Descrição do controle"
+              rows={5}
+              sx={{ flexGrow: 1 }}
+              {...field}
+            />
+          )}
         />
       </Stack>
 

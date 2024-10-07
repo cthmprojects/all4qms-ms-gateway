@@ -2,7 +2,7 @@ import { AddCircle } from '@mui/icons-material';
 import { Autocomplete, Chip, FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select, Stack, TextField } from '@mui/material';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 import React, { useEffect, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { onAutocompleteChanged, onTextChanged } from '../../utils';
 import { SummarizedProcess } from '../../models';
 
@@ -98,40 +98,60 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
       </Stack>
 
       <Stack direction="row" spacing={2}>
-        <TextField disabled={readonly} label="Fluxo" {...fieldHook('flow')} placeholder="Fluxo" sx={{ flexGrow: 1 }} />
-        <TextField disabled={readonly} label="Atividade" {...fieldHook('activity')} placeholder="Atividade" sx={{ flexGrow: 1 }} />
-      </Stack>
-
-      <Stack direction="row" spacing={2}>
-        <TextField
-          disabled={readonly}
-          label="Descrição"
-          multiline
-          placeholder="Descrição"
-          rows={5}
-          sx={{ flexGrow: 1 }}
-          {...fieldHook('description')}
+        <Controller
+          name="flow"
+          control={control}
+          render={({ field }) => <TextField disabled={readonly} label="Fluxo" placeholder="Fluxo" sx={{ flexGrow: 1 }} {...field} />}
+        />
+        <Controller
+          name="activity"
+          control={control}
+          render={({ field }) => (
+            <TextField disabled={readonly} label="Atividade" placeholder="Atividade" sx={{ flexGrow: 1 }} {...field} />
+          )}
         />
       </Stack>
 
       <Stack direction="row" spacing={2}>
-        <TextField
-          disabled={readonly}
-          label={getFirstAuxiliaryDescriptionLabel()}
-          multiline
-          placeholder={getFirstAuxiliaryDescriptionLabel()}
-          rows={5}
-          sx={{ flexGrow: 1 }}
-          {...fieldHook('firstAuxiliaryDescription')}
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <TextField disabled={readonly} label="Descrição" multiline placeholder="Descrição" rows={5} sx={{ flexGrow: 1 }} {...field} />
+          )}
         />
-        <TextField
-          disabled={readonly}
-          label={getSecondAuxiliaryDescriptionLabel()}
-          multiline
-          placeholder={getSecondAuxiliaryDescriptionLabel()}
-          rows={5}
-          sx={{ flexGrow: 1 }}
-          {...fieldHook('secondAuxiliaryDescription')}
+      </Stack>
+
+      <Stack direction="row" spacing={2}>
+        <Controller
+          name="firstAuxiliaryDescription"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              disabled={readonly}
+              label={getFirstAuxiliaryDescriptionLabel()}
+              multiline
+              placeholder={getFirstAuxiliaryDescriptionLabel()}
+              rows={5}
+              sx={{ flexGrow: 1 }}
+              {...field}
+            />
+          )}
+        />
+        <Controller
+          name="secondAuxiliaryDescription"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              disabled={readonly}
+              label={getSecondAuxiliaryDescriptionLabel()}
+              multiline
+              placeholder={getSecondAuxiliaryDescriptionLabel()}
+              rows={5}
+              sx={{ flexGrow: 1 }}
+              {...field}
+            />
+          )}
         />
       </Stack>
 
