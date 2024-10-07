@@ -131,6 +131,9 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
                 label="Prazo"
                 onChange={onDeadlineChanged}
                 selected={deadline}
+                popperProps={{
+                  strategy: 'fixed',
+                }}
               />
             </FormControl>
             <FormControl className="rnc-form-field m-2">
