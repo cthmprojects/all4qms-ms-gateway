@@ -71,7 +71,16 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
           descEficacia: firstForm.description.value,
         })
       );
-      dispatch(update({ ..._rnc, statusAtual: 'VALIDACAO' })).then(() => navigate('/rnc'));
+
+      let newStatus: string = '';
+      if (firstForm.verified.value) {
+        newStatus = 'VALIDACAO';
+      } else {
+        newStatus = 'ELABORACAO';
+      }
+
+      dispatch(update({ ..._rnc, statusAtual: newStatus })).then(() => navigate('/rnc'));
+
       toast.success('RNC Atualizada com sucesso!');
     }
   };
