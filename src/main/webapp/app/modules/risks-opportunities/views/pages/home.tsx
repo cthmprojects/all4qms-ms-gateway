@@ -163,6 +163,17 @@ const Home = () => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<number>(10);
 
+  function getLabelGrauRO(letter: string) {
+    const levels = {
+      A: 'ALTO',
+      B: 'BAIXO',
+      M: 'MÉDIO',
+    };
+    return levels[letter] || 'N/A';
+  }
+
+  // useEffect(listRo, [filters, page, pageSize]);
+
   const TableRendered = (
     <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
       <Table sx={{ width: '100%' }}>
@@ -297,7 +308,7 @@ const Home = () => {
           <Select onChange={e => setFilters({ ...filters, severidade: parseInt(e.target.value.toString()) })} label="Processo">
             {severities?.map((severity, index) => (
               <MenuItem key={index} value={severity.id}>
-                {severity.descricaoRO}
+                {getLabelGrauRO(severity.grauRO)}
               </MenuItem>
             ))}
           </Select>

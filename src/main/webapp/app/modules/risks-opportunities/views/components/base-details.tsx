@@ -302,7 +302,7 @@ const BaseDetails = ({
     const payload = {
       ...rawFormValue,
       senderId: senderId,
-      processId: rawFormValue.process.id,
+      processId: rawFormValue?.process?.id,
     };
 
     const controlActionValues = controlActionFormMethods.getValues();
