@@ -68,8 +68,8 @@ export const RNCNew = () => {
       dispatch(getById(parseInt(id)));
       dispatch(getDescriptionByRNCId(id));
     } else {
-      setDescription('');
-      setRequirements('');
+      setDescriptions(['']);
+      setRequirements(['']);
       setEvidences(['']);
     }
 
@@ -175,20 +175,20 @@ export const RNCNew = () => {
   /*
    NC Description
    */
-  const [description, setDescription] = useState<string>('');
+  const [descriptions, setDescriptions] = useState<Array<string>>([]);
   const [evidences, setEvidences] = useState<Array<string>>([]);
-  const [requirement, setRequirements] = useState<string>('');
+  const [requirements, setRequirements] = useState<Array<string>>([]);
 
-  const onDescriptionChanged = (value: string) => {
-    setDescription(value);
+  const onDescriptionsChanged = (values: Array<string>) => {
+    setDescriptions(values);
   };
 
   const onEvidencesChanged = (values: Array<string>) => {
     setEvidences(values);
   };
 
-  const onRequirementChanged = (value: string) => {
-    setRequirements(value);
+  const onRequirementsChanged = (values: Array<string>) => {
+    setRequirements(values);
   };
 
   /*
@@ -415,10 +415,12 @@ export const RNCNew = () => {
     }
 
     for (let i = 0; i < evidences.length; i++) {
+      const description = descriptions[i];
       const evidence = evidences[i];
+      const requirement = requirements[i];
 
-      if (i < descriptions.length) {
-        const descriptionId: number = descriptions[i].id;
+      if (i < ncDescriptions.length) {
+        const descriptionId: number = ncDescriptions[i].id;
 
         dispatch(
           updateDescription({
@@ -462,10 +464,12 @@ export const RNCNew = () => {
     saveExternalAudit();
 
     for (let i = 0; i < evidences.length; i++) {
+      const description = descriptions[i];
       const evidence = evidences[i];
+      const requirement = requirements[i];
 
-      if (i < descriptions.length) {
-        const descriptionId: number = descriptions[i].id;
+      if (i < ncDescriptions.length) {
+        const descriptionId: number = ncDescriptions[i].id;
 
         dispatch(
           updateDescription({
@@ -516,7 +520,7 @@ export const RNCNew = () => {
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
-  const descriptions = useAppSelector(state => state.all4qmsmsgateway.description.entities);
+  const ncDescriptions = useAppSelector(state => state.all4qmsmsgateway.description.entities);
   const audit: GeneralAudit | null = useAppSelector(state => state.all4qmsmsgateway.audit.entity);
 
   useEffect(() => {
@@ -550,15 +554,19 @@ export const RNCNew = () => {
           const savedDescriptions = response.data;
 
           if (savedDescriptions) {
+            const allDescriptions: Array<string> = [];
+            const allRequirements: Array<string> = [];
             const allEvidences: Array<string> = [];
 
             for (let i = 0; i < savedDescriptions.length; i++) {
               const description = savedDescriptions[i];
-              onDescriptionChanged(description.detalhesNaoConformidade || '');
-              onRequirementChanged(description.requisitoDescumprido || '');
+              allDescriptions.push(description.detalhesNaoConformidade || '');
+              allRequirements.push(description.requisitoDescumprido || '');
               allEvidences.push(description.evidenciaObjetiva);
             }
 
+            setDescriptions(allDescriptions);
+            setRequirements(allRequirements);
             setEvidences(allEvidences);
           }
         });
@@ -855,13 +863,13 @@ export const RNCNew = () => {
               <Row className="ms-3 me-3 mt-3">{renderComponents()}</Row>
               <Row className="ms-3 me-3 mt-3">
                 <DescriptionRnc
-                  description={description}
+                  descriptions={descriptions}
                   evidences={evidences}
-                  onDescriptionChanged={onDescriptionChanged}
+                  onDescriptionsChanged={onDescriptionsChanged}
                   onEvidencesChanged={onEvidencesChanged}
-                  onRequirementChanged={onRequirementChanged}
+                  onRequirementsChanged={onRequirementsChanged}
                   onDescriptionsEvidencesChanged={onDescriptionEvidencesChanged}
-                  requirement={requirement}
+                  requirements={requirements}
                   rncId={id}
                 />
               </Row>

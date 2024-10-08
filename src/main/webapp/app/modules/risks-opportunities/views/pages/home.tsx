@@ -172,7 +172,7 @@ const Home = () => {
     return levels[letter] || 'N/A';
   }
 
-  useEffect(listRo, [filters, page, pageSize]);
+  // useEffect(listRo, [filters, page, pageSize]);
 
   const TableRendered = (
     <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
