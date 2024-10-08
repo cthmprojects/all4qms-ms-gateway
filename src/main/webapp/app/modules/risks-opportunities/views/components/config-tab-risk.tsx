@@ -7,6 +7,7 @@ import ConfigComplexityMatrix from './config-complexity-matrix';
 import ConfigurationsDegrees, { ConfigurationsClassificationType, ConfigurationsDegreesType } from './config-degrees';
 import { saveMap, updateMap } from '../../reducers/maps.reducer';
 import { now } from 'lodash';
+import { useNavigate } from 'react-router-dom';
 
 type ConfigurationTabRiskProps = {
   configurations: Array<Configuration>;
@@ -27,6 +28,8 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
   const [newSeverities, setNewSeverities] = useState<Array<ConfigurationsDegreesType>>([]);
 
   const [newMap, setNewMap] = useState<RawMap | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!levels || levels.length <= 0) {
@@ -388,7 +391,7 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
         )}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'right', gap: 2, pt: 5, pr: 6 }}>
-        <Button variant="contained" size="large" sx={{ bgcolor: '#E0E0E0', color: 'black' }}>
+        <Button variant="contained" size="large" sx={{ bgcolor: '#E0E0E0', color: 'black' }} onClick={() => navigate(-1)}>
           VOLTAR
         </Button>
         <Button onClick={onSaveClicked} variant="contained" size="large" sx={{ bgcolor: '#EBC139', color: 'black' }}>

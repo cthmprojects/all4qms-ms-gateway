@@ -6,6 +6,7 @@ import { saveConfiguration, updateConfiguration } from '../../reducers/configura
 import ConfigComplexityMatrix from './config-complexity-matrix';
 import ConfigurationsDegrees, { ConfigurationsClassificationType, ConfigurationsDegreesType } from './config-degrees';
 import { saveMap, updateMap } from '../../reducers/maps.reducer';
+import { useNavigate } from 'react-router-dom';
 
 type ConfigurationsType = {
   complexityDegrees: ConfigurationsDegreesType[];
@@ -32,6 +33,8 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
   const [newOpportunities, setNewOpportunities] = useState<Array<ConfigurationsClassificationType>>([]);
 
   const [newMap, setNewMap] = useState<RawMap | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!levels || levels.length <= 0) {
@@ -391,7 +394,7 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
         {opportunities.length > 0 && <ConfigComplexityMatrix classifications={opportunities} map={newMap} onChanged={onMatrixChanged} />}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'right', gap: 2, pt: 5, pr: 6 }}>
-        <Button variant="contained" size="large" sx={{ bgcolor: '#E0E0E0', color: 'black' }}>
+        <Button variant="contained" size="large" sx={{ bgcolor: '#E0E0E0', color: 'black' }} onClick={() => navigate(-1)}>
           VOLTAR
         </Button>
         <Button onClick={onSaveClicked} variant="contained" size="large" sx={{ bgcolor: '#EBC139', color: 'black' }}>
