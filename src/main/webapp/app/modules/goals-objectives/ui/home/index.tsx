@@ -21,6 +21,7 @@ import {
   Grid,
   InputAdornment,
   OutlinedInput,
+  TextField,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Row } from 'reactstrap';
@@ -53,6 +54,14 @@ import { MaterialDatepicker } from 'app/shared/components/input/material-datepic
 // Registra a localidade
 registerLocale('pt-BR', ptBR);
 
+const initialFilter = {
+  idProcesso: '' as unknown as number,
+  ano: '',
+  mes: '',
+  situacao: '',
+  pesquisa: '',
+};
+
 const HomeGoalsList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -67,7 +76,7 @@ const HomeGoalsList = () => {
   /**
    * Filters
    */
-  const [filters, setFilters] = useState<ListMetasInterface>({ idProcesso: processes[0]?.id });
+  const [filters, setFilters] = useState<ListMetasInterface>(initialFilter);
 
   const { page, pageSize, paginator } = usePaginator(metasLista.totalElements);
 
@@ -138,11 +147,11 @@ const HomeGoalsList = () => {
 
     dispatch(
       getAllMetasFilter({
-        idProcesso: idProcesso || processes[0]?.id,
-        ano: ano instanceof Date ? ano.getFullYear().toString() : ano,
-        mes: mes instanceof Date ? format(mes, 'MM') : mes,
-        situacao: situacao,
-        pesquisa: pesquisa,
+        idProcesso: idProcesso || ('' as unknown as number),
+        ano: ano instanceof Date ? ano.getFullYear().toString() : '',
+        mes: mes instanceof Date ? format(mes, 'MM') : '',
+        situacao: situacao || '',
+        pesquisa: pesquisa || '',
         size: pageSize,
         page: page,
       })
@@ -150,7 +159,7 @@ const HomeGoalsList = () => {
   };
 
   const clearFilters = () => {
-    setFilters({});
+    setFilters(initialFilter);
   };
 
   const renderTable = () => {
@@ -321,29 +330,25 @@ const HomeGoalsList = () => {
             </FormControl>
           </Grid>
           <Grid item>
-            <FormControl fullWidth>
-              <InputLabel>Pesquisa</InputLabel>
-              {/* <TextField
-                label="Pesquisa"
-                style={{ minWidth: '20vw'  }}
-                onChange={event => {
-                  setFilters({ ...filters, pesquisa: event?.target?.value || '' });
-                }}
-                placeholder="Descrição"
-                value={filters.pesquisa || ''}
-              /> */}
-              <OutlinedInput
-                fullWidth
-                label="Pesquisa"
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton aria-label="toggle password visibility" onClick={() => null} onMouseDown={() => null}>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
+            <TextField
+              label="Pesquisa"
+              fullWidth
+              onChange={event => {
+                setFilters({ ...filters, pesquisa: event?.target?.value || '' });
+              }}
+              value={filters.pesquisa || ''}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton aria-label="toggle password visibility" onClick={() => null} onMouseDown={() => null}>
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
           </Grid>
 
           <Button
