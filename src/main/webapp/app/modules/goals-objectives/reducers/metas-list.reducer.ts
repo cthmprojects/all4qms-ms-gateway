@@ -67,7 +67,7 @@ export interface ListMetasInterface {
 }
 
 export const getAllMetasFilter = createAsyncThunk('get/metas-list', async (listMetasParams: ListMetasInterface) => {
-  const { page, size } = listMetasParams;
+  const { page, size, ...rest } = listMetasParams;
 
   const queryParams: Array<string> = [];
 
@@ -83,7 +83,16 @@ export const getAllMetasFilter = createAsyncThunk('get/metas-list', async (listM
   const urlParams: string = query ? `?${query}` : '';
   const url: string = `${apiUrl}/filtro${urlParams}`;
 
-  return axios.post<ListPaginationMeta>(url, listMetasParams);
+  const realParams = {};
+
+  for (const key of Object.keys(rest)) {
+    const value = rest[key];
+    if (value) {
+      realParams[key] = value;
+    }
+  }
+
+  return axios.post<ListPaginationMeta>(url, realParams);
 });
 
 const metasListaSlice = createEntitySlice({
