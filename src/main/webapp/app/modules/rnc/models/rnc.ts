@@ -316,7 +316,7 @@ export type CompleteNc = {
   origem: NonConformityOrigin;
   abrangencia: NonConformityCoverage;
   acaoImediata: Array<NonConformityImmediateAction>;
-  decisao: NonConformityDecision;
+  decisao: Array<NonConformityDecision>;
   ishikawa: NonConformityCauseEffect;
   porques: Array<NonConformityReason>;
   acaoPlano: Array<NonConformityActionPlan>;
