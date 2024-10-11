@@ -14,17 +14,17 @@ export default () => next => action => {
    */
   if (isFulfilledAction(action) && payload && payload.headers) {
     const headers = payload?.headers;
-    let alert: string | null = null;
+    let alert: string = '';
     headers &&
       Object.entries<string>(headers).forEach(([k, v]) => {
         if (k.toLowerCase().endsWith('app-alert')) {
           alert = v;
         }
       });
-    if (alert) {
-      // toast.success(alert);
-      console.info(alert);
+    if (alert && !alert.includes('all4QmsMsInfodocDocumentacao')) {
+      toast.success(alert);
     }
+    console.info(alert);
   }
 
   if (isRejectedAction(action) && error && error.isAxiosError) {
