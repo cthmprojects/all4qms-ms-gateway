@@ -476,7 +476,7 @@ export const NewDocument = () => {
             disabled
           />
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <TextField
               id="text-field-keyword"
               label="Documentos relacionados"
@@ -493,7 +493,7 @@ export const NewDocument = () => {
             {keywordList.map((keyword: string, index: number) => (
               <Chip key={index} label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
-          </div>
+          </div> */}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button

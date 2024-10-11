@@ -474,7 +474,7 @@ export const UpdateDocument = () => {
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <TextField
               id="text-field-keyword"
               label="Escreva aqui..."
@@ -491,7 +491,7 @@ export const UpdateDocument = () => {
             {keywordList.map((keyword: string, index: number) => (
               <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
-          </div>
+          </div> */}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
