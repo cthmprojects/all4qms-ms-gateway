@@ -495,7 +495,7 @@ const InfodocList = () => {
               </TableHead>
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
-                  <TableRow key={infodoc.doc.id}>
+                  <TableRow key={infodoc.doc.id} style={{ cursor: infodoc.doc.enumSituacao !== 'H' ? 'pointer' : 'auto' }}>
                     <Tooltip title={infodoc.doc.descricaoDoc}>
                       <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
