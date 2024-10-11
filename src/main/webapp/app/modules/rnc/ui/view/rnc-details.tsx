@@ -38,6 +38,8 @@ const RncDetails = () => {
     dispatch(findCompleteNonConformity(nonConformityId));
   }, [nonConformityId]);
 
+  useEffect(() => console.log('erickson', nonConformity), [nonConformity]);
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -57,9 +59,15 @@ const RncDetails = () => {
               <NonConformitySummary nonConformity={nonConformity?.naoConformidade} />
             </Box>
 
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <NonConformityOriginSummary origin={nonConformity?.origem} />
-            </Box>
+            {nonConformity?.origem &&
+              (nonConformity.origem.auditoria ||
+                nonConformity.origem.cliente ||
+                nonConformity.origem.mpprod ||
+                nonConformity.origem.outros) && (
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                  <NonConformityOriginSummary origin={nonConformity?.origem} />
+                </Box>
+              )}
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Stack spacing={2}>

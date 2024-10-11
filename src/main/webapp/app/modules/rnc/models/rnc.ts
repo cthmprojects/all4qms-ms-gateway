@@ -79,6 +79,7 @@ export type NonConformity = {
   decisaoNC: number;
   aprovacaoNC: number;
   vinculoDocAnterior: number;
+  qtdPorques: number;
 };
 
 export type NonConformityAttachment = {
