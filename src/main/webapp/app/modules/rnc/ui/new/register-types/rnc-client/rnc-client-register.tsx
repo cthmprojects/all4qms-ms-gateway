@@ -24,7 +24,7 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
     order: '', // ---> Provavelmente não utilizado
     productName: '',
     rejected: 0,
-    requestNumber: 0,
+    requestNumber: '',
     samples: 0,
     supplier: '',
     traceability: {
@@ -115,8 +115,9 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
               sx={{ width: '20% !important' }}
             />
             <TextField
-              value={client.defects}
+              value={((client.rejected / client.batchAmount) * 100)?.toFixed(2)}
               onChange={e => setClient({ ...client, defects: parseInt(e.target.value) })}
+              disabled
               label="% defeito"
               name="defect-rate"
               className="m-2"
@@ -176,11 +177,10 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
             </FormControl>
             <TextField
               value={client.requestNumber}
-              onChange={e => setClient({ ...client, requestNumber: parseInt(e.target.value) })}
+              onChange={e => setClient({ ...client, requestNumber: e.target.value })}
               label="Número do pedido"
               name="request-number"
               className="m-2"
-              type="number"
               sx={{ width: '20% !important' }}
             />
             <TextField
@@ -188,7 +188,6 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
               onChange={e => setClient({ ...client, opNumber: e.target.value })}
               label="Número OP"
               name="op-number"
-              type="number"
               className="m-2"
               sx={{ width: '20% !important' }}
             />

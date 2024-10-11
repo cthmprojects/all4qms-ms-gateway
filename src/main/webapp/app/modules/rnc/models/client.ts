@@ -11,7 +11,7 @@ export type RncClient = {
   order: string;
   productName: string;
   rejected: number;
-  requestNumber: number;
+  requestNumber: string;
   samples: number;
   supplier: string;
   traceability: RncTraceability;
