@@ -13,7 +13,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { Enums, GeneralAudit, Process, RawMaterial, Rnc, RncClient } from '../../models';
-import { getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
+import { clearDescriptions, getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
 import {
@@ -409,30 +409,12 @@ export const RNCNew = () => {
 
     saveOthers();
 
-    if (id || rnc.id) {
-      const currentId: number = (id ? parseInt(id) : null) || rnc.id;
-      dispatch(getDescriptionByRNCId(currentId));
-    }
+    clearDescriptions(stateRnc.id).then(() => {
+      for (let i = 0; i < evidences.length; i++) {
+        const description = descriptions[i];
+        const evidence = evidences[i];
+        const requirement = requirements[i];
 
-    for (let i = 0; i < evidences.length; i++) {
-      const description = descriptions[i];
-      const evidence = evidences[i];
-      const requirement = requirements[i];
-
-      if (i < ncDescriptions.length) {
-        const descriptionId: number = ncDescriptions[i].id;
-
-        dispatch(
-          updateDescription({
-            details: description,
-            evidence: evidence,
-            id: descriptionId,
-            requirement: requirement,
-            rncId: stateRnc.id,
-            anexos: descriptionEvidences,
-          })
-        );
-      } else {
         dispatch(
           saveDescription({
             details: description,
@@ -443,7 +425,7 @@ export const RNCNew = () => {
           })
         );
       }
-    }
+    });
 
     dispatch(
       update({
@@ -463,25 +445,12 @@ export const RNCNew = () => {
     saveInternalAudit();
     saveExternalAudit();
 
-    for (let i = 0; i < evidences.length; i++) {
-      const description = descriptions[i];
-      const evidence = evidences[i];
-      const requirement = requirements[i];
+    clearDescriptions(stateRnc.id).then(() => {
+      for (let i = 0; i < evidences.length; i++) {
+        const description = descriptions[i];
+        const evidence = evidences[i];
+        const requirement = requirements[i];
 
-      if (i < ncDescriptions.length) {
-        const descriptionId: number = ncDescriptions[i].id;
-
-        dispatch(
-          updateDescription({
-            details: description,
-            evidence: evidence,
-            id: descriptionId,
-            requirement: requirement,
-            rncId: stateRnc.id,
-            anexos: descriptionEvidences,
-          })
-        );
-      } else {
         dispatch(
           saveDescription({
             details: description,
@@ -491,19 +460,14 @@ export const RNCNew = () => {
             anexos: descriptionEvidences,
           })
         );
-
-        if (id || rnc.id) {
-          const currentId: number = (id ? parseInt(id) : null) || rnc.id;
-          dispatch(getDescriptionByRNCId(currentId));
-        }
       }
+    });
 
-      dispatch(
-        update({ ...stateRnc, ncOutros: others, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })
-      ).then(() => {
-        navigate('/rnc');
-      });
-    }
+    dispatch(
+      update({ ...stateRnc, ncOutros: others, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })
+    ).then(() => {
+      navigate('/rnc');
+    });
   };
 
   const filterUser = (login: string) => {
@@ -553,12 +517,14 @@ export const RNCNew = () => {
         getDescription(rnc.id).then(response => {
           const savedDescriptions = response.data;
 
-          if (savedDescriptions) {
+          if (savedDescriptions && savedDescriptions.length > 0) {
             const allDescriptions: Array<string> = [];
             const allRequirements: Array<string> = [];
             const allEvidences: Array<string> = [];
 
-            for (let i = 0; i < savedDescriptions.length; i++) {
+            const sortedDescriptions = savedDescriptions.sort((a, b) => a.id < b.id);
+
+            for (let i = 0; i < sortedDescriptions.length; i++) {
               const description = savedDescriptions[i];
               allDescriptions.push(description.detalhesNaoConformidade || '');
               allRequirements.push(description.requisitoDescumprido || '');
@@ -568,6 +534,10 @@ export const RNCNew = () => {
             setDescriptions(allDescriptions);
             setRequirements(allRequirements);
             setEvidences(allEvidences);
+          } else if (descriptions.length <= 0 || requirements.length <= 0 || evidences.length <= 0) {
+            setDescriptions(['']);
+            setRequirements(['']);
+            setEvidences(['']);
           }
         });
 

@@ -24,6 +24,8 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
       return;
     }
 
+    console.log('erickson', nonConformity);
+
     dispatch(getUsers({}));
     dispatch(getProcesses());
   }, [nonConformity]);
@@ -102,11 +104,12 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
             <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={emitterProcessName} />
             <TextField disabled label="Encaminhado para" placeholder="Encaminhado para" value={receiverName} />
             <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={receiverProcessName} />
-            <TextField disabled label="Data" placeholder="Data" value={formatTimestamp(nonConformity?.dtNC)} />
           </Stack>
           <Stack direction="row" spacing={2}>
+            <TextField disabled label="Data" placeholder="Data" value={formatTimestamp(nonConformity?.dtNC)} />
             <TextField disabled label="Tipo" placeholder="Tipo" value={nonConformity?.tipoNC ?? ''} />
             <TextField disabled label="Origem" placeholder="Origem" value={nonConformity?.origemNC ?? ''} />
+            <TextField disabled label="Qtd porquês" placeholder="Qtd porquês" value={nonConformity?.qtdPorques ?? ''} />
           </Stack>
         </Stack>
       </CardContent>

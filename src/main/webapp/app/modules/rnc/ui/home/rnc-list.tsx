@@ -358,7 +358,7 @@ const RncList = ({}) => {
 
                   return (
                     <TableRow key={id}>
-                      <TableCell>{numNC}</TableCell>
+                      <TableCell>{id}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
                       <TableCell>{emissor}</TableCell>
                       <TableCell> {descricao ?? '-'}</TableCell>
