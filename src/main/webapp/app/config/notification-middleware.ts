@@ -22,7 +22,8 @@ export default () => next => action => {
         }
       });
     if (alert) {
-      toast.success(alert);
+      // toast.success(alert);
+      console.info(alert);
     }
   }
 

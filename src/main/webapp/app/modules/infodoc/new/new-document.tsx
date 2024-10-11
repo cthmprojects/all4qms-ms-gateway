@@ -29,6 +29,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios, { AxiosResponse } from 'axios';
 import downloadFile from '../infodoc-store';
 import { listEnums } from '../reducers/enums.reducer';
+import { toast } from 'react-toastify';
 import {
   SendEmail,
   createInfoDoc,
@@ -101,8 +102,8 @@ export const NewDocument = () => {
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const [usersSGQ, setUsersSGQ] = useState<UserQMS[]>([]);
-  const [infoDocId, setInfoDocId] = useState(0);
-  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
+  const [infoDocId, setInfoDocId] = useState(-1);
+  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(-1);
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -166,6 +167,7 @@ export const NewDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
+          fileName = fileName.split('_').pop()!!;
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
@@ -195,58 +197,89 @@ export const NewDocument = () => {
     return emitter && emittedDate && selectedProcess && description;
   };
 
-  const saveDocument = () => {
+  const saveDocument = async () => {
     setIsLoading(true);
-    const newInfoDoc: Doc = {
-      idUsuarioCriacao: parseInt(emitter),
-      dataCricao: emittedDate,
-      descricaoDoc: description,
-      justificativa: '',
-      codigo: '',
-      titulo: '',
-      origem: 'I',
-      idProcesso: parseInt(selectedProcess),
-      idArquivo: parseInt(id!!),
-      ignorarValidade: true,
-      enumSituacao: 'E',
-      tipoDoc: 'MA',
-      revisao: 0,
-    };
+    try {
+      const newInfoDoc: Doc = {
+        idUsuarioCriacao: parseInt(emitter),
+        dataCricao: emittedDate,
+        descricaoDoc: description,
+        justificativa: '',
+        codigo: '',
+        titulo: '',
+        origem: 'I',
+        idProcesso: parseInt(selectedProcess),
+        idArquivo: parseInt(id!!),
+        ignorarValidade: true,
+        enumSituacao: 'E',
+        tipoDoc: 'MA',
+        revisao: 0,
+      };
 
-    if (!noValidate) {
-      newInfoDoc.ignorarValidade = false;
-      newInfoDoc.dataValidade = validDate;
+      if (!noValidate) {
+        newInfoDoc.ignorarValidade = false;
+        newInfoDoc.dataValidade = validDate;
+      }
+
+      let resStoreDoc;
+      if (infoDocId > 0) {
+        newInfoDoc.id = infoDocId;
+        resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
+      } else {
+        resStoreDoc = await dispatch(createInfoDoc(newInfoDoc));
+      }
+
+      const resDoc: InfoDoc = (resStoreDoc.payload as AxiosResponse).data || {};
+      if (resDoc) {
+        setIsLoading(false);
+        setInfoDocId(resDoc?.doc?.id || -1);
+        setInfoDocMovimentacao(resDoc?.movimentacao?.id || -1);
+        toast.success(`Documento ${resDoc?.doc?.id} Salvo com sucesso!`);
+
+        return resDoc;
+      } else {
+        toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+        setIsLoading(false);
+        return null;
+      }
+    } catch (err) {
+      console.error('Error new document:', err);
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
     }
-
-    dispatch(createInfoDoc(newInfoDoc))
-      .then((res: any) => {
-        setIsLoading(false);
-        setInfoDocId(parseInt(res.payload.data?.doc?.id));
-        setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
-      })
-      .catch(err => {
-        console.error('Error new document:', err);
-        setIsLoading(false);
-      });
   };
 
-  const fowardDocument = () => {
+  const fowardDocument = async () => {
+    if (!validateFields()) {
+      toast.warn(`Os campos de Emissor, Área/Proceso e Justificativa de Emissão, SÃO OBRIGATÓRIOS!`);
+      return null;
+    }
+
     setIsLoading(true);
-    const novaMovimentacao: Movimentacao = {
-      id: infoDocMovimentacao,
-      enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
-      enumStatus: EnumStatusDoc.VALIDACAO,
-      idDocumentacao: infoDocId,
-      idUsuarioCriacao: currentUser.id,
-    };
 
-    //     console.log('userSgq: ', usersSGQ);
+    const resDoc = await saveDocument();
 
-    dispatch(atualizarMovimentacao(novaMovimentacao));
+    if (resDoc) {
+      const novaMovimentacao: Movimentacao = {
+        id: resDoc.movimentacao?.id,
+        enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
+        enumStatus: EnumStatusDoc.VALIDACAO,
+        idDocumentacao: resDoc.doc.id,
+        idUsuarioCriacao: currentUser.id,
+      };
 
-    dispatch(notifyEmailAllSGQs(usersSGQ));
-    setIsLoading(false);
-    navigate('/infodoc');
+      //     console.log('userSgq: ', usersSGQ);
+
+      dispatch(atualizarMovimentacao(novaMovimentacao));
+
+      dispatch(notifyEmailAllSGQs(usersSGQ));
+      toast.success(`Documento ${resDoc?.doc?.id} Encaminhado com sucesso!`);
+      setIsLoading(false);
+      navigate('/infodoc');
+    } else {
+      toast.error(`Não foi possivel Salvar e Encaminhar Documento, tente novamente mais tarde!`);
+    }
   };
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -363,8 +396,10 @@ export const NewDocument = () => {
               <FormControl style={{ width: '100%' }}>
                 <InputLabel>Origem</InputLabel>
                 <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                  {originList?.map((e: any) => (
-                    <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                  {originList?.map((e: any, idx) => (
+                    <MenuItem key={idx} value={e.nome}>
+                      {e.valor}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -456,7 +491,7 @@ export const NewDocument = () => {
           </div>
           <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
             {keywordList.map((keyword: string, index: number) => (
-              <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
+              <Chip key={index} label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
           </div>
 
@@ -469,11 +504,13 @@ export const NewDocument = () => {
             >
               Voltar
             </Button>
-            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
+            <Button onClick={() => saveDocument()}>
+              {' '}
+              {/* disabled={!validateFields()}>*/}
               Salvar
             </Button>
             <Button
-              disabled={infoDocId <= 0}
+              // disabled={!validateFields()}
               onClick={() => fowardDocument()}
               className="ms-3"
               variant="contained"

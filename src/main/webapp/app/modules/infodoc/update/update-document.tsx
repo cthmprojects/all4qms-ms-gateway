@@ -24,13 +24,14 @@ import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../models';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
+import { toast } from 'react-toastify';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -170,6 +171,7 @@ export const UpdateDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
+          fileName = fileName.split('_').pop()!!;
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
@@ -182,6 +184,7 @@ export const UpdateDocument = () => {
 
   const saveDoc = (): Doc => {
     const newInfoDoc: Doc = {
+      id: parseInt(id!!),
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
       descricaoDoc: description,
@@ -206,33 +209,51 @@ export const UpdateDocument = () => {
     return newInfoDoc;
   };
 
-  const saveDocument = () => {
+  const saveDocument = async () => {
     setIsLoading(true);
     const newInfoDoc = saveDoc();
 
-    dispatch(createInfoDoc(newInfoDoc))
-      .then((res: any) => {
-        setInfoDocId(parseInt(res.payload.data?.doc?.id));
-        setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error('Error new document:', err);
-        setIsLoading(false);
-      });
+    const resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
+
+    const resDoc: InfoDoc = (resStoreDoc.payload as AxiosResponse).data || {};
+    if (resDoc) {
+      setIsLoading(false);
+      setInfoDocId(resDoc?.doc?.id || -1);
+      setInfoDocMovimentacao(resDoc?.movimentacao?.id || -1);
+      toast.success(`Documento ${resDoc?.doc?.id} Salvo com sucesso!`);
+
+      return resDoc;
+    } else {
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
+    }
   };
 
-  const fowardDocument = () => {
-    const novaMovimentacao: Movimentacao = {
-      id: infoDocMovimentacao,
-      enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
-      enumStatus: EnumStatusDoc.VALIDAREV,
-      idDocumentacao: infoDocId,
-      idUsuarioCriacao: currentUser.id,
-    };
+  const fowardDocument = async () => {
+    if (!validateFields()) {
+      toast.warn(`Os campos de Emissor, Área/Proceso, Descrição, Código e Titulo , SÃO OBRIGATÓRIOS!`);
+      return null;
+    }
 
-    dispatch(atualizarMovimentacao(novaMovimentacao));
-    navigate('/infodoc');
+    const resDoc = await saveDocument();
+
+    if (resDoc) {
+      const novaMovimentacao: Movimentacao = {
+        id: infoDocMovimentacao,
+        enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
+        enumStatus: EnumStatusDoc.VALIDAREV,
+        idDocumentacao: infoDocId,
+        idUsuarioCriacao: currentUser.id,
+      };
+
+      dispatch(atualizarMovimentacao(novaMovimentacao));
+      navigate('/infodoc');
+    } else {
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
+    }
   };
 
   const cancelUpdate = () => {

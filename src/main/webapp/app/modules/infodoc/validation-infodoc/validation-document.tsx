@@ -210,6 +210,9 @@ export const ValidationDocument = () => {
   };
   const handleGetResume = async () => {
     try {
+      if (!fileUploaded) {
+        toast.warn('Não foi encontrado nem um documento revisado anexado, anexe-o antes e tente novamente.');
+      }
       setLoadingIA(true);
       const resToken = await dispatch(getTokenResumeIA(fileUploaded));
       const tokenResumeIA = (resToken.payload as AxiosResponse).data;
@@ -242,6 +245,7 @@ export const ValidationDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
+          fileName = fileName.split('_').pop()!!;
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
@@ -555,7 +559,7 @@ export const ValidationDocument = () => {
                 label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled={!isSGQ}
+                disabled={!isSGQ || (isSGQ && noValidate)}
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -614,7 +618,7 @@ export const ValidationDocument = () => {
             </Button>
             <Button
               className="ms-3"
-              disabled={!validateFields()}
+              // disabled={!validateFields()}
               onClick={() => saveDocument()}
               sx={{ border: validateFields() ? '1px solid #000' : '', color: '#000', width: '100px' }}
             >
