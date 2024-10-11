@@ -177,7 +177,7 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
               sx={{ width: '20% !important' }}
               type="number"
               onChange={event => onChanged({ ...initialData, rejected: parseInt(event.target.value) })}
-              value={initialData.rejected}
+              value={initialData.rejected?.toFixed(2)}
               disabled={readonly}
             />
           </Card>

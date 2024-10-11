@@ -25,9 +25,9 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
     line: '',
     nqa: '',
     operator: '',
-    opNumber: 0,
+    opNumber: '',
     rejectionRate: 0,
-    requestNumber: 0,
+    requestNumber: '',
     samples: 0,
     shift: '',
     traceability: {
@@ -202,7 +202,7 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
               sx={{ width: '10% !important' }}
             />
             <TextField
-              value={(rawMaterial.defects / rawMaterial.samples) * 100}
+              value={((rawMaterial.defects / rawMaterial.samples) * 100).toFixed(2)}
               onChange={e => setRawMaterial({ ...rawMaterial, rejectionRate: parseInt(e.target.value.slice(0, 10), 10) })}
               label="% Rejeição"
               name="rejection-rate"
@@ -249,18 +249,16 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
             </FormControl>
             <TextField
               value={rawMaterial.requestNumber}
-              onChange={e => setRawMaterial({ ...rawMaterial, requestNumber: parseInt(e.target.value.slice(0, 10), 10) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, requestNumber: e.target.value })}
               label="Número do pedido"
-              type="number"
               name="request-number"
               className="m-2"
               sx={{ width: '25% !important' }}
             />
             <TextField
               value={rawMaterial.opNumber}
-              onChange={e => setRawMaterial({ ...rawMaterial, opNumber: parseInt(e.target.value.slice(0, 10), 10) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, opNumber: e.target.value })}
               label="Número OP"
-              type="number"
               name="op-number"
               className="m-2"
               sx={{ width: '25% !important' }}

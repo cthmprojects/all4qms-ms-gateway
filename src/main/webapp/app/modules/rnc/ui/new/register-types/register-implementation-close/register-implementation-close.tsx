@@ -19,11 +19,14 @@ import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
 import { updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
 import { toast } from 'react-toastify';
+import { IUser } from 'app/shared/model/user.model';
 
 export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFechamento }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const account = useAppSelector(state => state.authentication.accountQms) as IUser;
 
   useEffect(() => {
     dispatch(getUsers({}));
@@ -89,11 +92,13 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
   }, [_rnc]);
 
   useEffect(() => {
+    const idResponsavelFechamento = users.find(user => user.id === completion.responsavelFechamento)?.id;
+    const definitiveId = idResponsavelFechamento || account?.id;
     if (completion) {
       setFirstForm({
         date: { value: completion.dataFechamento ? new Date(completion.dataFechamento) : new Date(), error: false },
         emitter: {
-          value: completion.responsavelFechamento ? users.find(user => user.id === completion.responsavelFechamento)?.nome : '',
+          value: definitiveId || '',
           error: false,
         },
         changeRisk: { value: completion.alteracaoRisco, error: false },
@@ -145,7 +150,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
               value={firstForm.emitter.value}
             >
               {users.map((user, i) => (
-                <MenuItem value={user.nome} key={`user-${i}`}>
+                <MenuItem value={user.id} key={`user-${i}`}>
                   {user.nome}
                 </MenuItem>
               ))}

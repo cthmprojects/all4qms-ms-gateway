@@ -43,6 +43,7 @@ import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
 import axios from 'axios';
 import { findAudit } from '../../reducers/audit.reducer';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 
 const sendNotification = async (title: string, user: any) => {
   let url = '/api/pendencias';
@@ -761,23 +762,20 @@ export const RNCNew = () => {
                   </Select>
                 </FormControl>
 
-                <FormControl className="mb-2 rnc-form-field me-2">
-                  <DatePicker
-                    selected={firstForm.date.value}
-                    disabled={secondForm}
-                    onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
-                    className="date-picker"
-                    dateFormat={'dd/MM/yyyy'}
-                  />
-                  <label htmlFor="" className="rnc-date-label">
-                    Data
-                  </label>
-                </FormControl>
+                <MaterialDatepicker
+                  width="115px"
+                  label="Data"
+                  selected={firstForm.date.value}
+                  disabled={secondForm}
+                  onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
+                  dateFormat={'dd/MM/yyyy'}
+                  className="me-2"
+                />
 
                 <FormControl className="mb-2 rnc-form-field me-2">
                   <InputLabel>Tipo</InputLabel>
                   <Select
-                    label="Selecione o tipo"
+                    label="Tipo"
                     name="type"
                     disabled={secondForm}
                     error={firstForm.type.error}
@@ -800,7 +798,7 @@ export const RNCNew = () => {
                 <FormControl className="mb-2 rnc-form-field me-2">
                   <InputLabel>Origem</InputLabel>
                   <Select
-                    label="Selecione a origem"
+                    label="Origem"
                     name="origin"
                     disabled={secondForm}
                     value={firstForm.origin.value}

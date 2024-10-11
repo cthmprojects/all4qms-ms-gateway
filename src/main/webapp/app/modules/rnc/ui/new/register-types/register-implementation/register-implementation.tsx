@@ -20,11 +20,14 @@ import { saveApprovalNC, updateApprovalNC, getApprovalNC } from 'app/modules/rnc
 import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
 import { toast } from 'react-toastify';
+import { IUser } from 'app/shared/model/user.model';
 
 export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const account = useAppSelector(state => state.authentication.accountQms) as IUser;
 
   useEffect(() => {
     dispatch(getUsers({}));
@@ -89,24 +92,23 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
   }, [_rnc]);
 
   useEffect(() => {
-    if (implementation) {
-      setFirstForm({
-        date: { value: implementation?.dataImplementacao ? new Date(implementation.dataImplementacao) : new Date(), error: false },
-        emitter: {
-          value: implementation?.responsavelImplementacao
-            ? users.find(user => user.id === implementation.responsavelImplementacao)?.nome
-            : '',
-          error: false,
-        },
-        implemented: { value: implementation?.possuiImplementacao ? implementation.possuiImplementacao : false, error: false },
-        description: { value: implementation?.descImplementacao ? implementation.descImplementacao : '', error: false },
-      });
-    }
+    const idResponsavelImplementacao = users.find(user => user.id === implementation?.responsavelImplementacao)?.id;
+    const definitiveId = idResponsavelImplementacao || account?.id;
+
+    setFirstForm({
+      date: { value: implementation?.dataImplementacao ? new Date(implementation.dataImplementacao) : new Date(), error: false },
+      emitter: {
+        value: definitiveId || '',
+        error: false,
+      },
+      implemented: { value: implementation?.possuiImplementacao ? implementation.possuiImplementacao : false, error: false },
+      description: { value: implementation?.descImplementacao ? implementation.descImplementacao : '', error: false },
+    });
 
     if (_rnc?.aprovacaoNC == null && implementation?.id) {
       dispatch(update({ ..._rnc, aprovacaoNC: implementation?.id }));
     }
-  }, [implementation, users]);
+  }, [implementation, users, account]);
 
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
@@ -170,7 +172,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
                   }
                 >
                   {users.map((user, i) => (
-                    <MenuItem value={user.nome} key={`user-${i}`}>
+                    <MenuItem value={user.id} key={`user-${i}`}>
                       {user.nome}
                     </MenuItem>
                   ))}
