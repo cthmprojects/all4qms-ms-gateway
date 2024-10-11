@@ -30,9 +30,9 @@ export type RawMaterial = {
   line: string;
   nqa: string;
   operator: string;
-  opNumber: number;
+  opNumber: string;
   rejectionRate: number;
-  requestNumber: number;
+  requestNumber: string;
   samples: number;
   shift: string;
   traceability: RncTraceability;

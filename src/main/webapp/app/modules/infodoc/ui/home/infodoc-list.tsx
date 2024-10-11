@@ -58,6 +58,8 @@ import { listEnums } from '../../reducers/enums.reducer';
 import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
 import axios, { AxiosResponse } from 'axios';
 import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { AUTHORITIES } from 'app/config/constants';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -433,7 +435,7 @@ const InfodocList = () => {
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
-          fileDownload(file, `${fileName}.pdf`);
+          fileDownload(file, `${fileName}`);
         });
     }
   };
@@ -493,7 +495,7 @@ const InfodocList = () => {
               </TableHead>
               <TableBody>
                 {infodocs?.map((infodoc: InfoDoc) => (
-                  <TableRow key={infodoc.doc.id}>
+                  <TableRow key={infodoc.doc.id} style={{ cursor: infodoc.doc.enumSituacao !== 'H' ? 'pointer' : 'auto' }}>
                     <Tooltip title={infodoc.doc.descricaoDoc}>
                       <TableCell>{infodoc.doc.codigo}</TableCell>
                     </Tooltip>
@@ -614,6 +616,9 @@ const InfodocList = () => {
     }
   };
 
+  const account = useAppSelector(state => state.authentication.account);
+  const isSgq = hasAnyAuthority(account.authorities, [AUTHORITIES.SGQ]);
+
   return (
     // ////////////////////////////////////
     <div className="padding-container">
@@ -720,8 +725,8 @@ const InfodocList = () => {
               <Tab label="Lista Mestra" {...a11yProps(0)} />
               <Tab label="Edição" {...a11yProps(1)} />
               <Tab label="Revisão" {...a11yProps(2)} />
-              <Tab label="Obsoleto" {...a11yProps(3)} />
-              <Tab label="Cancelado" {...a11yProps(4)} />
+              {isSgq && <Tab label="Obsoleto" {...a11yProps(3)} />}
+              {isSgq && <Tab label="Cancelado" {...a11yProps(4)} />}
             </Tabs>
           </Box>
           <CustomTabPanel value={value} index={0}>

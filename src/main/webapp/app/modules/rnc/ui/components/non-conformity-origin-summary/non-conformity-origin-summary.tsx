@@ -113,7 +113,7 @@ const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps)
               <TextField disabled label="NQA" placeholder="NQA" value={origin?.mpprod.produto.nqa} />
               <TextField disabled label="Número de amostras" placeholder="Número de amostras" value={origin?.mpprod.produto.qtdAmostra} />
               <TextField disabled label="Número de defeitos" placeholder="Número de defeitos" value={origin?.mpprod.produto.qtdDefeito} />
-              <TextField disabled label="% Rejeição" placeholder="% Rejeição" value={origin?.mpprod.produto.qtdRejeicao} />
+              <TextField disabled label="% Rejeição" placeholder="% Rejeição" value={origin?.mpprod.produto.qtdRejeicao?.toFixed(2)} />
             </Stack>
             <Stack direction="row" spacing={2}>
               <TextField

@@ -59,6 +59,8 @@ export const RejectDocumentDialog = ({ open, handleClose, documentTitle, current
             motivoReprovacao: '',
           })
         );
+
+        setDescription('');
         navigate('/infodoc');
       })
       .catch(e => {

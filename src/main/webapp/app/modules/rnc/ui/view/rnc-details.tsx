@@ -38,6 +38,8 @@ const RncDetails = () => {
     dispatch(findCompleteNonConformity(nonConformityId));
   }, [nonConformityId]);
 
+  useEffect(() => console.log('erickson', nonConformity), [nonConformity]);
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -57,9 +59,15 @@ const RncDetails = () => {
               <NonConformitySummary nonConformity={nonConformity?.naoConformidade} />
             </Box>
 
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <NonConformityOriginSummary origin={nonConformity?.origem} />
-            </Box>
+            {nonConformity?.origem &&
+              (nonConformity.origem.auditoria ||
+                nonConformity.origem.cliente ||
+                nonConformity.origem.mpprod ||
+                nonConformity.origem.outros) && (
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                  <NonConformityOriginSummary origin={nonConformity?.origem} />
+                </Box>
+              )}
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Stack spacing={2}>
@@ -67,23 +75,25 @@ const RncDetails = () => {
               </Stack>
             </Box>
 
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <NonConformityCoverageSummary coverage={nonConformity?.abrangencia} />
-            </Box>
-
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              {nonConformity?.acaoImediata.map((a, index) => (
-                <NonConformityImmediateActionSummary key={index} immediateAction={a} />
-              ))}
-            </Box>
-
-            {nonConformity?.decisao && (
+            {nonConformity?.abrangencia && (
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <NonConformityDecisionSummary decision={nonConformity?.decisao} />
+                <NonConformityCoverageSummary coverage={nonConformity?.abrangencia} />
               </Box>
             )}
 
-            {(nonConformity?.ishikawa || nonConformity?.porques) && (
+            {nonConformity?.acaoImediata.map((a, index) => (
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <NonConformityImmediateActionSummary key={index} immediateAction={a} />
+              </Box>
+            ))}
+
+            {nonConformity?.decisao.map((d, index) => (
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <NonConformityDecisionSummary decision={d} />
+              </Box>
+            ))}
+
+            {(nonConformity?.ishikawa || (nonConformity?.porques && nonConformity?.porques.length > 0)) && (
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <NonConformityCauseInvestigationSummary ishikawa={nonConformity?.ishikawa} reasons={nonConformity?.porques} />
               </Box>
