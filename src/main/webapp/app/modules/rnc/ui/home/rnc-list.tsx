@@ -40,6 +40,8 @@ import { listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
 import './rnc.css';
 import { VisibilityOutlined } from '@mui/icons-material';
+import { resetAudit } from '../../reducers/audit.reducer';
+import { resetImplementation } from '../../reducers/approval.reducer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -158,6 +160,9 @@ const RncList = ({}) => {
     dispatch(listEnums());
     dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(getProcesses());
+    dispatch(resetAudit());
+    dispatch(reset());
+    dispatch(resetImplementation());
   }, []);
 
   useEffect(() => {

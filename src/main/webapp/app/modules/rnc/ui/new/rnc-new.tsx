@@ -304,10 +304,10 @@ export const RNCNew = () => {
     }
 
     return await axiosSaveAudit({
-      norm: internalAudit?.norm,
-      occurrence: internalAudit?.ncNumber?.toString(),
-      process: internalAudit?.reportNumber,
-      requirement: internalAudit?.normRequirements,
+      norm: externalAudit?.norm,
+      occurrence: externalAudit?.ncNumber?.toString(),
+      process: externalAudit?.reportNumber,
+      requirement: externalAudit?.normRequirements,
       rncId: rnc?.id,
       sequence: 1,
     });
