@@ -16,7 +16,7 @@ export const InternalAuditRegister = ({ audit, onChanged }: InternalAuditRegiste
 
   useEffect(() => {
     onChanged({
-      ncNumber: parseInt(nc),
+      ncNumber: nc,
       norm: norm,
       normRequirements: requirement,
       reportNumber: parseInt(report),
@@ -75,15 +75,7 @@ export const InternalAuditRegister = ({ audit, onChanged }: InternalAuditRegiste
         <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <TextField fullWidth label="Norma" name="norma" className="form-field m-3" value={norm} onChange={onNormChanged} />
-          <TextField
-            fullWidth
-            label="Número NC"
-            name="numeroNC"
-            className="form-field m-3"
-            type="number"
-            value={nc}
-            onChange={onNcChanged}
-          />
+          <TextField fullWidth label="Número NC" name="numeroNC" className="form-field m-3" value={nc} onChange={onNcChanged} />
           <TextField
             fullWidth
             label="Requisito(s) da Norma"

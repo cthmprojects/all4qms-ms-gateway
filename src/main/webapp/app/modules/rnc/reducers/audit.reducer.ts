@@ -38,6 +38,6 @@ const rncAuditSlice = createEntitySlice({
   },
 });
 
-export const { reset } = rncAuditSlice.actions;
+export const { reset: resetAudit } = rncAuditSlice.actions;
 
 export default rncAuditSlice.reducer;

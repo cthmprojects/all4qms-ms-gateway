@@ -8,7 +8,7 @@ export type RncAudit = {
 };
 
 export type GeneralAudit = {
-  ncNumber: number;
+  ncNumber: string;
   norm: string;
   normRequirements: string;
   reportNumber: number;
