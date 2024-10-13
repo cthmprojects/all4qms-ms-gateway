@@ -6,13 +6,15 @@
 import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import React, { useEffect, useState } from 'react';
-import DatePicker from 'react-datepicker';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { Enums, GeneralAudit, Process, RawMaterial, Rnc, RncClient } from '../../models';
+import { findAudit } from '../../reducers/audit.reducer';
 import { clearDescriptions, getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
@@ -22,15 +24,11 @@ import {
   axiosSaveAudit,
   axiosSaveClient,
   axiosSaveProduct,
-  axiosSaveRawMaterial,
   getById,
   list,
   save,
-  saveClientComplaint,
   saveDescription,
-  saveProductComplaint,
   update,
-  updateDescription,
 } from '../../reducers/rnc.reducer';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
@@ -39,11 +37,9 @@ import MPRegister from './register-types/mp-register/mp-register';
 import OthersRegister from './register-types/others-register/others-register';
 import ProductRegister from './register-types/product-register/product-register';
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
+import Similarities from './register-types/similarities/similarities';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
-import axios from 'axios';
-import { findAudit } from '../../reducers/audit.reducer';
-import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 
 const sendNotification = async (title: string, user: any) => {
   let url = '/api/pendencias';
@@ -842,15 +838,9 @@ export const RNCNew = () => {
                   rncId={id}
                 />
               </Row>
-              {/* <Row className="ms-3 me-3 mt-3" fullWidth>
-                <RepetitionRnc
-                  onRepetitionChanged={onRepetitionChanged}
-                  onSelectedRncIdsChanged={onSelectedRncIdsChanged}
-                  repetition={repetition}
-                  rncs={rncs}
-                  selectedRncIds={selectedRncIds}
-                />
-              </Row> */}
+              <Row className="ms-3 me-3 mt-3" fullWidth>
+                <Similarities rncs={rncs} />
+              </Row>
               <Row className="m-3">
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Button
