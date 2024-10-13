@@ -109,7 +109,7 @@ const NonConformitySummary = ({ enums, nonConformity }: NonConformitySummaryProp
       <CardContent>
         <Stack spacing={2}>
           <Stack direction="row" spacing={2}>
-            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.numNC ?? ''} />
+            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.id ?? ''} />
             <TextField disabled label="Emitido por" placeholder="Emitido por" value={emitterName} />
             <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={emitterProcessName} />
             <TextField disabled label="Encaminhado para" placeholder="Encaminhado para" value={receiverName} />
