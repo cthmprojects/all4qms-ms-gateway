@@ -58,7 +58,7 @@ export const RNCNew = () => {
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    dispatch(list({}));
+    dispatch(list({ size: 1000 }));
     dispatch(listEnums());
 
     if (id) {
@@ -192,7 +192,7 @@ export const RNCNew = () => {
    NC Repetition
    */
   const [repetition, setRepetition] = useState<boolean>();
-  const [selectedRncIds, setSelectedRncIds] = useState<Array<number>>([]);
+  const [similarId, setSimilarId] = useState<number | null>(null);
 
   /*
    NC Origin
@@ -209,10 +209,6 @@ export const RNCNew = () => {
 
   const onRepetitionChanged = (value: boolean) => {
     setRepetition(value);
-  };
-
-  const onSelectedRncIdsChanged = (values: Array<number>) => {
-    setSelectedRncIds(values);
   };
 
   const handleSubmit = e => {
@@ -241,7 +237,7 @@ export const RNCNew = () => {
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
-          vinculoDocAnterior: null,
+          vinculoDocAnterior: similarId,
           qtdPorques: pqs,
         })
       );
@@ -275,7 +271,7 @@ export const RNCNew = () => {
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
-          vinculoDocAnterior: null,
+          vinculoDocAnterior: similarId,
           qtdPorques: pqs,
         })
       );
@@ -430,7 +426,7 @@ export const RNCNew = () => {
         statusAtual: 'DETALHAMENTO',
         ncOutros: others,
         possuiReincidencia: repetition,
-        vinculoDocAnterior: null,
+        vinculoDocAnterior: similarId,
         vinculoAuditoria: auditLink,
         vinculoCliente: clientComplaint?.id ?? rnc?.vinculoCliente,
         vinculoProduto: rawMaterialLink?.id ?? rnc?.vinculoProduto,
@@ -461,7 +457,7 @@ export const RNCNew = () => {
     });
 
     dispatch(
-      update({ ...stateRnc, ncOutros: others, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })
+      update({ ...stateRnc, ncOutros: others, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: similarId })
     ).then(() => {
       navigate('/rnc');
     });
@@ -506,7 +502,7 @@ export const RNCNew = () => {
       }
 
       setRepetition(rnc.possuiReincidencia || false);
-      setSelectedRncIds(rnc.vinculoDocAnterior || []);
+      setSimilarId(rnc.vinculoDocAnterior ?? null);
 
       if (rnc.statusAtual === 'DETALHAMENTO') {
         setSecondForm(true);
@@ -839,7 +835,12 @@ export const RNCNew = () => {
                 />
               </Row>
               <Row className="ms-3 me-3 mt-3" fullWidth>
-                <Similarities rncs={rncs} />
+                <Similarities
+                  description={descriptions.length > 0 ? descriptions[0] : ''}
+                  onChanged={id => setSimilarId(id)}
+                  rncs={rncs}
+                  similarId={similarId}
+                />
               </Row>
               <Row className="m-3">
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
