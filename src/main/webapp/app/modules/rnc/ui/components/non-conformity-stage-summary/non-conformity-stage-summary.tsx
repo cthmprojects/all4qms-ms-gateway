@@ -1,4 +1,6 @@
 import { Card, CardContent, CardHeader, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
+import { IUsuario } from 'app/shared/model/usuario.model';
+import { useCallback } from 'react';
 
 type NonConformityStageSummaryProps = {
   available: boolean;
@@ -6,10 +8,11 @@ type NonConformityStageSummaryProps = {
   dateLabel: string;
   description: string;
   descriptionLabel: string;
-  responsible: string;
+  responsible: number;
   responsibleLabel: string;
   showAvailability: boolean;
   title: string;
+  users: Array<IUsuario>;
 };
 
 const NonConformityStageSummary = ({
@@ -22,7 +25,25 @@ const NonConformityStageSummary = ({
   responsibleLabel,
   showAvailability,
   title,
+  users,
 }: NonConformityStageSummaryProps) => {
+  const findUserById = useCallback(
+    (id: number): string => {
+      if (!users || users.length <= 0) {
+        return '';
+      }
+
+      const user: IUsuario | null = users.find(u => u.id === id);
+
+      if (!user) {
+        return '';
+      }
+
+      return user.nome;
+    },
+    [users]
+  );
+
   const formatTimestamp = (timestamp: Date): string => {
     if (!timestamp) {
       return '';
@@ -59,7 +80,7 @@ const NonConformityStageSummary = ({
               </>
             )}
             <TextField disabled label={dateLabel} placeholder={dateLabel} value={formatTimestamp(date)} />
-            <TextField disabled label={responsibleLabel} placeholder={responsibleLabel} value={responsible} />
+            <TextField disabled label={responsibleLabel} placeholder={responsibleLabel} value={findUserById(responsible)} />
           </Stack>
           <Stack spacing={2}>
             <TextField disabled label={descriptionLabel} placeholder={descriptionLabel} value={description} />

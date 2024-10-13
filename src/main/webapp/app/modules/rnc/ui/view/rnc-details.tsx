@@ -1,5 +1,7 @@
 import { Box, Breadcrumbs, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { IUsuario } from 'app/shared/model/usuario.model';
 import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CompleteNc, Enums, NonConformityDescriptionSummary as NcDescriptionSummary, NonConformityDescription } from '../../models';
@@ -23,6 +25,7 @@ const RncDetails = () => {
 
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const nonConformity: CompleteNc = useAppSelector(state => state.all4qmsmsgateway.completeNonConformities.entity);
+  const users: Array<IUsuario> = useAppSelector(state => state.all4qmsmsgateway.users.entities);
 
   const nonConformityId = useMemo(() => {
     if (!id || id.length <= 0) {
@@ -37,6 +40,7 @@ const RncDetails = () => {
       return;
     }
 
+    dispatch(getUsers({}));
     dispatch(listEnums());
     dispatch(findCompleteNonConformity(nonConformityId));
   }, [nonConformityId]);
@@ -146,10 +150,11 @@ const RncDetails = () => {
                   dateLabel="Data Implementação"
                   description={nonConformity?.aprovacao?.descImplementacao}
                   descriptionLabel="Descrição da Implementação"
-                  responsible={nonConformity?.aprovacao?.responsavelImplementacao?.toString()}
+                  responsible={nonConformity?.aprovacao?.responsavelImplementacao}
                   responsibleLabel="Resp. Verificação"
                   showAvailability={true}
                   title="Implementação do Plano"
+                  users={users}
                 />
               </Box>
             )}
@@ -162,10 +167,11 @@ const RncDetails = () => {
                   dateLabel="Data Verificação"
                   description={nonConformity?.aprovacao?.descEficacia}
                   descriptionLabel="Descrição da Eficácia"
-                  responsible={nonConformity?.aprovacao?.responsavelEficacia?.toString()}
+                  responsible={nonConformity?.aprovacao?.responsavelEficacia}
                   responsibleLabel="Resp. Verificação"
                   showAvailability={true}
                   title="Verificação da Eficácia"
+                  users={users}
                 />
               </Box>
             )}
@@ -178,10 +184,11 @@ const RncDetails = () => {
                   dateLabel="Data do Fechamento"
                   description={nonConformity?.aprovacao?.descFechamento}
                   descriptionLabel="Descrição do Fechamento"
-                  responsible={nonConformity?.aprovacao?.responsavelFechamento?.toString()}
+                  responsible={nonConformity?.aprovacao?.responsavelFechamento}
                   responsibleLabel="Resp. Verificação"
                   showAvailability={false}
                   title="Fechamento"
+                  users={users}
                 />
               </Box>
             )}
