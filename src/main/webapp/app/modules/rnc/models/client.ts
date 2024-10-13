@@ -1,6 +1,7 @@
 import { RncTraceability } from './traceability';
 
 export type RncClient = {
+  id?: number;
   batch: string;
   batchAmount: number;
   code: string;
