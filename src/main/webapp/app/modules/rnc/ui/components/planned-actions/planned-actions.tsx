@@ -117,6 +117,8 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
           <div
             style={{
               transform: 'translateY(-19px)',
+              position: 'relative',
+              zIndex: '999',
             }}
           >
             <span
@@ -141,6 +143,9 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
               className="date-picker"
               dateFormat={'dd/MM/yyyy'}
               id="date-picker-rnc-plano-acao-prazo"
+              popperProps={{
+                strategy: 'fixed',
+              }}
             />
           </div>
         </FormControl>
