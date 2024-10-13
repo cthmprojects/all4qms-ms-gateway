@@ -1,9 +1,10 @@
 import { Box, Breadcrumbs, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { CompleteNc, NonConformityDescription, NonConformityDescriptionSummary as NcDescriptionSummary } from '../../models';
+import { CompleteNc, Enums, NonConformityDescriptionSummary as NcDescriptionSummary, NonConformityDescription } from '../../models';
 import { findCompleteNonConformity } from '../../reducers/complete-non-conformity.reducer';
+import { listEnums } from '../../reducers/enums.reducer';
 import {
   NonConformityActionPlanSummary,
   NonConformityCauseInvestigationSummary,
@@ -20,6 +21,7 @@ const RncDetails = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
 
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const nonConformity: CompleteNc = useAppSelector(state => state.all4qmsmsgateway.completeNonConformities.entity);
 
   const nonConformityId = useMemo(() => {
@@ -35,6 +37,7 @@ const RncDetails = () => {
       return;
     }
 
+    dispatch(listEnums());
     dispatch(findCompleteNonConformity(nonConformityId));
   }, [nonConformityId]);
 
@@ -80,7 +83,7 @@ const RncDetails = () => {
         <Box sx={{ width: '100%' }}>
           <Stack spacing={2}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <NonConformitySummary nonConformity={nonConformity?.naoConformidade} />
+              <NonConformitySummary enums={enums} nonConformity={nonConformity?.naoConformidade} />
             </Box>
 
             {nonConformity?.origem &&
@@ -89,7 +92,7 @@ const RncDetails = () => {
                 nonConformity.origem.mpprod ||
                 nonConformity.origem.outros) && (
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                  <NonConformityOriginSummary origin={nonConformity?.origem} />
+                  <NonConformityOriginSummary enums={enums} origin={nonConformity?.origem} />
                 </Box>
               )}
 
