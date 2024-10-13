@@ -1,23 +1,24 @@
 import { Card, CardContent, CardHeader, Stack, TextField } from '@mui/material';
 import { NonConformityCauseEffect, NonConformityReason } from 'app/modules/rnc/models';
-import React from 'react';
 
 type NonConformityCauseInvestigationSummaryProps = {
+  description: string;
   ishikawa: NonConformityCauseEffect;
   reasons: Array<NonConformityReason>;
 };
 
 type IshikawaSummaryProps = {
+  description: string;
   ishikawa: NonConformityCauseEffect;
 };
 
-const IshikawaSummary = ({ ishikawa }: IshikawaSummaryProps) => {
+const IshikawaSummary = ({ description, ishikawa }: IshikawaSummaryProps) => {
   return (
     <Card>
       <CardHeader title="Ishikawa" />
       <CardContent>
         <Stack direction="row" spacing={2}>
-          <TextField disabled label="NC" placeholder="NC" value={ishikawa?.id} />
+          <TextField disabled label="NC" placeholder="NC" value={description} />
 
           <Stack spacing={2}>
             <Stack direction="row" spacing={2}>
@@ -43,16 +44,17 @@ const IshikawaSummary = ({ ishikawa }: IshikawaSummaryProps) => {
 };
 
 type ReasonSummaryProps = {
+  description: string;
   reason: NonConformityReason;
 };
 
-const ReasonSummary = ({ reason }: ReasonSummaryProps) => {
+const ReasonSummary = ({ description, reason }: ReasonSummaryProps) => {
   return (
     <Card>
       <CardHeader title="5 Porquês" />
       <CardContent>
         <Stack direction="row" spacing={2}>
-          <TextField disabled label="NC" placeholder="NC" value={reason?.id} />
+          <TextField disabled label="NC" placeholder="NC" value={description} />
 
           <Stack spacing={2} sx={{ flexGrow: 1 }}>
             <TextField disabled label="Porquê?" placeholder="Porquê?" value={reason?.pq1} />
@@ -69,14 +71,14 @@ const ReasonSummary = ({ reason }: ReasonSummaryProps) => {
   );
 };
 
-const NonConformityCauseInvestigationSummary = ({ ishikawa, reasons }: NonConformityCauseInvestigationSummaryProps) => {
+const NonConformityCauseInvestigationSummary = ({ description, ishikawa, reasons }: NonConformityCauseInvestigationSummaryProps) => {
   return (
     <Card>
       <CardHeader title="Investigação de Causas" />
       <CardContent>
         <Stack spacing={2}>
-          {ishikawa && <IshikawaSummary ishikawa={ishikawa} />}
-          {reasons && reasons.map((reason, index) => <ReasonSummary key={index} reason={reason} />)}
+          {ishikawa && <IshikawaSummary description={description} ishikawa={ishikawa} />}
+          {reasons && reasons.map((reason, index) => <ReasonSummary description={description} key={index} reason={reason} />)}
         </Stack>
       </CardContent>
     </Card>

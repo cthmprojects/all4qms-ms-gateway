@@ -2,7 +2,7 @@ import { Box, Breadcrumbs, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import React, { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { CompleteNc } from '../../models';
+import { CompleteNc, NonConformityDescription, NonConformityDescriptionSummary as NcDescriptionSummary } from '../../models';
 import { findCompleteNonConformity } from '../../reducers/complete-non-conformity.reducer';
 import {
   NonConformityActionPlanSummary,
@@ -38,7 +38,31 @@ const RncDetails = () => {
     dispatch(findCompleteNonConformity(nonConformityId));
   }, [nonConformityId]);
 
-  useEffect(() => console.log('erickson', nonConformity), [nonConformity]);
+  const description = useMemo<string>(() => {
+    if (!nonConformity) {
+      return '';
+    }
+
+    const ncDescriptions: Array<NonConformityDescription> = nonConformity.descricaoNC;
+
+    if (!ncDescriptions || ncDescriptions.length <= 0) {
+      return '';
+    }
+
+    const ncDescription: NonConformityDescription = ncDescriptions[0];
+
+    if (!ncDescription || !ncDescription.descricaoNaoConformidade) {
+      return '';
+    }
+
+    const summary: NcDescriptionSummary = ncDescription.descricaoNaoConformidade;
+
+    if (!summary) {
+      return '';
+    }
+
+    return summary.detalhesNaoConformidade;
+  }, [nonConformity]);
 
   return (
     <div className="padding-container">
@@ -95,7 +119,11 @@ const RncDetails = () => {
 
             {(nonConformity?.ishikawa || (nonConformity?.porques && nonConformity?.porques.length > 0)) && (
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <NonConformityCauseInvestigationSummary ishikawa={nonConformity?.ishikawa} reasons={nonConformity?.porques} />
+                <NonConformityCauseInvestigationSummary
+                  description={description}
+                  ishikawa={nonConformity?.ishikawa}
+                  reasons={nonConformity?.porques}
+                />
               </Box>
             )}
 
