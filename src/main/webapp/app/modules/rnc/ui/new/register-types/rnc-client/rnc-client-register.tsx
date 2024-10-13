@@ -3,6 +3,7 @@ import { RncClient } from 'app/modules/rnc/models';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import './rnc-client-register.css';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 
 // TODO: Receber os dados do cliente e preencher os campos
 // TODO: Validação de error dos campos
@@ -12,31 +13,33 @@ type ClientProps = {
   onChanged: (client: RncClient) => void;
 };
 
+const empty = {
+  batch: '',
+  batchAmount: 0,
+  code: '',
+  defects: 0,
+  description: '',
+  name: '',
+  opNumber: '',
+  order: '', // ---> Provavelmente não utilizado
+  productName: '',
+  rejected: 0,
+  requestNumber: '',
+  samples: 0,
+  supplier: '',
+  traceability: {
+    deliveredAt: new Date(),
+    identifier: '',
+    date: new Date(),
+    rncId: 0,
+  },
+};
+
 export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
-  const [client, setClient] = useState<RncClient>({
-    batch: '',
-    batchAmount: 0,
-    code: '',
-    defects: 0,
-    description: '',
-    name: '',
-    opNumber: '',
-    order: '', // ---> Provavelmente não utilizado
-    productName: '',
-    rejected: 0,
-    requestNumber: '',
-    samples: 0,
-    supplier: '',
-    traceability: {
-      deliveredAt: new Date(),
-      identifier: '',
-      date: new Date(),
-      rncId: 0,
-    },
-  });
+  const [client, setClient] = useState<RncClient>(initialData?.id ? initialData : empty);
 
   useEffect(() => {
-    if (!initialData) {
+    if (!initialData?.id) {
       return;
     }
 
@@ -49,7 +52,7 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
         rncId: initialData.traceability.rncId,
       },
     });
-  }, []);
+  }, [initialData?.id]);
 
   useEffect(() => {
     onChanged(client);
@@ -137,23 +140,20 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
             <TextField
               label="Lote"
               name="lot"
+              value={client.batch}
               className="ms-3 m-2"
               sx={{ width: '20% !important' }}
               onChange={e => setClient({ ...client, batch: e.target.value })}
             />
-            <FormControl className="m-2">
-              <DatePicker
-                // locale='pt-BR'
-                selected={client.traceability.deliveredAt}
-                onChange={date => setClient({ ...client, traceability: { ...client.traceability, deliveredAt: date } })}
-                className="date-picker date-picker-rnc-client"
-                id="date-picker-rnc-client"
-                dateFormat={'dd/MM/yyyy'}
-              />
-              <label htmlFor="date-picker-rnc-client" className="date-label">
-                Data de entrega
-              </label>
-            </FormControl>
+
+            <MaterialDatepicker
+              // locale='pt-BR'
+              selected={client.traceability.deliveredAt}
+              onChange={date => setClient({ ...client, traceability: { ...client.traceability, deliveredAt: date } })}
+              label="Data de entrega"
+              dateFormat={'dd/MM/yyyy'}
+              className="m-2"
+            />
             <TextField
               value={client.traceability.identifier}
               onChange={e => setClient({ ...client, traceability: { ...client.traceability, identifier: e.target.value } })}
@@ -162,19 +162,15 @@ export const ClientRegister = ({ initialData, onChanged }: ClientProps) => {
               className="m-2"
               sx={{ width: '20% !important' }}
             />
-            <FormControl className="m-2">
-              <DatePicker
-                // locale='pt-BR'
-                selected={client.traceability.date}
-                onChange={date => setClient({ ...client, traceability: { ...client.traceability, date: date } })}
-                className="date-picker date-picker-rnc-client"
-                id="date-picker-rnc-client-nf"
-                dateFormat={'dd/MM/yyyy'}
-              />
-              <label htmlFor="date-picker-rnc-client-nf" className="date-label date-label-nf">
-                Data NF
-              </label>
-            </FormControl>
+            <MaterialDatepicker
+              // locale='pt-BR'
+              selected={client.traceability.date}
+              onChange={date => setClient({ ...client, traceability: { ...client.traceability, date: date } })}
+              className="m-2"
+              label="Data NF"
+              dateFormat={'dd/MM/yyyy'}
+            />
+
             <TextField
               value={client.requestNumber}
               onChange={e => setClient({ ...client, requestNumber: e.target.value })}

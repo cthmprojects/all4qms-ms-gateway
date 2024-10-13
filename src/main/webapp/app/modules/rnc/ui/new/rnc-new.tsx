@@ -589,17 +589,18 @@ export const RNCNew = () => {
         const complaint = await axiosGetClient(rnc.vinculoCliente);
 
         setClientComplaint({
+          id: data.product.id,
           code: data.product?.codigoProduto,
           batchAmount: data.product?.qtdLote,
           name: complaint.data?.nomeClienteReclamacao,
           order: data.product?.numPedido,
-          productName: data.product?.nome,
+          productName: data.product?.nomeProduto,
           rejected: data.product?.qtdRejeicao,
           samples: data.product?.qtdAmostra,
           supplier: data.product?.nomeFornecedor,
           description: data.product?.nqa,
           defects: data.product?.qtdDefeito,
-          batch: data.product?.qtdLote,
+          batch: data.product?.lote,
           requestNumber: data.product?.numPedido,
           opNumber: data.product?.numOP,
           traceability: {
