@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
-import React from 'react';
 
 type NonConformityStageSummaryProps = {
   available: boolean;
@@ -55,8 +54,8 @@ const NonConformityStageSummary = ({
           <Stack direction="row" spacing={2}>
             {showAvailability && (
               <>
-                <FormControlLabel control={<Checkbox />} disabled label="Sim" value={available} />
-                <FormControlLabel control={<Checkbox />} disabled label="Não" value={!available} />
+                <FormControlLabel control={<Checkbox />} disabled label="Sim" checked={available} />
+                <FormControlLabel control={<Checkbox />} disabled label="Não" checked={!available} />
               </>
             )}
             <TextField disabled label={dateLabel} placeholder={dateLabel} value={formatTimestamp(date)} />
