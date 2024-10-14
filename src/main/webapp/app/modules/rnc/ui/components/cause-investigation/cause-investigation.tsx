@@ -1,19 +1,7 @@
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import { AddOutlined, DeleteOutline } from '@mui/icons-material';
 import { Textarea, styled } from '@mui/joy';
-import {
-  Autocomplete,
-  Button,
-  Card,
-  CardContent,
-  Checkbox,
-  Chip,
-  FormControlLabel,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Autocomplete, Button, Card, CardContent, Chip, Stack, TextField, Typography } from '@mui/material';
 import { IshikawaInvestigation, ReasonsInvestigation } from 'app/modules/rnc/models';
 import React, { useEffect, useState } from 'react';
 import { CardHeader } from 'reactstrap';

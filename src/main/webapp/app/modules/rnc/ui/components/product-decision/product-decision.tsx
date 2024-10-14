@@ -3,7 +3,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
   Checkbox,
   FormControl,
   InputLabel,
@@ -16,7 +15,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Decision } from 'app/modules/rnc/models/decision';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DatePicker from 'react-datepicker';
 
 type ProductDecisionProps = {
@@ -55,6 +54,31 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
   useEffect(() => {
     setDecision({ ...decision, responsibles: responsibles.join(';') });
   }, [responsibles]);
+
+  const calculateRate = (a: number, b: number): number => {
+    const total: number = a + b;
+
+    if (total === 0) {
+      return 0;
+    }
+
+    return b / total;
+  };
+
+  const rejectionRate = useMemo<number>(() => {
+    if (!decision) {
+      return 0;
+    }
+
+    const approved: number = decision?.approved ?? 0;
+    const reproved: number = decision?.reproved ?? 0;
+
+    return calculateRate(approved, reproved);
+  }, [decision]);
+
+  useEffect(() => {
+    onChanged({ ...initialData, rejected: rejectionRate });
+  }, [rejectionRate]);
 
   return (
     <div className="fake-card mt-3">
@@ -177,8 +201,8 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
               sx={{ width: '20% !important' }}
               type="number"
               onChange={event => onChanged({ ...initialData, rejected: parseInt(event.target.value) })}
-              value={initialData.rejected?.toFixed(2)}
-              disabled={readonly}
+              value={(calculateRate(initialData.approved, initialData.reproved) * 100).toFixed(2)}
+              disabled
             />
           </Card>
         </div>

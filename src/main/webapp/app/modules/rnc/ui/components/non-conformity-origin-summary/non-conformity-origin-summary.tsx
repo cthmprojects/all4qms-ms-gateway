@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, Stack, TextField } from '@mui/material';
-import { NonConformityOrigin } from 'app/modules/rnc/models';
-import React from 'react';
+import { Enums, NonConformityOrigin } from 'app/modules/rnc/models';
 
 type NonConformityOriginSummaryProps = {
+  enums: Enums | null;
   origin: NonConformityOrigin;
 };
 
-const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps) => {
+const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummaryProps) => {
   const formatTimestamp = (timestamp: Date): string => {
     const date: Date = new Date(timestamp);
     const year: number = date.getFullYear();

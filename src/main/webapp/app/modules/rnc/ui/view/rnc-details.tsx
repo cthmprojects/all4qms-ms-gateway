@@ -1,9 +1,12 @@
 import { Box, Breadcrumbs, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import React, { useEffect, useMemo } from 'react';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { IUsuario } from 'app/shared/model/usuario.model';
+import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { CompleteNc } from '../../models';
+import { CompleteNc, Enums, NonConformityDescriptionSummary as NcDescriptionSummary, NonConformityDescription } from '../../models';
 import { findCompleteNonConformity } from '../../reducers/complete-non-conformity.reducer';
+import { listEnums } from '../../reducers/enums.reducer';
 import {
   NonConformityActionPlanSummary,
   NonConformityCauseInvestigationSummary,
@@ -20,7 +23,9 @@ const RncDetails = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
 
+  const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const nonConformity: CompleteNc = useAppSelector(state => state.all4qmsmsgateway.completeNonConformities.entity);
+  const users: Array<IUsuario> = useAppSelector(state => state.all4qmsmsgateway.users.entities);
 
   const nonConformityId = useMemo(() => {
     if (!id || id.length <= 0) {
@@ -35,10 +40,36 @@ const RncDetails = () => {
       return;
     }
 
+    dispatch(getUsers({}));
+    dispatch(listEnums());
     dispatch(findCompleteNonConformity(nonConformityId));
   }, [nonConformityId]);
 
-  useEffect(() => console.log('erickson', nonConformity), [nonConformity]);
+  const description = useMemo<string>(() => {
+    if (!nonConformity) {
+      return '';
+    }
+
+    const ncDescriptions: Array<NonConformityDescription> = nonConformity.descricaoNC;
+
+    if (!ncDescriptions || ncDescriptions.length <= 0) {
+      return '';
+    }
+
+    const ncDescription: NonConformityDescription = ncDescriptions[0];
+
+    if (!ncDescription || !ncDescription.descricaoNaoConformidade) {
+      return '';
+    }
+
+    const summary: NcDescriptionSummary = ncDescription.descricaoNaoConformidade;
+
+    if (!summary) {
+      return '';
+    }
+
+    return summary.detalhesNaoConformidade;
+  }, [nonConformity]);
 
   return (
     <div className="padding-container">
@@ -56,7 +87,7 @@ const RncDetails = () => {
         <Box sx={{ width: '100%' }}>
           <Stack spacing={2}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <NonConformitySummary nonConformity={nonConformity?.naoConformidade} />
+              <NonConformitySummary enums={enums} nonConformity={nonConformity?.naoConformidade} />
             </Box>
 
             {nonConformity?.origem &&
@@ -65,7 +96,7 @@ const RncDetails = () => {
                 nonConformity.origem.mpprod ||
                 nonConformity.origem.outros) && (
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                  <NonConformityOriginSummary origin={nonConformity?.origem} />
+                  <NonConformityOriginSummary enums={enums} origin={nonConformity?.origem} />
                 </Box>
               )}
 
@@ -95,7 +126,11 @@ const RncDetails = () => {
 
             {(nonConformity?.ishikawa || (nonConformity?.porques && nonConformity?.porques.length > 0)) && (
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <NonConformityCauseInvestigationSummary ishikawa={nonConformity?.ishikawa} reasons={nonConformity?.porques} />
+                <NonConformityCauseInvestigationSummary
+                  description={description}
+                  ishikawa={nonConformity?.ishikawa}
+                  reasons={nonConformity?.porques}
+                />
               </Box>
             )}
 
@@ -115,10 +150,11 @@ const RncDetails = () => {
                   dateLabel="Data Implementação"
                   description={nonConformity?.aprovacao?.descImplementacao}
                   descriptionLabel="Descrição da Implementação"
-                  responsible={nonConformity?.aprovacao?.responsavelImplementacao?.toString()}
+                  responsible={nonConformity?.aprovacao?.responsavelImplementacao}
                   responsibleLabel="Resp. Verificação"
                   showAvailability={true}
                   title="Implementação do Plano"
+                  users={users}
                 />
               </Box>
             )}
@@ -131,10 +167,11 @@ const RncDetails = () => {
                   dateLabel="Data Verificação"
                   description={nonConformity?.aprovacao?.descEficacia}
                   descriptionLabel="Descrição da Eficácia"
-                  responsible={nonConformity?.aprovacao?.responsavelEficacia?.toString()}
+                  responsible={nonConformity?.aprovacao?.responsavelEficacia}
                   responsibleLabel="Resp. Verificação"
                   showAvailability={true}
                   title="Verificação da Eficácia"
+                  users={users}
                 />
               </Box>
             )}
@@ -147,10 +184,11 @@ const RncDetails = () => {
                   dateLabel="Data do Fechamento"
                   description={nonConformity?.aprovacao?.descFechamento}
                   descriptionLabel="Descrição do Fechamento"
-                  responsible={nonConformity?.aprovacao?.responsavelFechamento?.toString()}
+                  responsible={nonConformity?.aprovacao?.responsavelFechamento}
                   responsibleLabel="Resp. Verificação"
                   showAvailability={false}
                   title="Fechamento"
+                  users={users}
                 />
               </Box>
             )}
