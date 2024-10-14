@@ -19,6 +19,7 @@ import {
   RawRiskOpportunity,
   Reason,
   RiskOpportunity,
+  RiskOpportunityFromList,
 } from '../models';
 
 const apiRiscoOportunidadeUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades';
@@ -47,7 +48,7 @@ const initialState: EntityState<RawRiskOpportunity> = {
 };
 
 interface ListParams {
-  tipoRO?: string;
+  tipoRO: string;
   probabilidadeComplexidade?: string;
   severidadeMelhoria?: string;
   page?: number;
@@ -106,8 +107,8 @@ export const listROs = createAsyncThunk('ro/list', async (params: ListPagination
   return axios.get<Array<RawRiskOpportunity>>(`${apiRiscoOportunidadeUrl}${queryString ? `?${queryString}` : ''}`);
 });
 
-export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: ListParams) => {
-  const { tipoRO, idProcesso, probabilidadeComplexidade, severidadeMelhoria, decisao, pesquisa, page, size } = params;
+export const listROFiltro = async (params: ListParams) => {
+  const { page, size, ...rest } = params;
 
   const queryParams: string[] = [];
 
@@ -124,15 +125,22 @@ export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: Lis
 
   const queryString = queryParams.join('&');
 
-  return axios.post<PaginatedResource<RawRiskOpportunity>>(`${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`, {
-    tipoRO: tipoRO ?? null,
-    idProcesso: idProcesso ?? null,
-    probabilidadeComplexidade: probabilidadeComplexidade ?? null,
-    severidadeMelhoria: severidadeMelhoria ?? null,
-    decisao: decisao ?? null,
-    pesquisa: pesquisa ?? null,
-  });
-});
+  const realParams = {};
+
+  for (const key of Object.keys(rest)) {
+    const value = rest[key];
+    if (value) {
+      realParams[key] = value;
+    }
+  }
+
+  return (
+    await axios.post<PaginatedResource<RiskOpportunityFromList>>(
+      `${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`,
+      realParams
+    )
+  ).data;
+};
 
 export const createRO = createAsyncThunk('ro/create', async (data: RiskOpportunity) => {
   return await axios.post<RawRiskOpportunity>(apiRiscoOportunidadeUrl, data);
@@ -457,17 +465,6 @@ const ROSlice = createEntitySlice({
           entities: data,
           entity: null,
           totalItems: parseInt(headers['x-total-count'], 10),
-        };
-      })
-      .addMatcher(isFulfilled(listROFiltro), (state, action) => {
-        const { data } = action.payload;
-
-        return {
-          ...state,
-          loading: false,
-          entities: data.content,
-          entity: null,
-          totalItems: data.totalElements,
         };
       })
       .addMatcher(isFulfilled(createRO), (state, action) => {
