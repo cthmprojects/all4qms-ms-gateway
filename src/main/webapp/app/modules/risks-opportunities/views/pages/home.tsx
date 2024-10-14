@@ -41,8 +41,10 @@ import { getComplexities } from '../../reducers/complexities.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
-import { listROs } from '../../reducers/risks-opportunities.reducer';
+import { listROFiltro, listROs } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
+import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
+import { usePaginator } from 'app/shared/hooks/usePaginator';
 
 // Example
 const getSituacaoIcon = situacao => {
@@ -62,7 +64,17 @@ const getSituacaoIcon = situacao => {
   }
 };
 
-const columns = ['Fluxo', 'Atividade', 'Descrição', 'Causa', 'Efeito', 'Área/Processo', 'Probabilidade', 'Severidade', 'Decisão', 'Ações'];
+const columns = [
+  'Fluxo',
+  'Atividade',
+  'Descrição',
+  'Causa',
+  'Efeito',
+  'Área/Processo',
+  'Probabilidade',
+  'Severidade',
+  /*  'Decisão', */ 'Ações',
+];
 
 const Home = () => {
   const dispatch = useAppDispatch();
@@ -81,22 +93,6 @@ const Home = () => {
   );
   const severities: Array<Configuration> = useAppSelector<Array<Configuration>>(state => state.all4qmsmsgatewayro.severities.entities);
 
-  const risks = useMemo<Array<RawRiskOpportunity>>(() => {
-    if (!rolist || rolist.length <= 0) {
-      return [];
-    }
-
-    return rolist.filter(ro => ro.tipoRO === 'R');
-  }, [rolist]);
-
-  const opportunities = useMemo<Array<RawRiskOpportunity>>(() => {
-    if (!rolist || rolist.length <= 0) {
-      return [];
-    }
-
-    return rolist.filter(ro => ro.tipoRO === 'O');
-  }, [rolist]);
-
   const [tab, setTab] = useState(0);
   const [filters, setFilters] = useState({
     idProcesso: null,
@@ -104,6 +100,7 @@ const Home = () => {
     severidade: null,
     decisao: null,
     pesquisa: null as string,
+    tipoRO: 'R',
   });
   const navigate = useNavigate();
 
@@ -115,24 +112,28 @@ const Home = () => {
       severidade: null,
       decisao: null,
       pesquisa: null,
+      tipoRO: tab ? 'O' : 'R',
     });
   };
 
-  useEffect(() => {
-    const { idProcesso, probabilidade, severidade, decisao, pesquisa } = filters;
-    dispatch(
-      // listROFiltro({
-      //   idProcesso,
-      //   probabilidadeComplexidade: probabilidade,
-      //   severidadeMelhoria: severidade,
-      //   decisao,
-      //   pesquisa,
-      //   size: pageSize,
-      //   page,
-      // })
-      listROs({})
-    );
+  const { data, mutate } = useMutation({ mutationFn: listROFiltro }, new QueryClient());
 
+  function listRo() {
+    const { idProcesso, probabilidade, severidade, decisao, pesquisa } = filters;
+    mutate({
+      idProcesso,
+      probabilidadeComplexidade: probabilidade,
+      severidadeMelhoria: severidade,
+      decisao,
+      pesquisa,
+      size: pageSize,
+      page,
+      tipoRO: tab ? 'O' : 'R',
+    });
+  }
+
+  useEffect(() => {
+    listRo();
     dispatch(getComplexities());
     dispatch(getImprovements());
     dispatch(getProcesses());
@@ -160,8 +161,6 @@ const Home = () => {
   /**
    * Pagination
    */
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState<number>(10);
 
   function getLabelGrauRO(letter: string) {
     const levels = {
@@ -172,7 +171,10 @@ const Home = () => {
     return levels[letter] || 'N/A';
   }
 
-  // useEffect(listRo, [filters, page, pageSize]);
+  const totalElements = useMemo(() => data?.totalElements || 0, [data]);
+  const { page, pageSize, paginator } = usePaginator(totalElements);
+
+  useEffect(listRo, [filters, page, pageSize, tab]);
 
   const TableRendered = (
     <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -186,46 +188,31 @@ const Home = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {(tab === 0 ? risks : opportunities).map((ro: RawRiskOpportunity) => {
+          {data?.content.map(ro => {
             const {
-              atualizadoEm,
-              atualizadoPor,
-              criadoEm,
-              criadoPor,
-              dataRegistro,
-              descricao1,
-              descricao2,
-              descricao3,
-              descricaoControle,
               id,
-              idEmissor,
-              idLinhaConfigControle1,
-              idLinhaConfigControle2,
-              idPartesInteressadas,
-              idProcesso,
-              idsAnaliseROS,
               nomeAtividade,
               nomeFluxo,
-              tipoRO,
-              linhaConfigControle1,
-              linhaConfigControle2,
+              descricao,
+              causaFraqueza,
+              efeitoBeneficio,
+              severidadeMelhoria,
+              probabilidadeComplexidade,
+              processo,
             } = ro;
 
-            const path: string = tipoRO === 'R' ? 'risk' : 'opportunity';
-
-            const process: Process = processes.find(p => p.id === idProcesso);
+            const path: string = !tab ? 'risk' : 'opportunity';
 
             return (
               <TableRow key={id}>
                 <TableCell>{nomeFluxo ?? '-'}</TableCell>
                 <TableCell>{nomeAtividade ?? '-'}</TableCell>
-                <TableCell>{descricao1 ?? '-'}</TableCell>
-                <TableCell>{descricao2 ?? '-'}</TableCell>
-                <TableCell>{descricao3 ?? '-'}</TableCell>
-                <TableCell>{process?.nome ?? '-'}</TableCell>
-                <TableCell>{idLinhaConfigControle1 ?? linhaConfigControle1?.descricaoRO ?? '-'}</TableCell>
-                <TableCell>{idLinhaConfigControle2 ?? linhaConfigControle2?.descricaoRO ?? '-'}</TableCell>
-                <TableCell>{descricaoControle ?? '-'}</TableCell>
+                <TableCell>{descricao ?? '-'}</TableCell>
+                <TableCell>{causaFraqueza ?? '-'}</TableCell>
+                <TableCell>{efeitoBeneficio ?? '-'}</TableCell>
+                <TableCell>{processo ?? '-'}</TableCell>
+                <TableCell>{probabilidadeComplexidade ?? '-'}</TableCell>
+                <TableCell>{severidadeMelhoria ?? '-'}</TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={2}>
                     <Tooltip title="Editar">
@@ -255,6 +242,7 @@ const Home = () => {
           })}
         </TableBody>
       </Table>
+      {paginator}
     </TableContainer>
   );
 
