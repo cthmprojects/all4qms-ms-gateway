@@ -10,14 +10,13 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import { Rnc } from 'app/modules/rnc/models';
-import React from 'react';
+import { ExtendedNc, Rnc } from 'app/modules/rnc/models';
 
 type RncRepetitionProps = {
   onRepetitionChanged: (value: boolean) => void;
   onSelectedRncIdsChanged: (values: Array<number>) => void;
   repetition: boolean;
-  rncs: Array<Rnc>;
+  rncs: Array<ExtendedNc | Rnc>;
   selectedRncIds: Array<number>;
 };
 
@@ -49,12 +48,14 @@ export const RepetitionRnc = ({ onRepetitionChanged, onSelectedRncIdsChanged, re
               renderValue={selected => selected.join(', ')}
             >
               {rncs.map(rnc => {
+                const id: number = (rnc as ExtendedNc).nc.id;
+
                 const set = new Set<number>(selectedRncIds);
 
                 return (
-                  <MenuItem key={rnc.id} value={rnc.id}>
-                    <Checkbox checked={set.has(rnc.id)} />
-                    <ListItemText primary={rnc.id} />
+                  <MenuItem key={id} value={id}>
+                    <Checkbox checked={set.has(id)} />
+                    <ListItemText primary={id} />
                   </MenuItem>
                 );
               })}
