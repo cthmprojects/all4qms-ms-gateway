@@ -189,19 +189,19 @@ export const ValidationDocument = () => {
         break;
       case 4:
         clearInterval(timerGetIA);
-        setDocumentDescription('Não foi possivel carregar o documento automaticamente. Tente novamente mais tarde.');
+        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
         console.error('Erro ao carrecar IA resume: ', resumeIA.LLMResponse);
         setLoadingIA(false);
         break;
       case 5:
         clearInterval(timerGetIA);
-        setDocumentDescription('Não foi possivel carregar o documento automaticamente. Tente novamente mais tarde.');
+        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
         console.error('Erro ao carrecar IA resume: ', resumeIA.LLMResponse);
         setLoadingIA(false);
         break;
       default:
         clearInterval(timerGetIA);
-        setDocumentDescription('Não foi possivel carregar o documento automaticamente. Tente novamente mais tarde.');
+        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
         setLoadingIA(false);
         return;
     }
@@ -310,9 +310,9 @@ export const ValidationDocument = () => {
       setOrigin(actualInfoDoc.doc?.origem!!);
       setSelectedProcess(actualInfoDoc.doc?.idProcesso?.toString()!!);
 
-      if (actualInfoDoc.doc?.dataValidade) {
+      if (!actualInfoDoc.doc?.ignorarValidade) {
         setNoValidate(false);
-        setValidDate(new Date(actualInfoDoc.doc.dataValidade));
+        setValidDate(new Date(actualInfoDoc.doc.dataValidade!!));
       } else {
         setNoValidate(true);
         setValidDate(new Date(2999, 11, 31));
@@ -620,7 +620,7 @@ export const ValidationDocument = () => {
               className="ms-3"
               // disabled={!validateFields()}
               onClick={() => saveDocument()}
-              sx={{ border: validateFields() ? '1px solid #000' : '', color: '#000', width: '100px' }}
+              sx={{ border: '1px solid #000', color: '#000', width: '100px' }}
             >
               SALVAR
             </Button>
