@@ -197,7 +197,7 @@ export const UpdateDocument = () => {
       ignorarValidade: true,
       enumSituacao: 'R',
       tipoDoc: 'MA',
-      revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
+      // revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
       idDocumentacaoAnterior: parseInt(id!!),
     };
 

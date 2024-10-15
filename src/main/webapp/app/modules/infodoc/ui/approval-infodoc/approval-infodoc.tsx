@@ -205,6 +205,15 @@ export const ApprovalDocument = () => {
 
   const approveDocument = async () => {
     setIsLoading(true);
+
+    // Incrementando Revisão
+    await dispatch(
+      updateInfoDoc({
+        data: { ...actualInfoDoc.doc, revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1 },
+        id: id!!,
+      })
+    );
+
     await axios
       .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/homologacao/${id}`, {
         idDocumento: id,
@@ -212,6 +221,7 @@ export const ApprovalDocument = () => {
       })
       .then(async () => {
         toast.success('Documento aprovado com sucesso!');
+
         const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == emitter)[0];
         dispatch(
           notifyEmailInfoDoc({

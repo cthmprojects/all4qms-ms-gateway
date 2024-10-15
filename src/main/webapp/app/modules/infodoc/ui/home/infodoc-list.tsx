@@ -378,7 +378,7 @@ const InfodocList = () => {
   };
 
   const openDocToValidation = (event, infodoc: InfoDoc) => {
-    console.log(infodoc);
+    // console.log(infodoc);
 
     if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDACAO || infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDAREV) {
       navigate(`/infodoc/validation/${infodoc.doc.id}`);

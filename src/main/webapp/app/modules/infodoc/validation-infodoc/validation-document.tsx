@@ -273,7 +273,7 @@ export const ValidationDocument = () => {
       ignorarValidade: true,
       enumSituacao: 'R',
       tipoDoc: 'MA',
-      revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1,
+      // revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1,
       idDocumentacaoAnterior: parseInt(id!!),
     };
 
