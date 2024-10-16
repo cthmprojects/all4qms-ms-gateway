@@ -11,6 +11,7 @@ import nonConformities from './reducers/non-conformity.reducer';
 import process from './reducers/process.reducer';
 import completeNonConformities from './reducers/complete-non-conformity.reducer';
 import audit from './reducers/audit.reducer';
+import similarity from './reducers/similarities.reducer';
 
 const rncReducers = {
   enums,
@@ -26,6 +27,7 @@ const rncReducers = {
   process,
   completeNonConformities,
   audit,
+  similarity,
 };
 
 export default rncReducers;

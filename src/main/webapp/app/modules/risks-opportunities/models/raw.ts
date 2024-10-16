@@ -24,6 +24,18 @@ export type RawRiskOpportunity = {
   analiseROS?: Array<RawRiskOpportunityAnalysis>;
 };
 
+export type RiskOpportunityFromList = {
+  causaFraqueza: string;
+  descricao: string;
+  efeitoBeneficio: string;
+  id: number;
+  nomeAtividade: string;
+  nomeFluxo: string;
+  probabilidadeComplexidade: string;
+  processo: string;
+  severidadeMelhoria: string;
+};
+
 export type RawRiskOpportunityConfiguration = {
   id?: number;
   tipoRO: 'R' | 'O';

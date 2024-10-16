@@ -333,3 +333,14 @@ http://stackoverflow.com/questions/23436430/bootstrap-3-input-group-100-width */
 p {
   margin: initial;
 }
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}

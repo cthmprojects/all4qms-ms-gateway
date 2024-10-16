@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, Stack, TextField } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import { NonConformity } from 'app/modules/rnc/models';
+import { Enums, NonConformity } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type NonConformitySummaryProps = {
+  enums: Enums | null;
   nonConformity: NonConformity | null;
 };
 
-const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
+const NonConformitySummary = ({ enums, nonConformity }: NonConformitySummaryProps) => {
   const [emitterName, setEmitterName] = useState<string>('');
   const [emitterProcessName, setEmitterProcessName] = useState<string>('');
   const [receiverName, setReceiverName] = useState<string>('');
@@ -23,8 +24,6 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
     if (!nonConformity) {
       return;
     }
-
-    console.log('erickson', nonConformity);
 
     dispatch(getUsers({}));
     dispatch(getProcesses());
@@ -59,6 +58,17 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
     setEmitterName(emitter?.nome ?? '');
     setReceiverName(receiver?.nome ?? '');
   }, [nonConformity, users]);
+
+  const formatOrigin = useCallback(
+    (origin: string): string => {
+      if (!enums || !enums.originTypes || enums.originTypes.length <= 0) {
+        return '';
+      }
+
+      return enums.originTypes.find(o => o.name === origin)?.value ?? '';
+    },
+    [enums]
+  );
 
   const filterProcess = (id: number) => {
     const filteredProcesses = processes.filter(process => process.id === id);
@@ -99,7 +109,7 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
       <CardContent>
         <Stack spacing={2}>
           <Stack direction="row" spacing={2}>
-            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.numNC ?? ''} />
+            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.id ?? ''} />
             <TextField disabled label="Emitido por" placeholder="Emitido por" value={emitterName} />
             <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={emitterProcessName} />
             <TextField disabled label="Encaminhado para" placeholder="Encaminhado para" value={receiverName} />
@@ -108,7 +118,7 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
           <Stack direction="row" spacing={2}>
             <TextField disabled label="Data" placeholder="Data" value={formatTimestamp(nonConformity?.dtNC)} />
             <TextField disabled label="Tipo" placeholder="Tipo" value={nonConformity?.tipoNC ?? ''} />
-            <TextField disabled label="Origem" placeholder="Origem" value={nonConformity?.origemNC ?? ''} />
+            <TextField disabled label="Origem" placeholder="Origem" value={formatOrigin(nonConformity?.origemNC)} />
             <TextField disabled label="Qtd porquês" placeholder="Qtd porquês" value={nonConformity?.qtdPorques ?? ''} />
           </Stack>
         </Stack>

@@ -150,7 +150,7 @@ export const UpdateDocument = () => {
   };
 
   const validateFields = () => {
-    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+    return emitter && emittedDate && title && selectedProcess;
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -197,7 +197,7 @@ export const UpdateDocument = () => {
       ignorarValidade: true,
       enumSituacao: 'R',
       tipoDoc: 'MA',
-      revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
+      // revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
       idDocumentacaoAnterior: parseInt(id!!),
     };
 
@@ -497,9 +497,7 @@ export const UpdateDocument = () => {
             <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
               VOLTAR
             </Button>
-            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
-              SALVAR
-            </Button>
+            <Button onClick={() => saveDocument()}>SALVAR</Button>
             <Button
               disabled={infoDocId <= 0}
               className="ms-3"
