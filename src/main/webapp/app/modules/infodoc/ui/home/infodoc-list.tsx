@@ -380,7 +380,7 @@ const InfodocList = () => {
   };
 
   const openDocToValidation = (event, infodoc: InfoDoc) => {
-    console.log(infodoc);
+    // console.log(infodoc);
 
     if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDACAO || infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDAREV) {
       navigate(`/infodoc/validation/${infodoc.doc.id}`);
@@ -432,6 +432,7 @@ const InfodocList = () => {
           const fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
+          fileName = fileName.split('_').pop()!!;
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
