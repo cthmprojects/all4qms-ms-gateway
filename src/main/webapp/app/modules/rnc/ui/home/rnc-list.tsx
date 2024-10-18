@@ -93,17 +93,20 @@ const RncList = ({}) => {
 
   const handleApplyFilters = () => {
     const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
+    const formatter = new Intl.DateTimeFormat('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    console.table({ dtFim, dtIni });
     dispatch(
       listNonConformities({
         page: 0,
         size: pageSize,
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
+        dtFim: formatter.format(dtFim),
         statusAtual,
         processoNC,
         tipoNC,
         descricao,
         origemNC,
+        ...(dtIni ? { dtIni: formatter.format(dtIni) } : {}),
+        ...(dtFim ? { dtFim: formatter.format(dtFim) } : {}),
       })
     );
   };
