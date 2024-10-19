@@ -2,6 +2,7 @@ package com.tellescom.all4qms.service.mapper;
 
 import com.tellescom.all4qms.domain.Processo;
 import com.tellescom.all4qms.domain.Usuario;
+import com.tellescom.all4qms.domain.response.ProcessoResponse;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import org.mapstruct.*;
@@ -20,4 +21,8 @@ public interface ProcessoMapper extends EntityMapper<ProcessoDTO, Processo> {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "nome", source = "nome")
     UsuarioDTO toDtoUsuarioNome(Usuario usuario);
+
+    default ProcessoResponse toResponse(Processo processo) {
+        return ProcessoResponse.builder().id(processo.getId()).nome(processo.getNome()).build();
+    }
 }
