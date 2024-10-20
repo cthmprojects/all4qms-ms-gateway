@@ -92,7 +92,7 @@ const AddOpportunity = () => {
     interestedParts: Array<string>,
     rawRiskOpportunity: RawRiskOpportunity
   ): Promise<void> => {
-    dispatch(
+    await dispatch(
       saveRiskOpportunity({
         actionPlanSummary,
         details,
