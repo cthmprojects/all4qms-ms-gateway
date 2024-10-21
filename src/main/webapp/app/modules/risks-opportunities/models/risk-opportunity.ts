@@ -1,3 +1,5 @@
+import { RawInterestedPart } from './raw';
+
 export type RiskOpportunity = {
   activity: string;
   date: Date;
@@ -5,7 +7,7 @@ export type RiskOpportunity = {
   firstAuxiliaryDescription: string;
   flow: string;
   id?: number;
-  interestedParts: Array<string>;
+  interestedParts: RawInterestedPart;
   processId: number;
   secondAuxiliaryDescription: string;
   senderId: number;

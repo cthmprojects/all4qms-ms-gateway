@@ -97,7 +97,7 @@ export const UpdateDocument = () => {
   const [keyword, setKeyword] = useState<string>('');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const [isSGQ, setIsSGQ] = useState<Boolean>(false);
-  const [infoDocId, setInfoDocId] = useState(0);
+  const [infoDocId, setInfoDocId] = useState(Number(id));
   const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -451,7 +451,7 @@ export const UpdateDocument = () => {
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
                 style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd' }}
-                label="Notificar:"
+                label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
                 disabled

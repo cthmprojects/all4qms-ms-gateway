@@ -40,7 +40,7 @@ import { getComplexities } from '../../reducers/complexities.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
-import { listROFiltro, listROs } from '../../reducers/risks-opportunities.reducer';
+import { listROFiltro, listROs, resetRiskOportunity } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
@@ -141,6 +141,7 @@ const Home = () => {
     dispatch(getProbabilities());
     dispatch(getSeverities());
     dispatch(getRiskDecisions());
+    dispatch(resetRiskOportunity());
   }, []);
 
   const handleChangeTag = (event: React.SyntheticEvent, newValue: number) => {
