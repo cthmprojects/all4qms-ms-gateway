@@ -71,7 +71,7 @@ interface RiskOpportunityPayload {
   ishikawa: Ishikawa | null;
   reasons: Reason | null;
   details: AnalysisDetails;
-  interestedParts: Array<string>;
+  interestedParts: { id?: number; nomeParteInteressada: string };
   riskOpportunity: RawRiskOpportunity;
 }
 
@@ -180,18 +180,9 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
     }
   }
 
-  const riskOpportunityInterestedPartsIds: Array<number> = [];
-  for (let i = 0; i < interestedParts.length; i++) {
-    const interestedPart: string = interestedParts[i];
+  const idInterestedPart = await saveInterestedPartAsync(interestedParts as RawInterestedPart);
 
-    const interestPartId: number | null = await saveInterestedPartAsync(mapInterestPartToRaw(interestedPart, senderId));
-
-    if (interestPartId) {
-      riskOpportunityInterestedPartsIds.push(interestPartId);
-    }
-  }
-
-  riskOpportunity.idPartesInteressadas = riskOpportunityInterestedPartsIds.length > 0 ? riskOpportunityInterestedPartsIds[0] : 0;
+  riskOpportunity.idPartesInteressadas = idInterestedPart;
 
   riskOpportunity.idsAnaliseROS = null;
 
@@ -294,18 +285,9 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
 export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: RiskOpportunityPayload) => {
   const { actionPlanSummary, details, efficacy, implementation, interestedParts, ishikawa, riskOpportunity, reasons, senderId } = payload;
 
-  const riskOpportunityInterestedPartsIds: Array<number> = [];
-  for (let i = 0; i < interestedParts.length; i++) {
-    const interestedPart: string = interestedParts[i];
+  const idInterestedPart = await saveInterestedPartAsync(interestedParts as RawInterestedPart);
 
-    const interestPartId: number | null = await saveInterestedPartAsync(mapInterestPartToRaw(interestedPart, senderId));
-
-    if (interestPartId) {
-      riskOpportunityInterestedPartsIds.push(interestPartId);
-    }
-  }
-
-  riskOpportunity.idPartesInteressadas = riskOpportunityInterestedPartsIds.length > 0 ? riskOpportunityInterestedPartsIds[0] : 0;
+  riskOpportunity.idPartesInteressadas = idInterestedPart;
 
   const response = await axios.post<RawRiskOpportunity>(apiRiscoOportunidadeUrl, riskOpportunity);
 
@@ -404,13 +386,11 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
 });
 
 const saveInterestedPartAsync = async (interestedPart: RawInterestedPart): Promise<number | null> => {
-  const response = await axios.post<RawInterestedPart>(apiPartesInteressadasUrl, interestedPart);
+  const response = interestedPart.id
+    ? await axios.put<RawInterestedPart>(`${apiPartesInteressadasUrl}/${interestedPart.id}`, interestedPart)
+    : await axios.post<RawInterestedPart>(apiPartesInteressadasUrl, interestedPart);
 
-  if (response.status === 201) {
-    return response.data?.id;
-  } else {
-    return null;
-  }
+  return response.data?.id || null;
 };
 
 export const getApprovalById = async (id: number): Promise<AprovacaoNC> => {
@@ -493,7 +473,7 @@ const ROSlice = createEntitySlice({
   },
 });
 
-export const { reset } = ROSlice.actions;
+export const { reset: resetRiskOportunity } = ROSlice.actions;
 
 // Reducers
 export default ROSlice.reducer;
