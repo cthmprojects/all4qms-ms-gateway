@@ -64,7 +64,7 @@ type BaseDetailsProps = {
     ishikawa: Ishikawa | null,
     reasons: Reason | null,
     details: AnalysisDetails,
-    interestedParts: Array<string>,
+    interestedParts: { id?: number; nomeParteInteressada: string },
     rawRiskOpportunity: RawRiskOpportunity
   ) => void;
 };
@@ -88,7 +88,7 @@ const BaseDetails = ({
     defaultValues: {
       activity: '',
       date: null,
-      interestedParts: [],
+      interestedParts: { nomeParteInteressada: '' },
       description: '',
       firstAuxiliaryDescription: '',
       secondAuxiliaryDescription: '',
@@ -178,10 +178,8 @@ const BaseDetails = ({
     generalFormMethods.setValue('description', riskOpportunity.descricao1);
     generalFormMethods.setValue('firstAuxiliaryDescription', riskOpportunity.descricao2);
     generalFormMethods.setValue('flow', riskOpportunity.nomeFluxo);
-    generalFormMethods.setValue(
-      'interestedParts',
-      riskOpportunity.partesInteressadas ? [riskOpportunity.partesInteressadas.nomeParteInteressada] : []
-    );
+    riskOpportunity.partesInteressadas.id &&
+      generalFormMethods.setValue('interestedParts', riskOpportunity.partesInteressadas, { shouldDirty: true });
     generalFormMethods.setValue('secondAuxiliaryDescription', riskOpportunity.descricao3);
     generalFormMethods.setValue('type', riskOpportunity.tipoRO === 'R' ? 'Risco' : 'Oportunidade');
 

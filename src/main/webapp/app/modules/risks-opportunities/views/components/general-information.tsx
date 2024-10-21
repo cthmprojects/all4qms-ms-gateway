@@ -1,10 +1,10 @@
 import { AddCircle } from '@mui/icons-material';
 import { Autocomplete, Chip, FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select, Stack, TextField } from '@mui/material';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { onAutocompleteChanged, onTextChanged } from '../../utils';
-import { SummarizedProcess } from '../../models';
+import { RawInterestedPart, SummarizedProcess } from '../../models';
 
 type GeneralInformationProps = {
   isOpportunity?: boolean;
@@ -19,13 +19,23 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
   const { register, setValue, formState, control, trigger } = useFormContext();
 
   const otherDate = useWatch({ control, name: 'date' });
-  const formInterestedParts = useWatch({ control, name: 'interestedParts' });
+  const formInterestedParts: RawInterestedPart = useWatch({ control, name: 'interestedParts', exact: true });
   const processForm = useWatch({ control, name: 'process' });
+
+  const [interestedPartsArray, setInterestedPartsArray] = useState([]);
 
   useEffect(() => {
     // Poderia ser qualquer outro campo registrado
+    if (!interestedPartsArray.length && formInterestedParts.nomeParteInteressada) {
+      setInterestedPartsArray(formInterestedParts.nomeParteInteressada.split(';'));
+    }
     trigger('description');
-  }, [formInterestedParts]);
+  }, [formInterestedParts.id]);
+
+  useEffect(() => {
+    const newInterestedParts: RawInterestedPart = { ...formInterestedParts, nomeParteInteressada: interestedPartsArray.join(';') };
+    setValue('interestedParts', newInterestedParts, { shouldValidate: true, shouldTouch: true, shouldDirty: true });
+  }, [interestedPartsArray]);
 
   useEffect(() => {
     setProcesses(summarizedProcesses);
@@ -40,13 +50,13 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
   };
 
   const onInterestedPartAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    setValue('interestedParts', [...formInterestedParts, interestedPart]);
+    setInterestedPartsArray([...interestedPartsArray, interestedPart]);
     setInterestedPart('');
   };
 
   const onInterestedPartDeleted = (index: number): void => {
-    const newInterestedParts: Array<string> = formInterestedParts.filter((_, idx) => idx !== index);
-    setValue('interestedParts', newInterestedParts, { shouldValidate: true, shouldTouch: true, shouldDirty: true });
+    const newInterestedParts: Array<string> = interestedPartsArray.filter((_, idx) => idx !== index);
+    setInterestedPartsArray(newInterestedParts);
   };
 
   const fieldHook = (fieldName: string) => register(fieldName as any, { required: true });
@@ -173,15 +183,15 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
         <Autocomplete
           clearIcon={false}
           disabled={readonly}
-          options={[]}
           freeSolo
           multiple
           readOnly
+          options={[]}
           renderTags={(value, props) =>
             value.map((option, index) => <Chip onDelete={_ => onInterestedPartDeleted(index)} label={option} {...props({ index })} />)
           }
           renderInput={params => <TextField {...params} />}
-          value={formInterestedParts}
+          value={interestedPartsArray}
         />
       </Stack>
     </>

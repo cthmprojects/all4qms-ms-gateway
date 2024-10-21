@@ -89,10 +89,10 @@ const AddOpportunity = () => {
     ishikawa: Ishikawa | null,
     reasons: Reason | null,
     details: AnalysisDetails,
-    interestedParts: Array<string>,
+    interestedParts: { id?: number; nomeParteInteressada: string },
     rawRiskOpportunity: RawRiskOpportunity
   ): Promise<void> => {
-    dispatch(
+    await dispatch(
       saveRiskOpportunity({
         actionPlanSummary,
         details,

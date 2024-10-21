@@ -2,6 +2,7 @@ package com.tellescom.all4qms.service;
 
 import com.tellescom.all4qms.domain.Processo;
 import com.tellescom.all4qms.domain.Usuario;
+import com.tellescom.all4qms.domain.response.ProcessoResponse;
 import com.tellescom.all4qms.repository.ProcessoRepository;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
@@ -180,5 +181,9 @@ public class ProcessoService {
 
     public Flux<Long> buscarIdUserByIdProcesso(Long id) {
         return processoRepository.findUserIdByProcessos(id);
+    }
+
+    public Mono<List<ProcessoResponse>> buscaTodosProcessosResponse() {
+        return processoRepository.findAll().map(processoMapper::toResponse).collectList();
     }
 }

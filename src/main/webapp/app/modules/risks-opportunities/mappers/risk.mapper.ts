@@ -16,10 +16,6 @@ import {
 
 export const mapRiskOpportunity = (riskOpportunity: RiskOpportunity, interestedPartsId?: number): RawRiskOpportunity => {
   // TODO: salvar antes esse objeto no endpoint de parteInteressada
-  const partesInteressadas = {
-    criadoPor: riskOpportunity.senderId,
-    nomeParteInteressada: riskOpportunity.interestedParts.join(','),
-  };
 
   const now: Date = new Date();
 

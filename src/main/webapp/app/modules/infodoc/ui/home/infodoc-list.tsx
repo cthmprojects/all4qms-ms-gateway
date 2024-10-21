@@ -432,7 +432,7 @@ const InfodocList = () => {
           const fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
-          fileName = fileName.split('_').pop()!!;
+          fileName = fileName.substring(27)!!;
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 

@@ -154,7 +154,6 @@ const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
         <Controller
           control={control}
           name={'anexos'}
-          rules={{ required: 'Arquivo(s) obrigatórios' }}
           render={({ field: { value, onChange, ...field } }) => {
             return <AttachmentButton {...(initialPayload?.id ? { download } : {})} onChange={onChange} />;
           }}
@@ -208,21 +207,23 @@ export const ResultPage = () => {
     queryClient
   );
 
-  const { data: results, isLoading: isLoadingResults } = useQuery(
+  const {
+    data: results,
+    isPending: isLoadingResults,
+    mutate: getResultadoMeta,
+  } = useMutation(
     {
-      queryKey: [`meta-results`],
-      queryFn: () => getMetaResults(Number(metaId)),
-      enabled: !!metaId, // Só faz a consulta se o ID estiver presente
-      staleTime: 60000, // Dados ficam atualizados por 1 minuto,
+      mutationFn: () => getMetaResults(Number(metaId)),
     },
     queryClient
   );
+
+  useEffect(getResultadoMeta, []);
 
   const createMutation = useMutation(
     {
       mutationFn: createResult,
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`meta-results/${metaId}`] }); // Invalida as queries para atualizar a lista de registros
         setIsShowingNewForm(false);
         toast.success('Resultado cadastrado com sucesso');
       },

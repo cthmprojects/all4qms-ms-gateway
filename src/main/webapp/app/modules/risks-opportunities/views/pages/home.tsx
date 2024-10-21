@@ -10,7 +10,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import {
   Box,
   Breadcrumbs,
-  Button,
   FormControl,
   IconButton,
   InputLabel,
@@ -41,10 +40,12 @@ import { getComplexities } from '../../reducers/complexities.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
-import { listROFiltro, listROs } from '../../reducers/risks-opportunities.reducer';
+import { listROFiltro, listROs, resetRiskOportunity } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
+import { getLabelGrauRO } from 'app/shared/util/getLabels';
+import { Button } from 'reactstrap';
 
 // Example
 const getSituacaoIcon = situacao => {
@@ -140,6 +141,7 @@ const Home = () => {
     dispatch(getProbabilities());
     dispatch(getSeverities());
     dispatch(getRiskDecisions());
+    dispatch(resetRiskOportunity());
   }, []);
 
   const handleChangeTag = (event: React.SyntheticEvent, newValue: number) => {
@@ -161,15 +163,6 @@ const Home = () => {
   /**
    * Pagination
    */
-
-  function getLabelGrauRO(letter: string) {
-    const levels = {
-      A: 'ALTO',
-      B: 'BAIXO',
-      M: 'MÉDIO',
-    };
-    return levels[letter] || 'N/A';
-  }
 
   const totalElements = useMemo(() => data?.totalElements || 0, [data]);
   const { page, pageSize, paginator } = usePaginator(totalElements);
@@ -282,10 +275,10 @@ const Home = () => {
 
         <FormControl className=" me-2">
           <InputLabel>Probabilidade</InputLabel>
-          <Select onChange={e => setFilters({ ...filters, probabilidade: parseInt(e.target.value.toString()) })} label="Probabilidade">
+          <Select onChange={e => setFilters({ ...filters, probabilidade: e.target.value.toString() })} label="Probabilidade">
             {probabilities?.map((probability, index) => (
-              <MenuItem key={index} value={probability.id}>
-                {probability.descricaoRO}
+              <MenuItem key={index} value={probability.grauRO}>
+                {getLabelGrauRO(probability.grauRO)}
               </MenuItem>
             ))}
           </Select>
@@ -293,9 +286,9 @@ const Home = () => {
 
         <FormControl className=" me-2">
           <InputLabel>Severidade</InputLabel>
-          <Select onChange={e => setFilters({ ...filters, severidade: parseInt(e.target.value.toString()) })} label="Processo">
+          <Select onChange={e => setFilters({ ...filters, severidade: e.target.value.toString() })} label="Processo">
             {severities?.map((severity, index) => (
-              <MenuItem key={index} value={severity.id}>
+              <MenuItem key={index} value={severity.grauRO}>
                 {getLabelGrauRO(severity.grauRO)}
               </MenuItem>
             ))}
@@ -330,7 +323,17 @@ const Home = () => {
 
       <Button
         variant="contained"
-        className="secondary-button me-2"
+        className="me-3"
+        style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+        onClick={clearFilters}
+        title="Limpar filtros"
+      >
+        Limpar
+      </Button>
+
+      <Button
+        variant="contained"
+        className="primary-button me-2"
         style={{ marginRight: '10px', height: '42px', width: '185px' }}
         onClick={() => {
           navigate('configurations');

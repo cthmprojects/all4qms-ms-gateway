@@ -91,10 +91,10 @@ const AddRisk = () => {
     ishikawa: Ishikawa | null,
     reasons: Reason | null,
     details: AnalysisDetails,
-    interestedParts: Array<string>,
+    interestedParts: { id?: number; nomeParteInteressada: string },
     rawRiskOpportunity: RawRiskOpportunity
   ): Promise<void> => {
-    dispatch(
+    const res = await dispatch(
       saveRiskOpportunity({
         actionPlanSummary,
         details,
@@ -107,6 +107,7 @@ const AddRisk = () => {
         senderId,
       })
     );
+    console.log('######', res);
 
     navigate('/risks-opportunities/');
   };
