@@ -6,6 +6,7 @@ import com.tellescom.all4qms.domain.Setor;
 import com.tellescom.all4qms.domain.User;
 import com.tellescom.all4qms.domain.Usuario;
 import com.tellescom.all4qms.domain.response.GestorResponse;
+import com.tellescom.all4qms.domain.response.UsuarioResponse;
 import com.tellescom.all4qms.service.dto.FuncaoDTO;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
 import com.tellescom.all4qms.service.dto.SetorDTO;
@@ -69,5 +70,9 @@ public interface UsuarioMapper extends EntityMapper<UsuarioDTO, Usuario> {
 
     default GestorResponse toGestorResponse(Usuario usuario) {
         return GestorResponse.builder().id(usuario.getId()).nome(usuario.getNome()).build();
+    }
+
+    default UsuarioResponse toResponse(Usuario usuario) {
+        return UsuarioResponse.builder().id(usuario.getId()).nome(usuario.getNome()).build();
     }
 }

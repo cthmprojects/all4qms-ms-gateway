@@ -3,6 +3,7 @@ package com.tellescom.all4qms.web.rest;
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
 import com.tellescom.all4qms.domain.request.UsuarioUpdateRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
+import com.tellescom.all4qms.domain.response.UsuarioResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.security.AuthoritiesConstants;
 import com.tellescom.all4qms.service.UsuarioService;
@@ -284,5 +285,10 @@ public class UsuarioResource {
         }
 
         return usuarioService.getByRole(role);
+    }
+
+    @GetMapping("/minimo")
+    public Mono<List<UsuarioResponse>> buscarTodosUsuariosMinimo() {
+        return usuarioService.findAllUsuariosMinimos();
     }
 }
