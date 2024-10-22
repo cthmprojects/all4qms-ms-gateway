@@ -68,6 +68,7 @@ services:
       - IA-HOST=https://all4qms-ia.cthmprojetos.com
     ports:
       - 8084:8084
+
   metaind:
     image: all4qmsmsmetaind
     volumes:
