@@ -1,21 +1,19 @@
 import { Breadcrumbs, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TabsCustom } from '../../../../shared/components/tabs';
 import { Configuration, Enums, RawMap } from '../../models';
 import { getConfigurations } from '../../reducers/configurations.reducer';
 import { getAnalysis, getLevels, getTypes } from '../../reducers/enums.reducer';
+import { getMaps } from '../../reducers/maps.reducer';
 import ConfigurationsTabOpportunity from '../components/config-tab-opportunity';
 import ConfigurationsTabRisk from '../components/config-tab-risk';
-import { getMaps } from '../../reducers/maps.reducer';
 
 const Configurations = () => {
   const [valueTab, setValueTab] = useState<number>(0);
   const [opportunityConfigurations, setOpportunityConfigurations] = useState<Array<Configuration>>([]);
   const [riskConfigurations, setRiskConfigurations] = useState<Array<Configuration>>([]);
-  const [riskMap, setRiskMap] = useState<RawMap | null>(null);
-  const [opportunityMap, setOpportunityMap] = useState<RawMap | null>(null);
 
   const handleChangeTab = (_event: React.SyntheticEvent, newValue: number) => {
     setValueTab(newValue);
@@ -26,7 +24,10 @@ const Configurations = () => {
     state => state.all4qmsmsgatewayro.configurations.entities
   );
   const enums: Enums = useAppSelector<Enums>(state => state.all4qmsmsgatewayro.enums.entity);
+  const loading: boolean = useAppSelector<boolean>(state => state.all4qmsmsgatewayro.maps.loading);
+  const map: RawMap | null = useAppSelector<RawMap | null>(state => state.all4qmsmsgatewayro.maps.entity);
   const maps: Array<RawMap> = useAppSelector<Array<RawMap>>(state => state.all4qmsmsgatewayro.maps.entities);
+  const userQms = useAppSelector(state => state.authentication.accountQms);
 
   useEffect(() => {
     fetchConfigurations();
@@ -46,19 +47,29 @@ const Configurations = () => {
     setRiskConfigurations(configurations.filter(c => c.tipoRO === 'R'));
   }, [configurations]);
 
-  useEffect(() => {
-    if (!maps || maps.length <= 0) {
-      return;
+  const riskMap = useMemo<RawMap | null>(() => {
+    if ((!maps || maps.length <= 0) && !map) {
+      return null;
     }
 
-    const filteredRiskMaps: Array<RawMap> = maps.filter(c => c.tipoRO === 'R');
-    const riskMap: RawMap | null = filteredRiskMaps.length > 0 ? filteredRiskMaps[0] : null;
-    setRiskMap(riskMap);
+    if (map && map.tipoRO === 'R') {
+      return map;
+    }
 
-    const filteredOpportunityMaps: Array<RawMap> = maps.filter(c => c.tipoRO === 'O');
-    const opportunityMap: RawMap | null = filteredOpportunityMaps.length > 0 ? filteredOpportunityMaps[0] : null;
-    setOpportunityMap(opportunityMap);
-  }, [maps]);
+    return maps.find(m => m.tipoRO === 'R');
+  }, [maps, map]);
+
+  const opportunityMap = useMemo<RawMap | null>(() => {
+    if ((!maps || maps.length <= 0) && !map) {
+      return null;
+    }
+
+    if (map && map.tipoRO === 'O') {
+      return map;
+    }
+
+    return maps.find(m => m.tipoRO === 'O');
+  }, [maps, map]);
 
   const fetchConfigurations = (): void => {
     dispatch(getConfigurations({}));
@@ -68,6 +79,11 @@ const Configurations = () => {
     dispatch(getMaps());
   };
 
+  const fetchAll = (): void => {
+    fetchConfigurations();
+    fetchMaps();
+  };
+
   const tabsPanel = [
     {
       label: 'RISCOS',
@@ -75,8 +91,10 @@ const Configurations = () => {
         <ConfigurationsTabRisk
           configurations={riskConfigurations}
           levels={enums.levelOptions}
+          loading={loading}
           map={riskMap}
-          onSaved={fetchConfigurations}
+          onSaved={fetchAll}
+          userId={userQms?.id}
         />
       ),
     },
@@ -85,9 +103,11 @@ const Configurations = () => {
       children: (
         <ConfigurationsTabOpportunity
           configurations={opportunityConfigurations}
-          map={opportunityMap}
           levels={enums.levelOptions}
-          onSaved={fetchConfigurations}
+          loading={loading}
+          map={opportunityMap}
+          onSaved={fetchAll}
+          userId={userQms?.id}
         />
       ),
     },
