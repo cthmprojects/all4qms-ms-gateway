@@ -1,22 +1,23 @@
 import { Box, Button, Stack } from '@mui/material';
 import { useAppDispatch } from 'app/config/store';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Configuration, Option, RawMap } from '../../models';
 import { saveConfiguration, updateConfiguration } from '../../reducers/configurations.reducer';
+import { saveMap, updateMap } from '../../reducers/maps.reducer';
 import ConfigComplexityMatrix from './config-complexity-matrix';
 import ConfigurationsDegrees, { ConfigurationsClassificationType, ConfigurationsDegreesType } from './config-degrees';
-import { saveMap, updateMap } from '../../reducers/maps.reducer';
-import { now } from 'lodash';
-import { useNavigate } from 'react-router-dom';
 
 type ConfigurationTabRiskProps = {
   configurations: Array<Configuration>;
   levels: Array<Option>;
+  loading: boolean;
   map: RawMap | null;
   onSaved: () => void;
+  userId: number | null;
 };
 
-const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: ConfigurationTabRiskProps) => {
+const ConfigurationsTabRisk = ({ configurations, levels, loading, map, onSaved, userId }: ConfigurationTabRiskProps) => {
   const dispatch = useAppDispatch();
 
   const [classifications, setClassifications] = useState<Array<ConfigurationsClassificationType>>([]);
@@ -196,9 +197,9 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
         dispatch(
           saveConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: classification.decision,
             descricaoRO: classification.description,
             grauRO: getLevelByCode(classification.codigo),
@@ -211,9 +212,9 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
         dispatch(
           updateConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: classification.decision,
             descricaoRO: classification.description,
             grauRO: getLevelByCode(classification.codigo),
@@ -237,9 +238,9 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
         dispatch(
           saveConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: '',
             descricaoRO: probability.description,
             grauRO: level,
@@ -252,9 +253,9 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
         dispatch(
           updateConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: '',
             descricaoRO: probability.description,
             grauRO: level,
@@ -278,9 +279,9 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
         dispatch(
           saveConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: '',
             descricaoRO: severity.description,
             grauRO: level,
@@ -293,9 +294,9 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
         dispatch(
           updateConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: '',
             descricaoRO: severity.description,
             grauRO: level,
@@ -316,9 +317,9 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
       dispatch(
         saveMap({
           atualizadoEm: now,
-          atualizadoPor: 1, // TODO: Get proper user ID
+          atualizadoPor: userId,
           criadoEm: now,
-          criadoPor: 1, // TODO: Get proper user ID
+          criadoPor: userId,
           decisaoEixo11: newMap.decisaoEixo11 ?? { id: defaultConfiguration.id },
           decisaoEixo12: newMap.decisaoEixo12 ?? { id: defaultConfiguration.id },
           decisaoEixo13: newMap.decisaoEixo13 ?? { id: defaultConfiguration.id },
@@ -335,9 +336,9 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
       dispatch(
         updateMap({
           atualizadoEm: now,
-          atualizadoPor: 1, // TODO: Get proper user ID
+          atualizadoPor: userId,
           criadoEm: now,
-          criadoPor: 1, // TODO: Get proper user ID
+          criadoPor: userId,
           decisaoEixo11: newMap.decisaoEixo11 ?? { id: defaultConfiguration.id },
           decisaoEixo12: newMap.decisaoEixo12 ?? { id: defaultConfiguration.id },
           decisaoEixo13: newMap.decisaoEixo13 ?? { id: defaultConfiguration.id },
@@ -394,7 +395,7 @@ const ConfigurationsTabRisk = ({ configurations, levels, map, onSaved }: Configu
         <Button variant="contained" size="large" sx={{ bgcolor: '#E0E0E0', color: 'black' }} onClick={() => navigate(-1)}>
           VOLTAR
         </Button>
-        <Button onClick={onSaveClicked} variant="contained" size="large" sx={{ bgcolor: '#EBC139', color: 'black' }}>
+        <Button disabled={loading} onClick={onSaveClicked} variant="contained" size="large" sx={{ bgcolor: '#EBC139', color: 'black' }}>
           SALVAR
         </Button>
       </Box>

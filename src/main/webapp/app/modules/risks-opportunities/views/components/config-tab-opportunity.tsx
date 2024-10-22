@@ -1,12 +1,12 @@
 import { Box, Button, Stack } from '@mui/material';
 import { useAppDispatch } from 'app/config/store';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Configuration, Option, RawMap } from '../../models';
 import { saveConfiguration, updateConfiguration } from '../../reducers/configurations.reducer';
+import { saveMap, updateMap } from '../../reducers/maps.reducer';
 import ConfigComplexityMatrix from './config-complexity-matrix';
 import ConfigurationsDegrees, { ConfigurationsClassificationType, ConfigurationsDegreesType } from './config-degrees';
-import { saveMap, updateMap } from '../../reducers/maps.reducer';
-import { useNavigate } from 'react-router-dom';
 
 type ConfigurationsType = {
   complexityDegrees: ConfigurationsDegreesType[];
@@ -17,11 +17,13 @@ type ConfigurationsType = {
 type ConfigurationTabOpportunityProps = {
   configurations: Array<Configuration>;
   levels: Array<Option>;
+  loading: boolean;
   map: RawMap | null;
   onSaved: () => void;
+  userId: number | null;
 };
 
-const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: ConfigurationTabOpportunityProps) => {
+const ConfigurationsTabOpportunity = ({ configurations, levels, loading, map, onSaved, userId }: ConfigurationTabOpportunityProps) => {
   const dispatch = useAppDispatch();
 
   const [complexities, setComplexities] = useState<Array<ConfigurationsDegreesType>>([]);
@@ -201,9 +203,9 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
         dispatch(
           saveConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: opportunity.decision,
             descricaoRO: opportunity.description,
             grauRO: getLevelByCode(opportunity.codigo),
@@ -216,9 +218,9 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
         dispatch(
           updateConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: opportunity.decision,
             descricaoRO: opportunity.description,
             grauRO: getLevelByCode(opportunity.codigo),
@@ -242,9 +244,9 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
         dispatch(
           saveConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: '',
             descricaoRO: complexity.description,
             grauRO: level,
@@ -257,9 +259,9 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
         dispatch(
           updateConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: '',
             descricaoRO: complexity.description,
             grauRO: level,
@@ -283,9 +285,9 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
         dispatch(
           saveConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: '',
             descricaoRO: improvement.description,
             grauRO: level,
@@ -298,9 +300,9 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
         dispatch(
           updateConfiguration({
             atualizadoEm: now,
-            atualizadoPor: 1, // TODO: Get proper user ID
+            atualizadoPor: userId,
             criadoEm: now,
-            criadoPor: 1, // TODO: Get proper user ID
+            criadoPor: userId,
             decisaoRO: '',
             descricaoRO: improvement.description,
             grauRO: level,
@@ -321,9 +323,9 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
       dispatch(
         saveMap({
           atualizadoEm: now,
-          atualizadoPor: 1, // TODO: Get proper user ID
+          atualizadoPor: userId,
           criadoEm: now,
-          criadoPor: 1, // TODO: Get proper user ID
+          criadoPor: userId,
           decisaoEixo11: newMap.decisaoEixo11 ?? { id: defaultConfiguration.id },
           decisaoEixo12: newMap.decisaoEixo12 ?? { id: defaultConfiguration.id },
           decisaoEixo13: newMap.decisaoEixo13 ?? { id: defaultConfiguration.id },
@@ -340,9 +342,9 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
       dispatch(
         updateMap({
           atualizadoEm: now,
-          atualizadoPor: 1, // TODO: Get proper user ID
+          atualizadoPor: userId,
           criadoEm: now,
-          criadoPor: 1, // TODO: Get proper user ID
+          criadoPor: userId,
           decisaoEixo11: newMap.decisaoEixo11 ?? { id: defaultConfiguration.id },
           decisaoEixo12: newMap.decisaoEixo12 ?? { id: defaultConfiguration.id },
           decisaoEixo13: newMap.decisaoEixo13 ?? { id: defaultConfiguration.id },
@@ -397,7 +399,7 @@ const ConfigurationsTabOpportunity = ({ configurations, levels, map, onSaved }: 
         <Button variant="contained" size="large" sx={{ bgcolor: '#E0E0E0', color: 'black' }} onClick={() => navigate(-1)}>
           VOLTAR
         </Button>
-        <Button onClick={onSaveClicked} variant="contained" size="large" sx={{ bgcolor: '#EBC139', color: 'black' }}>
+        <Button disabled={loading} onClick={onSaveClicked} variant="contained" size="large" sx={{ bgcolor: '#EBC139', color: 'black' }}>
           SALVAR
         </Button>
       </Box>
