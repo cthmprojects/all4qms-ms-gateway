@@ -1,9 +1,10 @@
-import { Autocomplete, Checkbox, Stack, TextField, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Autocomplete, Checkbox, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { onAutocompleteChanged, onCheckboxChanged, onDateChanged } from '../../utils';
 import { SummarizedUser } from '../../models';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 
 type ClosingActionProps = {
   action: string;
@@ -20,7 +21,6 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
   const [verifier, setVerifier] = useState<SummarizedUser | null>(null);
 
   const { register, setValue, formState, control, trigger } = useFormContext();
-  const fieldHook = (fieldName: string) => register(fieldName as any, { required: true });
 
   const implementationDate = useWatch({ control, name: 'implementationDate' });
   const efficacyVerificationDate = useWatch({ control, name: 'efficacyVerificationDate' });
@@ -30,20 +30,17 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
   }, [users]);
 
   useEffect(() => {
-    if (verifiers.length <= 0) {
-      return;
-    }
-
-    setVerifier(verifiers[0]);
-  }, [verifiers]);
-
-  useEffect(() => {
     setValue(isImplementation ? 'implemented' : 'efficacyVerified', implemented);
   }, [implemented]);
 
   useEffect(() => {
     setValue(isImplementation ? 'implementationResponsibleId' : 'efficacyResponsibleId', verifier?.id);
   }, [verifier]);
+
+  const dateValue = useMemo(
+    () => (isImplementation ? implementationDate : efficacyVerificationDate),
+    [implementationDate, efficacyVerificationDate]
+  );
 
   return (
     <Stack spacing={2}>
@@ -55,7 +52,7 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
             <Stack direction="row" alignItems="center">
               <Checkbox
                 disabled={readonly}
-                checked={implemented}
+                checked={dateValue}
                 onChange={(event, checked) => onCheckboxChanged(event, checked, setImplemented)}
               />
 
@@ -65,7 +62,7 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
             <Stack direction="row" alignItems="center">
               <Checkbox
                 disabled={readonly}
-                checked={!implemented}
+                checked={!dateValue}
                 onChange={(event, checked) => onCheckboxChanged(event, !checked, setImplemented)}
               />
 
@@ -74,33 +71,40 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
           </Stack>
         </Stack>
 
-        <DatePicker
-          selected={isImplementation ? implementationDate : efficacyVerificationDate}
+        <MaterialDatepicker
+          label="Data"
+          selected={dateValue}
           disabled={readonly}
           onChange={newDate => setValue(isImplementation ? 'implementationDate' : 'efficacyVerificationDate', newDate)}
           className="date-picker"
           dateFormat={'dd/MM/yyyy'}
         />
 
-        <Autocomplete
-          disableClearable
-          disabled={readonly}
-          getOptionLabel={option => option.name}
-          onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setVerifier)}
-          options={verifiers}
-          renderInput={params => <TextField {...params} label="Responsável pela verificação" />}
-          sx={{ flexGrow: 1 }}
-          value={verifier}
+        <Controller
+          control={control}
+          name={isImplementation ? 'implementationResponsibleId' : 'efficacyResponsibleId'}
+          render={({ field }) => (
+            <FormControl className="ms-3">
+              <InputLabel>Responsável</InputLabel>
+              <Select label="Responsável" name="Responsável" {...field} sx={{ minWidth: '260px' }}>
+                <MenuItem>-</MenuItem>
+                {verifiers.map(user => (
+                  <MenuItem value={user.id} key={user.id}>
+                    {user.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         />
       </Stack>
 
-      <TextField
-        disabled={readonly}
-        label={description}
-        maxRows={5}
-        multiline
-        placeholder={description}
-        {...fieldHook(isImplementation ? 'implementationDescription' : 'efficacyDescription')}
+      <Controller
+        control={control}
+        name={isImplementation ? 'implementationDescription' : 'efficacyDescription'}
+        render={({ field }) => (
+          <TextField disabled={readonly} label={description} maxRows={5} multiline placeholder={description} {...field} />
+        )}
       />
     </Stack>
   );

@@ -76,6 +76,7 @@ interface RiskOpportunityPayload {
 }
 
 const formatDate = (date: Date, shortened: boolean = false): string => {
+  if (!date) return null;
   const year: string = date.getFullYear().toString();
   const month: string = (date.getMonth() + 1).toString().padStart(2, '0');
   const day: string = date.getDate().toString().padStart(2, '0');
@@ -188,10 +189,6 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
 
   const response = await axios.put<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${riskOpportunity.id}`, riskOpportunity);
 
-  if (response.status !== 201) {
-    return null;
-  }
-
   const resource: RawRiskOpportunity = response.data;
 
   const now: Date = new Date();
@@ -213,6 +210,9 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
         planoId: null,
       },
     ],
+    riscoOportunidade: {
+      id: resource.id,
+    },
     analise: {
       atualizadoEm: now,
       atualizadoPor: senderId,
@@ -302,8 +302,6 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
   const body: RawCompleteAnalysis = {
     acoesPlano: [
       {
-        atualizadoEm: null,
-        criadoEm: null,
         descricaoAcao: actionPlanSummary.actionDescription,
         prazoAcao: formatDate(actionPlanSummary.actionDate, true),
         idResponsavelAcao: actionPlanSummary.responsibleId,
@@ -316,11 +314,12 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
         planoId: null,
       },
     ],
+    riscoOportunidade: {
+      id: resource.id,
+    },
     analise: {
-      atualizadoEm: now,
       atualizadoPor: senderId,
       corDecisao: '',
-      criadoEm: now,
       criadoPor: senderId,
       dataAnalise: now,
       decisao: details.meaning,
@@ -334,8 +333,6 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
     },
     aprovacao: {
       alterarRisco: true,
-      atualizadoEm: now,
-      criadoEm: now,
       dataEficacia: efficacy.efficacyVerificationDate,
       dataFechamento: null,
       dataImplementacao: implementation.implementationDate,
@@ -360,8 +357,6 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
       metodo: ishikawa?.method,
     },
     plano: {
-      atualizadoEm: now,
-      criadoEm: now,
       statusPlano: 'ABERTO',
       qtdAcoes: 1,
       qtdAcoesConcluidas: 0,
