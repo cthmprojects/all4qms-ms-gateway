@@ -1,6 +1,6 @@
 /* eslint-disable radix */
 /* eslint-disable no-console */
-import { Check, Visibility } from '@mui/icons-material';
+import { Visibility } from '@mui/icons-material';
 import BlockIcon from '@mui/icons-material/Block';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -29,23 +29,23 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { QueryClient, useMutation } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { a11yProps, CustomTabPanel } from 'app/shared/components/tabs';
+import { usePaginator } from 'app/shared/hooks/usePaginator';
+import { getLabelGrauRO } from 'app/shared/util/getLabels';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Button } from 'reactstrap';
 import { Configuration, RawRiskOpportunity } from '../../models';
 import { getComplexities } from '../../reducers/complexities.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
-import { listROFiltro, listROs, resetRiskOportunity } from '../../reducers/risks-opportunities.reducer';
+import { deleteRO, listROFiltro, resetRiskOportunity } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
-import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
-import { usePaginator } from 'app/shared/hooks/usePaginator';
-import { getLabelGrauRO } from 'app/shared/util/getLabels';
-import { Button } from 'reactstrap';
 
 // Example
 const getSituacaoIcon = situacao => {
@@ -218,13 +218,13 @@ const Home = () => {
                         <Visibility sx={{ color: '#0EBDCE' }} />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Imprimir">
-                      <IconButton color="primary" onClick={() => {}}>
-                        <Check sx={{ color: '#03AC59' }} />
-                      </IconButton>
-                    </Tooltip>
                     <Tooltip title="Cancelar">
-                      <IconButton color="primary" onClick={() => {}}>
+                      <IconButton
+                        color="primary"
+                        onClick={() => {
+                          dispatch(deleteRO(id)).then(_ => listRo());
+                        }}
+                      >
                         <CancelIcon sx={{ color: '#FF0000' }} />
                       </IconButton>
                     </Tooltip>
