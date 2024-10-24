@@ -135,16 +135,16 @@ const BaseDetails = ({
       reason5: '',
       actionDescription: '',
       actionDate: new Date(),
-      responsibleId: null,
+      responsibleId: '' as unknown as number,
       verifyAction: false,
       actionVerificationDate: null,
-      actionVerifierId: null,
+      actionVerifierId: '' as unknown as number,
       implementationDate: null,
-      implementationResponsibleId: null,
+      implementationResponsibleId: '' as unknown as number,
       implemented: false,
       implementationDescription: '',
       efficacyVerificationDate: null,
-      efficacyResponsibleId: null,
+      efficacyResponsibleId: '' as unknown as number,
       efficacyVerified: false,
       efficacyDescription: '',
     },
@@ -250,7 +250,7 @@ const BaseDetails = ({
     const action: RawPlanAction | null = planWithActions.acoes.length > 0 ? planWithActions.acoes[0] : null;
 
     analysisFormMethods.setValue('actionDescription', action?.descricaoAcao);
-    analysisFormMethods.setValue('actionDate', new Date(action?.dataConclusaoAcao));
+    analysisFormMethods.setValue('actionDate', new Date(action?.prazoAcao));
     analysisFormMethods.setValue('responsibleId', action?.idResponsavelAcao);
     analysisFormMethods.setValue('verifyAction', false);
     analysisFormMethods.setValue('actionVerificationDate', new Date(action?.dataVerificao));
@@ -277,7 +277,7 @@ const BaseDetails = ({
       return;
     }
 
-    const analysis: RawRiskOpportunityAnalysis = allAnalysis[0];
+    const analysis: RawRiskOpportunityAnalysis = [...allAnalysis].reverse()[0];
     const probability: Configuration = filterConfiguration(analysis.linhaConfigAnalise1?.id ?? 0, firstConfigurations);
     const severity: Configuration = filterConfiguration(analysis.linhaConfigAnalise2?.id ?? 0, secondConfigurations);
 

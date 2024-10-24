@@ -176,8 +176,8 @@ export type RawApproval = {
   alterarRisco: boolean;
   vinculoRisco: number;
   descFechamento: string;
-  criadoEm: Date;
-  atualizadoEm: Date;
+  criadoEm?: Date;
+  atualizadoEm?: Date;
 };
 
 export type RawPlan = {
@@ -187,8 +187,8 @@ export type RawPlan = {
   qtdAcoesConcluidas: number;
   percentualPlano: number;
   dtConclusaoPlano: Date | string;
-  criadoEm: Date;
-  atualizadoEm: Date;
+  criadoEm?: Date;
+  atualizadoEm?: Date;
   idNaoConformidade?: number;
 };
 
@@ -203,8 +203,8 @@ export type RawPlanAction = {
   idResponsavelVerificaoAcao: number;
   idAnexosExecucao: number;
   dataConclusaoAcao: Date | string;
-  criadoEm: Date;
-  atualizadoEm: Date;
+  criadoEm?: Date;
+  atualizadoEm?: Date;
   planoId: number;
 };
 
@@ -219,8 +219,8 @@ export type RawAnalysis = {
   idAprovacaoNC: number;
   criadoPor: number;
   atualizadoPor: number;
-  criadoEm: Date;
-  atualizadoEm: Date;
+  criadoEm?: Date;
+  atualizadoEm?: Date;
   linhaConfigAnalise1: RawRiskOpportunityConfiguration;
   linhaConfigAnalise2: RawRiskOpportunityConfiguration;
   riscoOportunidade: RawRiskOpportunity;
@@ -233,6 +233,9 @@ export type RawCompleteAnalysis = {
   aprovacao: RawApproval;
   plano: RawPlan;
   acoesPlano: Array<RawPlanAction>;
+  riscoOportunidade: {
+    id: number;
+  };
 };
 
 export type RawInvestigation = {
