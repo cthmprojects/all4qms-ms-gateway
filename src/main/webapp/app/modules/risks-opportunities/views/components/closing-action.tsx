@@ -86,7 +86,7 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
           render={({ field }) => (
             <FormControl className="ms-3">
               <InputLabel>Responsável</InputLabel>
-              <Select label="Responsável" name="Responsável" {...field} sx={{ minWidth: '260px' }}>
+              <Select label="Responsável" name="Responsável" disabled={readonly} {...field} sx={{ minWidth: '260px' }}>
                 <MenuItem>-</MenuItem>
                 {verifiers.map(user => (
                   <MenuItem value={user.id} key={user.id}>

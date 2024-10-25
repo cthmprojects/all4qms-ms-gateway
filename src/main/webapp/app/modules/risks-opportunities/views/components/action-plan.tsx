@@ -77,16 +77,13 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
             dateFormat={'dd/MM/yyyy'}
           />
 
-          {verifierForm}
-          {responsibleForm}
-
           <Controller
             control={control}
             name="responsibleId"
             render={({ field }) => (
               <FormControl className="ms-3">
                 <InputLabel>Responsável</InputLabel>
-                <Select label="Responsável" name="funcao" {...field} sx={{ minWidth: '260px' }}>
+                <Select label="Responsável" name="funcao" disabled={readonly} {...field} sx={{ minWidth: '260px' }}>
                   <MenuItem>-</MenuItem>
                   {users.map(user => (
                     <MenuItem value={user.id} key={user.id}>
@@ -123,7 +120,7 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
             render={({ field }) => (
               <FormControl className="ms-3">
                 <InputLabel>Responsável pela verificação</InputLabel>
-                <Select label="Responsável pela verificação" name="funcao" {...field} sx={{ minWidth: '260px' }}>
+                <Select label="Responsável pela verificação" name="funcao" disabled={readonly} {...field} sx={{ minWidth: '260px' }}>
                   <MenuItem>-</MenuItem>
                   {users.map(user => (
                     <MenuItem value={user.id} key={user.id}>
