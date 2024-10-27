@@ -1,6 +1,6 @@
 import { Autocomplete, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { Configuration } from '../../models';
 
 type AnalysisDetailsProps = {
@@ -41,27 +41,40 @@ const AnalysisDetails = ({ description, firstConfigurations, points, readonly, s
       <Typography variant="h6">Detalhamento</Typography>
 
       <Stack direction="row" spacing={2}>
-        <Autocomplete
-          disableClearable
-          disabled={readonly}
-          getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          onChange={(event, value, reason, details) => setValue('probability', value, { shouldValidate: true })}
-          options={probabilities}
-          renderInput={params => <TextField {...params} label="Probabilidade" />}
-          sx={{ flexGrow: 1 }}
-          value={probabilityForm ?? null}
+        <Controller
+          control={control}
+          name="probability"
+          render={({ field: { onChange, ...rest } }) => (
+            <Autocomplete
+              disableClearable
+              disabled={readonly}
+              getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              options={probabilities}
+              renderInput={params => <TextField {...params} label="Probabilidade" />}
+              sx={{ flexGrow: 1 }}
+              onChange={(_, val) => onChange(val)}
+              {...rest}
+            />
+          )}
         />
-        <Autocomplete
-          disableClearable
-          disabled={readonly}
-          getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          onChange={(event, value, reason, details) => setValue('severity', value, { shouldValidate: true })}
-          options={severities}
-          renderInput={params => <TextField {...params} label="Severidade" />}
-          sx={{ flexGrow: 1 }}
-          value={severityForm ?? null}
+
+        <Controller
+          control={control}
+          name="severity"
+          render={({ field: { onChange, ...rest } }) => (
+            <Autocomplete
+              disableClearable
+              disabled={readonly}
+              getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              options={severities}
+              renderInput={params => <TextField {...params} label="Severidade" />}
+              sx={{ flexGrow: 1 }}
+              onChange={(_, val) => onChange(val)}
+              {...rest}
+            />
+          )}
         />
       </Stack>
 

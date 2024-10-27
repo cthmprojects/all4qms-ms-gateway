@@ -1,9 +1,10 @@
-import { Autocomplete, Checkbox, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Checkbox, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { SummarizedUser } from '../../models';
 import { onAutocompleteChanged, onCheckboxChanged, onDateChanged } from '../../utils';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 
 type ActionPlanProps = {
   users: Array<SummarizedUser>;
@@ -24,6 +25,9 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
 
   const actionDate = useWatch({ control, name: 'actionDate' });
   const actionVerificationDate = useWatch({ control, name: 'actionVerificationDate' });
+
+  const verifierForm = useWatch({ control, name: 'actionVerifierId' });
+  const responsibleForm = useWatch({ control, name: 'responsibleId' });
 
   useEffect(() => {
     setResponsibles(users);
@@ -47,33 +51,25 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
   }, [verifiers]);
 
   useEffect(() => {
-    setValue('responsibleId', responsible?.id);
-  }, [responsible]);
-
-  useEffect(() => {
     setValue('verifyAction', shouldVerify);
   }, [shouldVerify]);
-
-  useEffect(() => {
-    setValue('actionVerifierId', verifier?.id);
-  }, [verifier]);
 
   return (
     <Stack spacing={2}>
       <Typography variant="h6">Plano de ação</Typography>
 
       <Stack spacing={2} sx={{ flexGrow: 1 }}>
-        <TextField
-          disabled={readonly}
-          label="Descrição da ação"
-          maxRows={5}
-          multiline
-          placeholder="Descrição da ação"
-          {...fieldHook('actionDescription')}
+        <Controller
+          control={control}
+          name="actionDescription"
+          render={({ field }) => (
+            <TextField disabled={readonly} label="Descrição da ação" maxRows={5} multiline placeholder="Descrição da ação" {...field} />
+          )}
         />
 
         <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-          <DatePicker
+          <MaterialDatepicker
+            label="Prazo"
             disabled={readonly}
             selected={actionDate}
             onChange={newDate => setValue('actionDate', newDate, { shouldValidate: true })}
@@ -81,15 +77,22 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
             dateFormat={'dd/MM/yyyy'}
           />
 
-          <Autocomplete
-            disableClearable
-            disabled={readonly}
-            getOptionLabel={option => option.name}
-            onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setResponsible)}
-            options={responsibles}
-            renderInput={params => <TextField {...params} label="Responsável" />}
-            sx={{ flexGrow: 1 }}
-            value={responsible}
+          <Controller
+            control={control}
+            name="responsibleId"
+            render={({ field }) => (
+              <FormControl className="ms-3">
+                <InputLabel>Responsável</InputLabel>
+                <Select label="Responsável" name="funcao" disabled={readonly} {...field} sx={{ minWidth: '260px' }}>
+                  <MenuItem>-</MenuItem>
+                  {users.map(user => (
+                    <MenuItem value={user.id} key={user.id}>
+                      {user.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           />
 
           <Stack direction="row" alignItems="center">
@@ -102,7 +105,8 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
             <Typography>Verificar</Typography>
           </Stack>
 
-          <DatePicker
+          <MaterialDatepicker
+            label="Data de verificação"
             selected={actionVerificationDate}
             disabled={readonly}
             onChange={newDate => setValue('actionVerificationDate', newDate, { shouldValidate: true })}
@@ -110,15 +114,22 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
             dateFormat={'dd/MM/yyyy'}
           />
 
-          <Autocomplete
-            disableClearable
-            disabled={readonly}
-            getOptionLabel={option => option.name}
-            onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setVerifier)}
-            options={verifiers}
-            renderInput={params => <TextField {...params} label="Responsável pela verificação" />}
-            sx={{ flexGrow: 1 }}
-            value={verifier}
+          <Controller
+            control={control}
+            name="actionVerifierId"
+            render={({ field }) => (
+              <FormControl className="ms-3">
+                <InputLabel>Responsável pela verificação</InputLabel>
+                <Select label="Responsável pela verificação" name="funcao" disabled={readonly} {...field} sx={{ minWidth: '260px' }}>
+                  <MenuItem>-</MenuItem>
+                  {users.map(user => (
+                    <MenuItem value={user.id} key={user.id}>
+                      {user.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           />
         </Stack>
       </Stack>
