@@ -1,5 +1,6 @@
 import React from 'react';
-import { TextField, TextFieldProps } from '@mui/material';
+import { IconButton, InputAdornment, TextField, TextFieldProps } from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 import DatePicker from 'react-datepicker';
 
 export const MaterialDatepicker = ({
@@ -11,10 +12,24 @@ export const MaterialDatepicker = ({
   showMonthYearPicker,
   showYearPicker,
   hideHeader,
+  withoutClear,
   ...props
 }: Omit<TextFieldProps, 'onChange'> &
   React.ComponentProps<typeof DatePicker> & { onChange: (date: Date) => void; hideHeader?: boolean }) => {
   const format = dateFormat || 'dd/MM/yyyy';
+
+  const clear = withoutClear
+    ? {}
+    : {
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton onClick={() => onChange('')} edge="end">
+              <CloseIcon />
+            </IconButton>
+          </InputAdornment>
+        ),
+      };
+
   return (
     <DatePicker
       selected={selected}
@@ -30,6 +45,7 @@ export const MaterialDatepicker = ({
           {...props}
           InputProps={{
             readOnly: true,
+            ...clear,
           }}
         />
       }

@@ -59,8 +59,6 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
     setInterestedPartsArray(newInterestedParts);
   };
 
-  const fieldHook = (fieldName: string) => register(fieldName as any, { required: true });
-
   const user = useWatch({ control, name: 'sender' });
 
   return (
@@ -70,7 +68,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
           <InputLabel>Emitido por</InputLabel>
           <Select value={user} input={<OutlinedInput label="Emitido por" />} disabled>
             <MenuItem selected value={user}>
-              {user?.name}
+              {user?.nome || user?.name}
             </MenuItem>
           </Select>
         </FormControl>

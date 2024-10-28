@@ -82,7 +82,7 @@ const BaseDetails = ({
   onBack,
   onSave,
 }: BaseDetailsProps) => {
-  let isAdmin = useAppSelector(state => state.authentication.account);
+  let isAdmin = useAppSelector(state => state.authentication.accountQms);
 
   const generalFormMethods = useForm({
     defaultValues: {
@@ -100,6 +100,10 @@ const BaseDetails = ({
     mode: 'all',
     reValidateMode: 'onChange',
   });
+
+  useEffect(() => {
+    isAdmin.id && generalFormMethods.setValue('sender', isAdmin);
+  }, [isAdmin.id]);
 
   const controlActionFormMethods = useForm({
     defaultValues: {
@@ -354,6 +358,7 @@ const BaseDetails = ({
           readonly={readonly}
           secondConfigurations={secondConfigurations}
           users={users}
+          isOpportunity={isOpportunity}
         />
       </FormProvider>
 
