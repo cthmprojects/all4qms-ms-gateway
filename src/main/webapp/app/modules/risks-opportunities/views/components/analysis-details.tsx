@@ -9,9 +9,17 @@ type AnalysisDetailsProps = {
   points: number;
   readonly?: boolean;
   secondConfigurations: Array<Configuration>;
+  isOpportunity?: boolean;
 };
 
-const AnalysisDetails = ({ description, firstConfigurations, points, readonly, secondConfigurations }: AnalysisDetailsProps) => {
+const AnalysisDetails = ({
+  description,
+  firstConfigurations,
+  points,
+  readonly,
+  secondConfigurations,
+  isOpportunity,
+}: AnalysisDetailsProps) => {
   const [probabilities, setProbabilities] = useState<Array<Configuration>>([]);
   const [severities, setSeverities] = useState<Array<Configuration>>([]);
 
@@ -51,7 +59,7 @@ const AnalysisDetails = ({ description, firstConfigurations, points, readonly, s
               getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               options={probabilities}
-              renderInput={params => <TextField {...params} label="Probabilidade" />}
+              renderInput={params => <TextField {...params} label={isOpportunity ? 'Complexidade' : 'Probabilidade'} />}
               sx={{ flexGrow: 1 }}
               onChange={(_, val) => onChange(val)}
               {...rest}
@@ -69,7 +77,7 @@ const AnalysisDetails = ({ description, firstConfigurations, points, readonly, s
               getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               options={severities}
-              renderInput={params => <TextField {...params} label="Severidade" />}
+              renderInput={params => <TextField {...params} label={isOpportunity ? 'Melhoria' : 'Severidade'} />}
               sx={{ flexGrow: 1 }}
               onChange={(_, val) => onChange(val)}
               {...rest}
