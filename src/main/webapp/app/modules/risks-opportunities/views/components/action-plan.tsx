@@ -98,7 +98,7 @@ const ActionPlan = ({ readonly, users }: ActionPlanProps) => {
           <Stack direction="row" alignItems="center">
             <Checkbox
               disabled={readonly}
-              checked={shouldVerify}
+              checked={!!actionVerificationDate}
               onChange={(event, checked) => onCheckboxChanged(event, checked, setShouldVerify)}
             />
 

@@ -28,9 +28,10 @@ type AnalysisProps = {
   map: RawMap | null;
   readonly?: boolean;
   users: Array<SummarizedUser>;
+  isOpportunity?: boolean;
 };
 
-const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, readonly, users }: AnalysisProps) => {
+const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, readonly, users, isOpportunity }: AnalysisProps) => {
   const [analysisSummary, setAnalysisSummary] = useState<AnalysisSummary | null>(null);
   const [expanded, setExpanded] = useState<boolean>(false);
 
@@ -159,8 +160,8 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
               <TableHead>
                 <TableRow>
                   <TableCell>Data</TableCell>
-                  <TableCell>Probabilidade</TableCell>
-                  <TableCell>Severidade</TableCell>
+                  <TableCell>{isOpportunity ? 'Complexidade' : 'Probabilidade'}</TableCell>
+                  <TableCell>{isOpportunity ? 'Melhoria' : 'Severidade'}</TableCell>
                   <TableCell>Decisão</TableCell>
                   <TableCell>Análise</TableCell>
                 </TableRow>
@@ -205,6 +206,7 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
               points={points}
               readonly={readonly}
               secondConfigurations={secondConfigurations}
+              isOpportunity={isOpportunity}
             />
 
             <Divider />

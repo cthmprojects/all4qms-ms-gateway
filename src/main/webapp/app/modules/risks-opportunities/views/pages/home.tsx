@@ -65,18 +65,6 @@ const getSituacaoIcon = situacao => {
   }
 };
 
-const columns = [
-  'Fluxo',
-  'Atividade',
-  'Descrição',
-  'Causa',
-  'Efeito',
-  'Área/Processo',
-  'Probabilidade',
-  'Severidade',
-  /*  'Decisão', */ 'Ações',
-];
-
 const Home = () => {
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
@@ -132,6 +120,17 @@ const Home = () => {
       tipoRO: tab ? 'O' : 'R',
     });
   }
+
+  const columns = [
+    'Fluxo',
+    'Atividade',
+    'Descrição',
+    'Causa',
+    'Efeito',
+    'Área/Processo',
+    ...(tab ? ['Complexidade', 'Melhoria'] : ['Probabilidade', 'Severidade']),
+    /*  'Decisão', */ 'Ações',
+  ];
 
   useEffect(() => {
     listRo();
