@@ -279,7 +279,7 @@ const HomeGoalsList = () => {
                 onChange={e => setFilters({ ...filters, idProcesso: Number(e.target.value.toString()) })}
                 label="Processo"
               >
-                <MenuItem value={0}>Selecionar</MenuItem>
+                {/* <MenuItem value={0}>Selecionar</MenuItem> */}
                 {processes?.map((process, index) => (
                   <MenuItem key={index} value={process.id}>
                     {process.nome}
