@@ -9,7 +9,7 @@ type IndicatorValuesProps = {
   allowRemoving?: boolean;
   initialFrequency?: string | null;
   initialValues?: Array<number | null>;
-  initialYear?: number | null;
+  initialYear?: string | null;
   inputOnly?: boolean;
   frequencies: Array<string>;
   unit: string;
@@ -68,7 +68,7 @@ const IndicatorValues = ({
       return;
     }
 
-    setYear(initialYear);
+    setYear(Number(initialYear));
   }, [initialYear]);
 
   useEffect(() => {
@@ -241,7 +241,7 @@ const IndicatorValues = ({
           disabled={inputOnly}
           onChange={(event, value, reason, details) => {
             onAutocompleteChanged(event, value, reason, details, setFrequency);
-            onChanged(value, year, values);
+            onChanged(value, year, [null, null, null, null, null, null, null, null, null, null, null, null]);
           }}
           options={frequencies}
           renderInput={params => <TextField {...params} label="Frequência" />}

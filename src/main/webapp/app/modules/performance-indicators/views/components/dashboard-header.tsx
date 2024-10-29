@@ -67,7 +67,7 @@ const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, 
         Analítico
       </Button>
 
-      <Autocomplete
+      {/* <Autocomplete
         disableClearable
         getOptionLabel={option => `${option.code} - ${option.name}`}
         isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -113,7 +113,7 @@ const DashboardHeader = ({ indicators, onAnalyticsRequested, onSearchRequested, 
         variant="contained"
       >
         <SearchOutlined />
-      </Button>
+      </Button> */}
     </Stack>
   );
 };

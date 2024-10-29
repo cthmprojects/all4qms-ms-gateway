@@ -6,6 +6,7 @@ import com.tellescom.all4qms.domain.Usuario;
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
 import com.tellescom.all4qms.domain.request.UsuarioUpdateRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
+import com.tellescom.all4qms.domain.response.UsuarioResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
 import com.tellescom.all4qms.service.dto.UserDTO;
@@ -307,5 +308,9 @@ public class UsuarioService {
 
     public Mono<ResponseEntity<Flux<UserDTO>>> getByRole(String role) {
         return userService.countManagedUsers().map(headers -> ResponseEntity.ok().body(userService.getUsersByAuthority(role)));
+    }
+
+    public Mono<List<UsuarioResponse>> findAllUsuariosMinimos() {
+        return usuarioRepository.findAll().map(usuarioMapper::toResponse).collectList();
     }
 }

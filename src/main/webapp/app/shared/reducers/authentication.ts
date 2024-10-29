@@ -26,9 +26,12 @@ export type AuthenticationState = Readonly<typeof initialState>;
 
 // Actions
 
-export const getSession = (): AppThunk => (dispatch, getState) => {
+export const getSession = (): AppThunk => async (dispatch, getState) => {
   // if (Storage.local.get(AUTH_TOKEN_KEY) || Storage.session.get(AUTH_TOKEN_KEY)) {
-  dispatch(getAccount());
+  const result = await dispatch(getAccount());
+  const id = (result.payload as AxiosResponse).data.id;
+  id && (await dispatch(getAccountQms(id)));
+
   // }
 };
 

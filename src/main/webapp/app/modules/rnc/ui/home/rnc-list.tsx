@@ -40,6 +40,8 @@ import { listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
 import './rnc.css';
 import { VisibilityOutlined } from '@mui/icons-material';
+import { resetAudit } from '../../reducers/audit.reducer';
+import { resetImplementation } from '../../reducers/approval.reducer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -91,17 +93,20 @@ const RncList = ({}) => {
 
   const handleApplyFilters = () => {
     const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
+    const formatter = new Intl.DateTimeFormat('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    console.table({ dtFim, dtIni });
     dispatch(
       listNonConformities({
         page: 0,
         size: pageSize,
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
+        dtFim: formatter.format(dtFim),
         statusAtual,
         processoNC,
         tipoNC,
         descricao,
         origemNC,
+        ...(dtIni ? { dtIni: formatter.format(dtIni) } : {}),
+        ...(dtFim ? { dtFim: formatter.format(dtFim) } : {}),
       })
     );
   };
@@ -158,6 +163,9 @@ const RncList = ({}) => {
     dispatch(listEnums());
     dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(getProcesses());
+    dispatch(resetAudit());
+    dispatch(reset());
+    dispatch(resetImplementation());
   }, []);
 
   useEffect(() => {
@@ -358,7 +366,7 @@ const RncList = ({}) => {
 
                   return (
                     <TableRow key={id}>
-                      <TableCell>{numNC}</TableCell>
+                      <TableCell>{id}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
                       <TableCell>{emissor}</TableCell>
                       <TableCell> {descricao ?? '-'}</TableCell>

@@ -1,5 +1,6 @@
 package com.tellescom.all4qms.web.rest;
 
+import com.tellescom.all4qms.domain.response.ProcessoResponse;
 import com.tellescom.all4qms.repository.ProcessoRepository;
 import com.tellescom.all4qms.service.ProcessoService;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
@@ -240,5 +241,11 @@ public class ProcessoResource {
     public Flux<Long> buscaIdUsuarioPorProcessoId(@PathVariable("id") Long id) {
         log.debug("REST request to get all Usuarios By processo id");
         return processoService.buscarIdUserByIdProcesso(id);
+    }
+
+    @GetMapping("/minimo")
+    public Mono<List<ProcessoResponse>> buscaTodosProcessos() {
+        log.debug("Busca todos os processos retornando somente id e nome");
+        return processoService.buscaTodosProcessosResponse();
     }
 }

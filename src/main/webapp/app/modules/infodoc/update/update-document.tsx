@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
 import {
+  Box,
   Breadcrumbs,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   IconButton,
@@ -22,13 +24,14 @@ import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../models';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
+import { toast } from 'react-toastify';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -94,15 +97,16 @@ export const UpdateDocument = () => {
   const [keyword, setKeyword] = useState<string>('');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const [isSGQ, setIsSGQ] = useState<Boolean>(false);
-  const [infoDocId, setInfoDocId] = useState(0);
+  const [infoDocId, setInfoDocId] = useState(Number(id));
   const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
-    dispatch(getInfoDocById(id));
+    dispatch(getInfoDocById(id!!));
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -146,12 +150,13 @@ export const UpdateDocument = () => {
   };
 
   const validateFields = () => {
-    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+    return emitter && emittedDate && title && selectedProcess;
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsLoading(true);
     if (actualInfoDoc) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc.idArquivo}`;
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${idFile ? idFile : actualInfoDoc.doc.idArquivo}`;
 
       await axios
         .request({
@@ -166,16 +171,20 @@ export const UpdateDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
+          fileName = fileName.split('_').pop()!!;
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
           fileDownload(file, `${fileName}`);
+          setIsLoading(false);
         });
+      setIsLoading(false);
     }
   };
 
   const saveDoc = (): Doc => {
     const newInfoDoc: Doc = {
+      id: parseInt(id!!),
       idUsuarioCriacao: parseInt(emitter),
       dataCricao: emittedDate,
       descricaoDoc: description,
@@ -183,13 +192,13 @@ export const UpdateDocument = () => {
       codigo: code,
       titulo: title,
       origem: origin,
-      idArquivo: parseInt(idFile),
+      idArquivo: parseInt(idFile!!),
       idProcesso: parseInt(selectedProcess),
       ignorarValidade: true,
       enumSituacao: 'R',
       tipoDoc: 'MA',
-      revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
-      idDocumentacaoAnterior: parseInt(id),
+      // revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
+      idDocumentacaoAnterior: parseInt(id!!),
     };
 
     if (!noValidate) {
@@ -200,26 +209,51 @@ export const UpdateDocument = () => {
     return newInfoDoc;
   };
 
-  const saveDocument = () => {
+  const saveDocument = async () => {
+    setIsLoading(true);
     const newInfoDoc = saveDoc();
 
-    dispatch(createInfoDoc(newInfoDoc)).then((res: any) => {
-      setInfoDocId(parseInt(res.payload.data?.doc?.id));
-      setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
-    });
+    const resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
+
+    const resDoc: InfoDoc = (resStoreDoc.payload as AxiosResponse).data || {};
+    if (resDoc) {
+      setIsLoading(false);
+      setInfoDocId(resDoc?.doc?.id || -1);
+      setInfoDocMovimentacao(resDoc?.movimentacao?.id || -1);
+      toast.success(`Documento ${resDoc?.doc?.id} Salvo com sucesso!`);
+
+      return resDoc;
+    } else {
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
+    }
   };
 
-  const fowardDocument = () => {
-    const novaMovimentacao: Movimentacao = {
-      id: infoDocMovimentacao,
-      enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
-      enumStatus: EnumStatusDoc.VALIDAREV,
-      idDocumentacao: infoDocId,
-      idUsuarioCriacao: currentUser.id,
-    };
+  const fowardDocument = async () => {
+    if (!validateFields()) {
+      toast.warn(`Os campos de Emissor, Área/Proceso, Descrição, Código e Titulo , SÃO OBRIGATÓRIOS!`);
+      return null;
+    }
 
-    dispatch(atualizarMovimentacao(novaMovimentacao));
-    navigate('/infodoc');
+    const resDoc = await saveDocument();
+
+    if (resDoc) {
+      const novaMovimentacao: Movimentacao = {
+        id: infoDocMovimentacao,
+        enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
+        enumStatus: EnumStatusDoc.VALIDAREV,
+        idDocumentacao: infoDocId,
+        idUsuarioCriacao: currentUser.id,
+      };
+
+      dispatch(atualizarMovimentacao(novaMovimentacao));
+      navigate('/infodoc');
+    } else {
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
+    }
   };
 
   const cancelUpdate = () => {
@@ -417,7 +451,7 @@ export const UpdateDocument = () => {
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
                 style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd' }}
-                label="Notificar:"
+                label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
                 disabled
@@ -440,7 +474,7 @@ export const UpdateDocument = () => {
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <TextField
               id="text-field-keyword"
               label="Escreva aqui..."
@@ -457,15 +491,13 @@ export const UpdateDocument = () => {
             {keywordList.map((keyword: string, index: number) => (
               <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
-          </div>
+          </div> */}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
               VOLTAR
             </Button>
-            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
-              SALVAR
-            </Button>
+            <Button onClick={() => saveDocument()}>SALVAR</Button>
             <Button
               disabled={infoDocId <= 0}
               className="ms-3"
@@ -500,6 +532,25 @@ export const UpdateDocument = () => {
           </div>
         </div>
       </div>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };

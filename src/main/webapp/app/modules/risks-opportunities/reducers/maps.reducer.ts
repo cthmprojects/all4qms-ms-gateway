@@ -1,4 +1,4 @@
-import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
+import { createAsyncThunk, isFulfilled, isPending } from '@reduxjs/toolkit';
 import { EntityState, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
 import { RawMap } from '../models';
@@ -51,9 +51,15 @@ const mapsSlice = createEntitySlice({
         state.loading = false;
         state.entities = action.payload.data;
       })
+      .addMatcher(isPending(saveMap), (state, _) => {
+        state.loading = true;
+      })
       .addMatcher(isFulfilled(saveMap), (state, action) => {
         state.loading = false;
         state.entity = action.payload.data;
+      })
+      .addMatcher(isPending(updateMap), (state, _) => {
+        state.loading = true;
       })
       .addMatcher(isFulfilled(updateMap), (state, action) => {
         state.loading = false;

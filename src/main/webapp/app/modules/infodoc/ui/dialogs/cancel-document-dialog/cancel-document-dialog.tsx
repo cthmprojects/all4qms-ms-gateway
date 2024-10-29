@@ -67,6 +67,7 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
         }
 
         usersSGQ.map(user => sendPendenciasSGQ(user));
+        setJustifyValue('');
 
         handleClose();
       },

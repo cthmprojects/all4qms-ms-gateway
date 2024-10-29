@@ -5,6 +5,7 @@ import {
   Button,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Grid,
@@ -26,7 +27,7 @@ import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-re
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import FileUploadRoundedIcon from '@mui/icons-material/FileUploadRounded';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
 import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
@@ -37,7 +38,7 @@ import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 import { IUsuario } from '../../../shared/model/usuario.model';
 import UploadInfoFile from '../ui/dialogs/upload-dialog/upload-files';
-import { getResumeIA } from '../reducers/anexo.reducer';
+import { getResumeIaByToken, getTokenResumeIA } from '../reducers/anexo.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -79,6 +80,10 @@ const getDocById = async (id: any) => {
   return data;
 };
 
+type resIAType = {
+  Status: number;
+  LLMResponse: string;
+};
 export const ValidationDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -100,10 +105,12 @@ export const ValidationDocument = () => {
   const [idNewFile, setIdNewFile] = useState<number>(-1);
   const [idOldFile, setIdOldFile] = useState<number>(-1);
   const [fileUploaded, SetFile] = useState<File>();
+  const [timerGetIA, SetTimerGetIA] = useState<any>();
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
   const [loadingIA, setLoadingIA] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [openUploadFile, setOpenUploadFile] = useState(false);
   const [openRejectModal, setOpenRejectModal] = useState(false);
@@ -159,12 +166,65 @@ export const ValidationDocument = () => {
     return emitter && emittedDate && documentDescription && code && title && selectedProcess;
   };
 
-  const handleGetResume = async () => {
-    setLoadingIA(true);
-    const resumeIA = await dispatch(getResumeIA(fileUploaded));
-    setLoadingIA(false);
+  const consultResumeIA = async tokenResumeIA => {
+    const resResume = await dispatch(getResumeIaByToken({ token: tokenResumeIA }));
+    const resumeIA: resIAType = (resResume.payload as AxiosResponse).data;
 
-    console.log('resumeIA: ', resumeIA);
+    // PROCESSING = 1,
+    // PENDING = 2,
+    // DONE = 3,
+    // FAILED = 4,
+    // DO_NOT_EXISTS = 5,
+    // TOKEN_AND_FILENAME_MISSING = 6
+
+    switch (resumeIA.Status) {
+      case 1:
+        return;
+      case 2:
+        return;
+      case 3:
+        clearInterval(timerGetIA);
+        setDocumentDescription(resumeIA.LLMResponse);
+        setLoadingIA(false);
+        break;
+      case 4:
+        clearInterval(timerGetIA);
+        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
+        console.error('Erro ao carrecar IA resume: ', resumeIA.LLMResponse);
+        setLoadingIA(false);
+        break;
+      case 5:
+        clearInterval(timerGetIA);
+        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
+        console.error('Erro ao carrecar IA resume: ', resumeIA.LLMResponse);
+        setLoadingIA(false);
+        break;
+      default:
+        clearInterval(timerGetIA);
+        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
+        setLoadingIA(false);
+        return;
+    }
+    // setLoadingIA(false);
+    // console.log('resumeIA: ', tokenResumeIA);
+  };
+  const handleGetResume = async () => {
+    try {
+      if (!fileUploaded) {
+        toast.warn('Não foi encontrado nem um documento revisado anexado, anexe-o antes e tente novamente.');
+      }
+      setLoadingIA(true);
+      const resToken = await dispatch(getTokenResumeIA(fileUploaded));
+      const tokenResumeIA = (resToken.payload as AxiosResponse).data;
+
+      setDocumentDescription('Resumo da descrição do documento anexado, sendo gerado automaticamente, aguarde...');
+      const _timerGetIA = setInterval(() => consultResumeIA(tokenResumeIA), 5000);
+      SetTimerGetIA(_timerGetIA);
+    } catch (err) {
+      console.error('Error handleGetResume: ', err);
+      clearInterval(timerGetIA);
+      setLoadingIA(false);
+    }
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -185,6 +245,7 @@ export const ValidationDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
+          fileName = fileName.split('_').pop()!!;
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
@@ -207,12 +268,12 @@ export const ValidationDocument = () => {
       codigo: code,
       titulo: title,
       origem: origin,
-      idArquivo: idNewFile,
+      idArquivo: idNewFile > 0 ? idNewFile : actualInfoDoc.doc?.idArquivo,
       idProcesso: parseInt(selectedProcess),
       ignorarValidade: true,
       enumSituacao: 'R',
       tipoDoc: 'MA',
-      revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1,
+      // revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1,
       idDocumentacaoAnterior: parseInt(id!!),
     };
 
@@ -225,10 +286,12 @@ export const ValidationDocument = () => {
   };
 
   const saveDocument = () => {
+    setIsLoading(true);
     const newInfoDoc = saveDoc();
 
     dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! })).then((res: any) => {
       dispatch(getInfoDocById(id!!));
+      setIsLoading(false);
     });
   };
 
@@ -247,9 +310,9 @@ export const ValidationDocument = () => {
       setOrigin(actualInfoDoc.doc?.origem!!);
       setSelectedProcess(actualInfoDoc.doc?.idProcesso?.toString()!!);
 
-      if (actualInfoDoc.doc?.dataValidade) {
+      if (!actualInfoDoc.doc?.ignorarValidade) {
         setNoValidate(false);
-        setValidDate(new Date(actualInfoDoc.doc.dataValidade));
+        setValidDate(new Date(actualInfoDoc.doc.dataValidade!!));
       } else {
         setNoValidate(true);
         setValidDate(new Date(2999, 11, 31));
@@ -259,6 +322,7 @@ export const ValidationDocument = () => {
   }, [actualInfoDoc]);
 
   const approveDocument = async () => {
+    setIsLoading(true);
     await axios
       .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/aprovacao-sgq/${id}`, {
         idDocumento: id,
@@ -267,7 +331,7 @@ export const ValidationDocument = () => {
       .then(async () => {
         toast.success('Documento enviado para aprovação!');
         const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == emitter)[0];
-        await dispatch(
+        dispatch(
           notifyEmailInfoDoc({
             to: userEmitter?.email || '', // Email
             subject: 'Documento requerendo APROVAÇãO',
@@ -280,9 +344,11 @@ export const ValidationDocument = () => {
           })
         );
         navigate('/infodoc');
+        setIsLoading(false);
       })
       .catch(e => {
         toast.error('Erro ao aprovar documento.');
+        setIsLoading(false);
       });
   };
 
@@ -493,7 +559,7 @@ export const ValidationDocument = () => {
                 label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled={!isSGQ}
+                disabled={!isSGQ || (isSGQ && noValidate)}
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -502,15 +568,15 @@ export const ValidationDocument = () => {
                 <MenuItem value="60d">60 dias antes</MenuItem>
               </Select>
             </FormControl>
-            {/*<LoadingButton
+            <LoadingButton
               variant="outlined"
               size="large"
               loading={loadingIA}
               sx={{ backgroundColor: '#0EBDCE', color: '#000', height: '60px' }}
-              onClick={handleGetResume}
+              onClick={() => handleGetResume()}
             >
               Gerar Resumo IA documento
-            </LoadingButton>*/}
+            </LoadingButton>
           </Box>
           <Textarea
             className="w-100"
@@ -523,7 +589,7 @@ export const ValidationDocument = () => {
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <TextField
               id="text-field-keyword"
               label="Escreva aqui..."
@@ -540,7 +606,7 @@ export const ValidationDocument = () => {
             {keywordList.map((keyword: string, index: number) => (
               <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
-          </div>
+          </div> */}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button
@@ -552,9 +618,9 @@ export const ValidationDocument = () => {
             </Button>
             <Button
               className="ms-3"
-              disabled={!validateFields()}
+              // disabled={!validateFields()}
               onClick={() => saveDocument()}
-              sx={{ border: validateFields() ? '1px solid #000' : '', color: '#000', width: '100px' }}
+              sx={{ border: '1px solid #000', color: '#000', width: '100px' }}
             >
               SALVAR
             </Button>
@@ -581,6 +647,25 @@ export const ValidationDocument = () => {
           </div>
         </div>
       </Box>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };

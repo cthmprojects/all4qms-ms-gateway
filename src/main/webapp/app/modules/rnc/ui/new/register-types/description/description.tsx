@@ -1,42 +1,101 @@
-import { Add, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
-import { Card, Divider, Fab, IconButton, TextField, Tooltip } from '@mui/material';
+import { Add, Delete, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
+import { Card, Divider, Fab, IconButton, Stack, TextField, Tooltip } from '@mui/material';
 import { useAppDispatch } from 'app/config/store';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './description.css';
 
 type RncDescriptionProps = {
-  description: string;
+  descriptions: Array<string>;
   evidences: Array<string>;
-  requirement: string;
+  requirements: Array<string>;
   rncId?: string | number;
-  onDescriptionChanged: (value: string) => void;
+  onDescriptionsChanged: (values: Array<string>) => void;
   onEvidencesChanged: (values: Array<string>) => void;
-  onRequirementChanged: (value: string) => void;
+  onRequirementsChanged: (values: Array<string>) => void;
   onDescriptionsEvidencesChanged: (values: Array<File>) => void;
 };
 
+type RncDescription = {
+  description: string;
+  evidence: string;
+  requirement: string;
+};
+
 export const DescriptionRnc = ({
-  description,
+  descriptions,
   evidences,
-  requirement,
+  requirements,
   rncId,
-  onDescriptionChanged,
+  onDescriptionsChanged,
   onEvidencesChanged,
-  onRequirementChanged,
+  onRequirementsChanged,
   onDescriptionsEvidencesChanged,
 }: RncDescriptionProps) => {
   const dispatch = useAppDispatch();
   const [descFiles, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef(null);
 
-  const onAddEvidence = () => {
-    if (!description || !requirement || !evidences || !evidences[0]) return;
+  const rncDescriptions = useMemo(() => {
+    if (!descriptions || !requirements || !evidences || descriptions.length <= 0 || requirements.length <= 0 || evidences.length <= 0) {
+      return [];
+    }
 
+    if (
+      descriptions.length !== requirements.length ||
+      descriptions.length !== evidences.length ||
+      requirements.length !== evidences.length
+    ) {
+      return [];
+    }
+
+    const length: number = descriptions.length;
+
+    const allRncDescriptions: Array<RncDescription> = [];
+
+    for (let i = 0; i < length; i++) {
+      const description = descriptions[i];
+      const requirement = requirements[i];
+      const evidence = evidences[i];
+
+      allRncDescriptions.push({
+        description: description,
+        evidence: evidence,
+        requirement: requirement,
+      });
+    }
+
+    return allRncDescriptions;
+  }, [descriptions, evidences, requirements]);
+
+  const onAddDescription = () => {
+    if (
+      !descriptions ||
+      !requirements ||
+      !evidences ||
+      !descriptions[descriptions.length - 1] ||
+      !requirements[requirements.length - 1] ||
+      !evidences[evidences.length - 1]
+    ) {
+      return;
+    }
+
+    onDescriptionsChanged([...descriptions, '']);
+    onRequirementsChanged([...requirements, '']);
     onEvidencesChanged([...evidences, '']);
   };
 
-  const onRemoveEvidence = (index: number) => {
-    if (index === 0 || evidences.length === 1) return;
+  const onRemoveDescription = (index: number) => {
+    if (index === 0 || descriptions.length === 1 || requirements.length === 1 || evidences.length === 1) {
+      return;
+    }
+
+    const newDescriptions = [...descriptions];
+    newDescriptions.splice(index, 1);
+    onDescriptionsChanged(newDescriptions);
+
+    const newRequirement = [...requirements];
+    newRequirement.splice(index, 1);
+    onRequirementsChanged(newRequirement);
 
     const newEvidences = [...evidences];
     newEvidences.splice(index, 1);
@@ -71,52 +130,75 @@ export const DescriptionRnc = ({
     document.body.removeChild(a);
   };
 
-  const renderEvidences = () => {
-    if (evidences.length > 0) {
+  const renderRncDescriptions = () => {
+    if (rncDescriptions.length > 0) {
       return (
         <>
-          {evidences.map((evidencia, index) => (
-            <div key={index} className="mt-2 mb-2" style={{ position: 'relative' }}>
-              <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <TextField
-                  label={`Evidência objetiva ${index + 1}`}
-                  fullWidth
-                  sx={{ mt: 2 }}
-                  value={evidencia}
-                  onChange={event => {
-                    const newEvidences = [...evidences];
-                    newEvidences[index] = event.target.value;
-                    onEvidencesChanged(newEvidences);
-                  }}
-                />
+          {rncDescriptions.map((rncDescription, index) => {
+            const { description, evidence, requirement } = rncDescription;
+
+            return (
+              <div key={index} className="mt-2 mb-2" style={{ position: 'relative' }}>
+                <Stack spacing={2}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <TextField
+                      label={`Não conformidade ${index + 1}`}
+                      fullWidth
+                      sx={{ mt: 2 }}
+                      value={description}
+                      onChange={event => {
+                        const newDescriptions = [...descriptions];
+                        newDescriptions[index] = event.target.value;
+                        onDescriptionsChanged(newDescriptions);
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <TextField
+                      label={`Requisito descumprido ${index + 1}`}
+                      fullWidth
+                      sx={{ mt: 2 }}
+                      value={requirement}
+                      onChange={event => {
+                        const newRequirements = [...requirements];
+                        newRequirements[index] = event.target.value;
+                        onRequirementsChanged(newRequirements);
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <TextField
+                      label={`Evidência objetiva ${index + 1}`}
+                      fullWidth
+                      sx={{ mt: 2 }}
+                      value={evidence}
+                      onChange={event => {
+                        const newEvidences = [...evidences];
+                        newEvidences[index] = event.target.value;
+                        onEvidencesChanged(newEvidences);
+                      }}
+                    />
+                  </div>
+                </Stack>
+
+                <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
+
                 {index > 0 && (
-                  <IconButton sx={{ marginTop: '8px', marginLeft: '8px' }} onClick={() => onRemoveEvidence(index)}>
-                    <DeleteOutlined />
-                  </IconButton>
+                  <Tooltip title="Remover descrição">
+                    <Fab color="primary" aria-label="add" size="medium" onClick={() => onRemoveDescription(index)}>
+                      <Delete />
+                    </Fab>
+                  </Tooltip>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </>
       );
     } else {
-      return (
-        <>
-          <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <TextField
-              label={`Evidência objetiva 1`}
-              fullWidth
-              sx={{ mt: 2 }}
-              value={evidences[0]}
-              onChange={event => {
-                onEvidencesChanged([event.target.value]);
-              }}
-            />
-          </div>
-        </>
-      );
+      return <>Nenhuma descrição adicionada.</>;
     }
   };
 
@@ -137,38 +219,21 @@ export const DescriptionRnc = ({
                 <UploadFileOutlined />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Adicione uma nova evidência">
+            <Tooltip title="Adicione uma nova descrição">
               <Fab
-                disabled={!description || !requirement || !evidences}
+                disabled={!descriptions || !requirements || !evidences}
                 color="primary"
                 aria-label="add"
                 size="medium"
-                onClick={onAddEvidence}
+                onClick={onAddDescription}
               >
                 <Add />
               </Fab>
             </Tooltip>
           </div>
         </div>
-        <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
-        <TextField
-          label="Não conformidade"
-          placeholder="Escreva aqui"
-          fullWidth
-          sx={{ mt: 2 }}
-          value={description}
-          onChange={event => onDescriptionChanged(event.target.value)}
-        />
-        <TextField
-          label="Requisito descumprido"
-          placeholder="Escreva aqui"
-          fullWidth
-          sx={{ mt: 2 }}
-          value={requirement}
-          onChange={event => onRequirementChanged(event.target.value)}
-        />
 
-        {renderEvidences()}
+        {renderRncDescriptions()}
 
         {descFiles.length > 0 && (
           <div className="mt-2 mb-2">

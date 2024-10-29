@@ -1,5 +1,20 @@
 # all4qmsMsGateway
 
+---
+
+## Dependências:
+
+- Necessita da execução do conteúdo de create_db.sql na base de dados para criação de bancos e usuários dos seguintes serviços:
+  - Infodoc (all4qmsMsInfodoc)
+  - Metas e Indicadores (all4qmsMsMetaind)
+  - Risco (all4qmsMsRisco)
+  - Auditoria e Planejamento Estratégico (all4qmsMsAuditplan)
+- O arquivio está no caminho _src/main/resources/config/create_db.sql_
+- Necessita do Registry para comunicação entre microserviços
+- Necessita do serviço Gateway executando para consultas.
+
+---
+
 This application was generated using JHipster 7.9.3, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v7.9.3](https://www.jhipster.tech/documentation-archive/v7.9.3).
 
 This is a "gateway" application intended to be part of a microservice architecture, please refer to the [Doing microservices with JHipster][] page of the documentation for more information.

@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, Stack, TextField } from '@mui/material';
-import { NonConformityOrigin } from 'app/modules/rnc/models';
-import React from 'react';
+import { Enums, NonConformityOrigin } from 'app/modules/rnc/models';
 
 type NonConformityOriginSummaryProps = {
+  enums: Enums | null;
   origin: NonConformityOrigin;
 };
 
-const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps) => {
+const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummaryProps) => {
   const formatTimestamp = (timestamp: Date): string => {
     const date: Date = new Date(timestamp);
     const year: number = date.getFullYear();
@@ -113,7 +113,7 @@ const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps)
               <TextField disabled label="NQA" placeholder="NQA" value={origin?.mpprod.produto.nqa} />
               <TextField disabled label="Número de amostras" placeholder="Número de amostras" value={origin?.mpprod.produto.qtdAmostra} />
               <TextField disabled label="Número de defeitos" placeholder="Número de defeitos" value={origin?.mpprod.produto.qtdDefeito} />
-              <TextField disabled label="% Rejeição" placeholder="% Rejeição" value={origin?.mpprod.produto.qtdRejeicao} />
+              <TextField disabled label="% Rejeição" placeholder="% Rejeição" value={origin?.mpprod.produto.qtdRejeicao?.toFixed(2)} />
             </Stack>
             <Stack direction="row" spacing={2}>
               <TextField

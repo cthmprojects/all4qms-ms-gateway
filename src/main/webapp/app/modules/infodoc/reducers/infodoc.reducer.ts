@@ -2,7 +2,7 @@ import { createAsyncThunk, isFulfilled, isPending } from '@reduxjs/toolkit';
 import { EntityState, IQueryParams, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
 import { Doc, DocumentacaoRequest, InfoDoc } from '../models';
-import { UerSGQ } from '../../../entities/usuario/reducers/usuario.reducer';
+import { UserQMS } from '../../../entities/usuario/reducers/usuario.reducer';
 
 const apiNotifyEmailUrl = 'services/all4qmsmsinfodoc/api/infodoc/notificacoes/enviar-email';
 const apiDocumentacaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/documentos';
@@ -94,7 +94,7 @@ export const notifyEmailInfoDoc = createAsyncThunk('email/send', async (data: Se
   return await axios.post<InfoDoc>(apiNotifyEmailUrl, data);
 });
 
-export const notifyEmailAllSGQs = createAsyncThunk('email/send/SGQs', async (users: UerSGQ[]) => {
+export const notifyEmailAllSGQs = createAsyncThunk('email/send/SGQs', async (users: UserQMS[]) => {
   const emailsSGQRequests = users.map(user =>
     axios.post(apiNotifyEmailUrl, {
       to: user.email, // Email

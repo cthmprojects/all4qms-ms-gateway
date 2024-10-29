@@ -3,6 +3,7 @@ import {
   Breadcrumbs,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Grid,
@@ -17,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsers, UerSGQ } from 'app/entities/usuario/reducers/usuario.reducer';
+import { getUsers, UserQMS } from 'app/entities/usuario/reducers/usuario.reducer';
 import { IUsuario } from 'app/shared/model/usuario.model';
 import DatePicker from 'react-datepicker';
 import { Textarea, styled } from '@mui/joy';
@@ -28,6 +29,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios, { AxiosResponse } from 'axios';
 import downloadFile from '../infodoc-store';
 import { listEnums } from '../reducers/enums.reducer';
+import { toast } from 'react-toastify';
 import {
   SendEmail,
   createInfoDoc,
@@ -99,11 +101,12 @@ export const NewDocument = () => {
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
-  const [usersSGQ, setUsersSGQ] = useState<UerSGQ[]>([]);
-  const [infoDocId, setInfoDocId] = useState(0);
-  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
+  const [usersSGQ, setUsersSGQ] = useState<UserQMS[]>([]);
+  const [infoDocId, setInfoDocId] = useState(-1);
+  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(-1);
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -126,7 +129,7 @@ export const NewDocument = () => {
     const resUsersByProcess = await dispatch(getUsersByProcess(idProcess));
     const usersByProcess_ = (resUsersByProcess.payload as AxiosResponse).data || [];
 
-    const filteredUserByProcess: UerSGQ[] = usersByProcess_.filter((userPro: UerSGQ) =>
+    const filteredUserByProcess: UserQMS[] = usersByProcess_.filter((userPro: UserQMS) =>
       users_.some(firstUser => firstUser.id === userPro.user.id)
     );
     setUsersSGQ(filteredUserByProcess);
@@ -147,6 +150,7 @@ export const NewDocument = () => {
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsLoading(true);
     if (id) {
       const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
 
@@ -163,12 +167,15 @@ export const NewDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
+          fileName = fileName.split('_').pop()!!;
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
           fileDownload(file, `${fileName}`);
+          setIsLoading(false);
         });
     }
+    setIsLoading(false);
   };
 
   const cancelDocument = () => {
@@ -190,49 +197,89 @@ export const NewDocument = () => {
     return emitter && emittedDate && selectedProcess && description;
   };
 
-  const saveDocument = () => {
-    const newInfoDoc: Doc = {
-      idUsuarioCriacao: parseInt(emitter),
-      dataCricao: emittedDate,
-      descricaoDoc: description,
-      justificativa: '',
-      codigo: '',
-      titulo: '',
-      origem: 'I',
-      idProcesso: parseInt(selectedProcess),
-      idArquivo: parseInt(id!!),
-      ignorarValidade: true,
-      enumSituacao: 'E',
-      tipoDoc: 'MA',
-      revisao: 0,
-    };
+  const saveDocument = async () => {
+    setIsLoading(true);
+    try {
+      const newInfoDoc: Doc = {
+        idUsuarioCriacao: parseInt(emitter),
+        dataCricao: emittedDate,
+        descricaoDoc: description,
+        justificativa: '',
+        codigo: '',
+        titulo: '',
+        origem: 'I',
+        idProcesso: parseInt(selectedProcess),
+        idArquivo: parseInt(id!!),
+        ignorarValidade: true,
+        enumSituacao: 'E',
+        tipoDoc: 'MA',
+        revisao: 0,
+      };
 
-    if (!noValidate) {
-      newInfoDoc.ignorarValidade = false;
-      newInfoDoc.dataValidade = validDate;
+      if (!noValidate) {
+        newInfoDoc.ignorarValidade = false;
+        newInfoDoc.dataValidade = validDate;
+      }
+
+      let resStoreDoc;
+      if (infoDocId > 0) {
+        newInfoDoc.id = infoDocId;
+        resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
+      } else {
+        resStoreDoc = await dispatch(createInfoDoc(newInfoDoc));
+      }
+
+      const resDoc: InfoDoc = (resStoreDoc.payload as AxiosResponse).data || {};
+      if (resDoc) {
+        setIsLoading(false);
+        setInfoDocId(resDoc?.doc?.id || -1);
+        setInfoDocMovimentacao(resDoc?.movimentacao?.id || -1);
+        toast.success(`Documento ${resDoc?.doc?.id} Salvo com sucesso!`);
+
+        return resDoc;
+      } else {
+        toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+        setIsLoading(false);
+        return null;
+      }
+    } catch (err) {
+      console.error('Error new document:', err);
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
     }
-
-    dispatch(createInfoDoc(newInfoDoc)).then((res: any) => {
-      setInfoDocId(parseInt(res.payload.data?.doc?.id));
-      setInfoDocMovimentacao(parseInt(res.payload.data?.movimentacao?.id));
-    });
   };
 
-  const fowardDocument = () => {
-    const novaMovimentacao: Movimentacao = {
-      id: infoDocMovimentacao,
-      enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
-      enumStatus: EnumStatusDoc.VALIDACAO,
-      idDocumentacao: infoDocId,
-      idUsuarioCriacao: currentUser.id,
-    };
+  const fowardDocument = async () => {
+    if (!validateFields()) {
+      toast.warn(`Os campos de Emissor, Área/Proceso e Justificativa de Emissão, SÃO OBRIGATÓRIOS!`);
+      return null;
+    }
 
-    //     console.log('userSgq: ', usersSGQ);
+    setIsLoading(true);
 
-    dispatch(atualizarMovimentacao(novaMovimentacao));
+    const resDoc = await saveDocument();
 
-    dispatch(notifyEmailAllSGQs(usersSGQ));
-    navigate('/infodoc');
+    if (resDoc) {
+      const novaMovimentacao: Movimentacao = {
+        id: resDoc.movimentacao?.id,
+        enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
+        enumStatus: EnumStatusDoc.VALIDACAO,
+        idDocumentacao: resDoc.doc.id,
+        idUsuarioCriacao: currentUser.id,
+      };
+
+      //     console.log('userSgq: ', usersSGQ);
+
+      dispatch(atualizarMovimentacao(novaMovimentacao));
+
+      dispatch(notifyEmailAllSGQs(usersSGQ));
+      toast.success(`Documento ${resDoc?.doc?.id} Encaminhado com sucesso!`);
+      setIsLoading(false);
+      navigate('/infodoc');
+    } else {
+      toast.error(`Não foi possivel Salvar e Encaminhar Documento, tente novamente mais tarde!`);
+    }
   };
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -349,8 +396,10 @@ export const NewDocument = () => {
               <FormControl style={{ width: '100%' }}>
                 <InputLabel>Origem</InputLabel>
                 <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
-                  {originList?.map((e: any) => (
-                    <MenuItem value={e.nome}>{e.valor}</MenuItem>
+                  {originList?.map((e: any, idx) => (
+                    <MenuItem key={idx} value={e.nome}>
+                      {e.valor}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -427,7 +476,7 @@ export const NewDocument = () => {
             disabled
           />
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <TextField
               id="text-field-keyword"
               label="Documentos relacionados"
@@ -442,9 +491,9 @@ export const NewDocument = () => {
           </div>
           <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
             {keywordList.map((keyword: string, index: number) => (
-              <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
+              <Chip key={index} label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
-          </div>
+          </div> */}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button
@@ -455,11 +504,13 @@ export const NewDocument = () => {
             >
               Voltar
             </Button>
-            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
+            <Button onClick={() => saveDocument()}>
+              {' '}
+              {/* disabled={!validateFields()}>*/}
               Salvar
             </Button>
             <Button
-              disabled={infoDocId <= 0}
+              // disabled={!validateFields()}
               onClick={() => fowardDocument()}
               className="ms-3"
               variant="contained"
@@ -471,6 +522,25 @@ export const NewDocument = () => {
           </div>
         </div>
       </div>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };

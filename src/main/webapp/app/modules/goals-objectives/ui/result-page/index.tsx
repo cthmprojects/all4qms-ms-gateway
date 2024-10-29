@@ -14,23 +14,12 @@ import axios from 'axios';
 type ResultItemProps = {
   save: (formMethods: UseFormReturn<any>) => void;
   initialPayload?: any;
+  onDelete?: () => void;
 };
 
 const queryClient = new QueryClient();
 
-export const deleteMetaResult = async (id: number) => {
-  try {
-    const { data } = await axios.delete('/services/all4qmsmsmetaind/api/metaobj/resultados/' + id);
-    queryClient.invalidateQueries({ queryKey: ['meta-results'] });
-    toast.success('Resultado excluído com sucesso');
-    return data;
-  } catch (error) {
-    toast.error('Erro ao excluir resultado');
-    toast.error('Tente novamente');
-  }
-};
-
-const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
+const ResultItem = ({ save, initialPayload, onDelete }: ResultItemProps) => {
   const formMethods = useForm({
     defaultValues: initialPayload
       ? initialPayload
@@ -61,16 +50,6 @@ const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
 
   const isDisabled = !!initialPayload?.id;
 
-  const { data: attatchment, isLoading: isLoadingAttatchment } = useQuery(
-    {
-      queryKey: [`result-attatchment/${metaId}`],
-      queryFn: () => getMetaResultAttatchment(Number(metaId)),
-      enabled: !!metaId,
-      staleTime: 60000, // Dados ficam atualizados por 1 minuto,
-    },
-    queryClient
-  );
-
   async function download() {
     try {
       const response = await axios.get(`/services/all4qmsmsmetaind/api/metaobj/anexos/download/zip/${initialPayload?.id}`, {
@@ -85,7 +64,7 @@ const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
       link.href = url;
 
       // Define o nome do arquivo que será baixado
-      link.download = attatchment.nomeFisico.slice(0, -4) + '.zip';
+      link.download = 'arquivos.zip';
 
       // Simula um clique no link para iniciar o download
       document.body.appendChild(link);
@@ -154,14 +133,13 @@ const ResultItem = ({ save, initialPayload }: ResultItemProps) => {
         <Controller
           control={control}
           name={'anexos'}
-          rules={{ required: 'Arquivo(s) obrigatórios' }}
           render={({ field: { value, onChange, ...field } }) => {
             return <AttachmentButton {...(initialPayload?.id ? { download } : {})} onChange={onChange} />;
           }}
         />
 
         {initialPayload?.id && (
-          <IconButton sx={{ marginLeft: 'auto' }} onClick={() => deleteMetaResult(initialPayload?.id)}>
+          <IconButton sx={{ marginLeft: 'auto' }} onClick={onDelete}>
             <DeleteIcon />
           </IconButton>
         )}
@@ -198,32 +176,36 @@ export const ResultPage = () => {
 
   const { metaId } = useParams();
 
-  const { data: meta, isLoading: isLoadingMeta } = useQuery(
+  const {
+    data: meta,
+    isPending: isLoadingMeta,
+    mutate: fetchMeta,
+  } = useMutation(
     {
-      queryKey: [`meta/${metaId}`],
-      queryFn: () => getMeta(Number(metaId)),
-      enabled: !!metaId,
-      staleTime: 60000, // Dados ficam atualizados por 1 minuto,
+      mutationFn: () => getMeta(Number(metaId)),
     },
     queryClient
   );
 
-  const { data: results, isLoading: isLoadingResults } = useQuery(
+  const {
+    data: results,
+    isPending: isLoadingResults,
+    mutate: getResultadoMeta,
+  } = useMutation(
     {
-      queryKey: [`meta-results`],
-      queryFn: () => getMetaResults(Number(metaId)),
-      enabled: !!metaId, // Só faz a consulta se o ID estiver presente
-      staleTime: 60000, // Dados ficam atualizados por 1 minuto,
+      mutationFn: () => getMetaResults(Number(metaId)),
     },
     queryClient
   );
+  useEffect(fetchMeta, []);
+  useEffect(getResultadoMeta, []);
 
   const createMutation = useMutation(
     {
       mutationFn: createResult,
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`meta-results/${metaId}`] }); // Invalida as queries para atualizar a lista de registros
         setIsShowingNewForm(false);
+        getResultadoMeta();
         toast.success('Resultado cadastrado com sucesso');
       },
     },
@@ -236,12 +218,26 @@ export const ResultPage = () => {
 
     const formData = new FormData();
     formData.append('metaResultadoDTO', JSON.stringify(payload));
-    for (const item of anexos as any[]) {
-      formData.append('anexos', item);
+    if (anexos && anexos.length) {
+      for (const item of anexos as any[]) {
+        formData.append('anexos', item);
+      }
     }
 
     createMutation.mutate(formData);
   }
+
+  const deleteMetaResult = async (id: number) => {
+    try {
+      const { data } = await axios.delete('/services/all4qmsmsmetaind/api/metaobj/resultados/' + id);
+      getResultadoMeta();
+      toast.success('Resultado excluído com sucesso');
+      return data;
+    } catch (error) {
+      toast.error('Erro ao excluir resultado');
+      toast.error('Tente novamente');
+    }
+  };
 
   return (
     <div className="padding-container">
@@ -270,7 +266,7 @@ export const ResultPage = () => {
       <Box display="flex" flexDirection="column" gap="15px" paddingRight="110px" mt="20px">
         {(isShowingNewForm || !results?.length) && !isLoadingResults && <ResultItem save={saveItem} />}
         {(results || []).map((field, index) => (
-          <ResultItem save={saveItem} key={field.id} initialPayload={field} />
+          <ResultItem save={saveItem} key={field.id} initialPayload={field} onDelete={() => deleteMetaResult(field.id)} />
         ))}
       </Box>
     </div>

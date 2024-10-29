@@ -1,5 +1,5 @@
 # This configuration is intended for development purpose, it's **your** responsibility to harden it for production
-version: '3.8'
+version: '3.9'
 services:
   all4qmsmsgateway-postgresql:
     image: postgres:14.5
@@ -11,3 +11,6 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
       - 5432:5432
+networks:
+  default:
+    name: all4qms

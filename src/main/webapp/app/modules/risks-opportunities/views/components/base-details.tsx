@@ -66,7 +66,7 @@ type BaseDetailsProps = {
     ishikawa: Ishikawa | null,
     reasons: Reason | null,
     details: AnalysisDetails,
-    interestedParts: Array<string>,
+    interestedParts: { id?: number; nomeParteInteressada: string },
     rawRiskOpportunity: RawRiskOpportunity
   ) => void;
 };
@@ -85,14 +85,14 @@ const BaseDetails = ({
   onBack,
   onSave,
 }: BaseDetailsProps) => {
-  let isAdmin = useAppSelector(state => state.authentication.account);
+  let isAdmin = useAppSelector(state => state.authentication.accountQms);
 
   const generalFormMethods = useForm({
     defaultValues: {
       activity: '',
       date: null,
-      interestedParts: [],
       description: swotData?.descricao || '',
+      interestedParts: { nomeParteInteressada: '' },
       firstAuxiliaryDescription: '',
       secondAuxiliaryDescription: '',
       sender: isAdmin,
@@ -103,6 +103,10 @@ const BaseDetails = ({
     mode: 'all',
     reValidateMode: 'onChange',
   });
+
+  useEffect(() => {
+    isAdmin.id && generalFormMethods.setValue('sender', isAdmin);
+  }, [isAdmin.id]);
 
   const controlActionFormMethods = useForm({
     defaultValues: {
@@ -138,16 +142,16 @@ const BaseDetails = ({
       reason5: '',
       actionDescription: '',
       actionDate: new Date(),
-      responsibleId: null,
+      responsibleId: '' as unknown as number,
       verifyAction: false,
       actionVerificationDate: null,
-      actionVerifierId: null,
+      actionVerifierId: '' as unknown as number,
       implementationDate: null,
-      implementationResponsibleId: null,
+      implementationResponsibleId: '' as unknown as number,
       implemented: false,
       implementationDescription: '',
       efficacyVerificationDate: null,
-      efficacyResponsibleId: null,
+      efficacyResponsibleId: '' as unknown as number,
       efficacyVerified: false,
       efficacyDescription: '',
     },
@@ -181,10 +185,8 @@ const BaseDetails = ({
     generalFormMethods.setValue('description', riskOpportunity.descricao1);
     generalFormMethods.setValue('firstAuxiliaryDescription', riskOpportunity.descricao2);
     generalFormMethods.setValue('flow', riskOpportunity.nomeFluxo);
-    generalFormMethods.setValue(
-      'interestedParts',
-      riskOpportunity.partesInteressadas ? [riskOpportunity.partesInteressadas.nomeParteInteressada] : []
-    );
+    riskOpportunity.partesInteressadas.id &&
+      generalFormMethods.setValue('interestedParts', riskOpportunity.partesInteressadas, { shouldDirty: true });
     generalFormMethods.setValue('secondAuxiliaryDescription', riskOpportunity.descricao3);
     generalFormMethods.setValue('type', riskOpportunity.tipoRO === 'R' ? 'Risco' : 'Oportunidade');
 
@@ -255,7 +257,7 @@ const BaseDetails = ({
     const action: RawPlanAction | null = planWithActions.acoes.length > 0 ? planWithActions.acoes[0] : null;
 
     analysisFormMethods.setValue('actionDescription', action?.descricaoAcao);
-    analysisFormMethods.setValue('actionDate', new Date(action?.dataConclusaoAcao));
+    analysisFormMethods.setValue('actionDate', new Date(action?.prazoAcao));
     analysisFormMethods.setValue('responsibleId', action?.idResponsavelAcao);
     analysisFormMethods.setValue('verifyAction', false);
     analysisFormMethods.setValue('actionVerificationDate', new Date(action?.dataVerificao));
@@ -282,7 +284,7 @@ const BaseDetails = ({
       return;
     }
 
-    const analysis: RawRiskOpportunityAnalysis = allAnalysis[0];
+    const analysis: RawRiskOpportunityAnalysis = [...allAnalysis].reverse()[0];
     const probability: Configuration = filterConfiguration(analysis.linhaConfigAnalise1?.id ?? 0, firstConfigurations);
     const severity: Configuration = filterConfiguration(analysis.linhaConfigAnalise2?.id ?? 0, secondConfigurations);
 
@@ -305,7 +307,7 @@ const BaseDetails = ({
     const payload = {
       ...rawFormValue,
       senderId: senderId,
-      processId: rawFormValue.process.id,
+      processId: rawFormValue?.process?.id,
     };
 
     const controlActionValues = controlActionFormMethods.getValues();
@@ -359,6 +361,7 @@ const BaseDetails = ({
           readonly={readonly}
           secondConfigurations={secondConfigurations}
           users={users}
+          isOpportunity={isOpportunity}
         />
       </FormProvider>
 

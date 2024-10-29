@@ -1,10 +1,10 @@
 import { AddCircle } from '@mui/icons-material';
 import { Autocomplete, Chip, FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select, Stack, TextField } from '@mui/material';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
-import React, { useEffect, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { onAutocompleteChanged, onTextChanged } from '../../utils';
-import { SummarizedProcess } from '../../models';
+import { RawInterestedPart, SummarizedProcess } from '../../models';
 
 type GeneralInformationProps = {
   isOpportunity?: boolean;
@@ -19,13 +19,23 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
   const { register, setValue, formState, control, trigger } = useFormContext();
 
   const otherDate = useWatch({ control, name: 'date' });
-  const formInterestedParts = useWatch({ control, name: 'interestedParts' });
+  const formInterestedParts: RawInterestedPart = useWatch({ control, name: 'interestedParts', exact: true });
   const processForm = useWatch({ control, name: 'process' });
+
+  const [interestedPartsArray, setInterestedPartsArray] = useState([]);
 
   useEffect(() => {
     // Poderia ser qualquer outro campo registrado
+    if (!interestedPartsArray.length && formInterestedParts.nomeParteInteressada) {
+      setInterestedPartsArray(formInterestedParts.nomeParteInteressada.split(';'));
+    }
     trigger('description');
-  }, [formInterestedParts]);
+  }, [formInterestedParts.id]);
+
+  useEffect(() => {
+    const newInterestedParts: RawInterestedPart = { ...formInterestedParts, nomeParteInteressada: interestedPartsArray.join(';') };
+    setValue('interestedParts', newInterestedParts, { shouldValidate: true, shouldTouch: true, shouldDirty: true });
+  }, [interestedPartsArray]);
 
   useEffect(() => {
     setProcesses(summarizedProcesses);
@@ -40,16 +50,14 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
   };
 
   const onInterestedPartAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    setValue('interestedParts', [...formInterestedParts, interestedPart]);
+    setInterestedPartsArray([...interestedPartsArray, interestedPart]);
     setInterestedPart('');
   };
 
   const onInterestedPartDeleted = (index: number): void => {
-    const newInterestedParts: Array<string> = formInterestedParts.filter((_, idx) => idx !== index);
-    setValue('interestedParts', newInterestedParts, { shouldValidate: true, shouldTouch: true, shouldDirty: true });
+    const newInterestedParts: Array<string> = interestedPartsArray.filter((_, idx) => idx !== index);
+    setInterestedPartsArray(newInterestedParts);
   };
-
-  const fieldHook = (fieldName: string) => register(fieldName as any, { required: true });
 
   const user = useWatch({ control, name: 'sender' });
 
@@ -60,7 +68,7 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
           <InputLabel>Emitido por</InputLabel>
           <Select value={user} input={<OutlinedInput label="Emitido por" />} disabled>
             <MenuItem selected value={user}>
-              {user?.name}
+              {user?.nome || user?.name}
             </MenuItem>
           </Select>
         </FormControl>
@@ -98,40 +106,60 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
       </Stack>
 
       <Stack direction="row" spacing={2}>
-        <TextField disabled={readonly} label="Fluxo" {...fieldHook('flow')} placeholder="Fluxo" sx={{ flexGrow: 1 }} />
-        <TextField disabled={readonly} label="Atividade" {...fieldHook('activity')} placeholder="Atividade" sx={{ flexGrow: 1 }} />
-      </Stack>
-
-      <Stack direction="row" spacing={2}>
-        <TextField
-          disabled={readonly}
-          label="Descrição"
-          multiline
-          placeholder="Descrição"
-          rows={5}
-          sx={{ flexGrow: 1 }}
-          {...fieldHook('description')}
+        <Controller
+          name="flow"
+          control={control}
+          render={({ field }) => <TextField disabled={readonly} label="Fluxo" placeholder="Fluxo" sx={{ flexGrow: 1 }} {...field} />}
+        />
+        <Controller
+          name="activity"
+          control={control}
+          render={({ field }) => (
+            <TextField disabled={readonly} label="Atividade" placeholder="Atividade" sx={{ flexGrow: 1 }} {...field} />
+          )}
         />
       </Stack>
 
       <Stack direction="row" spacing={2}>
-        <TextField
-          disabled={readonly}
-          label={getFirstAuxiliaryDescriptionLabel()}
-          multiline
-          placeholder={getFirstAuxiliaryDescriptionLabel()}
-          rows={5}
-          sx={{ flexGrow: 1 }}
-          {...fieldHook('firstAuxiliaryDescription')}
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <TextField disabled={readonly} label="Descrição" multiline placeholder="Descrição" rows={5} sx={{ flexGrow: 1 }} {...field} />
+          )}
         />
-        <TextField
-          disabled={readonly}
-          label={getSecondAuxiliaryDescriptionLabel()}
-          multiline
-          placeholder={getSecondAuxiliaryDescriptionLabel()}
-          rows={5}
-          sx={{ flexGrow: 1 }}
-          {...fieldHook('secondAuxiliaryDescription')}
+      </Stack>
+
+      <Stack direction="row" spacing={2}>
+        <Controller
+          name="firstAuxiliaryDescription"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              disabled={readonly}
+              label={getFirstAuxiliaryDescriptionLabel()}
+              multiline
+              placeholder={getFirstAuxiliaryDescriptionLabel()}
+              rows={5}
+              sx={{ flexGrow: 1 }}
+              {...field}
+            />
+          )}
+        />
+        <Controller
+          name="secondAuxiliaryDescription"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              disabled={readonly}
+              label={getSecondAuxiliaryDescriptionLabel()}
+              multiline
+              placeholder={getSecondAuxiliaryDescriptionLabel()}
+              rows={5}
+              sx={{ flexGrow: 1 }}
+              {...field}
+            />
+          )}
         />
       </Stack>
 
@@ -153,15 +181,15 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
         <Autocomplete
           clearIcon={false}
           disabled={readonly}
-          options={[]}
           freeSolo
           multiple
           readOnly
+          options={[]}
           renderTags={(value, props) =>
             value.map((option, index) => <Chip onDelete={_ => onInterestedPartDeleted(index)} label={option} {...props({ index })} />)
           }
           renderInput={params => <TextField {...params} />}
-          value={formInterestedParts}
+          value={interestedPartsArray}
         />
       </Stack>
     </>

@@ -1,19 +1,7 @@
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import { AddOutlined, DeleteOutline } from '@mui/icons-material';
 import { Textarea, styled } from '@mui/joy';
-import {
-  Autocomplete,
-  Button,
-  Card,
-  CardContent,
-  Checkbox,
-  Chip,
-  FormControlLabel,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Autocomplete, Button, Card, CardContent, Chip, Stack, TextField, Typography } from '@mui/material';
 import { IshikawaInvestigation, ReasonsInvestigation } from 'app/modules/rnc/models';
 import React, { useEffect, useState } from 'react';
 import { CardHeader } from 'reactstrap';
@@ -495,6 +483,7 @@ const CauseInvestigation = ({
   newReasons,
   minimumReasons,
 }: CauseInvestigationProps) => {
+  const [showReasons, setShowReasons] = useState(true);
   const onReasonsInvestigationChanged = (investigation: ReasonsInvestigation, index: number): void => {
     const newReasons = [...reasons];
     newReasons[index] = investigation;
@@ -502,8 +491,14 @@ const CauseInvestigation = ({
   };
 
   const onReasonsInvestigationRemoved = (index: number): void => {
+    setShowReasons(false);
+
     const newReasons = reasons.filter((_, idx) => idx !== index);
+
     onReasonsInvestigationsChanged(newReasons);
+    setTimeout(() => {
+      setShowReasons(true);
+    }, 100);
   };
 
   return (
@@ -535,17 +530,18 @@ const CauseInvestigation = ({
             </Stack>
           </CardHeader>
           <CardContent>
-            {reasons.map((reason, index) => (
-              <ReasonsInvestigation
-                allowRemoving={index >= minimumReasons}
-                key={index}
-                newReasons={newReasons}
-                reasons={reason}
-                description={description}
-                onChanged={investigation => onReasonsInvestigationChanged(investigation, index)}
-                onRemoved={() => onReasonsInvestigationRemoved(index)}
-              />
-            ))}
+            {showReasons &&
+              reasons.map((reason, index) => (
+                <ReasonsInvestigation
+                  allowRemoving={index >= minimumReasons}
+                  key={index}
+                  newReasons={newReasons}
+                  reasons={reason}
+                  description={description}
+                  onChanged={investigation => onReasonsInvestigationChanged(investigation, index)}
+                  onRemoved={() => onReasonsInvestigationRemoved(index)}
+                />
+              ))}
           </CardContent>
         </Card>
       </CardContent>

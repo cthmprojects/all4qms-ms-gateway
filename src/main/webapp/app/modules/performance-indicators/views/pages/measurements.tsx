@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Button, Stack, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Button, Card, CardContent, CardHeader, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
@@ -8,9 +8,10 @@ import { Enums, Indicator, IndicatorGoal, SummarizedProcess } from '../../models
 import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reducer';
 import { getIndicatorGoal, updateIndicatorGoal } from '../../reducers/indicator-goals.reducer';
 import { getIndicator } from '../../reducers/indicators.reducer';
-import { IndicatorDetails, IndicatorMeasurements } from '../components';
+import { IndicatorDetails, IndicatorGoals, IndicatorMeasurements } from '../components';
 
 const Measurements = () => {
+  const [goals, setGoals] = useState<Array<Array<number | null>>>([]);
   const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([]);
   const { id } = useParams();
 
@@ -38,7 +39,7 @@ const Measurements = () => {
     dispatch(
       updateIndicatorGoal({
         frequency: indicatorGoal.frequency,
-        goals: indicatorGoal.goals,
+        goals: goals[0],
         id: indicatorGoal.id,
         indicator: indicatorGoal.indicator,
         measurements: measurements[0],
@@ -69,6 +70,14 @@ const Measurements = () => {
 
     return enums.frequencies.map(t => t.name);
   }, [enums]);
+
+  const initialGoalValues = useMemo<Array<Array<number | null>> | null>(() => {
+    if (!indicatorGoal) {
+      return null;
+    }
+
+    return [[...indicatorGoal.goals]];
+  }, [indicatorGoal]);
 
   const initialMeasurementValues = useMemo<Array<Array<number | null>> | null>(() => {
     if (!indicatorGoal) {
@@ -107,6 +116,10 @@ const Measurements = () => {
     });
   }, [processes]);
 
+  const onIndicatorGoalsChanged = (goals: Array<Array<number | null>>): void => {
+    setGoals(goals);
+  };
+
   const onIndicatorMeasurementsChanged = (measurements: Array<Array<number | null>>): void => {
     setMeasurements(measurements);
   };
@@ -129,12 +142,33 @@ const Measurements = () => {
             <Stack spacing={2}>
               <IndicatorDetails initialValue={indicator} processes={summarizedProcesses} readonly trends={trends} units={units} />
 
-              <IndicatorMeasurements
-                frequencies={frequencies}
-                initialValues={initialMeasurementValues}
-                onChanged={onIndicatorMeasurementsChanged}
-                unit="PERCENTUAL"
-              />
+              <Card>
+                <CardHeader title="Metas" />
+                <CardContent>
+                  <IndicatorMeasurements
+                    frequencies={frequencies}
+                    initialFrequency={indicatorGoal?.frequency}
+                    initialValues={initialGoalValues}
+                    indicatorYear={indicatorGoal?.year}
+                    onChanged={onIndicatorGoalsChanged}
+                    unit="PERCENTUAL"
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader title="Medições" />
+                <CardContent>
+                  <IndicatorMeasurements
+                    frequencies={frequencies}
+                    initialFrequency={indicatorGoal?.frequency}
+                    initialValues={initialMeasurementValues}
+                    indicatorYear={indicatorGoal?.year}
+                    onChanged={onIndicatorMeasurementsChanged}
+                    unit="PERCENTUAL"
+                  />
+                </CardContent>
+              </Card>
             </Stack>
           </Box>
         </Box>

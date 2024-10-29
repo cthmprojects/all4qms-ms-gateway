@@ -55,6 +55,6 @@ const RncApproval = createEntitySlice({
   },
 });
 
-export const { reset } = RncApproval.actions;
+export const { reset: resetImplementation } = RncApproval.actions;
 
 export default RncApproval.reducer;

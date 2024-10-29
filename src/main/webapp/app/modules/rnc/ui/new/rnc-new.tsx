@@ -6,14 +6,16 @@
 import { Breadcrumbs, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import React, { useEffect, useState } from 'react';
-import DatePicker from 'react-datepicker';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Row } from 'reactstrap';
 import { Enums, GeneralAudit, Process, RawMaterial, Rnc, RncClient } from '../../models';
-import { getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
+import { findAudit } from '../../reducers/audit.reducer';
+import { clearDescriptions, getDescription, getDescriptionByRNCId } from '../../reducers/description.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
 import { getProcesses } from '../../reducers/process.reducer';
 import {
@@ -22,15 +24,11 @@ import {
   axiosSaveAudit,
   axiosSaveClient,
   axiosSaveProduct,
-  axiosSaveRawMaterial,
   getById,
   list,
   save,
-  saveClientComplaint,
   saveDescription,
-  saveProductComplaint,
   update,
-  updateDescription,
 } from '../../reducers/rnc.reducer';
 import DescriptionRnc from './register-types/description/description';
 import ExternalAuditRegister from './register-types/external-audit/external-audit-register';
@@ -39,10 +37,9 @@ import MPRegister from './register-types/mp-register/mp-register';
 import OthersRegister from './register-types/others-register/others-register';
 import ProductRegister from './register-types/product-register/product-register';
 import ClientRegister from './register-types/rnc-client/rnc-client-register';
+import Similarities from './register-types/similarities/similarities';
 import { validateFields } from './rnc-new-validates';
 import './rnc-new.css';
-import axios from 'axios';
-import { findAudit } from '../../reducers/audit.reducer';
 
 const sendNotification = async (title: string, user: any) => {
   let url = '/api/pendencias';
@@ -61,15 +58,15 @@ export const RNCNew = () => {
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    dispatch(list({}));
+    dispatch(list({ size: 1000 }));
     dispatch(listEnums());
 
     if (id) {
       dispatch(getById(parseInt(id)));
       dispatch(getDescriptionByRNCId(id));
     } else {
-      setDescription('');
-      setRequirements('');
+      setDescriptions(['']);
+      setRequirements(['']);
       setEvidences(['']);
     }
 
@@ -175,27 +172,27 @@ export const RNCNew = () => {
   /*
    NC Description
    */
-  const [description, setDescription] = useState<string>('');
+  const [descriptions, setDescriptions] = useState<Array<string>>([]);
   const [evidences, setEvidences] = useState<Array<string>>([]);
-  const [requirement, setRequirements] = useState<string>('');
+  const [requirements, setRequirements] = useState<Array<string>>([]);
 
-  const onDescriptionChanged = (value: string) => {
-    setDescription(value);
+  const onDescriptionsChanged = (values: Array<string>) => {
+    setDescriptions(values);
   };
 
   const onEvidencesChanged = (values: Array<string>) => {
     setEvidences(values);
   };
 
-  const onRequirementChanged = (value: string) => {
-    setRequirements(value);
+  const onRequirementsChanged = (values: Array<string>) => {
+    setRequirements(values);
   };
 
   /*
    NC Repetition
    */
   const [repetition, setRepetition] = useState<boolean>();
-  const [selectedRncIds, setSelectedRncIds] = useState<Array<number>>([]);
+  const [similarId, setSimilarId] = useState<number | null>(null);
 
   /*
    NC Origin
@@ -212,10 +209,6 @@ export const RNCNew = () => {
 
   const onRepetitionChanged = (value: boolean) => {
     setRepetition(value);
-  };
-
-  const onSelectedRncIdsChanged = (values: Array<number>) => {
-    setSelectedRncIds(values);
   };
 
   const handleSubmit = e => {
@@ -244,7 +237,7 @@ export const RNCNew = () => {
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
-          vinculoDocAnterior: null,
+          vinculoDocAnterior: similarId,
           qtdPorques: pqs,
         })
       );
@@ -278,7 +271,7 @@ export const RNCNew = () => {
           processoNC: processoNC,
           idReceptorNC: users.find(user => user.nome == firstForm.forwarded.value)?.id,
           processoEmissor: processoEmissor,
-          vinculoDocAnterior: null,
+          vinculoDocAnterior: similarId,
           qtdPorques: pqs,
         })
       );
@@ -303,10 +296,10 @@ export const RNCNew = () => {
     }
 
     return await axiosSaveAudit({
-      norm: internalAudit?.norm,
-      occurrence: internalAudit?.ncNumber?.toString(),
-      process: internalAudit?.reportNumber,
-      requirement: internalAudit?.normRequirements,
+      norm: externalAudit?.norm,
+      occurrence: externalAudit?.ncNumber?.toString(),
+      process: externalAudit?.reportNumber,
+      requirement: externalAudit?.normRequirements,
       rncId: rnc?.id,
       sequence: 1,
     });
@@ -409,28 +402,12 @@ export const RNCNew = () => {
 
     saveOthers();
 
-    if (id || rnc.id) {
-      const currentId: number = (id ? parseInt(id) : null) || rnc.id;
-      dispatch(getDescriptionByRNCId(currentId));
-    }
+    clearDescriptions(stateRnc.id).then(() => {
+      for (let i = 0; i < evidences.length; i++) {
+        const description = descriptions[i];
+        const evidence = evidences[i];
+        const requirement = requirements[i];
 
-    for (let i = 0; i < evidences.length; i++) {
-      const evidence = evidences[i];
-
-      if (i < descriptions.length) {
-        const descriptionId: number = descriptions[i].id;
-
-        dispatch(
-          updateDescription({
-            details: description,
-            evidence: evidence,
-            id: descriptionId,
-            requirement: requirement,
-            rncId: stateRnc.id,
-            anexos: descriptionEvidences,
-          })
-        );
-      } else {
         dispatch(
           saveDescription({
             details: description,
@@ -441,7 +418,7 @@ export const RNCNew = () => {
           })
         );
       }
-    }
+    });
 
     dispatch(
       update({
@@ -449,7 +426,7 @@ export const RNCNew = () => {
         statusAtual: 'DETALHAMENTO',
         ncOutros: others,
         possuiReincidencia: repetition,
-        vinculoDocAnterior: null,
+        vinculoDocAnterior: similarId,
         vinculoAuditoria: auditLink,
         vinculoCliente: clientComplaint?.id ?? rnc?.vinculoCliente,
         vinculoProduto: rawMaterialLink?.id ?? rnc?.vinculoProduto,
@@ -461,23 +438,12 @@ export const RNCNew = () => {
     saveInternalAudit();
     saveExternalAudit();
 
-    for (let i = 0; i < evidences.length; i++) {
-      const evidence = evidences[i];
+    clearDescriptions(stateRnc.id).then(() => {
+      for (let i = 0; i < evidences.length; i++) {
+        const description = descriptions[i];
+        const evidence = evidences[i];
+        const requirement = requirements[i];
 
-      if (i < descriptions.length) {
-        const descriptionId: number = descriptions[i].id;
-
-        dispatch(
-          updateDescription({
-            details: description,
-            evidence: evidence,
-            id: descriptionId,
-            requirement: requirement,
-            rncId: stateRnc.id,
-            anexos: descriptionEvidences,
-          })
-        );
-      } else {
         dispatch(
           saveDescription({
             details: description,
@@ -487,19 +453,14 @@ export const RNCNew = () => {
             anexos: descriptionEvidences,
           })
         );
-
-        if (id || rnc.id) {
-          const currentId: number = (id ? parseInt(id) : null) || rnc.id;
-          dispatch(getDescriptionByRNCId(currentId));
-        }
       }
+    });
 
-      dispatch(
-        update({ ...stateRnc, ncOutros: others, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: null })
-      ).then(() => {
-        navigate('/rnc');
-      });
-    }
+    dispatch(
+      update({ ...stateRnc, ncOutros: others, statusAtual: 'LEVANTAMENTO', possuiReincidencia: repetition, vinculoDocAnterior: similarId })
+    ).then(() => {
+      navigate('/rnc');
+    });
   };
 
   const filterUser = (login: string) => {
@@ -516,7 +477,7 @@ export const RNCNew = () => {
   const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgateway.process.entities);
-  const descriptions = useAppSelector(state => state.all4qmsmsgateway.description.entities);
+  const ncDescriptions = useAppSelector(state => state.all4qmsmsgateway.description.entities);
   const audit: GeneralAudit | null = useAppSelector(state => state.all4qmsmsgateway.audit.entity);
 
   useEffect(() => {
@@ -541,7 +502,7 @@ export const RNCNew = () => {
       }
 
       setRepetition(rnc.possuiReincidencia || false);
-      setSelectedRncIds(rnc.vinculoDocAnterior || []);
+      setSimilarId(rnc.vinculoDocAnterior ?? null);
 
       if (rnc.statusAtual === 'DETALHAMENTO') {
         setSecondForm(true);
@@ -549,17 +510,27 @@ export const RNCNew = () => {
         getDescription(rnc.id).then(response => {
           const savedDescriptions = response.data;
 
-          if (savedDescriptions) {
+          if (savedDescriptions && savedDescriptions.length > 0) {
+            const allDescriptions: Array<string> = [];
+            const allRequirements: Array<string> = [];
             const allEvidences: Array<string> = [];
 
-            for (let i = 0; i < savedDescriptions.length; i++) {
+            const sortedDescriptions = savedDescriptions.sort((a, b) => a.id < b.id);
+
+            for (let i = 0; i < sortedDescriptions.length; i++) {
               const description = savedDescriptions[i];
-              onDescriptionChanged(description.detalhesNaoConformidade || '');
-              onRequirementChanged(description.requisitoDescumprido || '');
+              allDescriptions.push(description.detalhesNaoConformidade || '');
+              allRequirements.push(description.requisitoDescumprido || '');
               allEvidences.push(description.evidenciaObjetiva);
             }
 
+            setDescriptions(allDescriptions);
+            setRequirements(allRequirements);
             setEvidences(allEvidences);
+          } else if (descriptions.length <= 0 || requirements.length <= 0 || evidences.length <= 0) {
+            setDescriptions(['']);
+            setRequirements(['']);
+            setEvidences(['']);
           }
         });
 
@@ -610,17 +581,18 @@ export const RNCNew = () => {
         const complaint = await axiosGetClient(rnc.vinculoCliente);
 
         setClientComplaint({
+          id: data.product.id,
           code: data.product?.codigoProduto,
           batchAmount: data.product?.qtdLote,
           name: complaint.data?.nomeClienteReclamacao,
           order: data.product?.numPedido,
-          productName: data.product?.nome,
+          productName: data.product?.nomeProduto,
           rejected: data.product?.qtdRejeicao,
           samples: data.product?.qtdAmostra,
           supplier: data.product?.nomeFornecedor,
           description: data.product?.nqa,
           defects: data.product?.qtdDefeito,
-          batch: data.product?.qtdLote,
+          batch: data.product?.lote,
           requestNumber: data.product?.numPedido,
           opNumber: data.product?.numOP,
           traceability: {
@@ -753,23 +725,20 @@ export const RNCNew = () => {
                   </Select>
                 </FormControl>
 
-                <FormControl className="mb-2 rnc-form-field me-2">
-                  <DatePicker
-                    selected={firstForm.date.value}
-                    disabled={secondForm}
-                    onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
-                    className="date-picker"
-                    dateFormat={'dd/MM/yyyy'}
-                  />
-                  <label htmlFor="" className="rnc-date-label">
-                    Data
-                  </label>
-                </FormControl>
+                <MaterialDatepicker
+                  width="115px"
+                  label="Data"
+                  selected={firstForm.date.value}
+                  disabled={secondForm}
+                  onChange={date => setFirstForm({ ...firstForm, date: { value: date, error: firstForm.date.error } })}
+                  dateFormat={'dd/MM/yyyy'}
+                  className="me-2"
+                />
 
                 <FormControl className="mb-2 rnc-form-field me-2">
                   <InputLabel>Tipo</InputLabel>
                   <Select
-                    label="Selecione o tipo"
+                    label="Tipo"
                     name="type"
                     disabled={secondForm}
                     error={firstForm.type.error}
@@ -792,7 +761,7 @@ export const RNCNew = () => {
                 <FormControl className="mb-2 rnc-form-field me-2">
                   <InputLabel>Origem</InputLabel>
                   <Select
-                    label="Selecione a origem"
+                    label="Origem"
                     name="origin"
                     disabled={secondForm}
                     value={firstForm.origin.value}
@@ -855,25 +824,24 @@ export const RNCNew = () => {
               <Row className="ms-3 me-3 mt-3">{renderComponents()}</Row>
               <Row className="ms-3 me-3 mt-3">
                 <DescriptionRnc
-                  description={description}
+                  descriptions={descriptions}
                   evidences={evidences}
-                  onDescriptionChanged={onDescriptionChanged}
+                  onDescriptionsChanged={onDescriptionsChanged}
                   onEvidencesChanged={onEvidencesChanged}
-                  onRequirementChanged={onRequirementChanged}
+                  onRequirementsChanged={onRequirementsChanged}
                   onDescriptionsEvidencesChanged={onDescriptionEvidencesChanged}
-                  requirement={requirement}
+                  requirements={requirements}
                   rncId={id}
                 />
               </Row>
-              {/* <Row className="ms-3 me-3 mt-3" fullWidth>
-                <RepetitionRnc
-                  onRepetitionChanged={onRepetitionChanged}
-                  onSelectedRncIdsChanged={onSelectedRncIdsChanged}
-                  repetition={repetition}
+              <Row className="ms-3 me-3 mt-3" fullWidth>
+                <Similarities
+                  description={descriptions.length > 0 ? descriptions[0] : ''}
+                  onChanged={id => setSimilarId(id)}
                   rncs={rncs}
-                  selectedRncIds={selectedRncIds}
+                  similarId={similarId}
                 />
-              </Row> */}
+              </Row>
               <Row className="m-3">
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <Button

@@ -19,6 +19,7 @@ import {
   RawRiskOpportunity,
   Reason,
   RiskOpportunity,
+  RiskOpportunityFromList,
 } from '../models';
 
 const apiRiscoOportunidadeUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades';
@@ -47,7 +48,7 @@ const initialState: EntityState<RawRiskOpportunity> = {
 };
 
 interface ListParams {
-  tipoRO?: string;
+  tipoRO: string;
   probabilidadeComplexidade?: string;
   severidadeMelhoria?: string;
   page?: number;
@@ -70,11 +71,12 @@ interface RiskOpportunityPayload {
   ishikawa: Ishikawa | null;
   reasons: Reason | null;
   details: AnalysisDetails;
-  interestedParts: Array<string>;
+  interestedParts: { id?: number; nomeParteInteressada: string };
   riskOpportunity: RawRiskOpportunity;
 }
 
 const formatDate = (date: Date, shortened: boolean = false): string => {
+  if (!date) return null;
   const year: string = date.getFullYear().toString();
   const month: string = (date.getMonth() + 1).toString().padStart(2, '0');
   const day: string = date.getDate().toString().padStart(2, '0');
@@ -106,8 +108,8 @@ export const listROs = createAsyncThunk('ro/list', async (params: ListPagination
   return axios.get<Array<RawRiskOpportunity>>(`${apiRiscoOportunidadeUrl}${queryString ? `?${queryString}` : ''}`);
 });
 
-export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: ListParams) => {
-  const { tipoRO, idProcesso, probabilidadeComplexidade, severidadeMelhoria, decisao, pesquisa, page, size } = params;
+export const listROFiltro = async (params: ListParams) => {
+  const { page, size, ...rest } = params;
 
   const queryParams: string[] = [];
 
@@ -124,15 +126,22 @@ export const listROFiltro = createAsyncThunk('ro/listfilter', async (params: Lis
 
   const queryString = queryParams.join('&');
 
-  return axios.post<PaginatedResource<RawRiskOpportunity>>(`${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`, {
-    tipoRO: tipoRO ?? null,
-    idProcesso: idProcesso ?? null,
-    probabilidadeComplexidade: probabilidadeComplexidade ?? null,
-    severidadeMelhoria: severidadeMelhoria ?? null,
-    decisao: decisao ?? null,
-    pesquisa: pesquisa ?? null,
-  });
-});
+  const realParams = {};
+
+  for (const key of Object.keys(rest)) {
+    const value = rest[key];
+    if (value) {
+      realParams[key] = value;
+    }
+  }
+
+  return (
+    await axios.post<PaginatedResource<RiskOpportunityFromList>>(
+      `${apiRiscoOportunidadeFiltroUrl}${queryString ? `?${queryString}` : ''}`,
+      realParams
+    )
+  ).data;
+};
 
 export const createRO = createAsyncThunk('ro/create', async (data: RiskOpportunity) => {
   return await axios.post<RawRiskOpportunity>(apiRiscoOportunidadeUrl, data);
@@ -172,26 +181,13 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
     }
   }
 
-  const riskOpportunityInterestedPartsIds: Array<number> = [];
-  for (let i = 0; i < interestedParts.length; i++) {
-    const interestedPart: string = interestedParts[i];
+  const idInterestedPart = await saveInterestedPartAsync(interestedParts as RawInterestedPart);
 
-    const interestPartId: number | null = await saveInterestedPartAsync(mapInterestPartToRaw(interestedPart, senderId));
-
-    if (interestPartId) {
-      riskOpportunityInterestedPartsIds.push(interestPartId);
-    }
-  }
-
-  riskOpportunity.idPartesInteressadas = riskOpportunityInterestedPartsIds.length > 0 ? riskOpportunityInterestedPartsIds[0] : 0;
+  riskOpportunity.idPartesInteressadas = idInterestedPart;
 
   riskOpportunity.idsAnaliseROS = null;
 
   const response = await axios.put<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${riskOpportunity.id}`, riskOpportunity);
-
-  if (response.status !== 201) {
-    return null;
-  }
 
   const resource: RawRiskOpportunity = response.data;
 
@@ -214,6 +210,9 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
         planoId: null,
       },
     ],
+    riscoOportunidade: {
+      id: resource.id,
+    },
     analise: {
       atualizadoEm: now,
       atualizadoPor: senderId,
@@ -286,18 +285,9 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
 export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: RiskOpportunityPayload) => {
   const { actionPlanSummary, details, efficacy, implementation, interestedParts, ishikawa, riskOpportunity, reasons, senderId } = payload;
 
-  const riskOpportunityInterestedPartsIds: Array<number> = [];
-  for (let i = 0; i < interestedParts.length; i++) {
-    const interestedPart: string = interestedParts[i];
+  const idInterestedPart = await saveInterestedPartAsync(interestedParts as RawInterestedPart);
 
-    const interestPartId: number | null = await saveInterestedPartAsync(mapInterestPartToRaw(interestedPart, senderId));
-
-    if (interestPartId) {
-      riskOpportunityInterestedPartsIds.push(interestPartId);
-    }
-  }
-
-  riskOpportunity.idPartesInteressadas = riskOpportunityInterestedPartsIds.length > 0 ? riskOpportunityInterestedPartsIds[0] : 0;
+  riskOpportunity.idPartesInteressadas = idInterestedPart;
 
   const response = await axios.post<RawRiskOpportunity>(apiRiscoOportunidadeUrl, riskOpportunity);
 
@@ -312,8 +302,6 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
   const body: RawCompleteAnalysis = {
     acoesPlano: [
       {
-        atualizadoEm: null,
-        criadoEm: null,
         descricaoAcao: actionPlanSummary.actionDescription,
         prazoAcao: formatDate(actionPlanSummary.actionDate, true),
         idResponsavelAcao: actionPlanSummary.responsibleId,
@@ -326,11 +314,12 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
         planoId: null,
       },
     ],
+    riscoOportunidade: {
+      id: resource.id,
+    },
     analise: {
-      atualizadoEm: now,
       atualizadoPor: senderId,
       corDecisao: '',
-      criadoEm: now,
       criadoPor: senderId,
       dataAnalise: now,
       decisao: details.meaning,
@@ -344,8 +333,6 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
     },
     aprovacao: {
       alterarRisco: true,
-      atualizadoEm: now,
-      criadoEm: now,
       dataEficacia: efficacy.efficacyVerificationDate,
       dataFechamento: null,
       dataImplementacao: implementation.implementationDate,
@@ -370,8 +357,6 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
       metodo: ishikawa?.method,
     },
     plano: {
-      atualizadoEm: now,
-      criadoEm: now,
       statusPlano: 'ABERTO',
       qtdAcoes: 1,
       qtdAcoesConcluidas: 0,
@@ -396,13 +381,11 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
 });
 
 const saveInterestedPartAsync = async (interestedPart: RawInterestedPart): Promise<number | null> => {
-  const response = await axios.post<RawInterestedPart>(apiPartesInteressadasUrl, interestedPart);
+  const response = interestedPart.id
+    ? await axios.put<RawInterestedPart>(`${apiPartesInteressadasUrl}/${interestedPart.id}`, interestedPart)
+    : await axios.post<RawInterestedPart>(apiPartesInteressadasUrl, interestedPart);
 
-  if (response.status === 201) {
-    return response.data?.id;
-  } else {
-    return null;
-  }
+  return response.data?.id || null;
 };
 
 export const getApprovalById = async (id: number): Promise<AprovacaoNC> => {
@@ -459,17 +442,6 @@ const ROSlice = createEntitySlice({
           totalItems: parseInt(headers['x-total-count'], 10),
         };
       })
-      .addMatcher(isFulfilled(listROFiltro), (state, action) => {
-        const { data } = action.payload;
-
-        return {
-          ...state,
-          loading: false,
-          entities: data.content,
-          entity: null,
-          totalItems: data.totalElements,
-        };
-      })
       .addMatcher(isFulfilled(createRO), (state, action) => {
         state.loading = false;
       })
@@ -496,7 +468,7 @@ const ROSlice = createEntitySlice({
   },
 });
 
-export const { reset } = ROSlice.actions;
+export const { reset: resetRiskOportunity } = ROSlice.actions;
 
 // Reducers
 export default ROSlice.reducer;

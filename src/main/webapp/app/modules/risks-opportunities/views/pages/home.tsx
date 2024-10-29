@@ -1,6 +1,6 @@
 /* eslint-disable radix */
 /* eslint-disable no-console */
-import { Check, Visibility } from '@mui/icons-material';
+import { Visibility } from '@mui/icons-material';
 import BlockIcon from '@mui/icons-material/Block';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -10,7 +10,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import {
   Box,
   Breadcrumbs,
-  Button,
   FormControl,
   IconButton,
   InputLabel,
@@ -30,18 +29,22 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { QueryClient, useMutation } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { a11yProps, CustomTabPanel } from 'app/shared/components/tabs';
+import { usePaginator } from 'app/shared/hooks/usePaginator';
+import { getLabelGrauRO } from 'app/shared/util/getLabels';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Button } from 'reactstrap';
 import { Configuration, RawRiskOpportunity } from '../../models';
 import { getComplexities } from '../../reducers/complexities.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
-import { listROs } from '../../reducers/risks-opportunities.reducer';
+import { deleteRO, listROFiltro, resetRiskOportunity } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 
 // Example
@@ -62,8 +65,6 @@ const getSituacaoIcon = situacao => {
   }
 };
 
-const columns = ['Fluxo', 'Atividade', 'Descrição', 'Causa', 'Efeito', 'Área/Processo', 'Probabilidade', 'Severidade', 'Decisão', 'Ações'];
-
 const Home = () => {
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
@@ -81,22 +82,6 @@ const Home = () => {
   );
   const severities: Array<Configuration> = useAppSelector<Array<Configuration>>(state => state.all4qmsmsgatewayro.severities.entities);
 
-  const risks = useMemo<Array<RawRiskOpportunity>>(() => {
-    if (!rolist || rolist.length <= 0) {
-      return [];
-    }
-
-    return rolist.filter(ro => ro.tipoRO === 'R');
-  }, [rolist]);
-
-  const opportunities = useMemo<Array<RawRiskOpportunity>>(() => {
-    if (!rolist || rolist.length <= 0) {
-      return [];
-    }
-
-    return rolist.filter(ro => ro.tipoRO === 'O');
-  }, [rolist]);
-
   const [tab, setTab] = useState(0);
   const [filters, setFilters] = useState({
     idProcesso: null,
@@ -104,6 +89,7 @@ const Home = () => {
     severidade: null,
     decisao: null,
     pesquisa: null as string,
+    tipoRO: 'R',
   });
   const navigate = useNavigate();
 
@@ -115,30 +101,46 @@ const Home = () => {
       severidade: null,
       decisao: null,
       pesquisa: null,
+      tipoRO: tab ? 'O' : 'R',
     });
   };
 
-  useEffect(() => {
-    const { idProcesso, probabilidade, severidade, decisao, pesquisa } = filters;
-    dispatch(
-      // listROFiltro({
-      //   idProcesso,
-      //   probabilidadeComplexidade: probabilidade,
-      //   severidadeMelhoria: severidade,
-      //   decisao,
-      //   pesquisa,
-      //   size: pageSize,
-      //   page,
-      // })
-      listROs({})
-    );
+  const { data, mutate } = useMutation({ mutationFn: listROFiltro }, new QueryClient());
 
+  function listRo() {
+    const { idProcesso, probabilidade, severidade, decisao, pesquisa } = filters;
+    mutate({
+      idProcesso,
+      probabilidadeComplexidade: probabilidade,
+      severidadeMelhoria: severidade,
+      decisao,
+      pesquisa,
+      size: pageSize,
+      page,
+      tipoRO: tab ? 'O' : 'R',
+    });
+  }
+
+  const columns = [
+    'Fluxo',
+    'Atividade',
+    'Descrição',
+    'Causa',
+    'Efeito',
+    'Área/Processo',
+    ...(tab ? ['Complexidade', 'Melhoria'] : ['Probabilidade', 'Severidade']),
+    /*  'Decisão', */ 'Ações',
+  ];
+
+  useEffect(() => {
+    listRo();
     dispatch(getComplexities());
     dispatch(getImprovements());
     dispatch(getProcesses());
     dispatch(getProbabilities());
     dispatch(getSeverities());
     dispatch(getRiskDecisions());
+    dispatch(resetRiskOportunity());
   }, []);
 
   const handleChangeTag = (event: React.SyntheticEvent, newValue: number) => {
@@ -160,8 +162,11 @@ const Home = () => {
   /**
    * Pagination
    */
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState<number>(10);
+
+  const totalElements = useMemo(() => data?.totalElements || 0, [data]);
+  const { page, pageSize, paginator } = usePaginator(totalElements);
+
+  useEffect(listRo, [filters, page, pageSize, tab]);
 
   const TableRendered = (
     <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -175,46 +180,31 @@ const Home = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {(tab === 0 ? risks : opportunities).map((ro: RawRiskOpportunity) => {
+          {data?.content.map(ro => {
             const {
-              atualizadoEm,
-              atualizadoPor,
-              criadoEm,
-              criadoPor,
-              dataRegistro,
-              descricao1,
-              descricao2,
-              descricao3,
-              descricaoControle,
               id,
-              idEmissor,
-              idLinhaConfigControle1,
-              idLinhaConfigControle2,
-              idPartesInteressadas,
-              idProcesso,
-              idsAnaliseROS,
               nomeAtividade,
               nomeFluxo,
-              tipoRO,
-              linhaConfigControle1,
-              linhaConfigControle2,
+              descricao,
+              causaFraqueza,
+              efeitoBeneficio,
+              severidadeMelhoria,
+              probabilidadeComplexidade,
+              processo,
             } = ro;
 
-            const path: string = tipoRO === 'R' ? 'risk' : 'opportunity';
-
-            const process: Process = processes.find(p => p.id === idProcesso);
+            const path: string = !tab ? 'risk' : 'opportunity';
 
             return (
               <TableRow key={id}>
                 <TableCell>{nomeFluxo ?? '-'}</TableCell>
                 <TableCell>{nomeAtividade ?? '-'}</TableCell>
-                <TableCell>{descricao1 ?? '-'}</TableCell>
-                <TableCell>{descricao2 ?? '-'}</TableCell>
-                <TableCell>{descricao3 ?? '-'}</TableCell>
-                <TableCell>{process?.nome ?? '-'}</TableCell>
-                <TableCell>{idLinhaConfigControle1 ?? linhaConfigControle1?.descricaoRO ?? '-'}</TableCell>
-                <TableCell>{idLinhaConfigControle2 ?? linhaConfigControle2?.descricaoRO ?? '-'}</TableCell>
-                <TableCell>{descricaoControle ?? '-'}</TableCell>
+                <TableCell>{descricao ?? '-'}</TableCell>
+                <TableCell>{causaFraqueza ?? '-'}</TableCell>
+                <TableCell>{efeitoBeneficio ?? '-'}</TableCell>
+                <TableCell>{processo ?? '-'}</TableCell>
+                <TableCell>{probabilidadeComplexidade ?? '-'}</TableCell>
+                <TableCell>{severidadeMelhoria ?? '-'}</TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={2}>
                     <Tooltip title="Editar">
@@ -227,13 +217,13 @@ const Home = () => {
                         <Visibility sx={{ color: '#0EBDCE' }} />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Imprimir">
-                      <IconButton color="primary" onClick={() => {}}>
-                        <Check sx={{ color: '#03AC59' }} />
-                      </IconButton>
-                    </Tooltip>
                     <Tooltip title="Cancelar">
-                      <IconButton color="primary" onClick={() => {}}>
+                      <IconButton
+                        color="primary"
+                        onClick={() => {
+                          dispatch(deleteRO(id)).then(_ => listRo());
+                        }}
+                      >
                         <CancelIcon sx={{ color: '#FF0000' }} />
                       </IconButton>
                     </Tooltip>
@@ -244,6 +234,7 @@ const Home = () => {
           })}
         </TableBody>
       </Table>
+      {paginator}
     </TableContainer>
   );
 
@@ -283,10 +274,10 @@ const Home = () => {
 
         <FormControl className=" me-2">
           <InputLabel>Probabilidade</InputLabel>
-          <Select onChange={e => setFilters({ ...filters, probabilidade: parseInt(e.target.value.toString()) })} label="Probabilidade">
+          <Select onChange={e => setFilters({ ...filters, probabilidade: e.target.value.toString() })} label="Probabilidade">
             {probabilities?.map((probability, index) => (
-              <MenuItem key={index} value={probability.id}>
-                {probability.descricaoRO}
+              <MenuItem key={index} value={probability.grauRO}>
+                {getLabelGrauRO(probability.grauRO)}
               </MenuItem>
             ))}
           </Select>
@@ -294,10 +285,10 @@ const Home = () => {
 
         <FormControl className=" me-2">
           <InputLabel>Severidade</InputLabel>
-          <Select onChange={e => setFilters({ ...filters, severidade: parseInt(e.target.value.toString()) })} label="Processo">
+          <Select onChange={e => setFilters({ ...filters, severidade: e.target.value.toString() })} label="Processo">
             {severities?.map((severity, index) => (
-              <MenuItem key={index} value={severity.id}>
-                {severity.descricaoRO}
+              <MenuItem key={index} value={severity.grauRO}>
+                {getLabelGrauRO(severity.grauRO)}
               </MenuItem>
             ))}
           </Select>
@@ -331,7 +322,17 @@ const Home = () => {
 
       <Button
         variant="contained"
-        className="secondary-button me-2"
+        className="me-3"
+        style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+        onClick={clearFilters}
+        title="Limpar filtros"
+      >
+        Limpar
+      </Button>
+
+      <Button
+        variant="contained"
+        className="primary-button me-2"
         style={{ marginRight: '10px', height: '42px', width: '185px' }}
         onClick={() => {
           navigate('configurations');
