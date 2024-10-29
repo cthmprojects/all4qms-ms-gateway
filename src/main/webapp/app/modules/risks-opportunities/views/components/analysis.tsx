@@ -65,6 +65,16 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
     }
   };
 
+  const getColorByPosition = (position: number): string => {
+    if (position < 4) {
+      return 'lightgreen';
+    } else if (position === 4) {
+      return 'lightgoldenrodyellow';
+    } else {
+      return 'lightsalmon';
+    }
+  };
+
   useEffect(() => {
     setAnalysisSummary({
       analysis: description,
@@ -150,6 +160,24 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
     }
   }, [enums, probability, severity]);
 
+  const position = useMemo(() => {
+    if (!enums || !probability || !severity) {
+      return null;
+    }
+
+    const xLevel: Option | null = getLevel(probability);
+    const yLevel: Option | null = getLevel(severity);
+
+    if (!xLevel || !yLevel) {
+      return null;
+    }
+
+    const x: number = xLevel.code;
+    const y: number = yLevel.code;
+
+    return 3 - x + (3 - y);
+  }, [enums, probability, severity]);
+
   return (
     <Stack spacing={2}>
       <Typography variant="h6">Análise</Typography>
@@ -186,7 +214,7 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={2}>
-                        <Circle sx={{ fill: 'lightskyblue', marginRight: 50 }} />
+                        <Circle sx={{ fill: getColorByPosition(position), marginRight: 50 }} />
 
                         {analysisSummary.decision}
                       </Stack>

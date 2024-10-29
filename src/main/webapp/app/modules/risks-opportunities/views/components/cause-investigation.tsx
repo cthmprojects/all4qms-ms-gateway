@@ -1,4 +1,4 @@
-import { Checkbox, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Checkbox, Chip, Stack, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { onCheckboxChanged } from '../../utils';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
@@ -53,7 +53,9 @@ const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
           <Controller
             control={control}
             name="ishikawaCause"
-            render={({ field }) => <TextField disabled={readonly} label="Causa" maxRows={5} multiline placeholder="Causa" {...field} />}
+            render={({ field }) => (
+              <TextField disabled={readonly} label="Causa" maxRows={5} multiline placeholder="Causa" rows={5} {...field} />
+            )}
           />
 
           <Stack spacing={2} sx={{ flexGrow: 1 }}>
@@ -61,17 +63,67 @@ const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
               <Controller
                 control={control}
                 name="environment"
-                render={({ field }) => <TextField disabled={readonly} label="Meio ambiente" placeholder="Meio ambiente" {...field} />}
+                render={({ field: { onChange, ...rest } }) => (
+                  <Autocomplete
+                    className="m-2"
+                    disableClearable
+                    disabled={readonly}
+                    freeSolo
+                    options={['']}
+                    multiple
+                    onChange={(_, values) => onChange(values)}
+                    renderInput={params => <TextField {...params} label="Meio Ambiente" />}
+                    renderTags={(value: readonly string[], getTagProps) =>
+                      value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                    }
+                    sx={{ flexGrow: 1, maxWidth: 350 }}
+                    {...rest}
+                  />
+                )}
               />
+
               <Controller
                 control={control}
                 name="workforce"
-                render={({ field }) => <TextField disabled={readonly} label="Mão de obra" placeholder="Mão de obra" {...field} />}
+                render={({ field: { onChange, ...rest } }) => (
+                  <Autocomplete
+                    className="m-2"
+                    disableClearable
+                    disabled={readonly}
+                    freeSolo
+                    options={['']}
+                    multiple
+                    onChange={(_, values) => onChange(values)}
+                    renderInput={params => <TextField {...params} label="Mão de obra" />}
+                    renderTags={(value: readonly string[], getTagProps) =>
+                      value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                    }
+                    sx={{ flexGrow: 1, maxWidth: 350 }}
+                    {...rest}
+                  />
+                )}
               />
+
               <Controller
                 control={control}
                 name="method"
-                render={({ field }) => <TextField disabled={readonly} label="Método" placeholder="Método" {...field} />}
+                render={({ field: { onChange, ...rest } }) => (
+                  <Autocomplete
+                    className="m-2"
+                    disableClearable
+                    disabled={readonly}
+                    freeSolo
+                    options={['']}
+                    multiple
+                    onChange={(_, values) => onChange(values)}
+                    renderInput={params => <TextField {...params} label="Método" />}
+                    renderTags={(value: readonly string[], getTagProps) =>
+                      value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                    }
+                    sx={{ flexGrow: 1, maxWidth: 350 }}
+                    {...rest}
+                  />
+                )}
               />
             </Stack>
 
@@ -79,17 +131,67 @@ const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
               <Controller
                 control={control}
                 name="machine"
-                render={({ field }) => <TextField disabled={readonly} label="Máquina" placeholder="Máquina" {...field} />}
+                render={({ field: { onChange, ...rest } }) => (
+                  <Autocomplete
+                    className="m-2"
+                    disableClearable
+                    disabled={readonly}
+                    freeSolo
+                    options={['']}
+                    multiple
+                    onChange={(_, values) => onChange(values)}
+                    renderInput={params => <TextField {...params} label="Máquina" />}
+                    renderTags={(value: readonly string[], getTagProps) =>
+                      value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                    }
+                    sx={{ flexGrow: 1, maxWidth: 350 }}
+                    {...rest}
+                  />
+                )}
               />
+
               <Controller
                 control={control}
                 name="measurement"
-                render={({ field }) => <TextField disabled={readonly} label="Medição" placeholder="Medição" {...field} />}
+                render={({ field: { onChange, ...rest } }) => (
+                  <Autocomplete
+                    className="m-2"
+                    disableClearable
+                    disabled={readonly}
+                    freeSolo
+                    options={['']}
+                    multiple
+                    onChange={(_, values) => onChange(values)}
+                    renderInput={params => <TextField {...params} label="Medição" />}
+                    renderTags={(value: readonly string[], getTagProps) =>
+                      value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                    }
+                    sx={{ flexGrow: 1, maxWidth: 350 }}
+                    {...rest}
+                  />
+                )}
               />
+
               <Controller
                 control={control}
                 name="rawMaterial"
-                render={({ field }) => <TextField disabled={readonly} label="Matéria prima" placeholder="Matéria prima" {...field} />}
+                render={({ field: { onChange, ...rest } }) => (
+                  <Autocomplete
+                    className="m-2"
+                    disableClearable
+                    disabled={readonly}
+                    freeSolo
+                    options={['']}
+                    multiple
+                    onChange={(_, values) => onChange(values)}
+                    renderInput={params => <TextField {...params} label="Matéria Prima" />}
+                    renderTags={(value: readonly string[], getTagProps) =>
+                      value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                    }
+                    sx={{ flexGrow: 1, maxWidth: 350 }}
+                    {...rest}
+                  />
+                )}
               />
             </Stack>
           </Stack>

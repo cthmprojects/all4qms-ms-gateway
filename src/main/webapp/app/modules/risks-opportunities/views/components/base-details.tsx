@@ -124,12 +124,12 @@ const BaseDetails = ({
       severity: null,
       useIshikawa: false,
       ishikawaCause: '',
-      environment: '',
-      workforce: '',
-      machine: '',
-      measurement: '',
-      method: '',
-      rawMaterial: '',
+      environment: [],
+      workforce: [],
+      machine: [],
+      measurement: [],
+      method: [],
+      rawMaterial: [],
       useReasons: true,
       reasonCause: '',
       reasonEffect: '',
@@ -239,12 +239,12 @@ const BaseDetails = ({
 
     analysisFormMethods.setValue('useIshikawa', useIshikawa);
     analysisFormMethods.setValue('ishikawaCause', ishikawa?.descCausaEfeito);
-    analysisFormMethods.setValue('environment', ishikawa?.meioAmbiente);
-    analysisFormMethods.setValue('workforce', ishikawa?.maoDeObra);
-    analysisFormMethods.setValue('machine', ishikawa?.maquina);
-    analysisFormMethods.setValue('measurement', ishikawa?.medicao);
-    analysisFormMethods.setValue('method', ishikawa?.metodo);
-    analysisFormMethods.setValue('rawMaterial', ishikawa?.materiaPrima);
+    analysisFormMethods.setValue('environment', ishikawa?.meioAmbiente?.split(';') ?? []);
+    analysisFormMethods.setValue('workforce', ishikawa?.maoDeObra?.split(';') ?? []);
+    analysisFormMethods.setValue('machine', ishikawa?.maquina?.split(';') ?? []);
+    analysisFormMethods.setValue('measurement', ishikawa?.medicao?.split(';') ?? []);
+    analysisFormMethods.setValue('method', ishikawa?.metodo?.split(';') ?? []);
+    analysisFormMethods.setValue('rawMaterial', ishikawa?.materiaPrima?.split(';') ?? []);
     analysisFormMethods.setValue('useReasons', !useIshikawa);
     analysisFormMethods.setValue('reasonCause', reasons?.descCausa);
     analysisFormMethods.setValue('reasonEffect', reasons?.descProblema);
@@ -326,6 +326,12 @@ const BaseDetails = ({
     const completeAnalysis: CompleteAnalysis = {
       ...analysisValues,
       actions: analysisValues.actions.map(item => ({ ...item, idPlano })),
+      environment: analysisValues.environment?.join(';'),
+      measurement: analysisValues.measurement?.join(';'),
+      method: analysisValues.method?.join(';'),
+      machine: analysisValues.machine?.join(';'),
+      rawMaterial: analysisValues.rawMaterial?.join(';'),
+      workforce: analysisValues.workforce?.join(';'),
     };
 
     const efficacy: ActionPlanEfficacy = mapCompleteAnalysisToActionPlanEfficacy(completeAnalysis);
