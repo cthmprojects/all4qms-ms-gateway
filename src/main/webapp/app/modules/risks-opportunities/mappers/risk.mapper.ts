@@ -76,7 +76,7 @@ export const mapCompleteAnalysisToIshikawa = (completeAnalysis: CompleteAnalysis
         measurement: completeAnalysis.measurement,
         method: completeAnalysis.method,
         rawMaterial: completeAnalysis.rawMaterial,
-        workforce: completeAnalysis.manpower,
+        workforce: completeAnalysis.workforce,
       }
     : null;
 };
