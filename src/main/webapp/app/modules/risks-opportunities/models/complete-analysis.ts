@@ -1,4 +1,5 @@
 import { Configuration } from './configuration';
+import { RawPlanAction } from './raw';
 
 export type CompleteAnalysis = {
   description: string;
@@ -8,7 +9,7 @@ export type CompleteAnalysis = {
   useIshikawa: boolean;
   ishikawaCause: string;
   environment: string;
-  manpower: string;
+  workforce: string;
   machine: string;
   measurement: string;
   method: string;
@@ -35,4 +36,5 @@ export type CompleteAnalysis = {
   efficacyResponsibleId: number;
   efficacyVerified: boolean;
   efficacyDescription: string;
+  actions: RawPlanAction[];
 };
