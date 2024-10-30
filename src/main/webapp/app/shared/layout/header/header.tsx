@@ -81,7 +81,8 @@ const Header = (props: IHeaderProps) => {
 
   const getAllPendencias = async () => {
     try {
-      const user = userQms?.id ? userQms : JSON.parse(await Storage.session.get('USUARIO_QMS'));
+      // TODO: Pendência sem ref. Verificar backend
+      /* const user = userQms?.id ? userQms : JSON.parse(await Storage.session.get('USUARIO_QMS'));
       const resPendencias = await dispatch(
         getPendenciasByUser({
           page: 1,
@@ -94,7 +95,7 @@ const Header = (props: IHeaderProps) => {
       const pendencias: IPendencia[] = (resPendencias.payload as AxiosResponse).data;
 
       setPendenciasList(pendencias.filter((pend: IPendencia) => !pend.status));
-      setCoutPendencias((resCountPend.payload as AxiosResponse).data);
+      setCoutPendencias((resCountPend.payload as AxiosResponse).data); */
     } catch (err) {
       console.error('header getAllEntities: ', err);
     }
@@ -206,7 +207,7 @@ const Header = (props: IHeaderProps) => {
                 <MenuItem onClick={() => navigate('/funcao')}>Funções</MenuItem>
                 <MenuItem onClick={() => navigate('/setor')}>Setores</MenuItem>
                 <MenuItem onClick={() => navigate('/processo')}>Processos</MenuItem>
-                <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem>
+                {/* <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem> */}
                 <MenuItem onClick={() => navigate('/goals/resources')}>Recursos</MenuItem>
                 <MenuItem onClick={() => navigate('/account/reset/finish')}>Alterar senha</MenuItem>
               </Menu>
