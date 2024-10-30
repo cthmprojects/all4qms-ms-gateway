@@ -34,17 +34,28 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { Storage } from 'react-jhipster';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
 import { EixosSwot, SwotList } from '../../models/swot';
-import { getSwotAll } from '../../reducers/swot.reducer';
+import { getSwotAllFilter } from '../../reducers/swot.reducer';
 
 // Registra a localidade
 registerLocale('pt-BR', ptBR);
 
 const columns = ['SWOT', 'Descrição', 'Habilitado', 'Status', 'Ações'];
-
+enum StatusType {
+  PENDENTE = 'PENDENTE',
+  CONTROLADO = 'CONTROLADO',
+  TRATATIVA = 'TRATATIVA',
+}
+enum EixoType {
+  FORCAS = 'FORCAS',
+  FRAQUEZAS = 'FRAQUEZAS',
+  OPORTUNIDADES = 'OPORTUNIDADES',
+  AMEACAS = 'AMEACAS',
+}
 type FilterSwotType = {
   isEnableRO?: string;
-  status?: string;
-  eixo?: string;
+  status?: StatusType;
+  eixo?: EixoType;
+  pesquisa?: string;
 };
 const Home = () => {
   const navigate = useNavigate();
@@ -56,12 +67,12 @@ const Home = () => {
   /**
    * Filters
    */
-  const [filters, setFilters] = useState<FilterSwotType>({ isEnableRO: '', status: '', eixo: '' });
-
-  // const { page, pageSize, paginator } = usePaginator(metasLista.totalElements);
-  const { page, pageSize, paginator } = usePaginator(0);
+  const [filters, setFilters] = useState<FilterSwotType>({ isEnableRO: '', pesquisa: '' });
 
   const swotList: Array<EixosSwot> = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.entities);
+  const totalItems = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.totalItems);
+  const { page, pageSize, paginator } = usePaginator(totalItems || 0);
+  // const { page, pageSize, paginator } = usePaginator(0);
 
   useEffect(() => {
     if (page <= 0) {
@@ -76,7 +87,7 @@ const Home = () => {
     const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
     setIsSGQ(isSGQ);
 
-    dispatch(getSwotAll());
+    dispatch(getSwotAllFilter({ size: pageSize, page: page }));
   }, []);
 
   useEffect(() => {
@@ -86,25 +97,24 @@ const Home = () => {
   //---------------------------------------------------------------
 
   const handleApplyFilters = () => {
-    const { isEnableRO, status, eixo } = filters;
+    if (!filters) getSwotAllFilter({ size: pageSize, page: page });
 
-    // !processes && dispatch(getProcesses());
+    const { isEnableRO, status, eixo, pesquisa } = filters;
 
-    //   dispatch(
-    //     getAllMetasFilter({
-    //       idProcesso: idProcesso || processes[0]?.id,
-    //       ano: ano instanceof Date ? ano.getFullYear().toString() : ano,
-    //       mes: mes instanceof Date ? format(mes, 'MM') : mes,
-    //       situacao: situacao,
-    //       pesquisa: pesquisa,
-    //       size: pageSize,
-    //       page: page,
-    //     })
-    //   );
+    dispatch(
+      getSwotAllFilter({
+        eixo: eixo,
+        habilitado: isEnableRO == 'Sim' ? true : isEnableRO == 'Não' ? false : undefined,
+        status: status,
+        pesquisa: pesquisa,
+        size: pageSize,
+        page: page,
+      })
+    );
   };
 
   const clearFilters = () => {
-    setFilters({ isEnableRO: '', status: '', eixo: '' });
+    setFilters({});
   };
 
   const renderTable = () => {
@@ -127,14 +137,14 @@ const Home = () => {
                   swotList.map((swotItem: EixosSwot, index) => (
                     // <Tooltip title={goalResult.meta.metaObjetivo.desdobramentoSGQ}>
                     <TableRow className="table-row" key={index}>
-                      <TableCell onClick={event => null}>{swotItem.eixo}</TableCell>
-                      <TableCell onClick={event => null}>{swotItem.descricao}</TableCell>
-                      <TableCell onClick={event => null}>
+                      <TableCell>{swotItem.eixo}</TableCell>
+                      <TableCell>{swotItem.descricao}</TableCell>
+                      <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <Switch checked={swotItem.isAnalisar} />
                         </Box>
                       </TableCell>
-                      <TableCell onClick={event => null}>{swotItem.status}</TableCell>
+                      <TableCell>{swotItem.status}</TableCell>
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                         {isSGQ && (
                           <IconButton
@@ -229,7 +239,7 @@ const Home = () => {
               <Select
                 sx={{ height: '56px' }}
                 value={filters.status}
-                onChange={e => setFilters({ ...filters, status: e.target.value.toString() })}
+                onChange={e => setFilters({ ...filters, status: e.target.value.toString() as StatusType })}
                 label="Status"
               >
                 <MenuItem value={''}>Selecionar</MenuItem>
@@ -247,11 +257,11 @@ const Home = () => {
               <Select
                 sx={{ height: '56px' }}
                 value={filters.eixo}
-                onChange={e => setFilters({ ...filters, eixo: e.target.value.toString() })}
+                onChange={e => setFilters({ ...filters, eixo: e.target.value.toString() as EixoType })}
                 label="Eixo"
               >
                 <MenuItem value={''}>Selecionar</MenuItem>
-                {['FORCA', 'FRAQUEZA', 'OPORTUNIDADE', 'AMEACA']?.map((status, index) => (
+                {['FORCAS', 'FRAQUEZAS', 'OPORTUNIDADES', 'AMEACAS']?.map((status, index) => (
                   <MenuItem key={index} value={status}>
                     {status}
                   </MenuItem>
@@ -262,21 +272,13 @@ const Home = () => {
           <Grid item>
             <FormControl fullWidth>
               <InputLabel>Pesquisa</InputLabel>
-              {/* <TextField
-                    label="Pesquisa"
-                    style={{ minWidth: '20vw'  }}
-                    onChange={event => {
-                    setFilters({ ...filters, pesquisa: event?.target?.value || '' });
-                    }}
-                    placeholder="Descrição"
-                    value={filters.pesquisa || ''}
-                /> */}
               <OutlinedInput
                 fullWidth
                 label="Pesquisa"
+                onChange={e => setFilters({ ...filters, pesquisa: e.target.value.toString() })}
                 endAdornment={
                   <InputAdornment position="end">
-                    <IconButton aria-label="toggle password visibility" onClick={() => null} onMouseDown={() => null}>
+                    <IconButton aria-label="toggle password visibility" onClick={handleApplyFilters} onMouseDown={() => null}>
                       <SearchIcon />
                     </IconButton>
                   </InputAdornment>

@@ -44,7 +44,6 @@ import {
 import Analysis from './analysis';
 import ControlAction from './control-action';
 import GeneralInformation from './general-information';
-import { EixosSwot } from '../../../strategic-planning/models/swot';
 
 type BaseDetailsProps = {
   enums: Enums;
@@ -56,7 +55,6 @@ type BaseDetailsProps = {
   riskOpportunity?: RawRiskOpportunity;
   secondConfigurations: Array<Configuration>;
   users: Array<SummarizedUser>;
-  swotData?: EixosSwot;
   onBack: () => void;
   onSave?: (
     senderId: number,
@@ -81,7 +79,6 @@ const BaseDetails = ({
   riskOpportunity,
   secondConfigurations,
   users,
-  swotData,
   onBack,
   onSave,
 }: BaseDetailsProps) => {
@@ -91,8 +88,8 @@ const BaseDetails = ({
     defaultValues: {
       activity: '',
       date: null,
-      description: swotData?.descricao || '',
       interestedParts: { nomeParteInteressada: '' },
+      description: '',
       firstAuxiliaryDescription: '',
       secondAuxiliaryDescription: '',
       sender: isAdmin,

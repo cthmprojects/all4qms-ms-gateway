@@ -102,7 +102,7 @@ const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title, eixo }: SwotEixoPr
                     fullWidth
                     label={title}
                     onChange={e => onChangeDescAdded(e.target.value, index)}
-                    placeholder={'Descreva aqui as forças'}
+                    placeholder={`Descreva aqui as ${title}`}
                     multiline
                     minRows={2}
                     value={swotEixo.descricao}
@@ -124,9 +124,9 @@ const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title, eixo }: SwotEixoPr
               <TextField
                 // disabled={readonly}
                 fullWidth
-                label={'Strenghts / Forças'}
+                label={title}
                 onChange={e => setDescEixo(e.target.value)}
-                placeholder={'Descreva aqui as forças'}
+                placeholder={`Descreva aqui as ${title}`}
                 multiline
                 minRows={2}
                 value={descEixo}

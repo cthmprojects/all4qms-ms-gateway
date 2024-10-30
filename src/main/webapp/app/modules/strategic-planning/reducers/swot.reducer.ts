@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toInstitutionalPlan, toRawInstitutionalPlan } from '../mappers';
 import { InstitutionalPlan, RawInstitutionalPlan } from '../models';
 import { EixosSwot } from '../models/swot';
+import { ListPagination } from '../../goals-objectives/reducers/metas-list.reducer';
 
 const apiUrl = 'services/all4qmsmsauditplan/api/planest/swots';
 
@@ -17,39 +18,38 @@ const initialState: EntityState<EixosSwot> = {
   updateSuccess: false,
 };
 
-interface ListPagination {
+export interface ListPaginationRequestSwot {
   page?: number;
   size?: number;
+  habilitado?: boolean;
+  status?: 'PENDENTE' | 'CONTROLADO' | 'TRATATIVA';
+  eixo?: 'FORCAS' | 'FRAQUEZAS' | 'OPORTUNIDADES' | 'AMEACAS';
+  pesquisa?: string;
 }
+
+export const buildQueryParams = (params: ListPaginationRequestSwot): string => {
+  const queryParams = Object.entries(params)
+    .filter(([_, value]) => value !== undefined)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`);
+
+  queryParams.push(`cacheBuster=${new Date().getTime()}`);
+
+  return queryParams.length ? `?${queryParams.join('&')}` : '';
+};
 
 export const getSwot = createAsyncThunk('get/swot', async (id: number) => {
   return axios.get<EixosSwot>(`${apiUrl}/${id}`);
 });
 
-export const getSwotAllFilter = createAsyncThunk('get/swot-all-filter', async (params: ListPagination) => {
-  const { page, size } = params;
+export const getSwotAllFilter = createAsyncThunk('get/swot-all-filter', async (params: ListPaginationRequestSwot) => {
+  const query = buildQueryParams(params);
 
-  const queryParams: Array<string> = [];
-
-  if (page) {
-    queryParams.push(`page=${page}`);
-  }
-
-  if (size) {
-    queryParams.push(`size=${size}`);
-  }
-
-  queryParams.push(`cacheBuster=${new Date().getTime()}`);
-
-  const query: string = queryParams.join('&');
-  const urlParams: string = query ? `?${query}` : '';
-  const url: string = `${apiUrl}${urlParams}`;
-
-  return axios.get<Array<EixosSwot>>(url);
+  const url = `${apiUrl}${query}`;
+  return axios.get<ListPagination>(url);
 });
 
 export const getSwotAll = createAsyncThunk('get/all/swot-all', async () => {
-  return axios.get<Array<EixosSwot>>(`${apiUrl}`);
+  return axios.get<ListPagination>(`${apiUrl}`);
 });
 
 export const saveLoteSwot = createAsyncThunk('save/swot-lote', async (listEixoSwot: EixosSwot[]) => {
@@ -94,11 +94,13 @@ const swotSlice = createEntitySlice({
       })
       .addMatcher(isFulfilled(getSwotAllFilter), (state, action) => {
         state.loading = false;
-        state.entities = action.payload.data;
+        state.entities = action.payload.data.content;
+        state.totalItems = action.payload.data.totalElements;
       })
       .addMatcher(isFulfilled(getSwotAll), (state, action) => {
         state.loading = false;
-        state.entities = action.payload.data;
+        state.entities = action.payload.data.content;
+        state.totalItems = action.payload.data.totalElements;
       })
       .addMatcher(isFulfilled(saveSwot), (state, action) => {
         state.loading = false;
