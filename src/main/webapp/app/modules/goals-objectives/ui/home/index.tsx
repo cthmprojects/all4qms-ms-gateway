@@ -124,7 +124,7 @@ const HomeGoalsList = () => {
   const columns = ['Metas', 'Resultados', 'Situação', 'Atualização', 'Ações'];
   const getSituacaoIcon = (parcial, metaAtingida) => {
     if (parcial && metaAtingida) return { icon: <CheckIcon color="success" />, text: 'Meta Atingida' };
-    if (parcial || metaAtingida) return { icon: <TaskAltIcon color="success" />, text: 'Meta Parcial' };
+    if (!parcial && metaAtingida) return { icon: <TaskAltIcon color="success" />, text: 'Meta Parcial' };
     else return { icon: <CancelOutlinedIcon color="error" />, text: 'Meta Não Atingida' };
   };
 
@@ -279,7 +279,7 @@ const HomeGoalsList = () => {
                 onChange={e => setFilters({ ...filters, idProcesso: Number(e.target.value.toString()) })}
                 label="Processo"
               >
-                <MenuItem value={0}>Selecionar</MenuItem>
+                {/* <MenuItem value={0}>Selecionar</MenuItem> */}
                 {processes?.map((process, index) => (
                   <MenuItem key={index} value={process.id}>
                     {process.nome}
@@ -293,7 +293,7 @@ const HomeGoalsList = () => {
               label="Ano"
               selected={filters.ano as Date}
               showYearPicker
-              onChange={date => setFilters({ ...filters, ano: new Date(date) })}
+              onChange={date => setFilters({ ...filters, ano: date ? new Date(date) : null })}
               dateFormat="yyyy"
             />
           </Grid>
@@ -303,7 +303,7 @@ const HomeGoalsList = () => {
               selected={filters.mes as Date}
               showMonthYearPicker
               hideHeader
-              onChange={date => setFilters({ ...filters, mes: new Date(date) })}
+              onChange={date => setFilters({ ...filters, mes: date ? new Date(date) : null })}
               dateFormat="MMMM"
             />
           </Grid>

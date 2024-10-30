@@ -227,12 +227,13 @@ export type RawAnalysis = {
 };
 
 export type RawCompleteAnalysis = {
+  id?: number;
   analise: RawAnalysis;
   ishikawa: RawIshikawaInvestigation;
   porques: RawCauseEffectInvestigation;
   aprovacao: RawApproval;
   plano: RawPlan;
-  acoesPlano: Array<RawPlanAction>;
+  acoesPlano?: Array<RawPlanAction>;
   riscoOportunidade: {
     id: number;
   };

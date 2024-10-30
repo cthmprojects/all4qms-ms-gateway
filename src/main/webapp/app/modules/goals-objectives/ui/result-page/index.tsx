@@ -10,16 +10,18 @@ import { createResult, getMeta, getMetaResultAttatchment, getMetaResults } from 
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 import { AttachmentButton } from 'app/shared/layout/AttachmentButton';
 import axios from 'axios';
+import { useDebounce, useDebouncedCallback } from 'use-debounce';
 
 type ResultItemProps = {
   save: (formMethods: UseFormReturn<any>) => void;
   initialPayload?: any;
   onDelete?: () => void;
+  isPending?: boolean;
 };
 
 const queryClient = new QueryClient();
 
-const ResultItem = ({ save, initialPayload, onDelete }: ResultItemProps) => {
+const ResultItem = ({ save, initialPayload, onDelete, isPending }: ResultItemProps) => {
   const formMethods = useForm({
     defaultValues: initialPayload
       ? initialPayload
@@ -162,7 +164,7 @@ const ResultItem = ({ save, initialPayload, onDelete }: ResultItemProps) => {
       />
       {!isDisabled && (
         <Box display="flex" justifyContent="flex-end">
-          <Button disabled={!formState.isValid} variant="contained" onClick={() => save(formMethods)} color="primary">
+          <Button disabled={isPending || !formState.isValid} variant="contained" onClick={() => save(formMethods)} color="primary">
             SALVAR
           </Button>
         </Box>
@@ -227,6 +229,8 @@ export const ResultPage = () => {
     createMutation.mutate(formData);
   }
 
+  const debouncedSave = useDebouncedCallback(saveItem, 300);
+
   const deleteMetaResult = async (id: number) => {
     try {
       const { data } = await axios.delete('/services/all4qmsmsmetaind/api/metaobj/resultados/' + id);
@@ -264,9 +268,11 @@ export const ResultPage = () => {
       )}
 
       <Box display="flex" flexDirection="column" gap="15px" paddingRight="110px" mt="20px">
-        {(isShowingNewForm || !results?.length) && !isLoadingResults && <ResultItem save={saveItem} />}
+        {(isShowingNewForm || !results?.length) && !isLoadingResults && (
+          <ResultItem save={debouncedSave} isPending={createMutation.isPending} />
+        )}
         {(results || []).map((field, index) => (
-          <ResultItem save={saveItem} key={field.id} initialPayload={field} onDelete={() => deleteMetaResult(field.id)} />
+          <ResultItem save={debouncedSave} key={field.id} initialPayload={field} onDelete={() => deleteMetaResult(field.id)} />
         ))}
       </Box>
     </div>
