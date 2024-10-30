@@ -12,7 +12,7 @@ const ButtonList = () => {
     { icon: <FontAwesomeIcon icon="location-crosshairs" />, link: '', legenda: 'Auditorias', disabled: true },
     { icon: <FontAwesomeIcon icon="file-circle-check" />, link: '/rnc', legenda: 'RNC / OM' },
     { icon: <FontAwesomeIcon icon="file-circle-exclamation" />, link: '/performance-indicators', legenda: 'Indicadores de Desempenho' },
-    { icon: <FontAwesomeIcon icon="chart-line" />, link: '', legenda: 'Análise Crítica', disabled: true },
+    { icon: <FontAwesomeIcon icon="chart-line" />, link: '/strategic-planning', legenda: 'Planejamento Estratégico' },
   ];
 
   return (

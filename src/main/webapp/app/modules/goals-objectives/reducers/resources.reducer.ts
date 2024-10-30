@@ -2,11 +2,11 @@ import { createAsyncThunk, isFulfilled } from '@reduxjs/toolkit';
 import { EntityState, createEntitySlice } from 'app/shared/reducers/reducer.utils';
 import axios from 'axios';
 import { ListMeta, Meta, MetaRecurso } from '../models/goals';
-import { ListPaginationMeta } from './metas-list.reducer';
+import { ListPagination } from './metas-list.reducer';
 
 const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/recursos';
 
-interface ListPagination {
+interface ListPaginationReq {
   page?: number;
   size?: number;
 }
@@ -21,7 +21,7 @@ const initialState: EntityState<MetaRecurso> = {
   updateSuccess: false,
 };
 
-export const getAllResources = createAsyncThunk('get/resources_all', async (listMetasParams: ListPagination) => {
+export const getAllResources = createAsyncThunk('get/resources_all', async (listMetasParams: ListPaginationReq) => {
   const { page, size } = listMetasParams;
 
   const queryParams: Array<string> = [];
@@ -38,7 +38,7 @@ export const getAllResources = createAsyncThunk('get/resources_all', async (list
   const urlParams: string = query ? `?${query}` : '';
   const url: string = `${apiUrl}${urlParams}`;
 
-  return axios.get<ListPaginationMeta>(url);
+  return axios.get<ListPagination>(url);
 });
 export const getResource = createAsyncThunk('get/resources', async (id: number) => {
   return axios.get<MetaRecurso>(`${apiUrl}/${id}`);

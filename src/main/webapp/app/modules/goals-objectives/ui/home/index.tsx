@@ -47,7 +47,7 @@ import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { ListMeta, Meta, MetaResultado } from '../../models/goals';
 import { EnumSituacao } from '../../models/enums';
-import { getAllMetasFilter, ListMetasInterface, ListPaginationMeta } from '../../reducers/metas-list.reducer';
+import { getAllMetasFilter, ListMetasInterface, ListPagination } from '../../reducers/metas-list.reducer';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 
@@ -66,7 +66,7 @@ const HomeGoalsList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
-  const metasLista: ListPaginationMeta = useAppSelector<ListPaginationMeta>(state => state.all4qmsmsmetaind.metasLista.entity);
+  const metasLista: ListPagination = useAppSelector<ListPagination>(state => state.all4qmsmsmetaind.metasLista.entity);
 
   const [startDate, setStartDate] = useState(new Date());
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
@@ -100,7 +100,7 @@ const HomeGoalsList = () => {
 
   const fetchMetasAllFilter = async () => {
     const resMetasContent = await dispatch(getAllMetasFilter({}));
-    const listMetasRes: ListPaginationMeta = (resMetasContent.payload as AxiosResponse).data || {};
+    const listMetasRes: ListPagination = (resMetasContent.payload as AxiosResponse).data || {};
     setGoalsList(listMetasRes.content);
   };
 
