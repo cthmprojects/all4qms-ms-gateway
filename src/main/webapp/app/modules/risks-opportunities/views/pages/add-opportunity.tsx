@@ -14,6 +14,7 @@ import {
   Enums,
   Ishikawa,
   RawMap,
+  RawPlanAction,
   RawRiskOpportunity,
   Reason,
   SummarizedProcess,
@@ -85,16 +86,15 @@ const AddOpportunity = () => {
     senderId: number,
     efficacy: ActionPlanEfficacy,
     implementation: ActionPlanImplementation,
-    actionPlanSummary: ActionPlanSummary,
     ishikawa: Ishikawa | null,
     reasons: Reason | null,
     details: AnalysisDetails,
     interestedParts: { id?: number; nomeParteInteressada: string },
-    rawRiskOpportunity: RawRiskOpportunity
+    rawRiskOpportunity: RawRiskOpportunity,
+    acoesPlano: RawPlanAction[]
   ): Promise<void> => {
     await dispatch(
       saveRiskOpportunity({
-        actionPlanSummary,
         details,
         efficacy,
         implementation,
@@ -103,6 +103,7 @@ const AddOpportunity = () => {
         reasons,
         riskOpportunity: rawRiskOpportunity,
         senderId,
+        acoesPlano,
       })
     );
 

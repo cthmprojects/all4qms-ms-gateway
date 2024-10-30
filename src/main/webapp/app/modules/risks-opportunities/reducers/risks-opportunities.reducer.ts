@@ -10,17 +10,22 @@ import {
   AnalysisDetails,
   Ishikawa,
   PaginatedResource,
+  RawAnalysis,
+  RawApproval,
   RawCauseEffectInvestigation,
   RawCompleteAnalysis,
   RawInterestedPart,
   RawInvestigation,
   RawIshikawaInvestigation,
+  RawPlanAction,
   RawPlanWithActions,
   RawRiskOpportunity,
+  RawRiskOpportunityAnalysis,
   Reason,
   RiskOpportunity,
   RiskOpportunityFromList,
 } from '../models';
+import { toast } from 'react-toastify';
 
 const apiRiscoOportunidadeUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades';
 const apiRiscoOportunidadeTipoROUrl = 'services/all4qmsmsrisco/api/risco/risco-oportunidades/tipo-ro';
@@ -34,6 +39,8 @@ const actionPlanApiUrl = 'services/all4qmsmsrnc/api/acao-planos';
 const ishikawaApiUrl = 'services/all4qmsmsrnc/api/causa-efeitos';
 const reasonsApiUrl = 'services/all4qmsmsrnc/api/porques';
 const apiPartesInteressadasUrl = 'services/all4qmsmsrisco/api/risco/partes-interessadas';
+
+const acaoPlanoRncUrl = 'services/all4qmsmsrnc/api/acao-planos';
 
 // Initial State
 const initialState: EntityState<RawRiskOpportunity> = {
@@ -67,12 +74,13 @@ interface RiskOpportunityPayload {
   senderId: number;
   efficacy: ActionPlanEfficacy;
   implementation: ActionPlanImplementation;
-  actionPlanSummary: ActionPlanSummary;
   ishikawa: Ishikawa | null;
   reasons: Reason | null;
   details: AnalysisDetails;
   interestedParts: { id?: number; nomeParteInteressada: string };
   riskOpportunity: RawRiskOpportunity;
+  acoesPlano: RawPlanAction[];
+  analise?: RawRiskOpportunityAnalysis;
 }
 
 const formatDate = (date: Date, shortened: boolean = false): string => {
@@ -165,55 +173,77 @@ export const getROById = createAsyncThunk('ro/get', async (id: number | string) 
   return data;
 });
 
+function parseActionPlanToPayload(item: RawPlanAction) {
+  return {
+    ...item,
+    dataVerificao: formatDate(item.dataVerificao as Date, true),
+    prazoAcao: formatDate(item.prazoAcao as Date, true),
+  };
+}
+
+async function saveAcaoPlano(item: RawPlanAction) {
+  await axios.post(`${acaoPlanoRncUrl}`, item);
+}
+
+async function editAcaoPlano(item: RawPlanAction) {
+  await axios.put(`${acaoPlanoRncUrl}/${item.id}`, item);
+}
+
+async function persistAcaoPlano(item: RawPlanAction) {
+  await (item?.id ? editAcaoPlano(item) : saveAcaoPlano(item));
+}
+
+function saveOnlyActions(acoesPlano: RawPlanAction[]) {
+  const actions = Promise.all(acoesPlano.map(parseActionPlanToPayload).map(persistAcaoPlano));
+  actions.then(values => console.log('##### Result', values));
+}
+
+async function editAprovacao(item: RawApproval) {
+  await axios.put(`${aprovacaoNcUrl}/${item.id}`, item);
+}
+
+async function updatePorques(porques: RawCauseEffectInvestigation) {
+  axios.put(`${reasonsApiUrl}/${porques.id}`, porques);
+}
+
+async function updateIshikawa(ishikawa: RawIshikawaInvestigation) {
+  axios.put(`${ishikawaApiUrl}/${ishikawa.id}`, ishikawa);
+}
+
 export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: RiskOpportunityPayload) => {
-  const { actionPlanSummary, details, efficacy, implementation, interestedParts, ishikawa, riskOpportunity, reasons, senderId } = payload;
+  try {
+    const { details, efficacy, implementation, interestedParts, ishikawa, riskOpportunity, reasons, senderId, acoesPlano, analise } =
+      payload;
 
-  const interestedPartIdToBeRemoved: number = riskOpportunity.idPartesInteressadas;
-  if (interestedPartIdToBeRemoved > 0) {
-    await axios.delete(`${apiPartesInteressadasUrl}/${interestedPartIdToBeRemoved}`);
-  }
-
-  const analysisIdsToBeRemoved: Array<number> = riskOpportunity.idsAnaliseROS;
-  if (analysisIdsToBeRemoved && analysisIdsToBeRemoved.length > 0) {
-    for (let i = 0; i < analysisIdsToBeRemoved.length; i++) {
-      const analysisIdToBeRemoved: number = analysisIdsToBeRemoved[i];
-      await axios.delete(`${apiAnaliseRoUrl}/${analysisIdToBeRemoved}`);
+    const interestedPartIdToBeRemoved: number = riskOpportunity.idPartesInteressadas;
+    if (interestedPartIdToBeRemoved > 0) {
+      await axios.delete(`${apiPartesInteressadasUrl}/${interestedPartIdToBeRemoved}`);
     }
-  }
 
-  const idInterestedPart = await saveInterestedPartAsync(interestedParts as RawInterestedPart);
+    const analysisIdsToBeRemoved: Array<number> = riskOpportunity.idsAnaliseROS;
+    if (analysisIdsToBeRemoved && analysisIdsToBeRemoved.length > 0) {
+      for (let i = 0; i < analysisIdsToBeRemoved.length; i++) {
+        const analysisIdToBeRemoved: number = analysisIdsToBeRemoved[i];
+        await axios.delete(`${apiAnaliseRoUrl}/${analysisIdToBeRemoved}`);
+      }
+    }
 
-  riskOpportunity.idPartesInteressadas = idInterestedPart;
+    const idInterestedPart = await saveInterestedPartAsync(interestedParts as RawInterestedPart);
 
-  riskOpportunity.idsAnaliseROS = null;
+    riskOpportunity.idPartesInteressadas = idInterestedPart;
 
-  const response = await axios.put<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${riskOpportunity.id}`, riskOpportunity);
+    riskOpportunity.idsAnaliseROS = null;
 
-  const resource: RawRiskOpportunity = response.data;
+    const response = await axios.put<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${riskOpportunity.id}`, riskOpportunity);
 
-  const now: Date = new Date();
+    const resource: RawRiskOpportunity = response.data;
 
-  const body: RawCompleteAnalysis = {
-    acoesPlano: [
-      {
-        atualizadoEm: null,
-        criadoEm: null,
-        descricaoAcao: actionPlanSummary.actionDescription,
-        prazoAcao: formatDate(actionPlanSummary.actionDate, true),
-        idResponsavelAcao: actionPlanSummary.responsibleId,
-        statusAcao: 'PENDENTE',
-        dataVerificao: formatDate(actionPlanSummary.actionVerificationDate, true),
-        idResponsavelVerificaoAcao: actionPlanSummary.actionVerifierId,
-        idAnexosExecucao: null,
-        dataConclusaoAcao: actionPlanSummary.actionVerificationDate,
-        idPlano: null,
-        planoId: null,
-      },
-    ],
-    riscoOportunidade: {
-      id: resource.id,
-    },
-    analise: {
+    const now: Date = new Date();
+
+    if (analise?.id) saveOnlyActions(acoesPlano.map(item => ({ ...item, planoId: analise.idPlano })));
+
+    const newAnalise: RawAnalysis = {
+      id: analise?.id,
       atualizadoEm: now,
       atualizadoPor: senderId,
       corDecisao: '',
@@ -222,14 +252,16 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
       dataAnalise: now,
       decisao: details.meaning,
       descricaoDecisao: details.description,
-      idAprovacaoNC: null,
-      idInvestigacao: null,
-      idPlano: null,
+      idAprovacaoNC: analise.idAprovacaoNC,
+      idInvestigacao: analise.idInvestigacao,
+      idPlano: analise.idPlano,
       linhaConfigAnalise1: details.probability,
       linhaConfigAnalise2: details.severity,
       riscoOportunidade: resource,
-    },
-    aprovacao: {
+    };
+    // await (analise?.id ? axios.put(`${apiAnaliseRoUrl}/${analise.id}`, newAnalise) : axios.post(`${apiAnaliseRoUrl}`, body));
+
+    const newAprovacao = {
       alterarRisco: true,
       atualizadoEm: now,
       criadoEm: now,
@@ -246,27 +278,14 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
       responsavelFechamento: null,
       responsavelImplementacao: implementation.implementationResponsibleId,
       vinculoRisco: resource.id,
-    },
-    ishikawa: {
-      descCausaEfeito: ishikawa?.cause,
-      maoDeObra: ishikawa?.workforce,
-      maquina: ishikawa?.machine,
-      materiaPrima: ishikawa?.rawMaterial,
-      medicao: ishikawa?.measurement,
-      meioAmbiente: ishikawa?.environment,
-      metodo: ishikawa?.method,
-    },
-    plano: {
-      atualizadoEm: now,
-      criadoEm: now,
-      statusPlano: 'ABERTO',
-      qtdAcoes: 1,
-      qtdAcoesConcluidas: 0,
-      percentualPlano: 0,
-      dtConclusaoPlano: formatDate(actionPlanSummary.actionDate),
-      idNaoConformidade: 1,
-    },
-    porques: {
+      id: analise.idAprovacaoNC,
+    };
+    await editAprovacao(newAprovacao);
+
+    const inestigacao = await getInvestigationById(analise.idInvestigacao);
+
+    const porques = {
+      id: inestigacao.idPorques,
       descCausa: reasons?.cause,
       descProblema: reasons?.effect,
       pq1: reasons?.reason1,
@@ -274,16 +293,29 @@ export const editRiskOpportunity = createAsyncThunk('ro/edit', async (payload: R
       pq3: reasons?.reason3,
       pq4: reasons?.reason4,
       pq5: reasons?.reason5,
-    },
-  };
+    };
 
-  await axios.post(apiAnaliseRoUrl, body);
+    const ishikawaPayload = {
+      id: inestigacao.idCausaEfeito,
+      descCausaEfeito: ishikawa?.cause,
+      maoDeObra: ishikawa?.workforce,
+      maquina: ishikawa?.machine,
+      materiaPrima: ishikawa?.rawMaterial,
+      medicao: ishikawa?.measurement,
+      meioAmbiente: ishikawa?.environment,
+      metodo: ishikawa?.method,
+    };
 
-  return resource;
+    await updatePorques(porques);
+    await updateIshikawa(ishikawaPayload);
+
+    toast.success('Salvo com sucesso!');
+    return resource;
+  } catch (error) {}
 });
 
 export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: RiskOpportunityPayload) => {
-  const { actionPlanSummary, details, efficacy, implementation, interestedParts, ishikawa, riskOpportunity, reasons, senderId } = payload;
+  const { details, efficacy, implementation, interestedParts, ishikawa, riskOpportunity, reasons, senderId, acoesPlano } = payload;
 
   const idInterestedPart = await saveInterestedPartAsync(interestedParts as RawInterestedPart);
 
@@ -300,20 +332,7 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
   const now: Date = new Date();
 
   const body: RawCompleteAnalysis = {
-    acoesPlano: [
-      {
-        descricaoAcao: actionPlanSummary.actionDescription,
-        prazoAcao: formatDate(actionPlanSummary.actionDate, true),
-        idResponsavelAcao: actionPlanSummary.responsibleId,
-        statusAcao: 'PENDENTE',
-        dataVerificao: formatDate(actionPlanSummary.actionVerificationDate, true),
-        idResponsavelVerificaoAcao: actionPlanSummary.actionVerifierId,
-        idAnexosExecucao: null,
-        dataConclusaoAcao: actionPlanSummary.actionVerificationDate,
-        idPlano: null,
-        planoId: null,
-      },
-    ],
+    acoesPlano: acoesPlano.map(parseActionPlanToPayload),
     riscoOportunidade: {
       id: resource.id,
     },
@@ -361,7 +380,7 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
       qtdAcoes: 1,
       qtdAcoesConcluidas: 0,
       percentualPlano: 0,
-      dtConclusaoPlano: formatDate(actionPlanSummary.actionDate),
+      dtConclusaoPlano: null,
       idNaoConformidade: 1,
     },
     porques: {
@@ -379,6 +398,14 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
 
   return resource;
 });
+
+function actionPlanParser(payload: any) {
+  return {
+    ...payload,
+    prazoAcao: payload.prazoAcao ? new Date(payload.prazoAcao) : null,
+    dataVerificao: payload.dataVerificao ? new Date(payload.dataVerificao) : null,
+  } as RawPlanAction;
+}
 
 const saveInterestedPartAsync = async (interestedPart: RawInterestedPart): Promise<number | null> => {
   const response = interestedPart.id
@@ -399,7 +426,7 @@ export const getPlanById = async (id: number): Promise<RawPlanWithActions> => {
   const response = await axios.get<RawPlanWithActions>(`${planApiUrl}/byidplano/${id}`);
   const resource = response.data;
 
-  return resource;
+  return { acoes: resource.acoes.map(actionPlanParser), plano: resource.plano };
 };
 
 export const getInvestigationById = async (id: number): Promise<RawInvestigation> => {

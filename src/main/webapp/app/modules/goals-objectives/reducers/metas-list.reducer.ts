@@ -5,7 +5,7 @@ import { ListMeta, Meta } from '../models/goals';
 
 const apiUrl = 'services/all4qmsmsmetaind/api/metaobj/metas';
 
-const initialState: EntityState<ListPaginationMeta> = {
+const initialState: EntityState<ListPagination> = {
   loading: false,
   errorMessage: null,
   entities: [],
@@ -27,7 +27,7 @@ const initialState: EntityState<ListPaginationMeta> = {
   updateSuccess: false,
 };
 
-export interface ListPaginationMeta {
+export interface ListPagination {
   totalPages: number;
   totalElements: number;
   size: number;
@@ -92,7 +92,7 @@ export const getAllMetasFilter = createAsyncThunk('get/metas-list', async (listM
     }
   }
 
-  return axios.post<ListPaginationMeta>(url, realParams);
+  return axios.post<ListPagination>(url, realParams);
 });
 
 const metasListaSlice = createEntitySlice({

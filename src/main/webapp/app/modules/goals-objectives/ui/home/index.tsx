@@ -47,7 +47,7 @@ import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { ListMeta, Meta, MetaResultado } from '../../models/goals';
 import { EnumSituacao } from '../../models/enums';
-import { getAllMetasFilter, ListMetasInterface, ListPaginationMeta } from '../../reducers/metas-list.reducer';
+import { getAllMetasFilter, ListMetasInterface, ListPagination } from '../../reducers/metas-list.reducer';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 
@@ -66,7 +66,7 @@ const HomeGoalsList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
-  const metasLista: ListPaginationMeta = useAppSelector<ListPaginationMeta>(state => state.all4qmsmsmetaind.metasLista.entity);
+  const metasLista: ListPagination = useAppSelector<ListPagination>(state => state.all4qmsmsmetaind.metasLista.entity);
 
   const [startDate, setStartDate] = useState(new Date());
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
@@ -100,7 +100,7 @@ const HomeGoalsList = () => {
 
   const fetchMetasAllFilter = async () => {
     const resMetasContent = await dispatch(getAllMetasFilter({}));
-    const listMetasRes: ListPaginationMeta = (resMetasContent.payload as AxiosResponse).data || {};
+    const listMetasRes: ListPagination = (resMetasContent.payload as AxiosResponse).data || {};
     setGoalsList(listMetasRes.content);
   };
 
@@ -124,7 +124,7 @@ const HomeGoalsList = () => {
   const columns = ['Metas', 'Resultados', 'Situação', 'Atualização', 'Ações'];
   const getSituacaoIcon = (parcial, metaAtingida) => {
     if (parcial && metaAtingida) return { icon: <CheckIcon color="success" />, text: 'Meta Atingida' };
-    if (parcial || metaAtingida) return { icon: <TaskAltIcon color="success" />, text: 'Meta Parcial' };
+    if (!parcial && metaAtingida) return { icon: <TaskAltIcon color="success" />, text: 'Meta Parcial' };
     else return { icon: <CancelOutlinedIcon color="error" />, text: 'Meta Não Atingida' };
   };
 
@@ -279,7 +279,7 @@ const HomeGoalsList = () => {
                 onChange={e => setFilters({ ...filters, idProcesso: Number(e.target.value.toString()) })}
                 label="Processo"
               >
-                <MenuItem value={0}>Selecionar</MenuItem>
+                {/* <MenuItem value={0}>Selecionar</MenuItem> */}
                 {processes?.map((process, index) => (
                   <MenuItem key={index} value={process.id}>
                     {process.nome}
@@ -293,7 +293,7 @@ const HomeGoalsList = () => {
               label="Ano"
               selected={filters.ano as Date}
               showYearPicker
-              onChange={date => setFilters({ ...filters, ano: new Date(date) })}
+              onChange={date => setFilters({ ...filters, ano: date ? new Date(date) : null })}
               dateFormat="yyyy"
             />
           </Grid>
@@ -303,7 +303,7 @@ const HomeGoalsList = () => {
               selected={filters.mes as Date}
               showMonthYearPicker
               hideHeader
-              onChange={date => setFilters({ ...filters, mes: new Date(date) })}
+              onChange={date => setFilters({ ...filters, mes: date ? new Date(date) : null })}
               dateFormat="MMMM"
             />
           </Grid>
