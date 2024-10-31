@@ -99,7 +99,6 @@ const RncList = ({}) => {
       listNonConformities({
         page: 0,
         size: pageSize,
-        dtFim: formatter.format(dtFim),
         statusAtual,
         processoNC,
         tipoNC,
