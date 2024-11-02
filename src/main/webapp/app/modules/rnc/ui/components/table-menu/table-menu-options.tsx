@@ -13,6 +13,7 @@ import {
   canAccessExecutionPage,
   canAccessVerificationPage,
   canAccessValidationPage,
+  canAccessRncDeleteButton,
 } from './controls';
 
 interface props {
@@ -86,7 +87,11 @@ const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
         >
           Fechamento
         </MenuItem>
-        <MenuItem onClick={() => deleteRncById(rnc.id)} style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <MenuItem
+          disabled={!canAccessRncDeleteButton({ rnc, userId, userRole })}
+          onClick={() => deleteRncById(rnc.id)}
+          style={{ display: 'flex', justifyContent: 'space-between' }}
+        >
           Excluir
           <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
         </MenuItem>

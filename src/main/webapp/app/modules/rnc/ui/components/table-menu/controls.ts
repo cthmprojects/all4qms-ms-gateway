@@ -11,6 +11,11 @@ export const canAccessFillingPage = ({ rnc, userId, userRole }: props) => {
   return (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) && statusAtual === 'PREENCHIMENTO';
 };
 
+export const canAccessRncDeleteButton = ({ rnc, userId, userRole }: props) => {
+  const { statusAtual, idEmissorNC } = rnc;
+  return (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) && (statusAtual === 'PREENCHIMENTO' || statusAtual === 'DETALHAMENTO');
+};
+
 export const canAccessDetailingInfo = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
 
