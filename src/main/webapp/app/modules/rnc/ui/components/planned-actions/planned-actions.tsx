@@ -3,6 +3,7 @@ import { Fab, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, 
 import { useAppDispatch } from 'app/config/store';
 import { ActionPlan, Option } from 'app/modules/rnc/models';
 import { deleteAction } from 'app/modules/rnc/reducers/plan.reducer';
+import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 
@@ -112,46 +113,18 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
         onChange={e => onDescription(e.target.value)}
         value={description}
       />
-      <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
-        <FormControl className="m-2 mt-0 rnc-form-field">
-          <div
-            style={{
-              transform: 'translateY(-19px)',
-              position: 'relative',
-              zIndex: '999',
-            }}
-          >
-            <span
-              style={{
-                top: '12px',
-                position: 'relative',
-                margin: '0px',
-                padding: '0px 3px',
-                width: 'fit-content',
-                zIndex: '99',
-                transform: 'translate(9px, -1px)',
-                background: '#fff',
-                color: '#00000099',
-              }}
-            >
-              Prazo
-            </span>
-            <DatePicker
-              // locale='pt-BR'
-              selected={deadline}
-              onChange={date => setDeadline(date)}
-              className="date-picker"
-              dateFormat={'dd/MM/yyyy'}
-              id="date-picker-rnc-plano-acao-prazo"
-              popperProps={{
-                strategy: 'fixed',
-              }}
-            />
-          </div>
-        </FormControl>
-        <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="mt-2 mb-2">
+        <MaterialDatepicker
+          label="Prazo"
+          selected={deadline}
+          onChange={date => setDeadline(date)}
+          className="date-picker ms-0"
+          dateFormat={'dd/MM/yyyy'}
+          id="date-picker-rnc-plano-acao-prazo"
+        />
+        <FormControl className="mt-0 rnc-form-field">
           <InputLabel>Responsável</InputLabel>
-          <Select label="Encaminhado para:" name="forwarded" onChange={e => onResponsible(e.target.value as string)} value={responsible}>
+          <Select label="Responsável" name="forwarded" onChange={e => onResponsible(e.target.value as string)} value={responsible}>
             {users.map((user, i) => (
               <MenuItem value={user.id} key={`user-${i}`}>
                 {user.nome}
@@ -160,47 +133,24 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
           </Select>
         </FormControl>
 
-        <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+        <FormControl className="mt-0 rnc-form-field">
           <InputLabel>Status</InputLabel>
-          <Select label="Encaminhado para:" name="forwarded" disabled value={status}>
+          <Select label="Status" name="forwarded" disabled value={status}>
             <MenuItem value={'PENDENTE'}>PENDENTE</MenuItem>
             <MenuItem value={'VISTO'}>VISTO</MenuItem>
           </Select>
         </FormControl>
 
-        <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
-          <div
-            style={{
-              transform: 'translateY(-19px)',
-            }}
-          >
-            <span
-              style={{
-                top: '12px',
-                position: 'relative',
-                margin: '0px',
-                padding: '0px 3px',
-                width: 'fit-content',
-                zIndex: '99',
-                transform: 'translate(9px, -1px)',
-                background: '#fff',
-                color: '#00000099',
-              }}
-            >
-              Verificação
-            </span>
-            <DatePicker
-              // locale='pt-BR'
-              selected={verification}
-              onChange={date => setVerificationDate(date)}
-              className="date-picker"
-              dateFormat={'dd/MM/yyyy'}
-              id="date-picker-rnc-plano-acao-prazo"
-            />
-          </div>
-        </FormControl>
+        <MaterialDatepicker
+          label="Verificação"
+          selected={verification}
+          onChange={date => setVerificationDate(date)}
+          className="date-picker"
+          dateFormat={'dd/MM/yyyy'}
+          id="date-picker-rnc-plano-acao-prazo"
+        />
 
-        <FormControl className="m-2 mt-0 ms-0 rnc-form-field">
+        <FormControl className="rnc-form-field">
           <InputLabel>Resp. verificação</InputLabel>
           <Select label="Encaminhado para:" name="forwarded" onChange={e => onVerifier(e.target.value as string)} value={verifier}>
             {users.map((user, i) => (
