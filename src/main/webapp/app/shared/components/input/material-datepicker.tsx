@@ -18,17 +18,18 @@ export const MaterialDatepicker = ({
   React.ComponentProps<typeof DatePicker> & { onChange: (date: Date) => void; hideHeader?: boolean }) => {
   const format = dateFormat || 'dd/MM/yyyy';
 
-  const clear = withoutClear
-    ? {}
-    : {
-        endAdornment: (
-          <InputAdornment position="end">
-            <IconButton onClick={() => onChange('')} edge="end">
-              <CloseIcon />
-            </IconButton>
-          </InputAdornment>
-        ),
-      };
+  const clear =
+    withoutClear || disabled
+      ? {}
+      : {
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={() => onChange('')} edge="end">
+                <CloseIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        };
 
   return (
     <DatePicker
