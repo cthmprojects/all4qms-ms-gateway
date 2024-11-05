@@ -30,7 +30,7 @@ import FileUploadRoundedIcon from '@mui/icons-material/FileUploadRounded';
 import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
+import { Doc, EnumSituacao, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, notifyEmailInfoDoc, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { LoadingButton } from '@mui/lab';
@@ -271,7 +271,7 @@ export const ValidationDocument = () => {
       idArquivo: idNewFile > 0 ? idNewFile : actualInfoDoc.doc?.idArquivo,
       idProcesso: parseInt(selectedProcess),
       ignorarValidade: true,
-      enumSituacao: 'R',
+      enumSituacao: EnumSituacao.REVISAO,
       tipoDoc: 'MA',
       // revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1,
       idDocumentacaoAnterior: parseInt(id!!),

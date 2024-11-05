@@ -27,7 +27,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
+import { Doc, EnumSituacao, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
 import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
@@ -98,7 +98,7 @@ export const UpdateDocument = () => {
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const [isSGQ, setIsSGQ] = useState<Boolean>(false);
   const [infoDocId, setInfoDocId] = useState(Number(id));
-  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(0);
+  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(-1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
@@ -182,7 +182,7 @@ export const UpdateDocument = () => {
     }
   };
 
-  const saveDoc = (): Doc => {
+  const saveDoc = (situation?: EnumSituacao): Doc => {
     const newInfoDoc: Doc = {
       id: parseInt(id!!),
       idUsuarioCriacao: parseInt(emitter),
@@ -195,7 +195,7 @@ export const UpdateDocument = () => {
       idArquivo: parseInt(idFile!!),
       idProcesso: parseInt(selectedProcess),
       ignorarValidade: true,
-      enumSituacao: 'R',
+      enumSituacao: situation ? situation : EnumSituacao.EDICAO,
       tipoDoc: 'MA',
       // revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
       idDocumentacaoAnterior: parseInt(id!!),
@@ -209,9 +209,9 @@ export const UpdateDocument = () => {
     return newInfoDoc;
   };
 
-  const saveDocument = async () => {
+  const saveDocument = async (situation?: EnumSituacao) => {
     setIsLoading(true);
-    const newInfoDoc = saveDoc();
+    const newInfoDoc = saveDoc(situation);
 
     const resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
 
@@ -236,11 +236,11 @@ export const UpdateDocument = () => {
       return null;
     }
 
-    const resDoc = await saveDocument();
+    const resDoc = await saveDocument(EnumSituacao.REVISAO);
 
     if (resDoc) {
       const novaMovimentacao: Movimentacao = {
-        id: infoDocMovimentacao,
+        id: infoDocMovimentacao < 1 ? resDoc?.movimentacao?.id : infoDocMovimentacao,
         enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
         enumStatus: EnumStatusDoc.VALIDAREV,
         idDocumentacao: infoDocId,

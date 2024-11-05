@@ -15,6 +15,13 @@ export enum StatusEnum {
   CONCLUIDO = 'Concluido',
 }
 
+export enum EnumSituacao {
+  EDICAO = 'E',
+  HOMOLOGACAO = 'H',
+  REVISAO = 'R',
+  OBSOLETO = 'O',
+  CANCELADO = 'C',
+}
 export type InfoDoc = {
   doc: Doc;
   permissaodoc: Permissao[];
@@ -28,7 +35,7 @@ export type Doc = {
   revisao?: number;
   descricaoDoc?: string;
   idArquivo?: number;
-  enumSituacao?: 'E' | 'H' | 'R' | 'O' | 'C';
+  enumSituacao?: EnumSituacao;
   origem?: string;
   tipoDoc?: string;
   idProcesso?: number;
