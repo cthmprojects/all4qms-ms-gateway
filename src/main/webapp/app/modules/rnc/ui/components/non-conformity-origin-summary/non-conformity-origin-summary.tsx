@@ -12,18 +12,25 @@ const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummar
     const year: number = date.getFullYear();
     const month: number = date.getMonth() + 1;
     const day: number = date.getDate();
-    const hours: number = date.getHours();
-    const minutes: number = date.getMinutes();
-    const seconds: number = date.getSeconds();
 
     const yearStr: string = year.toString().padStart(4, '0');
     const monthStr: string = month.toString().padStart(2, '0');
     const dayStr: string = day.toString().padStart(2, '0');
-    const hoursStr: string = hours.toString().padStart(2, '0');
-    const minutesStr: string = minutes.toString().padStart(2, '0');
-    const secondsStr: string = seconds.toString().padStart(2, '0');
 
-    return `${yearStr}/${monthStr}/${dayStr} ${hoursStr}:${minutesStr}:${secondsStr}`;
+    return `${yearStr}/${monthStr}/${dayStr}`;
+  };
+
+  const formatDate = (timestamp: Date): string => {
+    const date: Date = new Date(timestamp);
+    const year: number = date.getFullYear();
+    const month: number = date.getMonth() + 1;
+    const day: number = date.getDate();
+
+    const yearStr: string = year.toString().padStart(4, '0');
+    const monthStr: string = month.toString().padStart(2, '0');
+    const dayStr: string = day.toString().padStart(2, '0');
+
+    return `${yearStr}/${monthStr}/${dayStr}`;
   };
 
   return (
@@ -78,10 +85,10 @@ const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummar
                 disabled
                 label="Data da entrega"
                 placeholder="Data da entrega"
-                value={formatTimestamp(origin?.cliente.rastreabilidade.dtEntregaNF)}
+                value={formatDate(origin?.cliente.rastreabilidade.dtEntregaNF)}
               />
               <TextField disabled label="Nota fiscal" placeholder="Nota fiscal" value={origin?.cliente.rastreabilidade.numNF} />
-              <TextField disabled label="Data NF" placeholder="Data NF" value={formatTimestamp(origin?.cliente.rastreabilidade.dtNF)} />
+              <TextField disabled label="Data NF" placeholder="Data NF" value={formatDate(origin?.cliente.rastreabilidade.dtNF)} />
               <TextField disabled label="Número de pedido" placeholder="Número de pedido" value={origin?.cliente.produto.numPedido} />
               <TextField disabled label="Número OP" placeholder="Número OP" value={origin?.cliente.produto.numOP} />
             </Stack>
@@ -120,10 +127,10 @@ const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummar
                 disabled
                 label="Data da entrega"
                 placeholder="Data da entrega"
-                value={formatTimestamp(origin?.mpprod.rastreabilidade.dtEntregaNF)}
+                value={formatDate(origin?.mpprod.rastreabilidade.dtEntregaNF)}
               />
               <TextField disabled label="Nota fiscal" placeholder="Nota fiscal" value={origin?.mpprod.rastreabilidade.numNF} />
-              <TextField disabled label="Data NF" placeholder="Data NF" value={formatTimestamp(origin?.mpprod.rastreabilidade.dtNF)} />
+              <TextField disabled label="Data NF" placeholder="Data NF" value={formatDate(origin?.mpprod.rastreabilidade.dtNF)} />
               <TextField disabled label="Número de pedido" placeholder="Número de pedido" value={origin?.mpprod.produto.numPedido} />
               <TextField disabled label="Número OP" placeholder="Número OP" value={origin?.mpprod.produto.numOP} />
             </Stack>

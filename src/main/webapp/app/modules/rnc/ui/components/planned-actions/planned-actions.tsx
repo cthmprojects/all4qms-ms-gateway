@@ -91,7 +91,7 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
   };
 
   const removeAction = () => {
-    dispatch(deleteAction(actionPlan.id));
+    actionPlan?.id && dispatch(deleteAction(actionPlan.id));
     onRemoved();
   };
 
@@ -160,9 +160,11 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
             ))}
           </Select>
         </FormControl>
-        <IconButton aria-label="Remover" onClick={_ => removeAction()}>
-          <Delete fontSize="medium" />
-        </IconButton>
+        {onRemoved && (
+          <IconButton aria-label="Remover" onClick={_ => removeAction()}>
+            <Delete fontSize="medium" />
+          </IconButton>
+        )}
       </div>
     </>
   );
@@ -241,7 +243,7 @@ const PlannedActions = ({ actionPlans, onUpdated, statuses, users }: PlannedActi
         <PlannedAction
           actionPlan={actionPlan}
           onChanged={actionPlan => onChanged(actionPlan, index)}
-          onRemoved={() => onRemoved(index)}
+          onRemoved={actionPlans.length > 1 ? () => onRemoved(index) : null}
           statuses={statuses}
           users={users}
         />
