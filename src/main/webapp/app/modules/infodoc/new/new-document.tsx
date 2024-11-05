@@ -39,7 +39,7 @@ import {
   notifyEmailInfoDoc,
   updateInfoDoc,
 } from '../reducers/infodoc.reducer';
-import { InfoDoc, Doc, Movimentacao, EnumTipoMovDoc, EnumStatusDoc } from '../models';
+import { InfoDoc, Doc, Movimentacao, EnumTipoMovDoc, EnumStatusDoc, EnumSituacao } from '../models';
 import { downloadAnexo } from '../reducers/anexo.reducer';
 import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
@@ -211,7 +211,7 @@ export const NewDocument = () => {
         idProcesso: parseInt(selectedProcess),
         idArquivo: parseInt(id!!),
         ignorarValidade: true,
-        enumSituacao: 'E',
+        enumSituacao: EnumSituacao.EDICAO,
         tipoDoc: 'MA',
         revisao: 0,
       };
