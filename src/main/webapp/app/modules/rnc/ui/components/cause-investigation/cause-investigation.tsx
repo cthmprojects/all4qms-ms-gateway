@@ -172,7 +172,7 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               multiple
               className="m-2"
               id="tags-outlined"
-              options={['']}
+              options={[]}
               value={environmentCauses}
               onChange={(event, values, reason, details) => {
                 onEnvironmentCausesChanged(values);
@@ -190,7 +190,7 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               className="m-2"
               id="tags-outlined"
               disabled={!newIshikawa}
-              options={['']}
+              options={[]}
               value={machineCauses}
               onChange={(event, values, reason, details) => {
                 onMachineCausesChanged(values);
@@ -209,7 +209,7 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               className="m-2"
               id="tags-outlined"
               disabled={!newIshikawa}
-              options={['']}
+              options={[]}
               value={manpowerCauses}
               onChange={(event, values, reason, details) => {
                 onManpowerCausesChanged(values);
@@ -226,7 +226,7 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               className="m-2"
               id="tags-outlined"
               disabled={!newIshikawa}
-              options={['']}
+              options={[]}
               value={measurementCauses}
               onChange={(event, values, reason, details) => {
                 onMeasurementCausesChanged(values);
@@ -245,7 +245,7 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               className="m-2"
               id="tags-outlined"
               disabled={!newIshikawa}
-              options={['']}
+              options={[]}
               value={methodCauses}
               onChange={(event, values, reason, details) => {
                 onMethodCausesChanged(values);
@@ -262,7 +262,7 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               className="m-2"
               id="tags-outlined"
               disabled={!newIshikawa}
-              options={['']}
+              options={[]}
               value={rawMaterialCauses}
               onChange={(event, values, reason, details) => {
                 onRawMaterialCausesChanged(values);
