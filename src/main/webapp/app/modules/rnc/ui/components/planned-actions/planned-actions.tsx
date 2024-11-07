@@ -98,9 +98,9 @@ const PlannedAction = ({ actionPlan, onChanged, onRemoved, statuses, users }: Pl
   useEffect(() => {
     setDeadline(actionPlan.prazoAcao);
     setDescription(actionPlan.descricaoAcao);
-    setResponsible(actionPlan.idResponsavelAcao.toString());
+    setResponsible(actionPlan.idResponsavelAcao?.toString());
     setStatus(actionPlan.statusAcao);
-    setVerifier(actionPlan.idResponsavelVerificaoAcao.toString());
+    setVerifier(actionPlan.idResponsavelVerificaoAcao?.toString());
     setVerification(actionPlan.dataVerificao);
   }, [actionPlan]);
 

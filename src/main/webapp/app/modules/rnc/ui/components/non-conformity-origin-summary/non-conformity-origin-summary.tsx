@@ -33,6 +33,14 @@ const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummar
     return `${yearStr}/${monthStr}/${dayStr}`;
   };
 
+  function identificadoNoLabel(value: string) {
+    const labels = {
+      process: 'Processo',
+      reception: 'Recebimento',
+    };
+    return labels[value] || 'Carregando...';
+  }
+
   return (
     <Card>
       <CardHeader title="Origem" />
@@ -77,7 +85,12 @@ const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummar
                 placeholder="Quantidade rejeitada"
                 value={origin?.cliente.produto.qtdRejeicao}
               />
-              <TextField disabled label="% defeito" placeholder="% defeito" value={origin?.cliente.produto.qtdDefeito} />
+              <TextField
+                disabled
+                label="% defeito"
+                placeholder="% defeito"
+                value={origin?.cliente.produto.qtdDefeito || (origin?.cliente.produto.qtdRejeicao / origin?.cliente.produto.qtdLote) * 100}
+              />
             </Stack>
             <Stack direction="row" spacing={2}>
               <TextField disabled label="Lote" placeholder="Lote" value={origin?.cliente.produto.lote} />
@@ -100,7 +113,12 @@ const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummar
             <Stack direction="row" spacing={2}>
               <TextField disabled label="Código" placeholder="Código" value={origin?.mpprod.produto.codigoProduto} />
               <TextField disabled label="Descrição" placeholder="Descrição" value={origin?.mpprod.produto.nomeProduto} />
-              <TextField disabled label="Identificado no" placeholder="Identificado no" value={origin?.mpprod.produto.identificador} />
+              <TextField
+                disabled
+                label="Identificado no"
+                placeholder="Identificado no"
+                value={identificadoNoLabel(origin?.mpprod.produto.identificador)}
+              />
             </Stack>
             <Stack direction="row" spacing={2}>
               <TextField disabled label="Turno" placeholder="Turno" value={origin?.mpprod.operador.turnoOperador} />

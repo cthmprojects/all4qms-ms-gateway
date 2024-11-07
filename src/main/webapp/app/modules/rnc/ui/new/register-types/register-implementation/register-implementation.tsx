@@ -56,7 +56,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
           ...implementation,
           possuiImplementacao: firstForm.implemented.value,
           dataImplementacao: firstForm.date.value,
-          responsavelImplementacao: users.find(user => user.nome === firstForm.emitter.value)?.id,
+          responsavelImplementacao: users.find(user => user.id === firstForm.emitter.value)?.id,
           descImplementacao: firstForm.description.value,
         })
       );
@@ -64,7 +64,7 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
       const new_implementation = {
         possuiImplementacao: firstForm.implemented.value,
         dataImplementacao: firstForm.date.value,
-        responsavelImplementacao: users.find(user => user.nome === firstForm.emitter.value)?.id,
+        responsavelImplementacao: users.find(user => user.id === firstForm.emitter.value)?.id,
         descImplementacao: firstForm.description.value,
         dataEficacia: null,
         dataFechamento: null,
