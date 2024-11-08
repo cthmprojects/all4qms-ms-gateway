@@ -41,20 +41,6 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
   const [decisionType, setDecisionType] = useState<string>('');
   const [responsibles, setResponsibles] = useState<Array<string>>([]);
 
-  useEffect(() => {
-    if (!initialData) {
-      return;
-    }
-
-    setDecisionType(initialData.type.toLowerCase());
-    setResponsibles(initialData.responsibles?.split(';') ?? []);
-    setDecision({ ...initialData });
-  }, [initialData]);
-
-  useEffect(() => {
-    setDecision({ ...decision, responsibles: responsibles.join(';') });
-  }, [responsibles]);
-
   const calculateRate = (a: number, b: number): number => {
     const total: number = a + b;
 
@@ -76,10 +62,6 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
     return calculateRate(approved, reproved);
   }, [decision]);
 
-  useEffect(() => {
-    onChanged({ ...initialData, rejected: rejectionRate });
-  }, [rejectionRate]);
-
   return (
     <div className="fake-card mt-3">
       <br />
@@ -89,21 +71,19 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
           <Select
             label="Decisão"
             name="decision"
-            value={decisionType}
+            value={initialData.type}
             onChange={event => {
               const type: string = event.target.value;
-              setDecision({ ...decision, type: type });
-              setDecisionType(type);
+              onChanged({ ...decision, type: type });
             }}
           >
-            <MenuItem value="retrabalho">Retrabalho</MenuItem>
-            <MenuItem value="seleção">Seleção</MenuItem>
+            <MenuItem value="RETRABALHO">Retrabalho</MenuItem>
+            <MenuItem value="SELEÇÃO">Seleção</MenuItem>
           </Select>
         </FormControl>
         <TextField
           sx={{ height: '60px', maxWidth: '50% !important' }}
           label="Descrição da decisão"
-          name="number"
           id="rnc-text-field"
           onChange={event => onChanged({ ...initialData, description: event.target.value })}
           value={initialData.description}
@@ -114,7 +94,7 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
         <FormControl className="mb-2 rnc-form-field me-2">
           <DatePicker
             selected={new Date(initialData.date)}
-            onChange={date => setDecision({ ...initialData, date: date })}
+            onChange={date => onChanged({ ...initialData, date: date })}
             className="date-picker"
             dateFormat={'dd/MM/yyyy'}
             id="date-picker-general-register"
@@ -142,13 +122,15 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
             <InputLabel>Responsáveis</InputLabel>
             <Select
               multiple
-              value={responsibles}
+              value={initialData.responsibles.split(';')}
               onChange={event => {
                 const { value } = event.target;
                 if (typeof value === 'string') {
                   setResponsibles(value.split(','));
+                  onChanged({ ...initialData, responsibles: value.split(',').join(';') });
                 } else {
                   setResponsibles(value);
+                  onChanged({ ...initialData, responsibles: value.join(';') });
                 }
               }}
               input={<OutlinedInput label="Responsáveis" />}
@@ -156,7 +138,7 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
             >
               {users.map((user, idx) => (
                 <MenuItem value={user} key={`user-${idx}`}>
-                  <Checkbox checked={responsibles.indexOf(user) > -1} />
+                  <Checkbox checked={initialData.responsibles.split(';').indexOf(user) > -1} />
                   <ListItemText primary={user} />
                 </MenuItem>
               ))}

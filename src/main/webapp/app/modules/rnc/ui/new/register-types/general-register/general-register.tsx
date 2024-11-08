@@ -498,7 +498,7 @@ export const GeneralRegister = () => {
 
     saveProductDecision();
 
-    if (_rnc && showPlanoAcaoCorretiva) {
+    if (_rnc) {
       getInvestigations().then(async res => {
         const ids: Array<number> = res.map(r => r.id);
 
