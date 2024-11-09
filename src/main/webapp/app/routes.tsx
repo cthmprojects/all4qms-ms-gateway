@@ -18,6 +18,7 @@ import PerformanceIndicatorsRoutes from './modules/performance-indicators';
 import RisksOpportunitiesRoutes from './modules/risks-opportunities';
 import RncRoutes from './modules/rnc';
 import StrategicPlaningRoutes from './modules/strategic-planning';
+import { AuditRoutes } from './modules/audit';
 
 const loading = <div>loading ...</div>;
 
@@ -55,6 +56,14 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
         <Route path="performance-indicators/*" element={<PerformanceIndicatorsRoutes />} />
         <Route path="strategic-planning/*" element={<StrategicPlaningRoutes />} />
+        <Route
+          path="audit/*"
+          element={
+            <PrivateRoute hasAnyAuthorities={[AUTHORITIES.SGQ]}>
+              <AuditRoutes />
+            </PrivateRoute>
+          }
+        />
 
         <Route path="account">
           <Route

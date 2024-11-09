@@ -22,6 +22,8 @@ import { Storage } from 'react-jhipster';
 import { IPendencia } from '../../model/pendencia.model';
 import { getEntitiesById as getPendenciasByUser, getPendenciasCount } from '../../../entities/pendencia/pendencia.reducer';
 import { AxiosResponse } from 'axios';
+import { EnableComponent } from 'app/shared/auth/enable-component';
+import { AUTHORITIES } from 'app/config/constants';
 
 export interface IHeaderProps {
   isAuthenticated: boolean;
@@ -209,6 +211,10 @@ const Header = (props: IHeaderProps) => {
                 <MenuItem onClick={() => navigate('/processo')}>Processos</MenuItem>
                 {/* <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem> */}
                 <MenuItem onClick={() => navigate('/goals/resources')}>Recursos</MenuItem>
+                <EnableComponent
+                  hasAnyAuthorities={[AUTHORITIES.SGQ]}
+                  component={<MenuItem onClick={() => navigate('/audit/maintenance')}>Auditores</MenuItem>}
+                />
                 <MenuItem onClick={() => navigate('/account/reset/finish')}>Alterar senha</MenuItem>
               </Menu>
               <Button startIcon={<AccountCircleIcon />} className="remove-margin-top-icon" onClick={handleOpenProfileMenu}>
