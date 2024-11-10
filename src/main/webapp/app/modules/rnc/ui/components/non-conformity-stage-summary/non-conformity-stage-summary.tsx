@@ -77,7 +77,7 @@ const NonConformityStageSummary = ({
             <TextField disabled label={responsibleLabel} placeholder={responsibleLabel} value={findUserById(responsible)} />
           </Stack>
           <Stack spacing={2}>
-            <TextField disabled label={descriptionLabel} placeholder={descriptionLabel} value={description} />
+            <TextField disabled label={descriptionLabel} placeholder={descriptionLabel} value={description ?? ''} />
           </Stack>
         </Stack>
       </CardContent>

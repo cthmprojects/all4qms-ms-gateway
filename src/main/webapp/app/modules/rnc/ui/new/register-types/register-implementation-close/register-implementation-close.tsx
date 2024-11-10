@@ -54,7 +54,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
         updateApprovalNC({
           ...completion,
           dataFechamento: firstForm.date.value,
-          responsavelFechamento: users.find(user => user.nome === firstForm.emitter.value)?.id,
+          responsavelFechamento: users.find(user => user.id === firstForm.emitter.value)?.id,
           alteracaoRisco: firstForm.changeRisk.value,
           descFechamento: firstForm.description.value,
         })
@@ -69,7 +69,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
         updateApprovalNC({
           ...completion,
           dataFechamento: firstForm.date.value,
-          responsavelFechamento: users.find(user => user.nome === firstForm.emitter.value)?.id,
+          responsavelFechamento: users.find(user => user.id === firstForm.emitter.value)?.id,
           alteracaoRisco: firstForm.changeRisk.value,
           descFechamento: firstForm.description.value,
         })
@@ -92,9 +92,10 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
   }, [_rnc]);
 
   useEffect(() => {
-    const idResponsavelFechamento = users.find(user => user.id === completion.responsavelFechamento)?.id;
-    const definitiveId = idResponsavelFechamento || account?.id;
     if (completion) {
+      const idResponsavelFechamento = users.find(user => user.id === completion.responsavelFechamento)?.id;
+      const definitiveId = idResponsavelFechamento || account?.id;
+
       setFirstForm({
         date: { value: completion.dataFechamento ? new Date(completion.dataFechamento) : new Date(), error: false },
         emitter: {
@@ -105,7 +106,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
         description: { value: completion.descFechamento, error: false },
       });
     }
-  }, [completion]);
+  }, [completion, users, account]);
 
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
