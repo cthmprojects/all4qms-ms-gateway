@@ -110,6 +110,8 @@ const RncList = ({}) => {
     );
   };
 
+  useEffect(handleApplyFilters, [filters.origemNC]);
+
   useEffect(() => {
     const value: string | null = description.length > 0 ? description : null;
 
@@ -172,7 +174,7 @@ const RncList = ({}) => {
       return;
     }
 
-    dispatch(listNonConformities({ page: page, size: pageSize }));
+    handleApplyFilters();
   }, [page]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -195,30 +197,18 @@ const RncList = ({}) => {
         type = 'PROCEDIMENTO_OUTROS';
         break;
       default:
+        type = '';
         break;
     }
 
-    const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
-    dispatch(
-      listNonConformities({
-        page: 0,
-        size: pageSize,
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
-        statusAtual,
-        processoNC,
-        tipoNC,
-        descricao,
-        origemNC: type,
-      })
-    );
+    setFilters({ ...filters, origemNC: type });
 
     setValue(newValue);
   };
 
-  useEffect(() => {
+  /* useEffect(() => {
     dispatch(listAprovacaoNC({}));
-  }, [nonConformities]);
+  }, [nonConformities]); */
 
   const reloadInfo = () => {
     dispatch(reset());

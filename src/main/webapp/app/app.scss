@@ -326,6 +326,11 @@ http://stackoverflow.com/questions/23436430/bootstrap-3-input-group-100-width */
   color: #4e4d4d;
 }
 
+.MuiButton-containedSecondary:not(.Mui-disabled) {
+  background-color: #d9d9d9 !important;
+  color: #4e4d4d;
+}
+
 .periodo {
   width: 150px !important;
 }
@@ -347,4 +352,18 @@ input[type='number'] {
 
 .react-datepicker__year--container {
   min-width: 150px;
+}
+
+/* Removendo a classe `react-datepicker__day--keyboard-selected` */
+.onlyView .react-datepicker__day--in-range.react-datepicker__day--keyboard-selected {
+  border-radius: 0.3rem;
+  background-color: #216ba5;
+  color: #fff;
+}
+
+.onlyView .react-datepicker__day--keyboard-selected {
+  background-color: transparent;
+  color: #ccc;
+  outline: none;
+  box-shadow: none;
 }
