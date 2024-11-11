@@ -883,6 +883,7 @@ export const GeneralRegister = () => {
               color="primary"
               style={{ background: '#e6b200', color: '#4e4d4d' }}
               onClick={() => {
+                saveOrUpdate();
                 if (!showPlanoAcaoCorretiva) {
                   setShowPlanoAcaoCorretiva(true);
                   updateElaboration();
