@@ -11,7 +11,7 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
       - SPRING_R2DBC_URL=r2dbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
-      - JHIPSTER_SLEEP=5 # gives time for microservices to boot before the gateway, the entire stack will be ready to accept incoming requests.
+      - JHIPSTER_SLEEP=30 # gives time for microservices to boot before the gateway, the entire stack will be ready to accept incoming requests.
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
     ports:
@@ -28,10 +28,11 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
       - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsnsrnc
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsnsrnc
-      - JHIPSTER_SLEEP=10
+      - JHIPSTER_SLEEP=40
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
       - IA-HOST=https://all4qms-ia.cthmprojetos.com
+      - SERVER_GATEWAY=http://gateway:8080
     ports:
       - 8082:8082
   infodoc:
@@ -46,7 +47,7 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
       - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsinfodoc
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsinfodoc
-      - JHIPSTER_SLEEP=15
+      - JHIPSTER_SLEEP=50
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
       - IA-HOST=https://all4qms-ia.cthmprojetos.com
@@ -62,10 +63,12 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
       - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsrisco
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsrisco
-      - JHIPSTER_SLEEP=20
+      - JHIPSTER_SLEEP=40
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
       - IA-HOST=https://all4qms-ia.cthmprojetos.com
+      - SERVER_RNC=http://rnc:8082
+      - SERVER_GATEWAY=http://gateway:8080
     ports:
       - 8084:8084
 
@@ -81,10 +84,12 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
       - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsmetaind
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsmetaind
-      - JHIPSTER_SLEEP=25
+      - JHIPSTER_SLEEP=50
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
       - IA-HOST=https://all4qms-ia.cthmprojetos.com
+    ports:
+      - 8085:8085
     healthcheck:
       test:
         - CMD
@@ -104,10 +109,12 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
       - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsauditplan
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsauditplan
-      - JHIPSTER_SLEEP=30
+      - JHIPSTER_SLEEP=60
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
       - IA-HOST=https://all4qms-ia.cthmprojetos.com
+    ports:
+      - 8086:8086
     healthcheck:
       test:
         - CMD

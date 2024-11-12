@@ -923,7 +923,7 @@
                                 <algorithm>SHA-1</algorithm>
                             </algorithms>
                             <includeRelativePath>true</includeRelativePath>
-                            <quiet>true</quiet>
+                            <quiet>false</quiet>
                         </configuration>
                     </plugin>
                     <plugin>
