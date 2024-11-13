@@ -217,8 +217,8 @@ jhipster:
   api-docs:
     default-include-pattern: ${server.servlet.context-path:}/api/**
     management-include-pattern: ${server.servlet.context-path:}/management/**
-    title: All 4 Qms Ms Gateway API
-    description: All 4 Qms Ms Gateway API documentation
+    title: Gateway API
+    description: Gateway API documentation
     version: 0.0.1
     terms-of-service-url:
     contact-name:
