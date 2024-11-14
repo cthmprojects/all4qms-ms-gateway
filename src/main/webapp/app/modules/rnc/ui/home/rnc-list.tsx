@@ -42,6 +42,7 @@ import './rnc.css';
 import { VisibilityOutlined } from '@mui/icons-material';
 import { resetAudit } from '../../reducers/audit.reducer';
 import { resetImplementation } from '../../reducers/approval.reducer';
+import { useDebouncedCallback } from 'use-debounce';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -97,20 +98,31 @@ const RncList = ({}) => {
     console.table({ dtFim, dtIni });
     dispatch(
       listNonConformities({
-        page: 0,
+        page: page,
         size: pageSize,
         statusAtual,
         processoNC,
         tipoNC,
         descricao,
-        origemNC,
+        origemNC: getType(origemNC),
         ...(dtIni ? { dtIni: formatter.format(dtIni) } : {}),
         ...(dtFim ? { dtFim: formatter.format(dtFim) } : {}),
       })
     );
   };
 
-  useEffect(handleApplyFilters, [filters.origemNC]);
+  function autoSearch() {
+    const { origemNC } = filters;
+    dispatch(
+      listNonConformities({
+        page: page,
+        size: pageSize,
+        origemNC: getType(origemNC),
+      })
+    );
+  }
+
+  const debouncedAutSearch = useDebouncedCallback(autoSearch, 300);
 
   useEffect(() => {
     const value: string | null = description.length > 0 ? description : null;
@@ -170,17 +182,13 @@ const RncList = ({}) => {
   }, []);
 
   useEffect(() => {
-    if (page <= 0) {
-      return;
-    }
+    debouncedAutSearch();
+  }, [page, pageSize, filters.origemNC]);
 
-    handleApplyFilters();
-  }, [page]);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  function getType(value: number) {
     let type: string = '';
 
-    switch (newValue) {
+    switch (value) {
       case 1:
         type = 'AUDITORIA';
         break;
@@ -200,9 +208,12 @@ const RncList = ({}) => {
         type = '';
         break;
     }
+    return type;
+  }
 
-    setFilters({ ...filters, origemNC: type });
-
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setFilters({ ...filters, origemNC: newValue });
+    setPage(0);
     setValue(newValue);
   };
 
