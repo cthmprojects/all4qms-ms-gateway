@@ -68,6 +68,33 @@ export const saveIndicatorGoal = createAsyncThunk('save/indicatorGoal', async (i
   return axios.post<MetaIndicador>(apiUrl, toRawIndicatorGoal(indicatorGoal));
 });
 
+export const saveIndicatorGoals = createAsyncThunk('save/indicatorGoals', async (indicatorGoals: Array<IndicatorGoal>) => {
+  const indicator: Indicator = indicatorGoals[0].indicator;
+
+  const response = await axios.post<Indicador>(indicadoresApiUrl, toRawIndicator(indicator));
+
+  if (response.status !== 201) {
+    return null;
+  }
+
+  const id: number = response.data.id;
+  const rawIndicatorGoals: Array<MetaIndicador> = [];
+
+  for (let i = 0; i < indicatorGoals.length; i++) {
+    const indicatorGoal = indicatorGoals[i];
+
+    indicatorGoal.indicator.id = id;
+    const response = await axios.post<MetaIndicador>(apiUrl, toRawIndicatorGoal(indicatorGoal));
+
+    if (response.status === 201) {
+      const rawIndicatorGoal: MetaIndicador = response.data;
+      rawIndicatorGoals.push(rawIndicatorGoal);
+    }
+  }
+
+  return rawIndicatorGoals;
+});
+
 export const updateIndicatorGoal = createAsyncThunk('update/indicatorGoal', async (indicatorGoal: IndicatorGoal) => {
   return axios.put<MetaIndicador>(`${apiUrl}/${indicatorGoal.id}`, toRawIndicatorGoal(indicatorGoal));
 });
@@ -92,6 +119,10 @@ const indicatorGoalsSlice = createEntitySlice({
       .addMatcher(isFulfilled(saveIndicatorGoal), (state, action) => {
         state.loading = false;
         state.entity = toIndicatorGoal(action.payload.data);
+      })
+      .addMatcher(isFulfilled(saveIndicatorGoals), (state, action) => {
+        state.loading = false;
+        state.entities = action.payload.map(d => toIndicatorGoal(d));
       })
       .addMatcher(isFulfilled(updateIndicatorGoal), (state, action) => {
         state.loading = false;
