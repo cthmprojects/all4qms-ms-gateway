@@ -56,10 +56,10 @@ const AddIndicator = () => {
     navigate('../');
   };
 
-  const save = (): void => {
+  const save = async (): Promise<void> => {
     // TODO: Save multiple goals
 
-    dispatch(
+    await dispatch(
       saveIndicatorGoal({
         frequency: goalFrequencies[0] as 'MENSAL' | 'BIMESTRAL' | 'TRIMESTRAL' | 'QUADRIMESTRAL' | 'SEMESTRAL' | 'ANUAL',
         goals: goals[0],
@@ -127,7 +127,9 @@ const AddIndicator = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Typography className="link">Indicadores</Typography>
+          <Link to={'../analytics'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+            Indicadores
+          </Link>
           <Typography className="link">Cadastro</Typography>
         </Breadcrumbs>
 

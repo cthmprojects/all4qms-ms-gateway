@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Button, Card, CardContent, CardHeader, Stack, Typography } from '@mui/material';
+import { Autocomplete, Box, Breadcrumbs, Button, Card, CardContent, CardHeader, Stack, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
@@ -9,6 +9,7 @@ import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reduce
 import { getIndicatorGoal, updateIndicatorGoal } from '../../reducers/indicator-goals.reducer';
 import { getIndicator } from '../../reducers/indicators.reducer';
 import { IndicatorDetails, IndicatorGoals, IndicatorMeasurements } from '../components';
+import { getYearRange } from '../../utils';
 
 const Measurements = () => {
   const [goals, setGoals] = useState<Array<Array<number | null>>>([]);
@@ -131,7 +132,9 @@ const Measurements = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Typography className="link">Indicadores</Typography>
+          <Link to={'../analytics'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+            Indicadores
+          </Link>
           <Typography className="link">Medições</Typography>
         </Breadcrumbs>
 
@@ -141,6 +144,27 @@ const Measurements = () => {
 
             <Stack spacing={2}>
               <IndicatorDetails initialValue={indicator} processes={summarizedProcesses} readonly trends={trends} units={units} />
+
+              <Stack direction="row" spacing={2}>
+                <Autocomplete
+                  disableClearable
+                  disabled
+                  options={frequencies}
+                  renderInput={params => <TextField {...params} label="Frequência" />}
+                  sx={{ minWidth: '215px' }}
+                  value={indicatorGoal?.frequency ?? null}
+                />
+
+                <Autocomplete
+                  disableClearable
+                  disabled
+                  getOptionLabel={option => option.toString()}
+                  options={getYearRange()}
+                  renderInput={props => <TextField {...props} label="Ano" />}
+                  sx={{ minWidth: '100px' }}
+                  value={indicatorGoal?.year ? parseInt(indicatorGoal?.year) : null}
+                />
+              </Stack>
 
               <Card>
                 <CardHeader title="Metas" />
@@ -157,7 +181,7 @@ const Measurements = () => {
               </Card>
 
               <Card>
-                <CardHeader title="Medições" />
+                <CardHeader title="Resultados" />
                 <CardContent>
                   <IndicatorMeasurements
                     frequencies={frequencies}

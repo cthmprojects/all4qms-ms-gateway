@@ -48,7 +48,7 @@ export const getIndicators = createAsyncThunk('get/indicators', async (params: L
 });
 
 export const getAllIndicators = createAsyncThunk('get/all/indicators', async () => {
-  return axios.get<Array<Indicador>>(`${apiUrl}`);
+  return axios.get<Array<Indicador>>(`${apiUrl}?cacheBuster=${new Date().getTime()}`);
 });
 
 export const saveIndicator = createAsyncThunk('save/indicator', async (indicator: Indicator) => {

@@ -49,7 +49,7 @@ export const getIndicatorGoals = createAsyncThunk('get/indicatorGoals', async (p
 });
 
 export const getAllIndicatorGoals = createAsyncThunk('get/all/indicatorGoals', async () => {
-  return axios.get<Array<MetaIndicador>>(`${apiUrl}`);
+  return axios.get<Array<MetaIndicador>>(`${apiUrl}?cacheBuster=${new Date().getTime()}`);
 });
 
 export const saveIndicatorGoal = createAsyncThunk('save/indicatorGoal', async (indicatorGoal: IndicatorGoal) => {
