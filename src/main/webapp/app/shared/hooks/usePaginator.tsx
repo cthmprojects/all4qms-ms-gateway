@@ -1,5 +1,6 @@
 import { TablePagination, Box, BoxProps, TablePaginationProps } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 type Config = {
   boxProps?: BoxProps;
@@ -7,9 +8,13 @@ type Config = {
 };
 
 export const usePaginator = (totalItems: number, config: Config = {}) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const { boxProps, paginatorProps } = config;
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState<number>(5);
+  const [page, setPage] = useState(Number(searchParams.get('page')) || 0);
+  const [pageSize, setPageSize] = useState<number>(Number(searchParams.get('pageSize')) || 5);
+
+  const [isInitialized, setIsInitialized] = useState(false);
 
   function displayedRowsLabel({ from, to, count }) {
     return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
@@ -24,8 +29,29 @@ export const usePaginator = (totalItems: number, config: Config = {}) => {
   };
 
   useEffect(() => {
-    setPage(0);
+    isInitialized && setPage(0);
   }, [totalItems, pageSize]);
+
+  function setPaginationInUrl() {
+    if (isInitialized) {
+      searchParams.set('page', `${page}`);
+      searchParams.set('pageSize', `${pageSize}`);
+      setSearchParams(searchParams, { replace: true });
+    }
+  }
+
+  useEffect(setPaginationInUrl, [page, pageSize]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const uPage = searchParams.get('page');
+      uPage && setPage(Number(uPage));
+
+      const uPageSize = searchParams.get('pageSize');
+      uPageSize && setPageSize(Number(uPageSize));
+      setIsInitialized(true);
+    }, 400);
+  }, []);
 
   const paginator = (
     <Box display="flex" justifyContent="center" {...(boxProps || {})}>

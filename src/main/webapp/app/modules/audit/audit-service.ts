@@ -7,6 +7,7 @@ import {
   Auditor,
   CronogramaAuditoria,
   ModeloAuditoria,
+  NcOmAuditoria,
   PlanejamentoAuditoria,
   RegistrarAuditoriaForm,
   RegistroAuditoria,
@@ -269,15 +270,6 @@ export const persistAgendamento = addToast(
   'Erro ao salvar agendamento'
 );
 
-export const getRegistroById = addToast(
-  async (id: number) => {
-    const { data } = await axios.get<RegistroAuditoria>(`${AuditBaseUrl}/auditoria/registros/${id}`);
-    return data;
-  },
-  '',
-  'Erro ao buscar registro'
-);
-
 export const getAgendamentoById = addToast(
   async (id: number) => {
     const { data } = await axios.get<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos/${id}`);
@@ -291,6 +283,17 @@ export const getAgendamentoById = addToast(
   },
   '',
   'Erro ao buscar agendamento'
+);
+
+/** Registro de Auditoria **/
+
+export const getRegistroById = addToast(
+  async (id: number) => {
+    const { data } = await axios.get<RegistroAuditoria>(`${AuditBaseUrl}/auditoria/registros/${id}`);
+    return data;
+  },
+  '',
+  'Erro ao buscar registro'
 );
 
 async function saveRegistro(registro: RegistroAuditoria) {
@@ -308,15 +311,30 @@ async function persistRegistro(registro: RegistroAuditoria) {
   return result;
 }
 
+function filterNcOmList(item: NcOmAuditoria) {
+  const { descricao, evidencia, requisito } = item;
+  return descricao || evidencia || requisito;
+}
+
 async function saveRegistroAuditoria({ agendamento, base, ncList, omList }: RegistrarAuditoriaForm) {
   const registro = await persistRegistro(base);
   const newAgendamento = updateAgendamento({ ...agendamento, registro });
+  const newNcOmList = ncList
+    .concat(omList)
+    .filter(filterNcOmList)
+    .map(item => ({ ...item, idRegistroAgendamento: registro.id }));
+  newNcOmList.length && (await persistNcsOmsAuditoria(newNcOmList));
   return parseRawAgendamento({ ...newAgendamento, registro });
 }
 
 async function updateRegistroAuditoria({ agendamento, base, ncList, omList }: RegistrarAuditoriaForm) {
   const registro = await persistRegistro(base);
   const newAgendamento = { ...agendamento, registro };
+  const newNcOmList = ncList
+    .concat(omList)
+    .filter(filterNcOmList)
+    .map(item => ({ ...item, idRegistroAgendamento: registro.id }));
+  newNcOmList.length && (await persistNcsOmsAuditoria(newNcOmList));
   return parseRawAgendamento(newAgendamento);
 }
 
@@ -328,6 +346,8 @@ export const persistRegistroAuditoria = addToast(
   'Registro de auditoria salvo com sucesso',
   'Erro ao salvar registro de auditoria'
 );
+
+/** Mdedelo de Auditoria **/
 
 export const getModelById = addToast(
   async (id: number) => {
@@ -355,4 +375,47 @@ export const persistModelo = addToast(
   },
   'Modelo de auditoria salvo com sucesso',
   'Erro ao salvar modelo de auditoria'
+);
+
+/** Não Conformidade ou Oportunidade de Melhoria de Auditoria **/
+
+async function saveNcOmAuditoria(descricaoNcOm: NcOmAuditoria) {
+  var form_data = new FormData();
+
+  const { anexo, ...rest } = descricaoNcOm;
+
+  for (var key in rest) {
+    !!descricaoNcOm[key] && form_data.append(key, descricaoNcOm[key]);
+  }
+  anexo?.length && form_data.append('anexo', anexo[0]);
+  const { data } = await axios.post<NonConformityAudit>(`${AuditBaseUrl}/auditoria/registros/descncoms`, form_data);
+  return data;
+}
+
+async function updateNcOmAuditoria(descricaoNcOm: NcOmAuditoria) {
+  var form_data = new FormData();
+
+  const { anexo, ...rest } = descricaoNcOm;
+
+  for (var key in rest) {
+    !!descricaoNcOm[key] && form_data.append(key, descricaoNcOm[key]);
+  }
+
+  anexo?.length && form_data.append('anexo', anexo[0]);
+  const { data } = await axios.put<NonConformityAudit>(`${AuditBaseUrl}/auditoria/registros/descncoms/${descricaoNcOm.id}`, form_data);
+  return data;
+}
+
+export async function persistNcsOmsAuditoria(descricaoNcOmList: NcOmAuditoria[]) {
+  const requests = descricaoNcOmList.map(item => (item?.id ? updateNcOmAuditoria(item) : saveNcOmAuditoria(item)));
+  await Promise.all(requests);
+}
+
+export const getListNcsOmsAuditoria = addToast(
+  async (registro: RegistroAuditoria) => {
+    const { data } = await axios.get<NcOmAuditoria[]>(`${AuditBaseUrl}/auditoria/registros/descncoms/byregistro/${registro.id}`);
+    return data;
+  },
+  '',
+  'Erro ao buscar lista NC/OM'
 );

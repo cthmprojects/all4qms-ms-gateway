@@ -15,21 +15,28 @@ type RegisterAuditNcOmListProps = {
   raizNcParcial: OnlyRequired<Omit<Rnc, 'tipoNC'>>;
 };
 
-export const RegisterAuditNcOmList = ({ type, raizNcParcial, audit }: RegisterAuditNcOmListProps) => {
+export const RegisterAuditNcOmList = ({ type, raizNcParcial, audit, previousList }: RegisterAuditNcOmListProps) => {
   const isNC = type == 'NC';
   const fieldName = isNC ? 'ncList' : 'omList';
 
   const { control } = useFormContext();
-  const { fields, prepend } = useFieldArray({ control, name: fieldName });
+  const { fields, prepend, append } = useFieldArray({ control, name: fieldName });
 
   const add = () => {
-    prepend({ descricao: '', requisito: '', evidencia: '' });
+    prepend({ descricao: '', requisito: '', evidencia: '', tipoDescricao: type });
   };
   useEffect(() => {
     setTimeout(() => {
       if (!fields.length) add();
     }, 300);
   }, []);
+
+  useEffect(() => {
+    previousList.forEach(item => {
+      const { registroAgendamento, ...rest } = item;
+      append({ ...rest, idRegistroAgendamento: registroAgendamento.id });
+    });
+  }, [previousList]);
   return (
     <Box>
       <Box display="flex" justifyContent="end" position="relative">
