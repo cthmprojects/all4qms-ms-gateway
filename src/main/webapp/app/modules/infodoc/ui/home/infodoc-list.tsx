@@ -277,11 +277,18 @@ const InfodocList = () => {
 
   // ---------------------------------------------------------------
 
+  // D (Distribuir),
+  // E (Edicao),
+  // R (Revisao),
+  // O (Obsoleto),
+  // C (Cancelado)
+  // H (Homologado),
+
   const switchSituationByTab = (newValue: number) => {
     let type = '';
     switch (newValue) {
       case 0:
-        type = 'H';
+        type = 'D';
         break;
       case 1:
         type = 'E';
@@ -289,11 +296,14 @@ const InfodocList = () => {
       case 2:
         type = 'R';
         break;
-      case 3:
-        type = 'O';
-        break;
       case 4:
         type = 'C';
+        break;
+      case 5:
+        type = 'O';
+        break;
+      case 6:
+        type = 'H';
         break;
       default:
         return '';
@@ -303,12 +313,6 @@ const InfodocList = () => {
   };
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    // E - Edição
-    // R - revisão
-    // H - homolog
-    // O - obsoleto
-    // C - cancelado
-
     const type: string = switchSituationByTab(newValue);
 
     const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
@@ -723,11 +727,13 @@ const InfodocList = () => {
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-              <Tab label="Lista Mestra" {...a11yProps(0)} />
-              <Tab label="Edição" {...a11yProps(1)} />
-              <Tab label="Revisão" {...a11yProps(2)} />
-              {isSgq && <Tab label="Obsoleto" {...a11yProps(3)} />}
+              <Tab label="Cópia Controlada" {...a11yProps(0)} />
+              <Tab label="Solicitação e Validação" {...a11yProps(1)} />
+              <Tab label="Aprovação" {...a11yProps(2)} />
+              <Tab label="Lista Mestra" {...a11yProps(3)} />
               {isSgq && <Tab label="Cancelado" {...a11yProps(4)} />}
+              {isSgq && <Tab label="Obsoleto" {...a11yProps(5)} />}
+              {isSgq && <Tab label="Homologados" {...a11yProps(6)} />}
             </Tabs>
           </Box>
           <CustomTabPanel value={value} index={0}>
