@@ -11,13 +11,13 @@ export const MaterialSelect = forwardRef(
       <FormControl className={className} variant={variant} required={required} fullWidth={fullWidth} error={error} sx={sx}>
         <InputLabel>{label}</InputLabel>
         <Select label={label} fullWidth={fullWidth} ref={ref} {...rest} defaultValue="">
-          {children}
           {rest && rest?.value && (
             //@ts-ignore
             <MenuItem sx={{ display: 'none' }} value={rest?.value}>
               {rest.renderValue ? rest.renderValue(rest?.value) : (rest?.value as string)}
             </MenuItem>
           )}
+          {children}
         </Select>
         {helperText && <FormHelperText>{helperText || (rest.value as string)}</FormHelperText>}
       </FormControl>
