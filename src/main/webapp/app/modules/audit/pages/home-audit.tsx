@@ -1,7 +1,7 @@
 import { Box, Breadcrumbs, Tab, Tabs, Typography } from '@mui/material';
 import { CustomTabPanel } from 'app/shared/components/tabs';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { TimelineTabContent } from '../components/timeline-tab-content';
 import { PlanningTabContent } from '../components/planning-tab-content';
 import { ModelTabContent } from '../components/model-tab-content';
@@ -11,10 +11,10 @@ export const HomeAudit = () => {
   const query = new URLSearchParams(location.search);
 
   const [tabIndex, setTabIndex] = useState(Number(query.get('tab')) || 0);
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const onTabChange = (_, index) => {
-    navigate(`/audit?tab=${index}`, { replace: true });
+    setSearchParams({ tab: index }, { replace: true });
     setTabIndex(index);
   };
   return (

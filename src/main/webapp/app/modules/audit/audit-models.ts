@@ -59,9 +59,22 @@ export type RegistroAuditoria = {
   numeroRelatorio: string;
 };
 
+export type NcOmAuditoria = {
+  tipoDescricao: 'NC' | 'OM';
+  descricao: string;
+  requisito: string;
+  evidencia: string;
+  numeroRnc: number;
+  idRnc: number;
+  idRegistroAgendamento: number;
+  anexo?: any;
+  id?: number;
+  criadoEm?: Date;
+};
+
 export type RegistrarAuditoriaForm = {
   agendamento: AgendamentoAuditoria;
   base: RegistroAuditoria;
-  ncList: any[];
-  omList: any[];
+  ncList: NcOmAuditoria[];
+  omList: NcOmAuditoria[];
 };
