@@ -2,7 +2,7 @@
 version: '3.8'
 services:
   jhipster-registry:
-    image: jhipster/jhipster-registry:v7.3.0
+    image: jhipster/jhipster-registry:v7.4.0
     volumes:
       - ./central-server-config:/central-config
     # When run with the "dev" Spring profile, the JHipster Registry will
@@ -23,6 +23,13 @@ services:
     # remove the "127.0.0.1:" prefix
     ports:
       - 8761:8761
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8761/management/health']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    labels:
+      org.springframework.boot.ignore: true
 networks:
   default:
     name: all4qms
