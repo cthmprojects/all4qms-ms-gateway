@@ -6,9 +6,10 @@ import { Button } from '@mui/material';
 type CustomInputType = {
   onChange: (payload: any) => void;
   download?: () => void;
+  isSingleFile?: boolean;
 };
 
-export const AttachmentButton = ({ onChange, download }: CustomInputType) => {
+export const AttachmentButton = ({ onChange, download, isSingleFile }: CustomInputType) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const files = inputRef.current?.files;
 
@@ -19,7 +20,7 @@ export const AttachmentButton = ({ onChange, download }: CustomInputType) => {
           onChange([].slice.call(event.target.files));
         }}
         type="file"
-        multiple={true}
+        multiple={!isSingleFile}
         style={{ position: 'absolute', height: '0px', width: '0px' }}
         ref={inputRef}
       />

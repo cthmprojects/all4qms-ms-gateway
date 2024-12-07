@@ -44,27 +44,31 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
           )}
         />
 
+        {/* {JSON.stringify(processes)} */}
         <Controller
           name="idProcesso"
           control={control}
           rules={defaultRule}
-          render={renderPayload => (
-            <MaterialSelect
-              variant="outlined"
-              label="Processo"
-              {...formField(renderPayload)}
-              sx={{ minWidth: '215px', flexGrow: '1' }}
-              disabled={disabled}
-              fullWidth
-            >
-              {processes?.map(item => (
-                // @ts-ignore - necessary to load object into value
-                <MenuItem key={item.id} value={item.id}>
-                  {item.descricao}
-                </MenuItem>
-              ))}
-            </MaterialSelect>
-          )}
+          render={renderPayload =>
+            processes?.length && (
+              <MaterialSelect
+                variant="outlined"
+                label="Processo"
+                {...formField(renderPayload)}
+                sx={{ minWidth: '215px', flexGrow: '1' }}
+                disabled={disabled}
+                defaultValue={1}
+                fullWidth
+              >
+                {processes?.map(item => (
+                  // @ts-ignore - necessary to load object into value
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.descricao}
+                  </MenuItem>
+                ))}
+              </MaterialSelect>
+            )
+          }
         />
 
         <Controller

@@ -6,13 +6,19 @@ import { Rnc } from 'app/modules/rnc/models';
 import { OnlyRequired } from 'app/shared/model/util';
 import { Button } from 'reactstrap';
 import { useMutation } from '@tanstack/react-query';
-import { getAgendamentoById, getProcessos, getUsuarios, persistRegistroAuditoria } from '../audit-service';
+import { getAgendamentoById, getListNcsOmsAuditoria, getProcessos, getUsuarios, persistRegistroAuditoria } from '../audit-service';
 import { AgendamentoAuditoria, RegistrarAuditoriaForm, RegistroAuditoria } from '../audit-models';
-import { useEffect, useMemo } from 'react';
+import { SyntheticEvent, useEffect, useMemo } from 'react';
 import { ScheduleForm } from '../components/schedule-form';
 import { formField } from 'app/shared/util/form-utils';
 import { defaultRule } from 'app/shared/model/constants';
-// import { useMemo } from 'react';
+import { useAppSelector } from 'app/config/store';
+import { IUser } from 'app/shared/model/user.model';
+
+const TIPOS_AUDITORIA = {
+  INTERNA: 'AUDITORIA_INTERNA',
+  EXTERNA: 'AUDITORIA_EXTERNA',
+};
 
 export const RegisterNewEdit = () => {
   const { idSchedule } = useParams();
@@ -26,7 +32,7 @@ export const RegisterNewEdit = () => {
     mode: 'all',
     reValidateMode: 'onChange',
   });
-  const { control, register, getValues, getFieldState, reset, trigger } = localForm;
+  const { control, register, getValues, getFieldState, reset, trigger, setValue } = localForm;
 
   const {
     control: baseControl,
@@ -73,25 +79,40 @@ export const RegisterNewEdit = () => {
     onSuccess: whenSaveAudit,
   });
 
+  const {
+    data: listNcOmAuditoria,
+    mutate: getListNcs,
+    isPending: isListPending,
+  } = useMutation({
+    mutationFn: () => getListNcsOmsAuditoria(schedule?.registro),
+  });
+
   function whenSaveAudit(scheduleReturn: AgendamentoAuditoria) {
     reset({ agendamento: scheduleReturn });
     baseReset(scheduleReturn.registro);
   }
 
+  const account = useAppSelector(state => state.authentication.accountQms) as IUser;
+
   const raizNaoConformidade: OnlyRequired<Omit<Rnc, 'tipoNC'>> = {
     dtNC: schedule?.dataAuditoria,
-    idEmissorNC: 1, // talvez usuário atual
-    idReceptorNC: 1, // TODO reponsável agendamento:
-    idUsuarioAtual: 1, //
+    idEmissorNC: account?.id, // talvez usuário atual
+    idReceptorNC: schedule?.responsavelAuditoria, // TODO reponsável agendamento:
+    idUsuarioAtual: account?.id, //
     possuiReincidencia: true,
     qtdPorques: 0,
-    origemNC: schedule?.planejamento?.cronograma?.modelo?.tipo,
+    origemNC: TIPOS_AUDITORIA[schedule?.planejamento?.cronograma?.modelo?.tipo],
     processoEmissor: schedule?.idProcesso,
     processoNC: schedule?.idProcesso,
     statusAtual: 'PREENCHIMENTO',
   };
 
-  const formSchedule = useForm<AgendamentoAuditoria>({});
+  const formSchedule = useForm<AgendamentoAuditoria>({
+    defaultValues: {
+      idProcesso: '' as unknown as number,
+      responsavelAuditoria: '' as unknown as number,
+    },
+  });
 
   useEffect(() => {
     listProcesses();
@@ -99,12 +120,32 @@ export const RegisterNewEdit = () => {
     idSchedule && getSchedule();
   }, []);
 
+  useEffect(() => {
+    setValue('ncList', []);
+    setValue('omList', []);
+    schedule?.registro?.id && getListNcs();
+  }, [schedule?.id, savedRegister]);
+
   const isSaveButtonDisabled = useMemo(() => {
-    if (audit.id && !baseFormState.isDirty) return true;
+    if (!baseFormState.isValid) return true;
+    if (audit.id && !baseFormState.isDirty && !localForm.formState.isDirty) return true;
     if (!audit?.id && !baseFormState.isValid) return true;
 
     return false;
-  }, [baseFormState.isValid, baseFormState.isDirty]);
+  }, [baseFormState.isValid, baseFormState.isDirty, localForm.formState.isDirty]);
+
+  const listNc = useMemo(() => {
+    return listNcOmAuditoria?.length ? listNcOmAuditoria.filter(item => item.tipoDescricao == 'NC') : [];
+  }, [schedule?.registro, listNcOmAuditoria]);
+
+  const listOm = useMemo(() => {
+    return listNcOmAuditoria?.length ? listNcOmAuditoria.filter(item => item.tipoDescricao == 'OM') : [];
+  }, [schedule?.registro, listNcOmAuditoria]);
+
+  function crumbCLick(e: SyntheticEvent) {
+    e.stopPropagation();
+    navigate(-1);
+  }
 
   return (
     <Stack gap="24px" className="padding-container" paddingLeft="3rem" paddingRight="2rem">
@@ -113,9 +154,11 @@ export const RegisterNewEdit = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Link to={'/audit'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
-            Auditoria
-          </Link>
+          <span onClick={crumbCLick}>
+            <Link to="" style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+              Auditoria
+            </Link>
+          </span>
           <Typography className="link">Registro</Typography>
         </Breadcrumbs>
         <h2 className="title">Agendamento</h2>
@@ -146,16 +189,16 @@ export const RegisterNewEdit = () => {
               name="numeroRelatorio"
               control={baseControl}
               rules={defaultRule}
-              render={renderPayload => <TextField type="number" fullWidth label="Número do Relatório" {...formField(renderPayload)} />}
+              render={renderPayload => <TextField fullWidth label="Número do Relatório" {...formField(renderPayload)} />}
             />
           </Stack>
         </Stack>
       </Stack>
       <FormProvider {...localForm}>
-        {!isPending && (
+        {!isListPending && (
           <Stack gap="24px">
-            <RegisterAuditNcOmList audit={audit} previousList={[]} type="NC" raizNcParcial={raizNaoConformidade} />
-            <RegisterAuditNcOmList audit={audit} previousList={[]} type="OM" raizNcParcial={raizNaoConformidade} />
+            <RegisterAuditNcOmList audit={audit} previousList={listNc} type="NC" raizNcParcial={raizNaoConformidade} />
+            <RegisterAuditNcOmList audit={audit} previousList={listOm} type="OM" raizNcParcial={raizNaoConformidade} />
           </Stack>
         )}
       </FormProvider>

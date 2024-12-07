@@ -6,10 +6,11 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { formField } from 'app/shared/util/form-utils';
 import { OnlyRequired } from 'app/shared/model/util';
 import { Rnc } from 'app/modules/rnc/models';
-import { generateRnc } from '../audit-service';
+import { generateRnc, persistNcsOmsAuditoria } from '../audit-service';
 import { useMemo, useState } from 'react';
 import { naoConformidadeToRncMs } from '../audit-helper';
 import { RegistrarAuditoriaForm } from '../audit-models';
+import { AttachmentButton } from 'app/shared/layout/AttachmentButton';
 
 type RegisterNcOmItemProps = {
   isNC: boolean;
@@ -25,16 +26,26 @@ export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade, showG
   const form = useWatch({ control, name: fieldPrefix });
   const [savedRnc, setSavedRnc] = useState('');
 
-  const isInvalid = useMemo(() => Object.values(form || {}).some(val => !val), [form]);
+  const isInvalid = useMemo(() => {
+    if (form) {
+      const { idRnc, numeroRnc, criadoEm, ...rest } = form;
+      return Object.values(rest || {}).some(val => !val);
+    }
+    return true;
+  }, [form]);
 
   const tooltip = useMemo(() => {
     if (!form?.id || isInvalid) return 'Para liberar preencha e salve os três campos ao lado';
+    if (form.idRnc) return 'RNC já gerada';
     return '';
   }, [form, isInvalid]);
 
   async function generateHandler() {
-    const { base } = getValues();
-    const { numeroNC, numeroRelatorio } = base;
+    const {
+      agendamento: { registro },
+    } = getValues();
+    console.log(getValues());
+    const { numeroNC, numeroRelatorio } = registro;
     const auditoria = {
       ocorrenciaAuditoria: numeroNC,
       processoAuditoria: Number(numeroRelatorio),
@@ -44,7 +55,7 @@ export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade, showG
     };
     const payload = { auditoria, raizNaoConformidade, naoConformidade: naoConformidadeToRncMs(getValues(fieldPrefix)) };
     const { id } = await generateRnc(payload);
-    setSavedRnc(id + '');
+    await persistNcsOmsAuditoria([{ ...form, idRnc: id }]);
   }
 
   return (
@@ -73,21 +84,22 @@ export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade, showG
 
       <Stack flexGrow="1" justifyContent="center" alignItems="center" gap="16px">
         <Stack flexDirection="row" width="100%" gap="10px" justifyContent="space-between">
-          <IconButton>
-            <UploadFileIcon />
-          </IconButton>
-          <IconButton>
-            <DownloadIcon />
-          </IconButton>
+          <Controller
+            control={control}
+            name={`${fieldPrefix}.anexo`}
+            render={({ field: { value, onChange, ...field } }) => {
+              return <AttachmentButton {...{}} onChange={onChange} />;
+            }}
+          />
           <IconButton>
             <DeleteIcon />
           </IconButton>
         </Stack>
-        <TextField disabled value={savedRnc} label={`Número da ${isNC ? 'RNC' : 'ROM'}`} />
+        <TextField disabled value={form?.idRnc || ''} label={`Número da ${isNC ? 'RNC' : 'ROM'}`} />
         {showGenerateNcButton && (
           <Tooltip title={tooltip}>
             <span>
-              <Button color="secondary" variant="contained" size="large" disabled={isInvalid} onClick={generateHandler}>
+              <Button color="secondary" variant="contained" size="large" disabled={isInvalid || !!form?.idRnc} onClick={generateHandler}>
                 GERAR {isNC ? 'RNC' : 'ROM'}
               </Button>
             </span>
