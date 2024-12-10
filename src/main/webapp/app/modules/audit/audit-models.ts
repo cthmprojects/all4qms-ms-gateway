@@ -69,6 +69,7 @@ export type NcOmAuditoria = {
   idRegistroAgendamento: number;
   anexo?: any;
   id?: number;
+  hasAnexo: boolean;
   criadoEm?: Date;
 };
 

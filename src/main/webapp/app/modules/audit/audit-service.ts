@@ -411,6 +411,15 @@ export async function persistNcsOmsAuditoria(descricaoNcOmList: NcOmAuditoria[])
   await Promise.all(requests);
 }
 
+export const deleteNcOmAuditoria = addToast(
+  async (descricaoNcOm: NcOmAuditoria) => {
+    const { data } = await axios.delete(`${AuditBaseUrl}/auditoria/registros/descncoms/${descricaoNcOm.id}`);
+    return data;
+  },
+  'Item excluído com sucesso',
+  'Erro ao excluir, tente novamente'
+);
+
 export const getListNcsOmsAuditoria = addToast(
   async (registro: RegistroAuditoria) => {
     const { data } = await axios.get<NcOmAuditoria[]>(`${AuditBaseUrl}/auditoria/registros/descncoms/byregistro/${registro.id}`);
