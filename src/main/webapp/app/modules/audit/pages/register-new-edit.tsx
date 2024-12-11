@@ -197,8 +197,20 @@ export const RegisterNewEdit = () => {
       <FormProvider {...localForm}>
         {!isListPending && (
           <Stack gap="24px">
-            <RegisterAuditNcOmList audit={audit} previousList={listNc} type="NC" raizNcParcial={raizNaoConformidade} />
-            <RegisterAuditNcOmList audit={audit} previousList={listOm} type="OM" raizNcParcial={raizNaoConformidade} />
+            <RegisterAuditNcOmList
+              audit={audit}
+              previousList={listNc}
+              type="NC"
+              raizNcParcial={raizNaoConformidade}
+              afterItemDeleted={getListNcs}
+            />
+            <RegisterAuditNcOmList
+              audit={audit}
+              previousList={listOm}
+              type="OM"
+              raizNcParcial={raizNaoConformidade}
+              afterItemDeleted={getListNcs}
+            />
           </Stack>
         )}
       </FormProvider>
