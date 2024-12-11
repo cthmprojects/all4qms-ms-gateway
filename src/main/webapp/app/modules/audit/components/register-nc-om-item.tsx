@@ -11,32 +11,40 @@ import { useMemo, useState } from 'react';
 import { naoConformidadeToRncMs } from '../audit-helper';
 import { RegistrarAuditoriaForm } from '../audit-models';
 import { AttachmentButton } from 'app/shared/layout/AttachmentButton';
+import axios from 'axios';
 
 type RegisterNcOmItemProps = {
   isNC: boolean;
   fieldPrefix: `${'ncList' | 'omList'}.${number}`;
   raizNaoConformidade: OnlyRequired<Rnc>;
   showGenerateNcButton?: boolean;
+  onDeleteClick: () => void;
 };
 
 const defaultRules = { required: 'Campo obrigatório' };
 
-export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade, showGenerateNcButton }: RegisterNcOmItemProps) => {
+export const RegisterNcOmItem = ({
+  isNC,
+  fieldPrefix,
+  raizNaoConformidade,
+  showGenerateNcButton,
+  onDeleteClick,
+}: RegisterNcOmItemProps) => {
   const { control, getValues } = useFormContext<RegistrarAuditoriaForm>();
   const form = useWatch({ control, name: fieldPrefix });
   const [savedRnc, setSavedRnc] = useState('');
 
   const isInvalid = useMemo(() => {
     if (form) {
-      const { idRnc, numeroRnc, criadoEm, ...rest } = form;
-      return Object.values(rest || {}).some(val => !val);
+      const { requisito, tipoDescricao, evidencia, descricao, id } = form;
+      return Object.values({ requisito, tipoDescricao, evidencia, descricao, id }).some(val => !val);
     }
     return true;
   }, [form]);
 
   const tooltip = useMemo(() => {
     if (!form?.id || isInvalid) return 'Para liberar preencha e salve os três campos ao lado';
-    if (form.idRnc) return 'RNC já gerada';
+    if (form.idRnc || !!savedRnc) return 'RNC já gerada';
     return '';
   }, [form, isInvalid]);
 
@@ -55,7 +63,50 @@ export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade, showG
     };
     const payload = { auditoria, raizNaoConformidade, naoConformidade: naoConformidadeToRncMs(getValues(fieldPrefix)) };
     const { id } = await generateRnc(payload);
+    setSavedRnc(`${id}`);
     await persistNcsOmsAuditoria([{ ...form, idRnc: id }]);
+  }
+
+  async function download() {
+    try {
+      const response = await axios.get(`/services/all4qmsmsauditplan/api/auditoria/registros/descncoms/anexo/${form.id}`, {
+        responseType: 'blob', // Define o tipo de resposta como blob
+      });
+
+      // Obtém o cabeçalho Content-Disposition
+      const contentDisposition = response.headers['content-disposition'];
+
+      // Extrai o nome do arquivo do cabeçalho
+      let fileName = 'downloaded_file'; // Nome padrão caso a extração falhe
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename\*?="?([^;"]+)[";]/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          fileName = decodeURIComponent(fileNameMatch[1].replace(/['"]/g, '')); // Decodifica caracteres especiais
+        }
+      }
+
+      // Cria um objeto URL para o blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // Cria um elemento de link
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Define o nome do arquivo que será baixado
+      link.download = fileName;
+
+      // Simula um clique no link para iniciar o download
+      document.body.appendChild(link);
+      link.click();
+
+      // Remove o link do DOM
+      document.body.removeChild(link);
+
+      // Libera o objeto URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao fazer o download do arquivo:', error);
+    }
   }
 
   return (
@@ -88,18 +139,24 @@ export const RegisterNcOmItem = ({ isNC, fieldPrefix, raizNaoConformidade, showG
             control={control}
             name={`${fieldPrefix}.anexo`}
             render={({ field: { value, onChange, ...field } }) => {
-              return <AttachmentButton {...{}} onChange={onChange} />;
+              return <AttachmentButton download={form?.hasAnexo ? download : null} onChange={onChange} />;
             }}
           />
-          <IconButton>
+          <IconButton onClick={onDeleteClick}>
             <DeleteIcon />
           </IconButton>
         </Stack>
-        <TextField disabled value={form?.idRnc || ''} label={`Número da ${isNC ? 'RNC' : 'ROM'}`} />
+        <TextField disabled value={form?.idRnc || savedRnc} label={`Número da ${isNC ? 'RNC' : 'ROM'}`} />
         {showGenerateNcButton && (
           <Tooltip title={tooltip}>
             <span>
-              <Button color="secondary" variant="contained" size="large" disabled={isInvalid || !!form?.idRnc} onClick={generateHandler}>
+              <Button
+                color="secondary"
+                variant="contained"
+                size="large"
+                disabled={isInvalid || !!form?.idRnc || !!savedRnc}
+                onClick={generateHandler}
+              >
                 GERAR {isNC ? 'RNC' : 'ROM'}
               </Button>
             </span>

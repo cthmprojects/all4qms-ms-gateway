@@ -6,37 +6,50 @@ import AddIcon from '@mui/icons-material/Add';
 import { RegisterNcOmItem } from './register-nc-om-item';
 import { OnlyRequired } from 'app/shared/model/util';
 import { Rnc } from 'app/modules/rnc/models';
-import { RegistroAuditoria } from '../audit-models';
+import { NcOmAuditoria, RegistroAuditoria } from '../audit-models';
+import { deleteNcOmAuditoria } from '../audit-service';
 
 type RegisterAuditNcOmListProps = {
   audit: RegistroAuditoria;
   type: 'NC' | 'OM';
   previousList: any[];
   raizNcParcial: OnlyRequired<Omit<Rnc, 'tipoNC'>>;
+  afterItemDeleted?: () => void;
 };
 
-export const RegisterAuditNcOmList = ({ type, raizNcParcial, audit, previousList }: RegisterAuditNcOmListProps) => {
+export const RegisterAuditNcOmList = ({ type, raizNcParcial, audit, previousList, afterItemDeleted }: RegisterAuditNcOmListProps) => {
   const isNC = type == 'NC';
   const fieldName = isNC ? 'ncList' : 'omList';
 
-  const { control } = useFormContext();
-  const { fields, prepend, append } = useFieldArray({ control, name: fieldName });
+  const { control, setValue } = useFormContext();
+  const { fields, prepend, remove } = useFieldArray({ control, name: fieldName, keyName: 'key' });
 
   const add = () => {
     prepend({ descricao: '', requisito: '', evidencia: '', tipoDescricao: type });
   };
-  useEffect(() => {
-    setTimeout(() => {
-      if (!fields.length) add();
-    }, 300);
-  }, []);
 
   useEffect(() => {
-    previousList.forEach(item => {
+    let localList = previousList?.map(item => {
       const { registroAgendamento, ...rest } = item;
-      append({ ...rest, idRegistroAgendamento: registroAgendamento.id });
+      return { ...rest, idRegistroAgendamento: registroAgendamento.id };
     });
+
+    setValue(fieldName, localList);
+
+    if (!localList.length) add();
   }, [previousList]);
+
+  async function onDeleteClick(descricaoNcOm: NcOmAuditoria, index: number) {
+    try {
+      if (!descricaoNcOm.id) {
+        remove(index);
+      } else {
+        await deleteNcOmAuditoria(descricaoNcOm);
+        afterItemDeleted();
+      }
+    } catch (error) {}
+  }
+
   return (
     <Box>
       <Box display="flex" justifyContent="end" position="relative">
@@ -47,13 +60,14 @@ export const RegisterAuditNcOmList = ({ type, raizNcParcial, audit, previousList
       <Stack className="container-style" marginRight="110px" gap="24px">
         <CardHeader title={`${isNC ? 'Não Conformidade' : 'Oportunidade de Melhoria'} `} />
         {fields.map((field, index) => (
-          <Card key={field.id}>
+          <Card key={field.key}>
             <CardContent>
               <RegisterNcOmItem
                 isNC={isNC}
                 fieldPrefix={`${fieldName}.${index}`}
                 raizNaoConformidade={{ ...raizNcParcial, tipoNC: type }}
                 showGenerateNcButton={!!audit?.id}
+                onDeleteClick={() => onDeleteClick(field as unknown as NcOmAuditoria, index)}
               />
             </CardContent>
           </Card>
