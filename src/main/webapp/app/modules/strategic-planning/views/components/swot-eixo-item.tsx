@@ -2,21 +2,15 @@ import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
 import Collapse from '@mui/material/Collapse';
-import Avatar from '@mui/material/Avatar';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Box, Button, Grid, Stack, Switch, TextField } from '@mui/material';
+import { Box, Stack, Switch, TextField } from '@mui/material';
 import { AddOutlined, DeleteOutlined } from '@mui/icons-material';
 import { EixosSwot } from '../../models/swot';
+import { deleteSwot } from '../../strategic-planning.service';
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -51,8 +45,9 @@ type SwotEixoProps = {
   listSwotEixo: EixosSwot[];
   setListSwotEixo: React.Dispatch<React.SetStateAction<EixosSwot[]>>;
   eixo: 'FORCAS' | 'FRAQUEZAS' | 'OPORTUNIDADES' | 'AMEACAS';
+  whenDeleted?: () => void;
 };
-const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title, eixo }: SwotEixoProps) => {
+const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title, eixo, whenDeleted }: SwotEixoProps) => {
   const [expanded, setExpanded] = React.useState(true);
   const [descEixo, setDescEixo] = React.useState('');
   const [isRoEixo, setIsRO] = React.useState(false);
@@ -70,7 +65,15 @@ const SwotEixoItem = ({ listSwotEixo, setListSwotEixo, title, eixo }: SwotEixoPr
     newListSwotEixo[index] = { ...newListSwotEixo[index], isAnalisar: value };
     setListSwotEixo(newListSwotEixo);
   };
-  const removeItem = (index: number) => setListSwotEixo(prev => prev.filter((_, i) => i !== index));
+  const removeItem = async (index: number) => {
+    const item = listSwotEixo.filter((_, i) => i === index)[0];
+
+    if (!item?.id) setListSwotEixo(prev => prev.filter((_, i) => i !== index));
+    else {
+      await deleteSwot(item);
+      whenDeleted();
+    }
+  };
 
   const onAddSwot = () => {
     setListSwotEixo(prevState => [...prevState, { descricao: descEixo, isAnalisar: isRoEixo, status: 'PENDENTE', eixo }]);

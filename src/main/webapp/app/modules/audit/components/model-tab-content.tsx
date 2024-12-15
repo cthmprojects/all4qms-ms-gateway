@@ -21,7 +21,7 @@ export const ModelTabContent = () => {
 
   const { control, register, reset, getValues } = useForm({
     defaultValues: {
-      search: '',
+      nome: '',
       tipo: '',
       frequencia: '',
     },
@@ -89,7 +89,7 @@ export const ModelTabContent = () => {
               )}
             />
 
-            <TextField label="Pesquisa" style={{ minWidth: '16vw' }} placeholder="Descrição" {...register('search')} />
+            <TextField label="Pesquisa" style={{ minWidth: '16vw' }} placeholder="Descrição" {...register('nome')} />
 
             <Button
               variant="contained"

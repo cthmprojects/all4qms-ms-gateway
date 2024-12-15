@@ -54,20 +54,20 @@ export const getSwotAll = createAsyncThunk('get/all/swot-all', async () => {
 
 export const saveLoteSwot = createAsyncThunk('save/swot-lote', async (listEixoSwot: EixosSwot[]) => {
   // Crie um array de promessas para as requisições POST
-  const promessas = listEixoSwot.map(swot => axios.post(apiUrl, swot));
+  const promessas = listEixoSwot.map(swot =>
+    swot.id ? axios.put<EixosSwot>(`${apiUrl}/${swot.id}`, swot) : axios.post<EixosSwot>(apiUrl, swot)
+  );
 
   // Execute todas as promessas
   return axios
     .all(promessas)
-    .then(
-      axios.spread((...respostas) => {
-        // Aqui você pode acessar as respostas de cada requisição
-        respostas.forEach((resposta, index) => {
-          console.log(`Resposta do Item ${index + 1}:`, resposta.data);
-        });
-        return respostas;
-      })
-    )
+    .then(respostas => {
+      // Aqui você pode acessar as respostas de cada requisição
+      respostas.forEach((resposta, index) => {
+        console.log(`Resposta do Item ${index + 1}:`, resposta.data);
+      });
+      return respostas.map(item => item.data);
+    })
     .catch(error => {
       // Lidar com erros
       console.error('Erro ao fazer as requisições:', error);
@@ -109,6 +109,10 @@ const swotSlice = createEntitySlice({
       .addMatcher(isFulfilled(updateSwot), (state, action) => {
         state.loading = false;
         state.entity = action.payload.data;
+      })
+      .addMatcher(isFulfilled(saveLoteSwot), (state, action) => {
+        state.loading = false;
+        state.entities = action.payload;
       });
   },
 });
