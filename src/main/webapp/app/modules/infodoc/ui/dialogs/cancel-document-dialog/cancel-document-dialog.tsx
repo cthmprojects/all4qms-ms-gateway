@@ -10,6 +10,7 @@ import { Storage } from 'react-jhipster';
 import { AxiosResponse } from 'axios';
 import { createEntity as createPendencia } from 'app/entities/pendencia/pendencia.reducer';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
   const id = React.useId();
@@ -56,6 +57,11 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
   };
 
   const requestCancelInfoDoc = (justify: string) => {
+    if (!justify) {
+      toast.error('Motivo do cancelamento não pode estar vazio');
+      return;
+    }
+
     const params = { id: infodoc.doc.id, userLoginID: userId, justify };
 
     dispatch(cancelDocument(params)).then(

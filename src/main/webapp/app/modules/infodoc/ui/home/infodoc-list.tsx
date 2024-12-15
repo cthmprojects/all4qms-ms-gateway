@@ -306,7 +306,7 @@ const InfodocList = () => {
         type = 'H';
         break;
       default:
-        return '';
+        return 'H';
     }
 
     return type;
@@ -436,7 +436,7 @@ const InfodocList = () => {
           const fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
-          fileName = fileName.substring(27)!!;
+          fileName = fileName.split('_').slice(5).join('_');
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 

@@ -167,6 +167,14 @@ export const ValidationDocument = () => {
   };
 
   const consultResumeIA = async tokenResumeIA => {
+    if (!tokenResumeIA) {
+      clearInterval(timerGetIA);
+      setDocumentDescription('Servidor de IA fora do ar. Tente novamente mais tarde.');
+      console.error('Erro ao carrecar IA resume, token undefined: ', tokenResumeIA);
+      setLoadingIA(false);
+      return;
+    }
+
     const resResume = await dispatch(getResumeIaByToken({ token: tokenResumeIA }));
     const resumeIA: resIAType = (resResume.payload as AxiosResponse).data;
 
@@ -245,7 +253,7 @@ export const ValidationDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
-          fileName = fileName.split('_').pop()!!;
+          fileName = fileName.split('_').slice(5).join('_');
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
@@ -285,14 +293,21 @@ export const ValidationDocument = () => {
     return newInfoDoc;
   };
 
-  const saveDocument = () => {
+  const saveDocument = async () => {
     setIsLoading(true);
     const newInfoDoc = saveDoc();
 
-    dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! })).then((res: any) => {
-      dispatch(getInfoDocById(id!!));
-      setIsLoading(false);
-    });
+    const respUpdt = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
+
+    if (respUpdt) {
+      const resDoc: InfoDoc = (respUpdt.payload as AxiosResponse).data || {};
+
+      await dispatch(getInfoDocById(id!!));
+      return resDoc;
+    } else {
+      toast.error('Erro ao salvar documento, tente novamente.');
+      return;
+    }
   };
 
   const users: IUsuario[] = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -323,6 +338,10 @@ export const ValidationDocument = () => {
 
   const approveDocument = async () => {
     setIsLoading(true);
+    const resSave = await saveDocument();
+    if (!resSave) {
+      return;
+    }
     await axios
       .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/aprovacao-sgq/${id}`, {
         idDocumento: id,
@@ -629,7 +648,10 @@ export const ValidationDocument = () => {
               variant="contained"
               color="warning"
               sx={{ backgroundColor: '#A23900', color: '#fff', width: '100px' }}
-              onClick={() => setOpenRejectModal(true)}
+              onClick={() => {
+                saveDocument();
+                setOpenRejectModal(true);
+              }}
               disabled={!isSGQ}
             >
               Reprovar
