@@ -338,8 +338,8 @@ const BaseDetails = ({
 
     if (!isOpportunity) {
       rawRiskOpportunity.descricaoControle = controlAction.description;
-      rawRiskOpportunity.idLinhaConfigControle1 = controlAction.probability.id;
-      rawRiskOpportunity.idLinhaConfigControle2 = controlAction.severity.id;
+      rawRiskOpportunity.idLinhaConfigControle1 = controlAction?.probability?.id;
+      rawRiskOpportunity.idLinhaConfigControle2 = controlAction?.severity?.id;
     }
 
     onSave(

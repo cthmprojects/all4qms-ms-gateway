@@ -29,7 +29,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { QueryClient, useMutation } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
@@ -64,6 +64,8 @@ const getSituacaoIcon = situacao => {
       return { icon: <InfoIcon />, text: 'Indefinido' };
   }
 };
+
+const query = new QueryClient();
 
 const Home = () => {
   const dispatch = useAppDispatch();
@@ -105,20 +107,31 @@ const Home = () => {
     });
   };
 
-  const { data, mutate } = useMutation({ mutationFn: listROFiltro }, new QueryClient());
+  const { idProcesso, probabilidade, severidade, decisao, pesquisa } = filters;
+
+  const { data } = useQuery(
+    {
+      queryKey: ['query/RO'],
+      queryFn: () =>
+        listROFiltro({
+          idProcesso,
+          probabilidadeComplexidade: probabilidade,
+          severidadeMelhoria: severidade,
+          decisao,
+          pesquisa,
+          size: pageSize,
+          page,
+          tipoRO: tab ? 'O' : 'R',
+        }),
+    },
+    query
+  );
+
+  const totalElements = useMemo(() => data?.totalElements || 0, [data?.totalElements]);
+  const { page, pageSize, paginator } = usePaginator(totalElements);
 
   function listRo() {
-    const { idProcesso, probabilidade, severidade, decisao, pesquisa } = filters;
-    mutate({
-      idProcesso,
-      probabilidadeComplexidade: probabilidade,
-      severidadeMelhoria: severidade,
-      decisao,
-      pesquisa,
-      size: pageSize,
-      page,
-      tipoRO: tab ? 'O' : 'R',
-    });
+    query.invalidateQueries({ queryKey: ['query/RO'] });
   }
 
   const columns = [
@@ -145,26 +158,7 @@ const Home = () => {
 
   const handleChangeTag = (event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
-    // R - risco
-    // O - oportunidade
-
-    let type = newValue == 1 ? 'R' : 'O';
-
-    // dispatch(
-    //   listROFiltro({
-    //     tipoRO: type,
-    //     page,
-    //     size: pageSize,
-    //   })
-    // );
   };
-
-  /**
-   * Pagination
-   */
-
-  const totalElements = useMemo(() => data?.totalElements || 0, [data]);
-  const { page, pageSize, paginator } = usePaginator(totalElements);
 
   useEffect(listRo, [filters, page, pageSize, tab]);
 
@@ -234,7 +228,6 @@ const Home = () => {
           })}
         </TableBody>
       </Table>
-      {paginator}
     </TableContainer>
   );
 
@@ -370,6 +363,7 @@ const Home = () => {
         <CustomTabPanel value={tab} index={1}>
           {TableRendered}
         </CustomTabPanel>
+        {paginator}
       </div>
     </div>
   );
