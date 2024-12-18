@@ -53,7 +53,7 @@ export const RegisterAuditNcOmList = ({ type, raizNcParcial, audit, previousList
   return (
     <Box>
       <Box display="flex" justifyContent="end" position="relative">
-        <Fab sx={{ position: 'absolute', top: '155px', marginRight: '25px' }} onClick={add}>
+        <Fab sx={{ position: 'absolute', top: `${fields.length ? '155px' : '30px'}`, marginRight: '25px' }} onClick={add}>
           <AddIcon />
         </Fab>
       </Box>

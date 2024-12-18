@@ -121,8 +121,6 @@ export const RegisterNewEdit = () => {
   }, []);
 
   useEffect(() => {
-    setValue('ncList', []);
-    setValue('omList', []);
     schedule?.registro?.id && getListNcs();
   }, [schedule?.id, savedRegister]);
 
