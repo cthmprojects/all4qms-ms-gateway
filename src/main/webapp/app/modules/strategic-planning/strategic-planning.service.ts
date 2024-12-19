@@ -22,7 +22,7 @@ export const createRiskOportunity = addToast(
     const user = JSON.parse(Storage.session.get('USUARIO_QMS'));
     const parts = await createInterestedPart();
     const payload = {
-      dataRegistro: new Date(),
+      dataRegistro: new Date().toISOString(),
       descricao1: swot.descricao,
       descricao2: '',
       descricao3: '',

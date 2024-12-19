@@ -125,7 +125,12 @@ const Home = () => {
     // const onClick= () => navigate('/risks-opportunities/risk', { state: { from: 'strategic-planning', data: eixo } })
     const onClick = eixo?.idRiscoOportunidade
       ? () => navigate(`/risks-opportunities/${isRisk ? 'risk' : 'opportunity'}/${eixo.idRiscoOportunidade}`)
-      : () => createRiskOportunity(eixo, isRisk ? 'R' : 'O');
+      : async () => {
+          await createRiskOportunity(eixo, isRisk ? 'R' : 'O');
+          setTimeout(() => {
+            handleApplyFilters();
+          }, 150);
+        };
     return {
       title,
       disabled: !eixo.isAnalisar,
