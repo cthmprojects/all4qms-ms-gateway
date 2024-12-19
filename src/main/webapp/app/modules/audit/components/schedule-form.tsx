@@ -63,7 +63,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
                 {processes?.map(item => (
                   // @ts-ignore - necessary to load object into value
                   <MenuItem key={item.id} value={item.id}>
-                    {item.descricao}
+                    {item.nome}
                   </MenuItem>
                 ))}
               </MaterialSelect>
@@ -96,7 +96,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
               selected={renderPayload.field.value}
               showTimeSelect
               showTimeSelectOnly
-              dateFormat="hh:mm"
+              dateFormat="HH:mm"
               label="Hora início"
               disabled={disabled}
               {...formField(renderPayload)}
@@ -114,7 +114,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
               selected={renderPayload.field.value}
               showTimeSelect
               showTimeSelectOnly
-              dateFormat="hh:mm"
+              dateFormat="HH:mm"
               label="Hora término"
               disabled={disabled}
               {...formField(renderPayload)}

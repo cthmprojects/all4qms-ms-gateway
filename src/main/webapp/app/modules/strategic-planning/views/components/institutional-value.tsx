@@ -1,5 +1,5 @@
 import { AddOutlined, DeleteOutlined } from '@mui/icons-material';
-import { Button, Stack } from '@mui/material';
+import { Button, Stack, TextField } from '@mui/material';
 import InstitutionalItem from './institutional-item';
 
 type InstitutionalVisionProps = {
@@ -13,7 +13,14 @@ type InstitutionalVisionProps = {
 const InstitutionalVision = ({ onAdded, onChanged, onRemoved, readonly, value }: InstitutionalVisionProps) => {
   return (
     <Stack direction="row" spacing={2}>
-      <InstitutionalItem label="Valor" onChanged={onChanged} placeholder="Valor" readonly={readonly} value={value} />
+      <TextField
+        label="Valor"
+        onChange={value => onChanged(value.target.value)}
+        placeholder="Valor"
+        disabled={!!readonly}
+        fullWidth
+        value={value}
+      />
 
       {onAdded && (
         <Button disabled={value.length <= 0} onClick={onAdded}>

@@ -34,7 +34,9 @@ export const renderValueCronograma = (cron: CronogramaAuditoria) => {
   return (
     <Stack>
       <span>{`CRONOGRAMA: ${partesLabel(cron.parte)}, ${capitalize(cron.status)} (${renderValueModelo(cron.modelo)})`}</span>
-      <span>{`DATAS: de ${cron.periodoInicial.toLocaleDateString('PT-br')} até ${cron.periodoFinal.toLocaleDateString('PT-br')}`}</span>
+      <span>{`DATAS: de ${cron?.periodoInicial?.toLocaleDateString?.('PT-br')} até ${cron?.periodoFinal?.toLocaleDateString?.(
+        'PT-br'
+      )}`}</span>
       {/* <span>{`MODELO: ${renderValueModelo(cron.modelo)}`}</span> */}
     </Stack>
   );
