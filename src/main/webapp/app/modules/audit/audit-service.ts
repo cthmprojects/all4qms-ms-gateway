@@ -89,7 +89,7 @@ export async function generateRnc({ auditoria, naoConformidade, raizNaoConformid
   const auditoriaResult = await saveAuditoria({ ...auditoria, idNaoConformidade: raizResult.id });
   const naoConformidadeResult = await saveRnc({ ...naoConformidade, naoConformidade: raizResult.id });
 
-  return naoConformidadeResult;
+  return raizResult;
 }
 
 // AUDIT REQUESTS
@@ -206,7 +206,8 @@ export const getPlanejamentoById = addToast(
 
 export const persistPlanejamento = addToast(
   async (planejamento: PlanejamentoAuditoria) => {
-    return await (planejamento?.id ? updatePlanejamento(planejamento) : savePlanejamento(planejamento));
+    const result = await (planejamento?.id ? updatePlanejamento(planejamento) : savePlanejamento(planejamento));
+    return parseRawPlanejamento(result);
   },
   'Planejamento salvo com sucesso',
   'Erro ao salvar planejamento'
