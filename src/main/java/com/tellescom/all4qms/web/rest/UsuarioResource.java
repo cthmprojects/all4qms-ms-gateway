@@ -291,4 +291,10 @@ public class UsuarioResource {
     public Mono<List<UsuarioResponse>> buscarTodosUsuariosMinimo() {
         return usuarioService.findAllUsuariosMinimos();
     }
+
+    @GetMapping("/aprovadores-by-processo/{idproc}")
+    public Flux<UsuarioResponse> buscarTodosAprovadoresByProcesso(@PathVariable("idproc") Long idProcesso) {
+        log.debug("REST request busca todos usuarios aprovadores por processo");
+        return usuarioService.findlAllAprovadoresByProcesso(idProcesso);
+    }
 }

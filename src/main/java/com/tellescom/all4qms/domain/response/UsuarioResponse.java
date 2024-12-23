@@ -13,4 +13,10 @@ public class UsuarioResponse {
 
     private Long id;
     private String nome;
+    private String email;
+
+    public UsuarioResponse(Long id, String nome) {
+        this.id = id;
+        this.nome = nome;
+    }
 }
