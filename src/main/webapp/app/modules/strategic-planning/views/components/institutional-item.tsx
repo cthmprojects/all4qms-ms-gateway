@@ -22,6 +22,8 @@ const InstitutionalItem = ({ label, placeholder, onChanged, readonly, value }: I
       placeholder={placeholder}
       value={value}
       variant="outlined"
+      multiline
+      rows={4}
       sx={{ flexGrow: 1 }}
     />
   );

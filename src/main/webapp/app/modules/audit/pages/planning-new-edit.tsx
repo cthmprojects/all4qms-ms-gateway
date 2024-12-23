@@ -13,6 +13,19 @@ import { Button } from 'reactstrap';
 
 const defaultRule = { required: 'Campo obrigatório' };
 
+function createPlanIdentifier() {
+  const now = new Date(); // Obtém a data atual
+
+  // Formata o mês com dois dígitos (01, 02, ..., 12)
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+
+  // Obtém os últimos dois dígitos do ano
+  const year = String(now.getFullYear()).slice(-2);
+
+  // Retorna a string no formato desejado
+  return `plan-${month}-${year}`;
+}
+
 export const PlanningNewEdit = () => {
   const { idPlanning } = useParams();
 
@@ -20,7 +33,7 @@ export const PlanningNewEdit = () => {
   const { control, getValues, reset } = useForm<PlanejamentoAuditoria>({
     defaultValues: {
       id: null,
-      identificadorPlanejamento: '',
+      identificadorPlanejamento: createPlanIdentifier(),
       objetivoAuditoria: '',
       criteriosNormas: '',
       auditores: [],

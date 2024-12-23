@@ -26,6 +26,7 @@ export const AttachmentButton = ({ onChange, download, isSingleFile }: CustomInp
       />
       <div>
         <Button
+          title={download ? 'Download do arquivo' : 'Anexar arquivo'}
           variant="contained"
           sx={{ borderRadius: '54px', backgroundColor: '#E0E0E0 !important', color: '#384150' }}
           color="info"

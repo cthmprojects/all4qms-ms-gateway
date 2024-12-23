@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   IconButton,
   MenuItem,
@@ -17,11 +18,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Row, Table } from 'reactstrap';
 import { useDebounce } from 'use-debounce';
 import { queryClientAudit } from '..';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
 import { TiposAuditoria } from 'app/shared/model/constants';
 import { MaterialSelect } from 'app/shared/components/select/material-select';
-import { getPaginatedPlanejamento } from '../audit-service';
+import { getPaginatedAuditor, getPaginatedPlanejamento } from '../audit-service';
 import { handleFilter, renderValueCronograma } from '../audit-helper';
 import { CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
 import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
@@ -57,6 +58,35 @@ export const PlanningTabContent = () => {
   useEffect(() => {
     queryClientAudit.invalidateQueries({ queryKey: ['plannings/list'] });
   }, [page, pageSize, filtro]);
+
+  const {
+    data: auditors,
+    mutate: getAuditors,
+    isPending,
+  } = useMutation({
+    mutationFn: () => getPaginatedAuditor({}),
+  });
+
+  useEffect(() => {
+    getAuditors;
+  }, []);
+
+  if (!isPending && auditors?.empty) {
+    return (
+      <Box display="flex" rowGap="20px" flexDirection="column">
+        <Alert severity="info">Para acessar essa aba primeiro é necessário cadastrar auditores no botão abaixo</Alert>
+        <Button
+          variant="contained"
+          className="primary-button infodoc-list-form-field"
+          style={{ marginRight: '10px', height: '58px' }}
+          onClick={() => navigate('/audit/maintenance')}
+          title="Auditores"
+        >
+          Auditores
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <div>

@@ -21,6 +21,7 @@ import {
   InputAdornment,
   OutlinedInput,
   Switch,
+  IconButtonProps,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Row } from 'reactstrap';
@@ -35,6 +36,7 @@ import { Storage } from 'react-jhipster';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
 import { EixosSwot, SwotList } from '../../models/swot';
 import { getSwotAllFilter } from '../../reducers/swot.reducer';
+import { createRiskOportunity } from '../../strategic-planning.service';
 
 // Registra a localidade
 registerLocale('pt-BR', ptBR);
@@ -84,7 +86,7 @@ const Home = () => {
 
   useEffect(() => {
     const roles = Storage.local.get('ROLE');
-    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ']?.some(item => roles?.includes(item));
     setIsSGQ(isSGQ);
 
     dispatch(getSwotAllFilter({ size: pageSize, page: page }));
@@ -117,6 +119,25 @@ const Home = () => {
     setFilters({});
   };
 
+  function configAction(eixo: EixosSwot) {
+    const isRisk = ['FRAQUEZAS', 'AMEACAS'].includes(eixo.eixo);
+    const title = `${eixo.idRiscoOportunidade ? 'Editar' : 'Criar'} ${isRisk ? 'Risco' : 'Oportunidade'}`;
+    // const onClick= () => navigate('/risks-opportunities/risk', { state: { from: 'strategic-planning', data: eixo } })
+    const onClick = eixo?.idRiscoOportunidade
+      ? () => navigate(`/risks-opportunities/${isRisk ? 'risk' : 'opportunity'}/${eixo.idRiscoOportunidade}`)
+      : async () => {
+          await createRiskOportunity(eixo, isRisk ? 'R' : 'O');
+          setTimeout(() => {
+            handleApplyFilters();
+          }, 150);
+        };
+    return {
+      title,
+      disabled: !eixo.isAnalisar,
+      onClick,
+    } as IconButtonProps;
+  }
+
   const renderTable = () => {
     if (swotList.length > 0) {
       return (
@@ -147,12 +168,8 @@ const Home = () => {
                       <TableCell>{swotItem.status}</TableCell>
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                         {isSGQ && (
-                          <IconButton
-                            title="Criar Risco e Oportunidade"
-                            color="primary"
-                            onClick={() => navigate('/risks-opportunities/risk', { state: { from: 'strategic-planning', data: swotItem } })}
-                          >
-                            <EditNoteIcon sx={{ color: '#e6b200' }} />
+                          <IconButton color="primary" {...configAction(swotItem)}>
+                            <EditNoteIcon />
                           </IconButton>
                         )}
                       </TableCell>
