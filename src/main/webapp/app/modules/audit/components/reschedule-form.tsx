@@ -22,8 +22,9 @@ export const RescheduleForm = forwardRef(({ agendamento, onClose }: RescheduleFo
 
   const { mutate: saveScheduling, isPending: pendingRequest } = useMutation({
     mutationFn: () => persistAgendamento(getValues()),
-    onSuccess: (schedule: AgendamentoAuditoria) => {
+    onSuccess: async (schedule: AgendamentoAuditoria) => {
       onClose();
+      await persistAgendamento({ ...agendamento, isReagendado: true });
       agendamento.id && navigate(`/audit/planning/${schedule.planejamento.id}/schedule?idSchedule=${schedule.id}`, { replace: true });
     },
   });
