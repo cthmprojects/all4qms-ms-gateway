@@ -4,14 +4,15 @@ import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Enums, Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
+import { Analysis, Enums, Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
 import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reducer';
 import { getIndicatorGoal, updateIndicatorGoal } from '../../reducers/indicator-goals.reducer';
 import { getIndicator } from '../../reducers/indicators.reducer';
-import { IndicatorDetails, IndicatorGoals, IndicatorMeasurements } from '../components';
 import { getYearRange } from '../../utils';
+import { IndicatorDetails, IndicatorMeasurements } from '../components';
 
 const Measurements = () => {
+  const [allAnalysis, setAllAnalysis] = useState<Array<Analysis | null>>([]);
   const [goals, setGoals] = useState<Array<Array<number | null>>>([]);
   const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([]);
   const { id } = useParams();
@@ -121,7 +122,8 @@ const Measurements = () => {
     setGoals(goals);
   };
 
-  const onIndicatorMeasurementsChanged = (measurements: Array<Array<number | null>>): void => {
+  const onIndicatorMeasurementsChanged = (measurements: Array<Array<number | null>>, allAnalysis: Array<Analysis | null>): void => {
+    setAllAnalysis(allAnalysis);
     setMeasurements(measurements);
   };
 
@@ -184,6 +186,7 @@ const Measurements = () => {
                 <CardHeader title="Resultados" />
                 <CardContent>
                   <IndicatorMeasurements
+                    canAddAnalysis
                     frequencies={frequencies}
                     initialFrequency={indicatorGoal?.frequency}
                     initialValues={initialMeasurementValues}
