@@ -29,7 +29,7 @@ import { AuditorForm } from '../components/auditor-form';
 
 const deleteResourceRequest = async (payload: Partial<Auditor>) => {
   try {
-    const { data } = await axios.delete<Auditor>('/services/all4qmsmsmetaind/api/metaobj/recursos/' + payload.id);
+    const { data } = await axios.delete<Auditor>('/services/all4qmsmsauditplan/api/auditoria/auditores/' + payload.id);
     queryClientAudit.invalidateQueries({ queryKey: [`audit/auditor`] });
     toast.success('Recurso excluído com sucesso');
     return data;

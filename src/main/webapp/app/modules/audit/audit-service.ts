@@ -242,11 +242,32 @@ export const getProcessoById = addToast(
 );
 
 export const getPaginatedAgendamento = addToast(
-  async (params: Record<string, number | string>) => {
+  async (params: Record<string, number | string | boolean>) => {
     const { data } = await axios.get<PaginatedResponse<AgendamentoAuditoria>>(`${AuditBaseUrl}/auditoria/agendamentos`, {
       params,
     });
-    return { ...data, content: data.content.map(parseRawAgendamento) };
+    const allPlans = await Promise.all(data.content.map(item => getPlanejamentoById(item.planejamento.id)));
+    const allNcOm = await Promise.all(
+      data.content.map(item => (item.registro?.id ? getListNcsOmsAuditoria(item.registro) : Promise.resolve(null)))
+    );
+
+    return {
+      ...data,
+      content: data.content.map((item, index) => {
+        const plan = allPlans[index];
+        const ncsOms = allNcOm[index];
+
+        const ncsNumber = ncsOms?.filter(nc => nc.tipoDescricao == 'NC').length || 0;
+        const omsNumber = ncsOms?.filter(nc => nc.tipoDescricao == 'OM').length || 0;
+
+        return {
+          ...parseRawAgendamento(item),
+          planejamento: parseRawPlanejamento(plan),
+          ncsNumber,
+          omsNumber,
+        } as AgendamentoAuditoria & { ncsNumber: number; omsNumber: number };
+      }),
+    };
   },
   '',
   'Erro ao consultar agendamentos'
