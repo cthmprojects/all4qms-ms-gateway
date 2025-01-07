@@ -21,7 +21,7 @@ export const AttachmentButton = ({ onChange, download, isSingleFile }: CustomInp
         }}
         type="file"
         multiple={!isSingleFile}
-        style={{ position: 'absolute', height: '0px', width: '0px' }}
+        style={{ position: 'absolute', height: '0px', width: '0px', display: 'none' }}
         ref={inputRef}
       />
       <div>
