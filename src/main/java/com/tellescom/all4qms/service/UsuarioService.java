@@ -316,7 +316,7 @@ public class UsuarioService {
 
     public Flux<UsuarioResponse> findlAllAprovadoresByProcesso(long processoId) {
         Flux<UsuarioDTO> usuariosAprovadoresPorProcesso = this.processarUsuariosPorIdProcesso(processoId);
-        Flux<UserDTO> usersPorRole = userService.getUsersByAuthority("ROLE_APROVADOR");
+        Flux<UserDTO> usersPorRole = userService.getUsersByAuthority("ROLE_SGQ");
 
         return usersPorRole
             .map(UserDTO::getId) // Extrai os IDs de UserDTO
