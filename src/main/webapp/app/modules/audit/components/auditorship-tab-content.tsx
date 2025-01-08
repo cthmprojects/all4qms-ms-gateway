@@ -34,7 +34,7 @@ export const AuditorshipTabContent = () => {
 
   const { data: schedules, isLoading: isLoadingSchedules } = useQuery({
     queryKey: ['schedule/list'],
-    queryFn: () => getPaginatedAgendamento({ page, size: pageSize, ...handleFilter(getValues()) }),
+    queryFn: () => getPaginatedAgendamento({ page, size: pageSize, finalizado: false, ...handleFilter(getValues()) }),
     staleTime: 60000, // Dados ficam atualizados por 1 minuto,
   });
 
@@ -45,7 +45,8 @@ export const AuditorshipTabContent = () => {
   const { control, register, getValues, reset } = useForm({
     defaultValues: {
       search: '',
-      tipoAuditoria: '',
+      tipo: '',
+      finalizado: false,
     },
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -72,7 +73,7 @@ export const AuditorshipTabContent = () => {
       >
         <Stack gap="12px" flexDirection="row" sx={{ flexGrow: 0.4, display: 'inline-flex' }}>
           <Controller
-            name="tipoAuditoria"
+            name="tipo"
             control={control}
             render={({ field }) => (
               <MaterialSelect onChange={null} label="Tipo de auditoria" fullWidth {...field} sx={{ minWidth: '190px' }}>
@@ -112,29 +113,37 @@ export const AuditorshipTabContent = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {schedules?.content.map((schedule: AgendamentoAuditoria, index) => (
-              <TableRow className="table-row" key={schedule.id}>
+            {schedules?.content.map((schedule, index) => (
+              <TableRow
+                className="table-row"
+                key={schedule.id}
+                sx={schedule.isReagendado ? { opacity: 0.5, pointerEvents: 'none', cursor: 'not-allowed', height: '57px' } : {}}
+              >
                 <TableCell>{schedule.dataAuditoria.toLocaleDateString('pt-BR')}</TableCell>
                 <TableCell>{schedule?.planejamento?.cronograma?.modelo?.tipo}</TableCell>
-                <TableCell>N/A</TableCell>
-                <TableCell>N/A</TableCell>
+                <TableCell>{schedule.ncsNumber}</TableCell>
+                <TableCell>{schedule.omsNumber}</TableCell>
                 <TableCell>{schedule.horaInicial.toLocaleTimeString('pt-BR')}</TableCell>
                 <TableCell>{schedule.horaFinal.toLocaleTimeString('pt-BR')}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
-                    <IconButton
-                      title="Editar"
-                      color="primary"
-                      onClick={() =>
-                        navigate(
-                          schedule?.isFinalizado
-                            ? `/audit/auditorship/edit/${schedule.id}`
-                            : `/audit/planning/${schedule?.planejamento?.id}/schedule?idSchedule=${schedule?.id}`
-                        )
-                      }
-                    >
-                      <EditIcon sx={{ color: '#e6b200' }} />
-                    </IconButton>
+                    {schedule.isReagendado ? (
+                      '[REAGENDADO]'
+                    ) : (
+                      <IconButton
+                        title="Editar"
+                        color="primary"
+                        onClick={() =>
+                          navigate(
+                            schedule?.isFinalizado
+                              ? `/audit/auditorship/edit/${schedule.id}`
+                              : `/audit/planning/${schedule?.planejamento?.id}/schedule?idSchedule=${schedule?.id}`
+                          )
+                        }
+                      >
+                        <EditIcon sx={{ color: '#e6b200' }} />
+                      </IconButton>
+                    )}
                   </Box>
                 </TableCell>
               </TableRow>
