@@ -7,6 +7,7 @@ import IndicatorValues from './indicator-values';
 type IndicatorMeasurementsProps = {
   canAddAnalysis?: boolean;
   frequencies: Array<string>;
+  initialAnalysis: Array<Analysis>;
   initialFrequency?: string;
   initialValues?: Array<Array<number | null>>;
   unit: string;
@@ -17,6 +18,7 @@ type IndicatorMeasurementsProps = {
 const IndicatorMeasurements = ({
   canAddAnalysis,
   frequencies,
+  initialAnalysis,
   initialFrequency,
   initialValues,
   indicatorYear,
@@ -145,11 +147,13 @@ const IndicatorMeasurements = ({
 
     const arr: Array<Analysis> = [];
     for (let i = 0; i < analysisIndices.length; i++) {
-      arr.push(null);
+      const analysis: Analysis | null = initialAnalysis && initialAnalysis.length > i ? initialAnalysis[i] : null;
+
+      arr.push(analysis);
     }
 
     setAllAnalysis(arr);
-  }, [analysisIndices, analysisLabels]);
+  }, [analysisIndices, analysisLabels, initialAnalysis]);
 
   const updateAnalysis = (analysis: Analysis, idx: number) => {
     const updated: Array<Analysis> = [...allAnalysis];
@@ -189,6 +193,9 @@ const IndicatorMeasurements = ({
                       deadline: analysis?.deadline ?? '',
                       description: analysis?.description ?? '',
                       responsible: analysis?.responsible ?? '',
+                      month: idx,
+                      indicatorGoal: null,
+                      indicatorGoalId: -1,
                     },
                     idx
                   )
@@ -201,6 +208,9 @@ const IndicatorMeasurements = ({
                       deadline: analysis?.deadline ?? '',
                       description: analysis?.description ?? '',
                       responsible: analysis?.responsible ?? '',
+                      month: idx,
+                      indicatorGoal: null,
+                      indicatorGoalId: -1,
                     },
                     idx
                   )
@@ -213,6 +223,9 @@ const IndicatorMeasurements = ({
                       deadline: deadline ?? '',
                       description: analysis?.description ?? '',
                       responsible: analysis?.responsible ?? '',
+                      month: idx,
+                      indicatorGoal: null,
+                      indicatorGoalId: -1,
                     },
                     idx
                   )
@@ -225,6 +238,9 @@ const IndicatorMeasurements = ({
                       deadline: analysis?.deadline ?? '',
                       description: description,
                       responsible: analysis?.responsible ?? '',
+                      month: idx,
+                      indicatorGoal: null,
+                      indicatorGoalId: -1,
                     },
                     idx
                   )
@@ -237,6 +253,9 @@ const IndicatorMeasurements = ({
                       deadline: analysis?.deadline ?? '',
                       description: analysis?.description,
                       responsible: responsible ?? '',
+                      month: idx,
+                      indicatorGoal: null,
+                      indicatorGoalId: -1,
                     },
                     idx
                   )

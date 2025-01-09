@@ -5,6 +5,12 @@ import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Analysis, Enums, Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
+import {
+  deleteIndicatorAnalysis,
+  getIndicatorAnalysis,
+  saveIndicatorAnalysis,
+  updateIndicatorAnalysis,
+} from '../../reducers/analysis.reducer';
 import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reducer';
 import { getIndicatorGoal, updateIndicatorGoal } from '../../reducers/indicator-goals.reducer';
 import { getIndicator } from '../../reducers/indicators.reducer';
@@ -28,14 +34,17 @@ const Measurements = () => {
   }, []);
 
   useEffect(() => {
-    dispatch(getIndicatorGoal(parseInt(id)));
+    const indicatorGoalId: number = parseInt(id);
+
+    dispatch(getIndicatorGoal(indicatorGoalId));
+    dispatch(getIndicatorAnalysis(indicatorGoalId));
   }, [id]);
 
   const back = (): void => {
     navigate('../');
   };
 
-  const save = (): void => {
+  const save = async (): Promise<void> => {
     // TODO: Save multiple measurements
 
     dispatch(
@@ -49,6 +58,33 @@ const Measurements = () => {
       })
     );
 
+    for (let i = 0; i < allIndicatorGoalAnalysis.length; i++) {
+      const analysis: Analysis | null = allIndicatorGoalAnalysis[i];
+
+      if (!analysis) {
+        continue;
+      }
+
+      await dispatch(deleteIndicatorAnalysis(analysis));
+    }
+
+    for (let i = 0; i < allAnalysis.length; i++) {
+      const analysis: Analysis | null = allAnalysis[i];
+
+      if (!analysis) {
+        continue;
+      }
+
+      await dispatch(
+        saveIndicatorAnalysis({
+          ...analysis,
+          id: null,
+          indicatorGoal: indicatorGoal,
+          indicatorGoalId: indicatorGoal.id,
+        })
+      );
+    }
+
     navigate('../');
   };
 
@@ -56,6 +92,7 @@ const Measurements = () => {
   const indicator: Indicator | null = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entity);
   const indicatorGoal: IndicatorGoal | null = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entity);
   const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
+  const allIndicatorGoalAnalysis: Array<Analysis> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorAnalysis.entities);
 
   useEffect(() => {
     if (!indicatorGoal || !indicatorGoal.id) {
@@ -88,6 +125,14 @@ const Measurements = () => {
 
     return [[...indicatorGoal.measurements]];
   }, [indicatorGoal]);
+
+  const initialAnalysis = useMemo<Array<Analysis>>(() => {
+    if (!allIndicatorGoalAnalysis) {
+      return null;
+    }
+
+    return [...allIndicatorGoalAnalysis];
+  }, [allIndicatorGoalAnalysis]);
 
   const trends = useMemo<Array<string>>(() => {
     if (!enums || !enums.trends || enums.trends.length <= 0) {
@@ -173,6 +218,7 @@ const Measurements = () => {
                 <CardContent>
                   <IndicatorMeasurements
                     frequencies={frequencies}
+                    initialAnalysis={[]}
                     initialFrequency={indicatorGoal?.frequency}
                     initialValues={initialGoalValues}
                     indicatorYear={indicatorGoal?.year}
@@ -188,6 +234,7 @@ const Measurements = () => {
                   <IndicatorMeasurements
                     canAddAnalysis
                     frequencies={frequencies}
+                    initialAnalysis={initialAnalysis}
                     initialFrequency={indicatorGoal?.frequency}
                     initialValues={initialMeasurementValues}
                     indicatorYear={indicatorGoal?.year}
