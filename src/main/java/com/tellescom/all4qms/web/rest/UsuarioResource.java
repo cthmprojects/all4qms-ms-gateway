@@ -297,4 +297,10 @@ public class UsuarioResource {
         log.debug("REST request busca todos usuarios aprovadores por processo");
         return usuarioService.findlAllAprovadoresByProcesso(idProcesso);
     }
+
+    @GetMapping("/sqg-users")
+    public Flux<UsuarioResponse> buscarTodosUsuariosSgq() {
+        log.debug("REST request busca todos usuarios aprovadores por processo");
+        return usuarioService.findAllUsersSgq();
+    }
 }

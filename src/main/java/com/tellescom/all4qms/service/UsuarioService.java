@@ -327,4 +327,12 @@ public class UsuarioService {
                     .map(usuarioMapper::toResponseWithMail)
             );
     }
+
+    public Flux<UsuarioResponse> findAllUsersSgq() {
+        return userService
+            .getUsersByAuthority("ROLE_SGQ")
+            .map(UserDTO::getId)
+            .flatMap(this::findAllByUserJhId)
+            .map(usuarioMapper::toResponseWithMail);
+    }
 }
