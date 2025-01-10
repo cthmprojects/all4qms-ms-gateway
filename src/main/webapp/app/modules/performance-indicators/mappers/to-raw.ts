@@ -1,4 +1,4 @@
-import { Enumerador, Indicador, Indicator, IndicatorGoal, MetaIndicador, Option } from '../models';
+import { Analysis, Enumerador, Indicador, Indicator, IndicatorGoal, MetaIndicador, Option, RawAnalysis } from '../models';
 
 export const toRawIndicator = (indicator: Indicator): Indicador => {
   return {
@@ -51,5 +51,15 @@ export const toRawOption = (option: Option): Enumerador => {
     cod: option.code,
     nome: option.name,
     valor: option.value,
+  };
+};
+
+export const toRawAnalysis = (analysis: Analysis): RawAnalysis => {
+  return {
+    analiseCritica: analysis.analysisDetails,
+    ano: parseInt(analysis.indicatorGoal.year),
+    mes: analysis.month,
+    observacao: [analysis.action, analysis.deadline, analysis.description, analysis.responsible].join(';'),
+    idIndicadorMeta: analysis.indicatorGoal.id,
   };
 };

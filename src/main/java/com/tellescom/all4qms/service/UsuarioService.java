@@ -313,4 +313,26 @@ public class UsuarioService {
     public Mono<List<UsuarioResponse>> findAllUsuariosMinimos() {
         return usuarioRepository.findAll().map(usuarioMapper::toResponse).collectList();
     }
+
+    public Flux<UsuarioResponse> findlAllAprovadoresByProcesso(long processoId) {
+        Flux<UsuarioDTO> usuariosAprovadoresPorProcesso = this.processarUsuariosPorIdProcesso(processoId);
+        Flux<UserDTO> usersPorRole = userService.getUsersByAuthority("ROLE_SGQ");
+
+        return usersPorRole
+            .map(UserDTO::getId) // Extrai os IDs de UserDTO
+            .collect(Collectors.toSet()) // Coleta os IDs em um conjunto
+            .flatMapMany(idsDeUsers ->
+                usuariosAprovadoresPorProcesso
+                    .filter(usuario -> usuario.getUser() != null && idsDeUsers.contains(usuario.getUser().getId()))
+                    .map(usuarioMapper::toResponseWithMail)
+            );
+    }
+
+    public Flux<UsuarioResponse> findAllUsersSgq() {
+        return userService
+            .getUsersByAuthority("ROLE_SGQ")
+            .map(UserDTO::getId)
+            .flatMap(this::findAllByUserJhId)
+            .map(usuarioMapper::toResponseWithMail);
+    }
 }

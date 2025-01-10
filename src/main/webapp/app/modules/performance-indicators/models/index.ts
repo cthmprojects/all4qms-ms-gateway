@@ -1,3 +1,4 @@
+export * from './analysis';
 export * from './indicator';
 export * from './indicator-goal';
 export * from './option';

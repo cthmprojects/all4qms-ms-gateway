@@ -84,7 +84,7 @@ const IndicatorDetails = ({ initialValue, processes, readonly, trends, units, on
           value={name}
         />
 
-        <Autocomplete
+        {/* <Autocomplete
           disableClearable
           disabled={readonly}
           onChange={(event, value, reason, details) => onAutocompleteChanged(event, value, reason, details, setUnit)}
@@ -92,7 +92,7 @@ const IndicatorDetails = ({ initialValue, processes, readonly, trends, units, on
           renderInput={props => <TextField {...props} label="Unidade" />}
           sx={{ flexGrow: 1 }}
           value={unit}
-        />
+        /> */}
 
         <Autocomplete
           disableClearable

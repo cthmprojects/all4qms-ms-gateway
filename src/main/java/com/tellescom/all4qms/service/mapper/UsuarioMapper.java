@@ -75,4 +75,8 @@ public interface UsuarioMapper extends EntityMapper<UsuarioDTO, Usuario> {
     default UsuarioResponse toResponse(Usuario usuario) {
         return UsuarioResponse.builder().id(usuario.getId()).nome(usuario.getNome()).build();
     }
+
+    default UsuarioResponse toResponseWithMail(UsuarioDTO usuarioDTO) {
+        return UsuarioResponse.builder().id(usuarioDTO.getId()).nome(usuarioDTO.getNome()).email(usuarioDTO.getEmail()).build();
+    }
 }

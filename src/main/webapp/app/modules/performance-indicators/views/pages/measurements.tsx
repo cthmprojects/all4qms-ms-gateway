@@ -1,16 +1,24 @@
-import { Box, Breadcrumbs, Button, Card, CardContent, CardHeader, Stack, Typography } from '@mui/material';
+import { Autocomplete, Box, Breadcrumbs, Button, Card, CardContent, CardHeader, Stack, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Enums, Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
+import { Analysis, Enums, Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
+import {
+  deleteIndicatorAnalysis,
+  getIndicatorAnalysis,
+  saveIndicatorAnalysis,
+  updateIndicatorAnalysis,
+} from '../../reducers/analysis.reducer';
 import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reducer';
 import { getIndicatorGoal, updateIndicatorGoal } from '../../reducers/indicator-goals.reducer';
 import { getIndicator } from '../../reducers/indicators.reducer';
-import { IndicatorDetails, IndicatorGoals, IndicatorMeasurements } from '../components';
+import { getYearRange } from '../../utils';
+import { IndicatorDetails, IndicatorMeasurements } from '../components';
 
 const Measurements = () => {
+  const [allAnalysis, setAllAnalysis] = useState<Array<Analysis | null>>([]);
   const [goals, setGoals] = useState<Array<Array<number | null>>>([]);
   const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([]);
   const { id } = useParams();
@@ -26,14 +34,17 @@ const Measurements = () => {
   }, []);
 
   useEffect(() => {
-    dispatch(getIndicatorGoal(parseInt(id)));
+    const indicatorGoalId: number = parseInt(id);
+
+    dispatch(getIndicatorGoal(indicatorGoalId));
+    dispatch(getIndicatorAnalysis(indicatorGoalId));
   }, [id]);
 
   const back = (): void => {
     navigate('../');
   };
 
-  const save = (): void => {
+  const save = async (): Promise<void> => {
     // TODO: Save multiple measurements
 
     dispatch(
@@ -47,6 +58,33 @@ const Measurements = () => {
       })
     );
 
+    for (let i = 0; i < allIndicatorGoalAnalysis.length; i++) {
+      const analysis: Analysis | null = allIndicatorGoalAnalysis[i];
+
+      if (!analysis) {
+        continue;
+      }
+
+      await dispatch(deleteIndicatorAnalysis(analysis));
+    }
+
+    for (let i = 0; i < allAnalysis.length; i++) {
+      const analysis: Analysis | null = allAnalysis[i];
+
+      if (!analysis) {
+        continue;
+      }
+
+      await dispatch(
+        saveIndicatorAnalysis({
+          ...analysis,
+          id: null,
+          indicatorGoal: indicatorGoal,
+          indicatorGoalId: indicatorGoal.id,
+        })
+      );
+    }
+
     navigate('../');
   };
 
@@ -54,6 +92,7 @@ const Measurements = () => {
   const indicator: Indicator | null = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicators.entity);
   const indicatorGoal: IndicatorGoal | null = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entity);
   const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
+  const allIndicatorGoalAnalysis: Array<Analysis> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorAnalysis.entities);
 
   useEffect(() => {
     if (!indicatorGoal || !indicatorGoal.id) {
@@ -86,6 +125,14 @@ const Measurements = () => {
 
     return [[...indicatorGoal.measurements]];
   }, [indicatorGoal]);
+
+  const initialAnalysis = useMemo<Array<Analysis>>(() => {
+    if (!allIndicatorGoalAnalysis) {
+      return null;
+    }
+
+    return [...allIndicatorGoalAnalysis];
+  }, [allIndicatorGoalAnalysis]);
 
   const trends = useMemo<Array<string>>(() => {
     if (!enums || !enums.trends || enums.trends.length <= 0) {
@@ -120,7 +167,8 @@ const Measurements = () => {
     setGoals(goals);
   };
 
-  const onIndicatorMeasurementsChanged = (measurements: Array<Array<number | null>>): void => {
+  const onIndicatorMeasurementsChanged = (measurements: Array<Array<number | null>>, allAnalysis: Array<Analysis | null>): void => {
+    setAllAnalysis(allAnalysis);
     setMeasurements(measurements);
   };
 
@@ -131,7 +179,9 @@ const Measurements = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Typography className="link">Indicadores</Typography>
+          <Link to={'../analytics'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+            Indicadores
+          </Link>
           <Typography className="link">Medições</Typography>
         </Breadcrumbs>
 
@@ -142,11 +192,33 @@ const Measurements = () => {
             <Stack spacing={2}>
               <IndicatorDetails initialValue={indicator} processes={summarizedProcesses} readonly trends={trends} units={units} />
 
+              <Stack direction="row" spacing={2}>
+                <Autocomplete
+                  disableClearable
+                  disabled
+                  options={frequencies}
+                  renderInput={params => <TextField {...params} label="Frequência" />}
+                  sx={{ minWidth: '215px' }}
+                  value={indicatorGoal?.frequency ?? null}
+                />
+
+                <Autocomplete
+                  disableClearable
+                  disabled
+                  getOptionLabel={option => option.toString()}
+                  options={getYearRange()}
+                  renderInput={props => <TextField {...props} label="Ano" />}
+                  sx={{ minWidth: '100px' }}
+                  value={indicatorGoal?.year ? parseInt(indicatorGoal?.year) : null}
+                />
+              </Stack>
+
               <Card>
                 <CardHeader title="Metas" />
                 <CardContent>
                   <IndicatorMeasurements
                     frequencies={frequencies}
+                    initialAnalysis={[]}
                     initialFrequency={indicatorGoal?.frequency}
                     initialValues={initialGoalValues}
                     indicatorYear={indicatorGoal?.year}
@@ -157,10 +229,12 @@ const Measurements = () => {
               </Card>
 
               <Card>
-                <CardHeader title="Medições" />
+                <CardHeader title="Resultados" />
                 <CardContent>
                   <IndicatorMeasurements
+                    canAddAnalysis
                     frequencies={frequencies}
+                    initialAnalysis={initialAnalysis}
                     initialFrequency={indicatorGoal?.frequency}
                     initialValues={initialMeasurementValues}
                     indicatorYear={indicatorGoal?.year}
