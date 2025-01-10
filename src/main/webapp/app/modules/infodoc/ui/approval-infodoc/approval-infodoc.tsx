@@ -29,8 +29,16 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import axios from 'axios';
 import { RejectDocumentDialog } from '../dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao, Process } from '../../models';
-import { createInfoDoc, deleteInfoDoc, getInfoDocById, notifyEmailInfoDoc, updateInfoDoc } from '../../reducers/infodoc.reducer';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao, Process } from '../../models';
+import {
+  cancelDocParams,
+  cancelDocument,
+  createInfoDoc,
+  deleteInfoDoc,
+  getInfoDocById,
+  notifyEmailInfoDoc,
+  updateInfoDoc,
+} from '../../reducers/infodoc.reducer';
 import { cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
@@ -82,14 +90,14 @@ export const ApprovalDocument = () => {
   const navigate = useNavigate();
   const { id, idFile } = useParams();
 
-  const [emitter, setEmitter] = useState('');
+  const [emitter, setEmitter] = useState<number | undefined>(undefined);
   const [emittedDate, setEmittedDate] = useState(new Date());
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
   const [origin, setOrigin] = useState('externa');
   const [processes, setProcesses] = useState<Process[]>([]);
-  const [selectedProcess, setSelectedProcess] = useState('');
+  const [selectedProcess, setSelectedProcess] = useState<number | undefined>(undefined);
   const [noValidate, setNoValidate] = useState(false);
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
@@ -103,6 +111,7 @@ export const ApprovalDocument = () => {
   const [openRejectModal, setOpenRejectModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, _] = useState<UserQMS>(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -181,17 +190,18 @@ export const ApprovalDocument = () => {
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
-  const actualInfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
+  const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
   useEffect(() => {
     if (actualInfoDoc) {
-      setCode(actualInfoDoc.doc?.codigo);
-      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+      setCode(actualInfoDoc.doc?.codigo!!);
+      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao!!);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
-      setDescription(actualInfoDoc.doc?.descricaoDoc);
-      setTitle(actualInfoDoc.doc?.titulo);
-      setOrigin(actualInfoDoc.doc?.origem);
-      setSelectedProcess(actualInfoDoc.doc?.idProcesso);
+      setDescription(actualInfoDoc.doc?.justificativa!!);
+      setDocumentDescription(actualInfoDoc.doc?.descricaoDoc!!);
+      setTitle(actualInfoDoc.doc?.titulo!!);
+      setOrigin(actualInfoDoc.doc?.origem!!);
+      setSelectedProcess(actualInfoDoc.doc?.idProcesso!!);
 
       if (actualInfoDoc.doc?.dataValidade) {
         setNoValidate(false);
@@ -204,7 +214,32 @@ export const ApprovalDocument = () => {
     }
   }, [actualInfoDoc]);
 
-  const approveDocument = async () => {
+  const approveDocumentCancel = async () => {
+    setIsLoading(true);
+
+    const params: cancelDocParams = {
+      id: parseInt(id!!),
+      userLoginID: userLoginID,
+      justify: actualInfoDoc?.movimentacao?.comentarioCancelamento!!,
+    };
+
+    dispatch(cancelDocument(params)).then(
+      (response: any) => {
+        if (response?.error) {
+          console.error('requestCancelInfoDoc:', response?.error);
+          return;
+        }
+      },
+      err => {
+        return;
+      }
+    );
+    toast.success('Documento cancelado com sucesso!');
+    setIsLoading(false);
+    navigate('/infodoc');
+  };
+
+  const approveDocumentHomolog = async () => {
     setIsLoading(true);
 
     // Incrementando Revisão
@@ -246,6 +281,14 @@ export const ApprovalDocument = () => {
     setIsLoading(false);
   };
 
+  const approveDocument = async () => {
+    if (actualInfoDoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVACANC) {
+      approveDocumentCancel();
+    } else {
+      approveDocumentHomolog();
+    }
+  };
+
   useEffect(() => {
     setOriginList(enums?.origem);
 
@@ -283,7 +326,7 @@ export const ApprovalDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(Number(event.target.value) || undefined)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -297,7 +340,7 @@ export const ApprovalDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em Aprovação
+                  Em Aprovação {actualInfoDoc?.doc.status}
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -369,7 +412,11 @@ export const ApprovalDocument = () => {
             <Grid item xs={2}>
               <FormControl style={{ width: '100%' }} disabled>
                 <InputLabel>Área / Processo</InputLabel>
-                <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+                <Select
+                  label="Área / Processo"
+                  value={selectedProcess}
+                  onChange={event => setSelectedProcess(Number(event.target.value) || undefined)}
+                >
                   {processes.map((process: any, i) => (
                     <MenuItem value={process.id} key={`process-${i}`}>
                       {process.nome}

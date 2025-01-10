@@ -390,7 +390,8 @@ const InfodocList = () => {
       navigate(`/infodoc/validation/${infodoc.doc.id}`);
     } else if (
       infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVACAO ||
-      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVAREV
+      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVAREV ||
+      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVACANC
     ) {
       navigate(`/infodoc/approval/${infodoc.doc.id}`);
     } else if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.EMISSAO) {
