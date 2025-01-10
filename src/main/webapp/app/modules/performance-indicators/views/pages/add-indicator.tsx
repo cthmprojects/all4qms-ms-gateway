@@ -4,9 +4,9 @@ import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Enums, SummarizedProcess } from '../../models';
+import { Enums, IndicatorGoal, SummarizedProcess } from '../../models';
 import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reducer';
-import { saveIndicatorGoal } from '../../reducers/indicator-goals.reducer';
+import { saveIndicatorGoals } from '../../reducers/indicator-goals.reducer';
 import { IndicatorDetails, IndicatorGoals } from '../components';
 
 const AddIndicator = () => {
@@ -56,13 +56,17 @@ const AddIndicator = () => {
     navigate('../');
   };
 
-  const save = (): void => {
-    // TODO: Save multiple goals
+  const save = async (): Promise<void> => {
+    const indicatorGoals: Array<IndicatorGoal> = [];
 
-    dispatch(
-      saveIndicatorGoal({
-        frequency: goalFrequencies[0] as 'MENSAL' | 'BIMESTRAL' | 'TRIMESTRAL' | 'QUADRIMESTRAL' | 'SEMESTRAL' | 'ANUAL',
-        goals: goals[0],
+    for (let i = 0; i < goals.length; i++) {
+      const frequency = goalFrequencies[i] as 'MENSAL' | 'BIMESTRAL' | 'TRIMESTRAL' | 'QUADRIMESTRAL' | 'SEMESTRAL' | 'ANUAL';
+      const currentGoals = goals[i];
+      const year = goalYears[i].toString();
+
+      indicatorGoals.push({
+        frequency: frequency,
+        goals: currentGoals,
         indicator: {
           code: code,
           description: description,
@@ -72,9 +76,11 @@ const AddIndicator = () => {
           unit: unit as 'PERCENTUAL' | 'MONETARIO' | 'UNITARIO' | 'DECIMAL',
         },
         measurements: [null, null, null, null, null, null, null, null, null, null, null, null],
-        year: goalYears[0].toString(),
-      })
-    );
+        year: year,
+      });
+    }
+
+    await dispatch(saveIndicatorGoals(indicatorGoals));
 
     navigate('../');
   };
@@ -127,7 +133,9 @@ const AddIndicator = () => {
           <Link to={'/'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
             Home
           </Link>
-          <Typography className="link">Indicadores</Typography>
+          <Link to={'../analytics'} style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }}>
+            Indicadores
+          </Link>
           <Typography className="link">Cadastro</Typography>
         </Breadcrumbs>
 

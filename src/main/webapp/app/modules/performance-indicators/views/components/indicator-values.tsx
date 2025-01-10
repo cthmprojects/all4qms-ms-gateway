@@ -213,7 +213,7 @@ const IndicatorValues = ({
 
   const updateValue = (value: string, idx: number): void => {
     const newValues: Array<number> = [...values];
-    newValues[idx] = value.length > 0 ? parseInt(value) : null;
+    newValues[idx] = value.length > 0 ? parseFloat(value) : null;
     onChanged(frequency, year, newValues);
   };
 
@@ -236,32 +236,36 @@ const IndicatorValues = ({
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={2}>
-        <Autocomplete
-          disableClearable
-          disabled={inputOnly}
-          onChange={(event, value, reason, details) => {
-            onAutocompleteChanged(event, value, reason, details, setFrequency);
-            onChanged(value, year, [null, null, null, null, null, null, null, null, null, null, null, null]);
-          }}
-          options={frequencies}
-          renderInput={params => <TextField {...params} label="Frequência" />}
-          sx={{ minWidth: '215px' }}
-          value={frequency}
-        />
+        {!inputOnly && (
+          <Autocomplete
+            disableClearable
+            disabled={inputOnly}
+            onChange={(event, value, reason, details) => {
+              onAutocompleteChanged(event, value, reason, details, setFrequency);
+              onChanged(value, year, [null, null, null, null, null, null, null, null, null, null, null, null]);
+            }}
+            options={frequencies}
+            renderInput={params => <TextField {...params} label="Frequência" />}
+            sx={{ minWidth: '215px' }}
+            value={frequency}
+          />
+        )}
 
-        <Autocomplete
-          disableClearable
-          disabled={inputOnly}
-          getOptionLabel={option => option.toString()}
-          onChange={(event, value, reason, details) => {
-            onAutocompleteChanged(event, value, reason, details, setYear);
-            onChanged(frequency, value, values);
-          }}
-          options={years}
-          renderInput={props => <TextField {...props} label="Ano" />}
-          sx={{ minWidth: '100px' }}
-          value={year}
-        />
+        {!inputOnly && (
+          <Autocomplete
+            disableClearable
+            disabled={inputOnly}
+            getOptionLabel={option => option.toString()}
+            onChange={(event, value, reason, details) => {
+              onAutocompleteChanged(event, value, reason, details, setYear);
+              onChanged(frequency, value, values);
+            }}
+            options={years}
+            renderInput={props => <TextField {...props} label="Ano" />}
+            sx={{ minWidth: '100px' }}
+            value={year}
+          />
+        )}
 
         {allowAdding && (
           <IconButton onClick={onAdded} sx={{ width: 50, height: 50 }}>

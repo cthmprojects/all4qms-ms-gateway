@@ -1,5 +1,18 @@
 import { EditOutlined } from '@mui/icons-material';
-import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@mui/material';
+import {
+  IconButton,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
 
 type AnalyticsTableProps = {
@@ -22,12 +35,35 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
     return filteredProcesses.length > 0 ? filteredProcesses[0] : null;
   };
 
-  const getColor = (measurement: number | null, goal: number): string => {
-    if (!measurement || measurement < goal) {
-      return 'red';
-    } else {
+  const getColor = (measurement: number | null, goal: number, trend: 'MAIOR' | 'MENOR' | 'ESTABILIZAR'): string => {
+    if (trend === 'ESTABILIZAR') {
       return 'green';
     }
+
+    if (!measurement) {
+      return 'red';
+    }
+
+    const diff: number = measurement - goal;
+
+    if ((trend === 'MAIOR' && diff >= 0) || (trend === 'MENOR' && diff <= 0)) {
+      return 'green';
+    } else {
+      return 'red';
+    }
+  };
+
+  const render = (measurement: number | null, goal: number | null, avg: string, trend: 'MAIOR' | 'MENOR' | 'ESTABILIZAR') => {
+    const decimalGoal: string = goal ? `${goal.toFixed(2)}%` : '-';
+
+    return (
+      <TableCell>
+        <Stack spacing={2} alignItems="center">
+          <Typography sx={{ color: 'black', fontSize: 12 }}>{decimalGoal}</Typography>
+          <Typography sx={{ color: getColor(measurement, goal, trend), fontSize: 12 }}>{avg ?? '-'}</Typography>
+        </Stack>
+      </TableCell>
+    );
   };
 
   return (
@@ -37,7 +73,6 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
           <TableRow>
             <TableCell align="left">Indicador</TableCell>
             <TableCell align="left">Processo</TableCell>
-            <TableCell align="left">Metas</TableCell>
             <TableCell align="left">Acumulado</TableCell>
             <TableCell align="left">JAN</TableCell>
             <TableCell align="left">FEV</TableCell>
@@ -59,6 +94,8 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
             const { frequency, goals, id, indicator, measurements, year } = indicatorGoal;
 
             const completeIndicator: Indicator | null = getIndicator(indicator.id);
+            const trend = completeIndicator.trend;
+
             const process: SummarizedProcess | null = getProcess(completeIndicator?.processId);
 
             const avgs: Array<number> = [];
@@ -85,20 +122,12 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
               <TableRow key={id}>
                 <TableCell>{completeIndicator?.name ?? '-'}</TableCell>
                 <TableCell>{process?.name ?? '-'}</TableCell>
-                <TableCell>{goal.toFixed(2) ?? '-'}</TableCell> {/* Metas */}
-                <TableCell sx={{ color: getColor(accumulated, 100) }}>{accumulated.toFixed(2) ?? '-'}%</TableCell> {/* Acumulado */}
-                <TableCell sx={{ color: getColor(measurements[0], goals[0]) }}>{avgsToShow[0] ?? '-'}</TableCell> {/* JAN */}
-                <TableCell sx={{ color: getColor(measurements[1], goals[1]) }}>{avgsToShow[1] ?? '-'}</TableCell> {/* FEV */}
-                <TableCell sx={{ color: getColor(measurements[2], goals[2]) }}>{avgsToShow[2] ?? '-'}</TableCell> {/* MAR */}
-                <TableCell sx={{ color: getColor(measurements[3], goals[3]) }}>{avgsToShow[3] ?? '-'}</TableCell> {/* ABR */}
-                <TableCell sx={{ color: getColor(measurements[4], goals[4]) }}>{avgsToShow[4] ?? '-'}</TableCell> {/* MAI */}
-                <TableCell sx={{ color: getColor(measurements[5], goals[5]) }}>{avgsToShow[5] ?? '-'}</TableCell> {/* JUN */}
-                <TableCell sx={{ color: getColor(measurements[6], goals[6]) }}>{avgsToShow[6] ?? '-'}</TableCell> {/* JUL */}
-                <TableCell sx={{ color: getColor(measurements[7], goals[7]) }}>{avgsToShow[7] ?? '-'}</TableCell> {/* AGO */}
-                <TableCell sx={{ color: getColor(measurements[8], goals[8]) }}>{avgsToShow[8] ?? '-'}</TableCell> {/* SET */}
-                <TableCell sx={{ color: getColor(measurements[9], goals[9]) }}>{avgsToShow[9] ?? '-'}</TableCell> {/* OUT */}
-                <TableCell sx={{ color: getColor(measurements[10], goals[10]) }}>{avgsToShow[10] ?? '-'}</TableCell> {/* NOV */}
-                <TableCell sx={{ color: getColor(measurements[11], goals[11]) }}>{avgsToShow[11] ?? '-'}</TableCell> {/* DEZ */}
+                {/*<TableCell>{goal.toFixed(2) ?? '-'}</TableCell> */} {/* Metas */}
+                {/* Acumulado */}
+                <TableCell sx={{ color: getColor(accumulated, 100, completeIndicator.trend) }}>
+                  {accumulated.toFixed(2) ?? '-'}%
+                </TableCell>{' '}
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(month => render(measurements[month], goals[month], avgsToShow[month], trend))}
                 <TableCell>
                   <Tooltip title="Editar">
                     <IconButton color="primary" onClick={() => onManageMeasurementsRequested(id)}>
