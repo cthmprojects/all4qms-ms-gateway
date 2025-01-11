@@ -303,4 +303,19 @@ public class UsuarioResource {
         log.debug("REST request busca todos usuarios aprovadores por processo");
         return usuarioService.findAllUsersSgq();
     }
+
+    @GetMapping("/reset-password/{id}")
+    public Mono<ResponseEntity<Void>> resetSenhaPadraoUsuario(@PathVariable Long id) {
+        log.debug("REST request to reset senha padrao Usuario : {}", id);
+        return usuarioService
+            .resetPassword(id)
+            .then(
+                Mono.just(
+                    ResponseEntity
+                        .noContent()
+                        .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
+                        .build()
+                )
+            );
+    }
 }
