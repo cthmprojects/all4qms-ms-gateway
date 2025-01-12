@@ -8,7 +8,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ActionPlanEfficacy,
   ActionPlanImplementation,
-  ActionPlanSummary,
   AnalysisDetails,
   Configuration,
   Enums,
@@ -24,9 +23,10 @@ import {
 import { getAnalysis, getLevels, getTypes } from '../../reducers/enums.reducer';
 import { getMaps } from '../../reducers/maps.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
-import { editRiskOpportunity, getROById } from '../../reducers/risks-opportunities.reducer';
+import { editRiskOpportunity as editRiskOpportunityy, getROById } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 import { BaseDetails } from '../components';
+import { editRiskOpportunity } from '../../service';
 
 const EditRisk = () => {
   const { id } = useParams();
@@ -101,7 +101,7 @@ const EditRisk = () => {
     analise?: RawRiskOpportunityAnalysis
   ): Promise<void> => {
     dispatch(
-      editRiskOpportunity({
+      editRiskOpportunityy({
         details,
         efficacy,
         implementation,
@@ -116,6 +116,12 @@ const EditRisk = () => {
     );
 
     navigate('/risks-opportunities/');
+  };
+
+  const newOnSave = async (payload: Parameters<typeof editRiskOpportunity>[0]) => {
+    await editRiskOpportunity(payload);
+    await dispatch(getROById(id));
+    if (rawRiskOpportunity.id) navigate(`/risks-opportunities/risk/${rawRiskOpportunity.id}`, { replace: true });
   };
 
   return (
@@ -142,7 +148,7 @@ const EditRisk = () => {
           riskOpportunity={rawRiskOpportunity}
           users={getSummarizedUsers()}
           onBack={onBack}
-          onSave={onSave}
+          newOnSave={newOnSave}
         />
       </div>
     </div>

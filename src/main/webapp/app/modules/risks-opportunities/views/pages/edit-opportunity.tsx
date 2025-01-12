@@ -5,28 +5,14 @@ import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import {
-  ActionPlanEfficacy,
-  ActionPlanImplementation,
-  ActionPlanSummary,
-  AnalysisDetails,
-  Configuration,
-  Enums,
-  Ishikawa,
-  RawMap,
-  RawPlanAction,
-  RawRiskOpportunity,
-  RawRiskOpportunityAnalysis,
-  Reason,
-  SummarizedProcess,
-  SummarizedUser,
-} from '../../models';
+import { Configuration, Enums, RawMap, RawRiskOpportunity, SummarizedProcess, SummarizedUser } from '../../models';
 import { getComplexities } from '../../reducers/complexities.reducer';
 import { getAnalysis, getLevels, getTypes } from '../../reducers/enums.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getMaps } from '../../reducers/maps.reducer';
-import { editRiskOpportunity, getROById } from '../../reducers/risks-opportunities.reducer';
+import { getROById } from '../../reducers/risks-opportunities.reducer';
 import { BaseDetails } from '../components';
+import { editRiskOpportunity } from '../../service';
 
 const EditOpportunity = () => {
   const { id } = useParams();
@@ -86,34 +72,12 @@ const EditOpportunity = () => {
     navigate('/risks-opportunities/');
   };
 
-  const onSave = async (
-    senderId: number,
-    efficacy: ActionPlanEfficacy,
-    implementation: ActionPlanImplementation,
-    ishikawa: Ishikawa | null,
-    reasons: Reason | null,
-    details: AnalysisDetails,
-    interestedParts: { id?: number; nomeParteInteressada: string },
-    rawRiskOpportunity: RawRiskOpportunity,
-    acoesPlano: RawPlanAction[],
-    analise?: RawRiskOpportunityAnalysis
-  ): Promise<void> => {
-    dispatch(
-      editRiskOpportunity({
-        details,
-        efficacy,
-        implementation,
-        interestedParts,
-        ishikawa,
-        reasons,
-        riskOpportunity: { ...rawRiskOpportunity, id: parseInt(id) },
-        senderId,
-        acoesPlano,
-        analise,
-      })
-    );
-
-    navigate('/risks-opportunities/');
+  const newOnSave = async (payload: Parameters<typeof editRiskOpportunity>[0]) => {
+    await editRiskOpportunity(payload);
+    setTimeout(async () => {
+      await dispatch(getROById(id));
+      if (rawRiskOpportunity.id) navigate(`/risks-opportunities/opportunity/${rawRiskOpportunity.id}`, { replace: true });
+    }, 100);
   };
 
   return (
@@ -141,7 +105,7 @@ const EditOpportunity = () => {
           secondConfigurations={improvements}
           users={getSummarizedUsers()}
           onBack={onBack}
-          onSave={onSave}
+          newOnSave={newOnSave}
         />
       </div>
     </div>
