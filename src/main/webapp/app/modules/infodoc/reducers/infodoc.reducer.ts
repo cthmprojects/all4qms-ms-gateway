@@ -148,7 +148,7 @@ export const getInfoDocById = createAsyncThunk('docs/get', async (id: number | s
   return newResponse;
 });
 
-interface cancelDocParams {
+export interface cancelDocParams {
   id: number;
   userLoginID: number;
   justify: string;

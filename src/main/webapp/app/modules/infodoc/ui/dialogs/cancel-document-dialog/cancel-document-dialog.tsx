@@ -5,11 +5,17 @@ import { InfoDoc } from 'app/modules/infodoc/models';
 import { StyledLabel, StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { Button } from 'reactstrap';
 import { cancelDocument } from 'app/modules/infodoc/reducers/infodoc.reducer';
-import { useAppDispatch } from 'app/config/store';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Storage } from 'react-jhipster';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { createEntity as createPendencia } from 'app/entities/pendencia/pendencia.reducer';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { IUsuario } from '../../../../../shared/model/usuario.model';
+import { notifyEmailInfoDoc, updateInfoDoc } from '../../../reducers/infodoc.reducer';
+import { Doc, EnumSituacao, StatusEnum } from '../../../models/infodoc';
+import { atualizarMovimentacao } from '../../../reducers/movimentacao.reducer';
+import { EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../../../models/movimentacao';
 
 const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
   const id = React.useId();
@@ -35,6 +41,9 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
   const navigate = useNavigate();
   const [justifyValue, setJustifyValue] = useState('');
 
+  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const users: IUsuario[] = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+
   const sendPendenciasSGQ = async user => {
     try {
       const userLoged = JSON.parse(await Storage.session.get('USUARIO_QMS'));
@@ -55,27 +64,93 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
     }
   };
 
+  const approveCancelDocument = async () => {
+    const movDoc: Movimentacao = {
+      ...infodoc.movimentacao,
+      enumStatus: EnumStatusDoc.APROVACANC,
+      enumTipoMovDoc: EnumTipoMovDoc.CANCELAR,
+      comentarioCancelamento: justifyValue,
+    };
+
+    await dispatch(atualizarMovimentacao(movDoc))
+      .then(async () => {
+        toast.success('Documento enviado para aprovação!');
+        const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == infodoc.doc?.idUsuarioCriacao?.toString()!!)[0];
+        dispatch(
+          notifyEmailInfoDoc({
+            to: userEmitter?.email || '', // Email
+            subject: 'Documento requerendo APROVAÇãO para cancelamento',
+            tipo: 'APROVAR',
+            nomeEmissor: userEmitter?.nome || '', // nome
+            tituloDocumento: 'Documento em Cancelamento',
+            dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
+            descricao: `Cancelamento de Documento com a seguinte justificativa: \n\n${justifyValue}`,
+            motivoReprovacao: '',
+          })
+        );
+        navigate('/infodoc');
+        // setIsLoading(false);
+      })
+      .catch(e => {
+        toast.error('Erro ao aprovar documento.');
+        // setIsLoading(false);
+      });
+  };
+
+  const saveDoc = (): Doc => {
+    const newInfoDoc: Doc = {
+      ...infodoc.doc,
+      enumSituacao: EnumSituacao.REVISAO,
+      status: StatusEnum.APROVACANC,
+    };
+
+    return newInfoDoc;
+  };
+
+  const changeToRevDocument = async () => {
+    const newInfoDoc = saveDoc();
+
+    const respUpdt = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
+
+    if (respUpdt) {
+      const resDoc: InfoDoc = (respUpdt.payload as AxiosResponse).data || {};
+
+      return resDoc;
+    } else {
+      toast.error('Erro ao salvar documento, tente novamente.');
+      return;
+    }
+  };
+
   const requestCancelInfoDoc = (justify: string) => {
+    if (!justify) {
+      toast.error('Motivo do cancelamento não pode estar vazio');
+      return;
+    }
+
     const params = { id: infodoc.doc.id, userLoginID: userId, justify };
 
-    dispatch(cancelDocument(params)).then(
-      (response: any) => {
-        if (response?.error) {
-          console.error('requestCancelInfoDoc:', response?.error);
-          handleClose();
-          return;
-        }
+    changeToRevDocument();
+    approveCancelDocument();
 
-        usersSGQ.map(user => sendPendenciasSGQ(user));
-        setJustifyValue('');
+    // dispatch(cancelDocument(params)).then(
+    //   (response: any) => {
+    //     if (response?.error) {
+    //       console.error('requestCancelInfoDoc:', response?.error);
+    //       handleClose();
+    //       return;
+    //     }
 
-        handleClose();
-      },
-      err => {
-        return;
-      }
-    );
-    navigate('/infodoc');
+    //     usersSGQ.map(user => sendPendenciasSGQ(user));
+    //     setJustifyValue('');
+
+    //     handleClose();
+    //   },
+    //   err => {
+    //     return;
+    //   }
+    // );
+    handleClose();
   };
 
   return (
