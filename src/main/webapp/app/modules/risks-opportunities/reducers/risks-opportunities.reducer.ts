@@ -170,7 +170,10 @@ export const deleteRO = createAsyncThunk('ro/delete', async (id: number | string
 export const getROById = createAsyncThunk('ro/get', async (id: number | string) => {
   const { data } = await axios.get<RawRiskOpportunity>(`${apiRiscoOportunidadeUrl}/${id}`);
 
-  return data;
+  return {
+    ...data,
+    analiseROS: data.analiseROS.map(item => ({ ...item, dataAnalise: new Date(item.dataAnalise) })),
+  };
 });
 
 function parseActionPlanToPayload(item: RawPlanAction) {
@@ -193,7 +196,7 @@ async function persistAcaoPlano(item: RawPlanAction) {
   await (item?.id ? editAcaoPlano(item) : saveAcaoPlano(item));
 }
 
-function saveOnlyActions(acoesPlano: RawPlanAction[]) {
+export function saveOnlyActions(acoesPlano: RawPlanAction[]) {
   const actions = Promise.all(acoesPlano.map(parseActionPlanToPayload).map(persistAcaoPlano));
   actions.then(values => console.log('##### Result', values));
 }
@@ -407,7 +410,7 @@ function actionPlanParser(payload: any) {
   } as RawPlanAction;
 }
 
-const saveInterestedPartAsync = async (interestedPart: RawInterestedPart): Promise<number | null> => {
+export const saveInterestedPartAsync = async (interestedPart: RawInterestedPart): Promise<number | null> => {
   const response = interestedPart.id
     ? await axios.put<RawInterestedPart>(`${apiPartesInteressadasUrl}/${interestedPart.id}`, interestedPart)
     : await axios.post<RawInterestedPart>(apiPartesInteressadasUrl, interestedPart);
@@ -415,11 +418,16 @@ const saveInterestedPartAsync = async (interestedPart: RawInterestedPart): Promi
   return response.data?.id || null;
 };
 
-export const getApprovalById = async (id: number): Promise<AprovacaoNC> => {
-  const response = await axios.get<AprovacaoNC>(`${aprovacaoNcUrl}/${id}`);
+export const getApprovalById = async (id: number): Promise<RawApproval> => {
+  const response = await axios.get<RawApproval>(`${aprovacaoNcUrl}/${id}`);
   const resource = response.data;
 
-  return resource;
+  return {
+    ...resource,
+    dataImplementacao: resource.dataImplementacao && new Date(resource.dataImplementacao),
+    dataEficacia: resource.dataEficacia && new Date(resource.dataEficacia),
+    dataFechamento: resource.dataFechamento && new Date(resource.dataFechamento),
+  };
 };
 
 export const getPlanById = async (id: number): Promise<RawPlanWithActions> => {

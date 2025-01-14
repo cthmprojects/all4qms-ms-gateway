@@ -8,7 +8,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ActionPlanEfficacy,
   ActionPlanImplementation,
-  ActionPlanSummary,
   AnalysisDetails,
   Configuration,
   Enums,
@@ -23,9 +22,10 @@ import {
 import { getAnalysis, getLevels, getTypes } from '../../reducers/enums.reducer';
 import { getMaps } from '../../reducers/maps.reducer';
 import { getProbabilities } from '../../reducers/probabilities.reducer';
-import { saveRiskOpportunity } from '../../reducers/risks-opportunities.reducer';
+import { saveRiskOpportunity as saveRiskOpportunityy } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
 import { BaseDetails } from '../components';
+import { saveRiskOpportunity } from '../../service';
 
 const AddRisk = () => {
   const dispatch = useAppDispatch();
@@ -56,7 +56,7 @@ const AddRisk = () => {
       return null;
     }
 
-    const filteredMaps: Array<RawMap> = maps.filter(m => m.tipoRO === 'O');
+    const filteredMaps: Array<RawMap> = maps.filter(m => m.tipoRO === 'R');
     return filteredMaps.length > 0 ? filteredMaps[0] : null;
   }, [maps]);
 
@@ -96,7 +96,7 @@ const AddRisk = () => {
     acoesPlano: RawPlanAction[]
   ): Promise<void> => {
     const res = await dispatch(
-      saveRiskOpportunity({
+      saveRiskOpportunityy({
         acoesPlano,
         details,
         efficacy,
@@ -108,9 +108,13 @@ const AddRisk = () => {
         senderId,
       })
     );
-    console.log('######', res);
 
     navigate('/risks-opportunities/');
+  };
+
+  const newOnSave = async (payload: Parameters<typeof saveRiskOpportunity>[0]) => {
+    const ro = await saveRiskOpportunity(payload);
+    if (ro.id) navigate(`/risks-opportunities/risk/${ro.id}`, { replace: true });
   };
 
   return (
@@ -137,6 +141,7 @@ const AddRisk = () => {
           users={getSummarizedUsers()}
           onBack={onBack}
           onSave={onSave}
+          newOnSave={newOnSave}
         />
       </div>
     </div>

@@ -5,27 +5,13 @@ import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  ActionPlanEfficacy,
-  ActionPlanImplementation,
-  ActionPlanSummary,
-  AnalysisDetails,
-  Configuration,
-  Enums,
-  Ishikawa,
-  RawMap,
-  RawPlanAction,
-  RawRiskOpportunity,
-  Reason,
-  SummarizedProcess,
-  SummarizedUser,
-} from '../../models';
+import { Configuration, Enums, RawMap, SummarizedProcess, SummarizedUser } from '../../models';
 import { getComplexities } from '../../reducers/complexities.reducer';
 import { getAnalysis, getLevels, getTypes } from '../../reducers/enums.reducer';
 import { getImprovements } from '../../reducers/improvements.reducer';
 import { getMaps } from '../../reducers/maps.reducer';
-import { saveRiskOpportunity } from '../../reducers/risks-opportunities.reducer';
 import { BaseDetails } from '../components';
+import { saveRiskOpportunity } from '../../service';
 
 const AddOpportunity = () => {
   const dispatch = useAppDispatch();
@@ -82,32 +68,9 @@ const AddOpportunity = () => {
     navigate('/risks-opportunities/');
   };
 
-  const onSave = async (
-    senderId: number,
-    efficacy: ActionPlanEfficacy,
-    implementation: ActionPlanImplementation,
-    ishikawa: Ishikawa | null,
-    reasons: Reason | null,
-    details: AnalysisDetails,
-    interestedParts: { id?: number; nomeParteInteressada: string },
-    rawRiskOpportunity: RawRiskOpportunity,
-    acoesPlano: RawPlanAction[]
-  ): Promise<void> => {
-    await dispatch(
-      saveRiskOpportunity({
-        details,
-        efficacy,
-        implementation,
-        interestedParts,
-        ishikawa,
-        reasons,
-        riskOpportunity: rawRiskOpportunity,
-        senderId,
-        acoesPlano,
-      })
-    );
-
-    navigate('/risks-opportunities/');
+  const newOnSave = async (payload: Parameters<typeof saveRiskOpportunity>[0]) => {
+    const ro = await saveRiskOpportunity(payload);
+    if (ro.id) navigate(`/risks-opportunities/opportunity/${ro.id}`, { replace: true });
   };
 
   return (
@@ -134,7 +97,7 @@ const AddOpportunity = () => {
           secondConfigurations={improvements}
           users={getSummarizedUsers()}
           onBack={onBack}
-          onSave={onSave}
+          newOnSave={newOnSave}
         />
       </div>
     </div>

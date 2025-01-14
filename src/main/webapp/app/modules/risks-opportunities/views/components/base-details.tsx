@@ -1,33 +1,23 @@
-import { Button, Stack } from '@mui/material';
+import { Box, Button, Fab, Stack } from '@mui/material';
 import { useAppSelector } from 'app/config/store';
-import { AprovacaoNC, Plan } from 'app/modules/rnc/models';
-import { useEffect, useMemo } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import {
-  mapCompleteAnalysisToActionPlanEfficacy,
-  mapCompleteAnalysisToActionPlanImplementation,
-  mapCompleteAnalysisToActionPlanSummary,
-  mapCompleteAnalysisToIshikawa,
-  mapCompleteAnalysisToReasons,
-  mapCompleteToAnalysisDetails,
-  mapRiskOpportunity,
-} from '../../mappers';
+import { useEffect } from 'react';
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { mapRiskOpportunity } from '../../mappers';
 import {
   ActionPlanEfficacy,
   ActionPlanImplementation,
-  ActionPlanSummary,
   AnalysisDetails,
-  CompleteAnalysis,
   Configuration,
   ControlActionSummary,
   Enums,
   Ishikawa,
+  RawApproval,
   RawCauseEffectInvestigation,
+  RawCompleteAnalysis,
   RawInvestigation,
   RawIshikawaInvestigation,
   RawMap,
   RawPlanAction,
-  RawPlanWithActions,
   RawRiskOpportunity,
   RawRiskOpportunityAnalysis,
   Reason,
@@ -44,6 +34,10 @@ import {
 import Analysis from './analysis';
 import ControlAction from './control-action';
 import GeneralInformation from './general-information';
+import { deleteAnalise, saveRiskOpportunity } from '../../service';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import { useConfirmDialog } from 'app/shared/hooks/useConfirmDialog';
 
 type BaseDetailsProps = {
   enums: Enums;
@@ -68,6 +62,7 @@ type BaseDetailsProps = {
     acoesPlano: RawPlanAction[],
     analise?: RawRiskOpportunityAnalysis
   ) => void;
+  newOnSave?: (payload: Parameters<typeof saveRiskOpportunity>[0]) => void;
 };
 
 const BaseDetails = ({
@@ -82,6 +77,7 @@ const BaseDetails = ({
   users,
   onBack,
   onSave,
+  newOnSave,
 }: BaseDetailsProps) => {
   let isAdmin = useAppSelector(state => state.authentication.accountQms);
 
@@ -97,6 +93,7 @@ const BaseDetails = ({
       type: !isOpportunity ? 'Risco' : 'Oportunidade',
       flow: '',
       process: null,
+      id: '' as unknown as number,
     },
     mode: 'all',
     reValidateMode: 'onChange',
@@ -116,47 +113,26 @@ const BaseDetails = ({
     reValidateMode: 'onChange',
   });
 
+  const defaultAnaliseFormPayload = {
+    acoesPlano: [{}],
+    analise: {
+      dataAnalise: new Date(),
+    },
+    aprovacao: {},
+    ishikawa: {},
+    plano: {},
+    porques: {},
+  } as RawCompleteAnalysis;
+
   const analysisFormMethods = useForm({
     defaultValues: {
-      description: '',
-      meaning: '',
-      probability: null,
-      severity: null,
-      useIshikawa: false,
-      ishikawaCause: '',
-      environment: '',
-      workforce: '',
-      machine: '',
-      measurement: '',
-      method: '',
-      rawMaterial: '',
-      useReasons: true,
-      reasonCause: '',
-      reasonEffect: '',
-      reason1: '',
-      reason2: '',
-      reason3: '',
-      reason4: '',
-      reason5: '',
-      actionDescription: '',
-      actionDate: new Date(),
-      responsibleId: '' as unknown as number,
-      verifyAction: false,
-      actionVerificationDate: null,
-      actionVerifierId: '' as unknown as number,
-      implementationDate: null,
-      implementationResponsibleId: '' as unknown as number,
-      implemented: false,
-      implementationDescription: '',
-      efficacyVerificationDate: null,
-      efficacyResponsibleId: '' as unknown as number,
-      efficacyVerified: false,
-      efficacyDescription: '',
-      actions: [],
+      analysis: [] as RawCompleteAnalysis[],
     },
     mode: 'all',
     reValidateMode: 'onChange',
   });
+
+  const { append, fields, remove } = useFieldArray({ control: analysisFormMethods.control, name: 'analysis', keyName: 'key' });
 
   generalFormMethods.formState.isValid;
 
@@ -188,6 +164,7 @@ const BaseDetails = ({
       generalFormMethods.setValue('interestedParts', riskOpportunity.partesInteressadas, { shouldDirty: true });
     generalFormMethods.setValue('secondAuxiliaryDescription', riskOpportunity.descricao3);
     generalFormMethods.setValue('type', riskOpportunity.tipoRO === 'R' ? 'Risco' : 'Oportunidade');
+    generalFormMethods.setValue('id', riskOpportunity.id);
 
     const filteredUsers: Array<SummarizedUser> = users.filter(u => u.id === riskOpportunity.idEmissor);
     const user: SummarizedProcess | null = filteredUsers.length > 0 ? filteredUsers[0] : null;
@@ -201,7 +178,6 @@ const BaseDetails = ({
   useEffect(() => {
     generalFormMethods.register('interestedParts', { min: 1, required: true });
     generalFormMethods.register('date', { required: true });
-    analysisFormMethods.setValue('actions', [{}]);
   }, []);
 
   useEffect(() => {
@@ -221,88 +197,42 @@ const BaseDetails = ({
     const approvalId: number = analysis.idAprovacaoNC;
     const investigationId: number = analysis.idInvestigacao;
     const planId: number = analysis.idPlano;
-    const approval: AprovacaoNC = await getApprovalById(approvalId);
+
+    const aprovacao: RawApproval = await getApprovalById(approvalId);
     const investigation: RawInvestigation = await getInvestigationById(investigationId);
-    const planWithActions: RawPlanWithActions = await getPlanById(planId);
+    const acoesPlano = (await getPlanById(planId)).acoes;
     const ishikawa: RawIshikawaInvestigation = investigation.idCausaEfeito ? await getIshikawaById(investigation.idCausaEfeito) : null;
-    const reasons: RawCauseEffectInvestigation = investigation.idPorques ? await getReasonsById(investigation.idPorques) : null;
+    const porques: RawCauseEffectInvestigation = investigation.idPorques ? await getReasonsById(investigation.idPorques) : null;
 
-    const useIshikawa: boolean =
-      !ishikawa &&
-      !ishikawa.descCausaEfeito &&
-      !ishikawa.maoDeObra &&
-      !ishikawa.maquina &&
-      !ishikawa.materiaPrima &&
-      !ishikawa.medicao &&
-      !ishikawa.meioAmbiente &&
-      !ishikawa.metodo;
+    const analise = {
+      ...analysis,
+      criadoPor: isAdmin.id,
+    };
 
-    analysisFormMethods.setValue('useIshikawa', useIshikawa);
-    analysisFormMethods.setValue('ishikawaCause', ishikawa?.descCausaEfeito);
-    analysisFormMethods.setValue('environment', ishikawa?.meioAmbiente);
-    analysisFormMethods.setValue('workforce', ishikawa?.maoDeObra);
-    analysisFormMethods.setValue('machine', ishikawa?.maquina);
-    analysisFormMethods.setValue('measurement', ishikawa?.medicao);
-    analysisFormMethods.setValue('method', ishikawa?.metodo);
-    analysisFormMethods.setValue('rawMaterial', ishikawa?.materiaPrima);
-    analysisFormMethods.setValue('useReasons', !useIshikawa);
-    analysisFormMethods.setValue('reasonCause', reasons?.descCausa);
-    analysisFormMethods.setValue('reasonEffect', reasons?.descProblema);
-    analysisFormMethods.setValue('reason1', reasons?.pq1);
-    analysisFormMethods.setValue('reason2', reasons?.pq2);
-    analysisFormMethods.setValue('reason3', reasons?.pq3);
-    analysisFormMethods.setValue('reason4', reasons?.pq4);
-    analysisFormMethods.setValue('reason5', reasons?.pq5);
-
-    const actions: RawPlanAction[] = planWithActions.acoes.length ? planWithActions.acoes : [{} as RawPlanAction];
-    analysisFormMethods.setValue('actions', actions);
-
-    /* analysisFormMethods.setValue('actionDescription', action?.descricaoAcao);
-    analysisFormMethods.setValue('actionDate', new Date(action?.prazoAcao));
-    analysisFormMethods.setValue('responsibleId', action?.idResponsavelAcao);
-    analysisFormMethods.setValue('verifyAction', false);
-    analysisFormMethods.setValue('actionVerificationDate', new Date(action?.dataVerificao));
-    analysisFormMethods.setValue('actionVerifierId', action?.idResponsavelVerificaoAcao); */
-
-    analysisFormMethods.setValue('implementationDate', approval.dataImplementacao ? new Date(approval.dataImplementacao) : null);
-    analysisFormMethods.setValue('implementationResponsibleId', approval.responsavelImplementacao);
-    analysisFormMethods.setValue('implemented', approval.possuiImplementacao);
-    analysisFormMethods.setValue('implementationDescription', approval.descImplementacao);
-    analysisFormMethods.setValue('efficacyVerificationDate', approval?.dataEficacia ? new Date(approval.dataEficacia) : null);
-    analysisFormMethods.setValue('efficacyResponsibleId', approval.responsavelEficacia);
-    analysisFormMethods.setValue('efficacyVerified', approval.possuiEficacia);
-    analysisFormMethods.setValue('efficacyDescription', approval.descEficacia);
+    append({ aprovacao, acoesPlano, ishikawa, porques, analise } as RawCompleteAnalysis);
   };
 
   useEffect(() => {
     (async () => {
-      if (!analysisFormMethods || !riskOpportunity) {
+      analysisFormMethods.setValue('analysis', []);
+
+      if (!analysisFormMethods || !riskOpportunity?.id) {
+        append(defaultAnaliseFormPayload);
         return;
       }
-      analysis?.id && (await fetchAnalysis(analysis));
 
       const allAnalysis: Array<RawRiskOpportunityAnalysis> = riskOpportunity.analiseROS;
+
+      allAnalysis.forEach(fetchAnalysis);
 
       if (!allAnalysis || allAnalysis.length <= 0) {
         return;
       }
-      const probability: Configuration = filterConfiguration(analysis.linhaConfigAnalise1?.id ?? 0, firstConfigurations);
-      const severity: Configuration = filterConfiguration(analysis.linhaConfigAnalise2?.id ?? 0, secondConfigurations);
-
-      analysisFormMethods.setValue('description', analysis?.descricaoDecisao);
-      analysisFormMethods.setValue('meaning', analysis?.decisao);
-      analysisFormMethods.setValue('probability', probability);
-      analysisFormMethods.setValue('severity', severity);
     })();
-  }, [analysisFormMethods, riskOpportunity, firstConfigurations, secondConfigurations]);
-
-  const analysis = useMemo(() => {
-    if (riskOpportunity?.analiseROS?.length) return [...(riskOpportunity?.analiseROS || [])].reverse()[0];
-    else return null;
-  }, [riskOpportunity?.id]);
+  }, [riskOpportunity]);
 
   const save = async (): Promise<void> => {
-    if (!onSave) {
+    if (!newOnSave) {
       return;
     }
 
@@ -319,21 +249,6 @@ const BaseDetails = ({
     const controlAction: ControlActionSummary = {
       ...controlActionValues,
     };
-
-    const idPlano: number = analysis?.idPlano;
-
-    const analysisValues = analysisFormMethods.getValues();
-    const completeAnalysis: CompleteAnalysis = {
-      ...analysisValues,
-      actions: analysisValues.actions.map(item => ({ ...item, idPlano })),
-    };
-
-    const efficacy: ActionPlanEfficacy = mapCompleteAnalysisToActionPlanEfficacy(completeAnalysis);
-    const implementation: ActionPlanImplementation = mapCompleteAnalysisToActionPlanImplementation(completeAnalysis);
-    const actionPlanSummary: ActionPlanSummary = mapCompleteAnalysisToActionPlanSummary(completeAnalysis);
-    const ishikawa: Ishikawa | null = mapCompleteAnalysisToIshikawa(completeAnalysis);
-    const reasons: Reason | null = mapCompleteAnalysisToReasons(completeAnalysis);
-    const details: AnalysisDetails = mapCompleteToAnalysisDetails(completeAnalysis);
     const rawRiskOpportunity: RawRiskOpportunity = mapRiskOpportunity(payload as any);
 
     if (!isOpportunity) {
@@ -342,26 +257,30 @@ const BaseDetails = ({
       rawRiskOpportunity.idLinhaConfigControle2 = controlAction?.severity?.id;
     }
 
-    onSave(
-      senderId,
-      efficacy,
-      implementation,
-      ishikawa,
-      reasons,
-      details,
-      payload.interestedParts,
-      rawRiskOpportunity,
-      completeAnalysis.actions,
-      analysis
-    );
+    newOnSave({
+      riscoOportunidade: rawRiskOpportunity,
+      analises: analysisFormMethods.getValues().analysis,
+      partesInteressadas: payload.interestedParts,
+    });
   };
 
   const back = (): void => {
     onBack();
   };
 
-  const showAnalyze =
-    !riskOpportunity?.id || (riskOpportunity.id && !riskOpportunity?.analiseROS?.length) || (riskOpportunity.id && analysis?.id);
+  const trashCanButtonHandler = (item: RawCompleteAnalysis, index: number) => {
+    showDialog({
+      title: 'Excluir Análise?',
+      content: 'Você precisa confirmar para excluir permanentemente essa análise.',
+      onConfirm: async () => {
+        item?.analise?.id && (await deleteAnalise(item.analise));
+        remove(index);
+      },
+    });
+    return;
+  };
+
+  const { showDialog, ConfirmDialog } = useConfirmDialog();
 
   return (
     <Stack spacing={2}>
@@ -375,17 +294,39 @@ const BaseDetails = ({
         </FormProvider>
       )}
 
+      {ConfirmDialog}
+
       <FormProvider {...analysisFormMethods}>
-        {showAnalyze && (
-          <Analysis
-            enums={enums}
-            firstConfigurations={firstConfigurations}
-            map={map}
-            readonly={readonly}
-            secondConfigurations={secondConfigurations}
-            users={users}
-            isOpportunity={isOpportunity}
-          />
+        {fields.map((item, index) => (
+          <Box display="flex" alignItems="center" gap="10px">
+            <Box width="100%">
+              <Analysis
+                enums={enums}
+                firstConfigurations={firstConfigurations}
+                map={map}
+                readonly={readonly}
+                secondConfigurations={secondConfigurations}
+                users={users}
+                isOpportunity={isOpportunity}
+                pathPrefix={`analysis.${index}.`}
+                key={item.key}
+              />
+            </Box>
+            {!readonly && fields.length > 1 && (
+              <Box width={fields.length > 1 ? '60xp' : '0px'}>
+                <Fab size="small" onClick={() => trashCanButtonHandler(item, index)}>
+                  <DeleteIcon />
+                </Fab>
+              </Box>
+            )}
+          </Box>
+        ))}
+        {!readonly && (
+          <Box display="flex" justifyContent="center">
+            <Fab size="small" onClick={() => append(defaultAnaliseFormPayload)}>
+              <AddIcon />
+            </Fab>
+          </Box>
         )}
       </FormProvider>
 

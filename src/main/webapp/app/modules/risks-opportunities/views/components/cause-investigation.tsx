@@ -5,14 +5,14 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 
 type CauseInvestigationProps = {
   readonly?: boolean;
+  pathPrefix?: string;
 };
 
-const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
+const CauseInvestigation = ({ readonly, pathPrefix }: CauseInvestigationProps) => {
   const [useIshikawa, setUseIshikawa] = useState<boolean>(false);
   const [useReasons, setUseReasons] = useState<boolean>(true);
 
   const { register, setValue, formState, control, trigger } = useFormContext();
-  const fieldHook = (fieldName: string) => register(fieldName as any, { required: true });
 
   const onUseIshikawaChanged = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean): void => {
     if (checked && useReasons) {
@@ -22,6 +22,10 @@ const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
     setValue('useIshikawa', checked);
     onCheckboxChanged(event, checked, setUseIshikawa);
   };
+
+  function withPrefix(prop: string) {
+    return pathPrefix + prop;
+  }
 
   const onUseReasonsChanged = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean): void => {
     if (checked && useIshikawa) {
@@ -52,7 +56,7 @@ const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
         <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
           <Controller
             control={control}
-            name="ishikawaCause"
+            name={withPrefix('ishikawa.descCausaEfeito')}
             render={({ field }) => <TextField disabled={readonly} label="Causa" maxRows={5} multiline placeholder="Causa" {...field} />}
           />
 
@@ -60,17 +64,17 @@ const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
             <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
               <Controller
                 control={control}
-                name="environment"
+                name={withPrefix('ishikawa.meioAmbiente')}
                 render={({ field }) => <TextField disabled={readonly} label="Meio ambiente" placeholder="Meio ambiente" {...field} />}
               />
               <Controller
                 control={control}
-                name="workforce"
+                name={withPrefix('ishikawa.maoDeObra')}
                 render={({ field }) => <TextField disabled={readonly} label="Mão de obra" placeholder="Mão de obra" {...field} />}
               />
               <Controller
                 control={control}
-                name="method"
+                name={withPrefix('ishikawa.metodo')}
                 render={({ field }) => <TextField disabled={readonly} label="Método" placeholder="Método" {...field} />}
               />
             </Stack>
@@ -78,17 +82,17 @@ const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
             <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
               <Controller
                 control={control}
-                name="machine"
+                name={withPrefix('ishikawa.maquina')}
                 render={({ field }) => <TextField disabled={readonly} label="Máquina" placeholder="Máquina" {...field} />}
               />
               <Controller
                 control={control}
-                name="measurement"
+                name={withPrefix('ishikawa.medicao')}
                 render={({ field }) => <TextField disabled={readonly} label="Medição" placeholder="Medição" {...field} />}
               />
               <Controller
                 control={control}
-                name="rawMaterial"
+                name={withPrefix('ishikawa.materiaPrima')}
                 render={({ field }) => <TextField disabled={readonly} label="Matéria prima" placeholder="Matéria prima" {...field} />}
               />
             </Stack>
@@ -100,42 +104,42 @@ const CauseInvestigation = ({ readonly }: CauseInvestigationProps) => {
         <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
           <Controller
             control={control}
-            name="reasonCause"
+            name={withPrefix('porques.descCausa')}
             render={({ field }) => <TextField disabled={readonly} label="Causa" maxRows={5} multiline placeholder="Causa" {...field} />}
           />
 
           <Stack spacing={2} sx={{ flexGrow: 1 }}>
             <Controller
               control={control}
-              name="reason1"
+              name={withPrefix('porques.pq1')}
               render={({ field }) => <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...field} />}
             />
 
             <Controller
               control={control}
-              name="reason2"
+              name={withPrefix('porques.pq2')}
               render={({ field }) => <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...field} />}
             />
             <Controller
               control={control}
-              name="reason3"
+              name={withPrefix('porques.pq3')}
               render={({ field }) => <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...field} />}
             />
             <Controller
               control={control}
-              name="reason4"
+              name={withPrefix('porques.pq4')}
               render={({ field }) => <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...field} />}
             />
             <Controller
               control={control}
-              name="reason5"
+              name={withPrefix('porques.pq5')}
               render={({ field }) => <TextField disabled={readonly} label="Porquê?" placeholder="Porquê?" {...field} />}
             />
           </Stack>
 
           <Controller
             control={control}
-            name="reasonEffect"
+            name={withPrefix('porques.descProblema')}
             render={({ field }) => <TextField disabled={readonly} label="Efeito" maxRows={5} multiline placeholder="Efeito" {...field} />}
           />
         </Stack>
