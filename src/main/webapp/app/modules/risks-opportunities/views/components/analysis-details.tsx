@@ -10,6 +10,7 @@ type AnalysisDetailsProps = {
   readonly?: boolean;
   secondConfigurations: Array<Configuration>;
   isOpportunity?: boolean;
+  pathPrefix?: string;
 };
 
 const AnalysisDetails = ({
@@ -19,14 +20,19 @@ const AnalysisDetails = ({
   readonly,
   secondConfigurations,
   isOpportunity,
+  pathPrefix,
 }: AnalysisDetailsProps) => {
   const [probabilities, setProbabilities] = useState<Array<Configuration>>([]);
   const [severities, setSeverities] = useState<Array<Configuration>>([]);
 
-  const { register, setValue, formState, control, trigger } = useFormContext();
+  const { register, setValue, formState, control, trigger, getValues } = useFormContext();
 
-  const probabilityForm = useWatch({ control, name: 'probability' });
-  const severityForm = useWatch({ control, name: 'severity' });
+  const probabilityForm = useWatch({ control, name: withPrefix('linhaConfigAnalise1') });
+  const severityForm = useWatch({ control, name: withPrefix('linhaConfigAnalise2') });
+
+  function withPrefix(prop: string) {
+    return pathPrefix + 'analise.' + prop;
+  }
 
   useEffect(() => {
     if (!firstConfigurations) {
@@ -51,7 +57,7 @@ const AnalysisDetails = ({
       <Stack direction="row" spacing={2}>
         <Controller
           control={control}
-          name="probability"
+          name={withPrefix('linhaConfigAnalise1')}
           render={({ field: { onChange, ...rest } }) => (
             <Autocomplete
               disableClearable
@@ -69,7 +75,7 @@ const AnalysisDetails = ({
 
         <Controller
           control={control}
-          name="severity"
+          name={withPrefix('linhaConfigAnalise2')}
           render={({ field: { onChange, ...rest } }) => (
             <Autocomplete
               disableClearable

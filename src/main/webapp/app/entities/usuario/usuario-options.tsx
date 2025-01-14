@@ -2,9 +2,13 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from 'app/config/store';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { deleteEntity as deleteRNCUser } from './usuario.reducer';
 import { deleteUser as deleteJhipsterUser } from 'app/modules/administration/user-management/user-management.reducer';
+import { hasAnyAuthority } from 'app/shared/auth/enable-component';
+import { AUTHORITIES } from 'app/config/constants';
+import { useConfirmDialog } from 'app/shared/hooks/useConfirmDialog';
+import { resetPassword } from './user.service';
 
 export const UsarioOptions = ({ userRole, user, deleteUser }) => {
   const dispatch = useAppDispatch();
@@ -26,6 +30,18 @@ export const UsarioOptions = ({ userRole, user, deleteUser }) => {
     deleteUser(loginJhUser, idRncUser);
   };
 
+  let isAdmin = useAppSelector(state => hasAnyAuthority(state.authentication.account.authorities, [AUTHORITIES.ADMIN]));
+
+  const { ConfirmDialog, showDialog } = useConfirmDialog();
+
+  const show = () => {
+    showDialog({
+      title: 'Resetar senha',
+      content: 'Tem certeza que quer resetar a senha deste usuário?',
+      onConfirm: () => resetPassword(user),
+    });
+  };
+
   return (
     <>
       <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
@@ -40,6 +56,7 @@ export const UsarioOptions = ({ userRole, user, deleteUser }) => {
           'aria-labelledby': 'basic-button',
         }}
       >
+        {isAdmin && <MenuItem onClick={show}>Resetar senha</MenuItem>}
         <MenuItem onClick={() => navigate(`${user.id}/edit`)}>Editar usuário</MenuItem>
         {userRole.includes('ROLE_ADMIN') && (
           <MenuItem onClick={() => handleDeleteUser(user.user.login, user.id)}>
@@ -48,6 +65,7 @@ export const UsarioOptions = ({ userRole, user, deleteUser }) => {
           </MenuItem>
         )}
       </Menu>
+      {ConfirmDialog}
     </>
   );
 };

@@ -335,4 +335,11 @@ public class UsuarioService {
             .flatMap(this::findAllByUserJhId)
             .map(usuarioMapper::toResponseWithMail);
     }
+
+    public Mono<Void> resetPassword(Long id) {
+        Mono<UsuarioDTO> usuarioDTO = this.findOne(id);
+        return usuarioDTO.flatMap(user -> {
+            return userService.resetPassword(user.getUser().getId());
+        });
+    }
 }

@@ -1,7 +1,6 @@
-import { Autocomplete, Checkbox, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
-import DatePicker from 'react-datepicker';
-import { onAutocompleteChanged, onCheckboxChanged, onDateChanged } from '../../utils';
+import { Checkbox, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { onCheckboxChanged } from '../../utils';
 import { SummarizedUser } from '../../models';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
@@ -12,9 +11,10 @@ type ClosingActionProps = {
   isImplementation?: boolean;
   users: Array<SummarizedUser>;
   readonly?: boolean;
+  pathPrefix?: string;
 };
 
-const ClosingAction = ({ action, description, isImplementation, readonly, users }: ClosingActionProps) => {
+const ClosingAction = ({ action, description, isImplementation, readonly, users, pathPrefix }: ClosingActionProps) => {
   const [implemented, setImplemented] = useState<boolean>(false);
   const [implementedAt, setImplementedAt] = useState<Date>(new Date());
   const [verifiers, setVerifiers] = useState<Array<SummarizedUser>>([]);
@@ -22,25 +22,19 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
 
   const { register, setValue, formState, control, trigger } = useFormContext();
 
-  const implementationDate = useWatch({ control, name: 'implementationDate' });
-  const efficacyVerificationDate = useWatch({ control, name: 'efficacyVerificationDate' });
+  const dateValue = useWatch({ control, name: withPrefix(isImplementation ? 'dataImplementacao' : 'dataEficacia') });
 
   useEffect(() => {
     setVerifiers(users);
   }, [users]);
 
   useEffect(() => {
-    setValue(isImplementation ? 'implemented' : 'efficacyVerified', implemented);
-  }, [implemented]);
+    setValue(withPrefix(isImplementation ? 'possuiImplementacao' : 'possuiEficacia'), !!dateValue);
+  }, [dateValue]);
 
-  useEffect(() => {
-    setValue(isImplementation ? 'implementationResponsibleId' : 'efficacyResponsibleId', verifier?.id);
-  }, [verifier]);
-
-  const dateValue = useMemo(
-    () => (isImplementation ? implementationDate : efficacyVerificationDate),
-    [implementationDate, efficacyVerificationDate]
-  );
+  function withPrefix(prop: string) {
+    return pathPrefix + prop;
+  }
 
   return (
     <Stack spacing={2}>
@@ -52,7 +46,7 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
             <Stack direction="row" alignItems="center">
               <Checkbox
                 disabled={readonly}
-                checked={dateValue}
+                checked={!!dateValue}
                 onChange={(event, checked) => onCheckboxChanged(event, checked, setImplemented)}
               />
 
@@ -75,14 +69,14 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
           label="Data"
           selected={dateValue}
           disabled={readonly}
-          onChange={newDate => setValue(isImplementation ? 'implementationDate' : 'efficacyVerificationDate', newDate)}
+          onChange={newDate => setValue(withPrefix(isImplementation ? 'dataImplementacao' : 'dataEficacia'), newDate)}
           className="date-picker"
           dateFormat={'dd/MM/yyyy'}
         />
 
         <Controller
           control={control}
-          name={isImplementation ? 'implementationResponsibleId' : 'efficacyResponsibleId'}
+          name={withPrefix(isImplementation ? 'responsavelImplementacao' : 'responsavelEficacia')}
           render={({ field }) => (
             <FormControl className="ms-3">
               <InputLabel>Responsável</InputLabel>
@@ -101,7 +95,7 @@ const ClosingAction = ({ action, description, isImplementation, readonly, users 
 
       <Controller
         control={control}
-        name={isImplementation ? 'implementationDescription' : 'efficacyDescription'}
+        name={withPrefix(isImplementation ? 'descImplementacao' : 'descEficacia')}
         render={({ field }) => (
           <TextField disabled={readonly} label={description} maxRows={5} multiline placeholder={description} {...field} />
         )}

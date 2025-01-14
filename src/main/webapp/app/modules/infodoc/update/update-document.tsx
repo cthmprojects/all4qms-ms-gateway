@@ -171,7 +171,7 @@ export const UpdateDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
-          fileName = fileName.split('_').pop()!!;
+          fileName = fileName.split('_').slice(5).join('_');
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 

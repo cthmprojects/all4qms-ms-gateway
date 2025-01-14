@@ -292,6 +292,20 @@ public class UserService {
             .then();
     }
 
+    @Transactional
+    public Mono<Void> resetPassword(Long id) {
+        return userRepository
+            .findById(id)
+            .flatMap(user -> {
+                String encryptedPassword = passwordEncoder.encode("all4qms" + LocalDate.now().getYear());
+                user.setPassword(encryptedPassword);
+                return Mono.just(user);
+            })
+            .flatMap(this::saveUser)
+            .doOnNext(user -> log.debug("Reset password for User: {}", user))
+            .then();
+    }
+
     @Transactional(readOnly = true)
     public Flux<AdminUserDTO> getAllManagedUsers(Pageable pageable) {
         return userRepository.findAllWithAuthorities(pageable).map(AdminUserDTO::new);
@@ -339,6 +353,7 @@ public class UserService {
 
     /**
      * Gets a list of all the authorities.
+     *
      * @return a list of all the authorities.
      */
     @Transactional(readOnly = true)
@@ -348,6 +363,7 @@ public class UserService {
 
     /**
      * Gets a list of all users of the given authority.
+     *
      * @return a list of all users of the given authority.
      */
     @Transactional(readOnly = true)

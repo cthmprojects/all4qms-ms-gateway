@@ -29,17 +29,22 @@ type AnalysisProps = {
   readonly?: boolean;
   users: Array<SummarizedUser>;
   isOpportunity?: boolean;
+  pathPrefix?: string;
 };
 
-const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, readonly, users, isOpportunity }: AnalysisProps) => {
+const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, readonly, users, isOpportunity, pathPrefix }: AnalysisProps) => {
   const [analysisSummary, setAnalysisSummary] = useState<AnalysisSummary | null>(null);
   const [expanded, setExpanded] = useState<boolean>(false);
 
-  const { register, setValue, formState, control, trigger } = useFormContext();
-  const actionDate = useWatch({ control, name: 'actionDate' });
-  const description = useWatch({ control, name: 'description' });
-  const probability = useWatch({ control, name: 'probability' });
-  const severity = useWatch({ control, name: 'severity' });
+  const { control, getValues } = useFormContext();
+  const actionDate = useWatch({ control, name: withPrefix('analise.dataAnalise') });
+  const description = useWatch({ control, name: withPrefix('analise.description') });
+  const probability = useWatch({ control, name: withPrefix('analise.linhaConfigAnalise1') });
+  const severity = useWatch({ control, name: withPrefix('analise.linhaConfigAnalise2') });
+
+  function withPrefix(prop: string) {
+    return pathPrefix + prop;
+  }
 
   const getLabel = (configuration: Configuration | null): string => {
     const level: Option | null = getLevel(configuration);
@@ -56,9 +61,9 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
   };
 
   const getColor = (level: string): string => {
-    if (level === 'Baixo') {
+    if (level === 'Aceito Risco') {
       return 'lightgreen';
-    } else if (level === 'Medio') {
+    } else if (level === 'Prioridade 2 (médio)') {
       return 'lightgoldenrodyellow';
     } else {
       return 'lightsalmon';
@@ -169,7 +174,7 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
               <TableBody>
                 {analysisSummary && (
                   <TableRow key={analysisSummary.analysis} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell>{analysisSummary.date.toLocaleDateString()}</TableCell>
+                    <TableCell>{analysisSummary?.date?.toLocaleDateString?.('pt-BR')}</TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={2}>
                         <Circle sx={{ fill: getColor(analysisSummary.probability), marginRight: 50 }} />
@@ -207,19 +212,20 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
               readonly={readonly}
               secondConfigurations={secondConfigurations}
               isOpportunity={isOpportunity}
+              pathPrefix={pathPrefix}
             />
 
             <Divider />
 
-            <CauseInvestigation readonly={readonly} />
+            <CauseInvestigation readonly={readonly} pathPrefix={pathPrefix} />
 
             <Divider />
 
-            <ActionPlan readonly={readonly} users={users} />
+            <ActionPlan pathPrefix={pathPrefix} readonly={readonly} users={users} />
 
             <Divider />
 
-            <Closing readonly={readonly} users={users} />
+            <Closing readonly={readonly} users={users} pathPrefix={pathPrefix + '.aprovacao.'} />
           </Stack>
         </AccordionDetails>
       </Accordion>
