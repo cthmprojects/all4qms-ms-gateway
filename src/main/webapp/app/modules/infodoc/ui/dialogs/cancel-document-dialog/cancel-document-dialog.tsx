@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Textarea } from '@mui/joy';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { InfoDoc } from 'app/modules/infodoc/models';
 import { StyledLabel, StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { Button } from 'reactstrap';
-import { cancelDocument } from 'app/modules/infodoc/reducers/infodoc.reducer';
+import { aprovarCancelDocument, cancelDocument, solicitarCancelDocument } from 'app/modules/infodoc/reducers/infodoc.reducer';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Storage } from 'react-jhipster';
 import axios, { AxiosResponse } from 'axios';
@@ -41,86 +41,15 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
   const navigate = useNavigate();
   const [justifyValue, setJustifyValue] = useState('');
 
+  const [isSGQ, setIsSGQ] = useState(false);
   const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const users: IUsuario[] = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
 
-  const sendPendenciasSGQ = async user => {
-    try {
-      const userLoged = JSON.parse(await Storage.session.get('USUARIO_QMS'));
-      const resPendencias = await dispatch(
-        createPendencia({
-          nome: `CANCELAMENTO - ${justifyValue}`,
-          status: false,
-          tipo: 'ATIVIDADE',
-          criadoEm: new Date(Date.now()).toISOString(),
-          responsavel: user,
-          criadoPor: userLoged,
-          atualizadoPor: userLoged,
-        })
-      );
-      const reponse = (resPendencias?.payload as AxiosResponse).data;
-    } catch (err) {
-      console.error('CancelDocumentDialog -> sendPendenciasSGQ: ', err);
-    }
-  };
-
-  const approveCancelDocument = async () => {
-    const movDoc: Movimentacao = {
-      ...infodoc.movimentacao,
-      enumStatus: EnumStatusDoc.APROVACANC,
-      enumTipoMovDoc: EnumTipoMovDoc.CANCELAR,
-      comentarioCancelamento: justifyValue,
-    };
-
-    await dispatch(atualizarMovimentacao(movDoc))
-      .then(async () => {
-        toast.success('Documento enviado para aprovação!');
-        const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == infodoc.doc?.idUsuarioCriacao?.toString()!!)[0];
-        dispatch(
-          notifyEmailInfoDoc({
-            to: userEmitter?.email || '', // Email
-            subject: 'Documento requerendo APROVAÇãO para cancelamento',
-            tipo: 'APROVAR',
-            nomeEmissor: userEmitter?.nome || '', // nome
-            tituloDocumento: 'Documento em Cancelamento',
-            dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
-            descricao: `Cancelamento de Documento com a seguinte justificativa: \n\n${justifyValue}`,
-            motivoReprovacao: '',
-          })
-        );
-        navigate('/infodoc');
-        // setIsLoading(false);
-      })
-      .catch(e => {
-        toast.error('Erro ao aprovar documento.');
-        // setIsLoading(false);
-      });
-  };
-
-  const saveDoc = (): Doc => {
-    const newInfoDoc: Doc = {
-      ...infodoc.doc,
-      enumSituacao: EnumSituacao.REVISAO,
-      status: StatusEnum.APROVACANC,
-    };
-
-    return newInfoDoc;
-  };
-
-  const changeToRevDocument = async () => {
-    const newInfoDoc = saveDoc();
-
-    const respUpdt = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
-
-    if (respUpdt) {
-      const resDoc: InfoDoc = (respUpdt.payload as AxiosResponse).data || {};
-
-      return resDoc;
-    } else {
-      toast.error('Erro ao salvar documento, tente novamente.');
-      return;
-    }
-  };
+  useEffect(() => {
+    const roles = Storage.local.get('ROLE');
+    const _isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(_isSGQ);
+  }, []);
 
   const requestCancelInfoDoc = (justify: string) => {
     if (!justify) {
@@ -130,9 +59,11 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
 
     const params = { id: infodoc.doc.id, userLoginID: userId, justify };
 
-    changeToRevDocument();
-    approveCancelDocument();
-
+    if (isSGQ) {
+      dispatch(aprovarCancelDocument(params));
+    } else {
+      dispatch(solicitarCancelDocument(params));
+    }
     // dispatch(cancelDocument(params)).then(
     //   (response: any) => {
     //     if (response?.error) {
