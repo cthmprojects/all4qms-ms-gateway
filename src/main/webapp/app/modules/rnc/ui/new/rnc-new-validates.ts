@@ -14,7 +14,7 @@ export const validateFields = (firstForm, setFirstForm, setFormError): boolean =
 
   const validateForwarded = () => {
     let valid = true;
-    if (firstForm.forwarded.value == '') {
+    if (!firstForm.forwarded.value || firstForm.forwarded.value.length <= 0) {
       setFirstForm({ ...firstForm, forwarded: { value: '', error: true } });
       setFormError(true);
       valid = false;

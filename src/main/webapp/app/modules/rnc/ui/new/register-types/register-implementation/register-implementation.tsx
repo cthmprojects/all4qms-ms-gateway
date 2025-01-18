@@ -16,7 +16,7 @@ import DatePicker from 'react-datepicker';
 import './register-implementation.css';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { saveApprovalNC, updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
+import { saveApprovalNC, updateApprovalNC, getApprovalNC, saveApprovalAsync } from 'app/modules/rnc/reducers/approval.reducer';
 import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
 import { toast } from 'react-toastify';
@@ -49,7 +49,9 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
     handlePrazoImplementacao(value);
   };
 
-  const saveImplementation = () => {
+  const saveImplementation = async (): Promise<number> => {
+    let approvalId: number;
+
     if (_rnc.aprovacaoNC !== null) {
       dispatch(
         updateApprovalNC({
@@ -60,6 +62,8 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
           descImplementacao: firstForm.description.value,
         })
       );
+
+      approvalId = _rnc.aprovacaoNC;
     } else {
       const new_implementation = {
         possuiImplementacao: firstForm.implemented.value,
@@ -69,15 +73,18 @@ export const RegisterImplementation = ({ handleTela, handlePrazoImplementacao })
         dataEficacia: null,
         dataFechamento: null,
       };
-      dispatch(saveApprovalNC(new_implementation));
+
+      approvalId = await saveApprovalAsync(new_implementation);
     }
     toast.success('Dados salvos com sucesso!');
+
+    return approvalId;
   };
 
-  const updateStatus = () => {
+  const updateStatus = async (): Promise<void> => {
     if (_rnc) {
-      saveImplementation();
-      dispatch(update({ ..._rnc, statusAtual: 'VERIFICACAO' })).then(() => navigate('/rnc'));
+      const approvalId: number = await saveImplementation();
+      dispatch(update({ ..._rnc, statusAtual: 'VERIFICACAO', aprovacaoNC: approvalId })).then(() => navigate('/rnc'));
     }
   };
 

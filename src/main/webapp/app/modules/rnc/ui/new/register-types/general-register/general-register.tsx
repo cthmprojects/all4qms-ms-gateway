@@ -554,7 +554,9 @@ export const GeneralRegister = () => {
         );
       });
       toast.success('RNC atualizada com sucesso!');
-    } else if (_rnc && showPlanoAcaoCorretiva) {
+    }
+
+    if (_rnc && showPlanoAcaoCorretiva) {
       if (plans.length > 0) {
         dispatch(
           updatePlan({
