@@ -21,6 +21,16 @@ export const saveApprovalNC = createAsyncThunk('approval/save', async (entity: A
   return result.data;
 });
 
+export const saveApprovalAsync = async (entity: AprovacaoNC): Promise<number> => {
+  const result = await axios.post(apiUrl, entity);
+
+  if (result.status !== 201) {
+    return -1;
+  }
+
+  return result.data.id;
+};
+
 export const updateApprovalNC = createAsyncThunk('approval/update', async (entity: AprovacaoNC) => {
   const result = await axios.patch(`${apiUrl}/${entity.id}`, entity);
   return result.data;
