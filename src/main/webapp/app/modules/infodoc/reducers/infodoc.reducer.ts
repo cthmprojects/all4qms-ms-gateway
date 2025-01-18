@@ -167,6 +167,45 @@ export const cancelDocument = createAsyncThunk('docs/cancel', async ({ id, userL
   }
 });
 
+export const aprovarCancelDocument = createAsyncThunk('docs/aprova-cancel', async ({ id, userLoginID, justify }: cancelDocParams) => {
+  if (id) {
+    // const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;
+    const url = `services/all4qmsmsinfodoc/api/infodoc/documentos/aprova-cancelar/${id}`;
+    const data = {
+      idDocumento: id,
+      idUsuario: userLoginID,
+      justificativa: justify,
+    };
+    return await axios.put(url, data);
+  }
+});
+
+export const reprovarCancelDocument = createAsyncThunk('docs/reprova-cancel', async ({ id, userLoginID, justify }: cancelDocParams) => {
+  if (id) {
+    // const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;
+    const url = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprova-cancelar/${id}`;
+    const data = {
+      idDocumento: id,
+      idUsuario: userLoginID,
+      justificativa: justify,
+    };
+    return await axios.put(url, data);
+  }
+});
+
+export const solicitarCancelDocument = createAsyncThunk('docs/solicitao-cancel', async ({ id, userLoginID, justify }: cancelDocParams) => {
+  if (id) {
+    // const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;
+    const url = `services/all4qmsmsinfodoc/api/infodoc/documentos/solicitao-cancelar/${id}`;
+    const data = {
+      idDocumento: id,
+      idUsuario: userLoginID,
+      justificativa: justify,
+    };
+    return await axios.put(url, data);
+  }
+});
+
 const InfoDocSlice = createEntitySlice({
   name: 'infodoc',
   initialState,

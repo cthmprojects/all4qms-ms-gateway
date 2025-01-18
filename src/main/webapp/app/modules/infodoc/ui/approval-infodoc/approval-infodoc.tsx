@@ -26,20 +26,22 @@ import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-re
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao, Process } from '../../models';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao, Process, StatusEnum } from '../../models';
 import {
+  aprovarCancelDocument,
   cancelDocParams,
   cancelDocument,
   createInfoDoc,
   deleteInfoDoc,
   getInfoDocById,
   notifyEmailInfoDoc,
+  reprovarCancelDocument,
   updateInfoDoc,
 } from '../../reducers/infodoc.reducer';
-import { cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
+import { buscarMovimentacao, cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 import { IUsuario } from '../../../../shared/model/usuario.model';
@@ -104,7 +106,9 @@ export const ApprovalDocument = () => {
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [originList, setOriginList] = useState([]);
   const [idNewFile, setIdNewFile] = useState<number>();
+  const [statusMoviment, setStatusMoviment] = useState<StatusEnum>();
 
+  const [moviment, setMoviment] = useState<Movimentacao>();
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
 
@@ -192,8 +196,18 @@ export const ApprovalDocument = () => {
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
   const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
+  const getMoviment = async () => {
+    const resMov = await dispatch(buscarMovimentacao(id || ''));
+    const moviment: Movimentacao = (resMov.payload as AxiosResponse).data;
+    const status = StatusEnum[moviment?.enumStatus as keyof typeof StatusEnum];
+    setStatusMoviment(status);
+    setMoviment(moviment);
+  };
+
   useEffect(() => {
     if (actualInfoDoc) {
+      getMoviment();
+
       setCode(actualInfoDoc.doc?.codigo!!);
       setEmitter(actualInfoDoc.doc?.idUsuarioCriacao!!);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
@@ -223,7 +237,32 @@ export const ApprovalDocument = () => {
       justify: actualInfoDoc?.movimentacao?.comentarioCancelamento!!,
     };
 
-    dispatch(cancelDocument(params)).then(
+    dispatch(aprovarCancelDocument(params)).then(
+      (response: any) => {
+        if (response?.error) {
+          console.error('requestCancelInfoDoc:', response?.error);
+          return;
+        }
+      },
+      err => {
+        return;
+      }
+    );
+    toast.success('Documento cancelado com sucesso!');
+    setIsLoading(false);
+    navigate('/infodoc');
+  };
+
+  const reproveDocumentCancel = async () => {
+    setIsLoading(true);
+
+    const params: cancelDocParams = {
+      id: parseInt(id!!),
+      userLoginID: userLoginID,
+      justify: actualInfoDoc?.movimentacao?.comentarioCancelamento!!,
+    };
+
+    dispatch(reprovarCancelDocument(params)).then(
       (response: any) => {
         if (response?.error) {
           console.error('requestCancelInfoDoc:', response?.error);
@@ -282,10 +321,18 @@ export const ApprovalDocument = () => {
   };
 
   const approveDocument = async () => {
-    if (actualInfoDoc?.movimentacao?.enumStatus == EnumStatusDoc.APROVACANC) {
+    if (moviment.enumStatus == EnumStatusDoc.APROVACANC || moviment.enumStatus == EnumStatusDoc.CANCELAMENTO) {
       approveDocumentCancel();
     } else {
       approveDocumentHomolog();
+    }
+  };
+
+  const repproveDocument = async () => {
+    if (moviment.enumStatus == EnumStatusDoc.APROVACANC || moviment.enumStatus == EnumStatusDoc.CANCELAMENTO) {
+      reproveDocumentCancel();
+    } else {
+      setOpenRejectModal(true);
     }
   };
 
@@ -340,7 +387,7 @@ export const ApprovalDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em Aprovação {actualInfoDoc?.doc.status}
+                  {statusMoviment}
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -503,8 +550,16 @@ export const ApprovalDocument = () => {
               <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
           </div>
+          <div
+            className="p-2 mt-3"
+            style={{ display: 'flex', alignItems: 'center', color: 'red', justifyItems: 'right', justifyContent: 'flex-end' }}
+          >
+            <h3 style={{ fontSize: '20px', textAlign: 'right' }}>
+              {moviment?.comentarioCancelamento ? 'Comentário Cancelamento: ' : ''} {moviment?.comentarioCancelamento}
+            </h3>
+          </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px', justifyItems: 'right' }} className="mt-5">
             <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
               VOLTAR
             </Button>
@@ -513,7 +568,7 @@ export const ApprovalDocument = () => {
               variant="contained"
               color="primary"
               style={{ background: '#A23900', color: '#fff' }}
-              onClick={() => setOpenRejectModal(true)}
+              onClick={() => repproveDocument()}
             >
               Reprovar
             </Button>
