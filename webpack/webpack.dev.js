@@ -57,7 +57,7 @@ module.exports = async options =>
         },
         {
           // Para a API externa
-          context: ['/external-api'], // Defina um contexto específico para diferenciar da API local
+          context: ['/external-api'], // Define um contexto específico para diferenciar da API local
           target: 'https://api-llm-all4qms.cthmprojetos.com',
           secure: false,
           changeOrigin: true,

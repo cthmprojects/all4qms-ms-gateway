@@ -391,7 +391,7 @@ const InfodocList = () => {
     } else if (
       infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVACAO ||
       infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVAREV ||
-      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVACANC
+      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.CANCELAMENTO
     ) {
       navigate(`/infodoc/approval/${infodoc.doc.id}`);
     } else if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.EMISSAO) {
@@ -540,9 +540,14 @@ const InfodocList = () => {
                         id="btn-print"
                         title="Imprimir"
                         color="primary"
-                        onClick={event => onPrintClicked(infodoc, event)}
-                        // disabled={infodoc.doc.enumSituacao == 'C'}
-                        disabled
+                        // onClick={event => onPrintClicked(infodoc, event)}
+                        onClick={event => setDistributionModal(true)}
+                        disabled={
+                          infodoc.doc.enumSituacao === 'C' ||
+                          (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
+                          (infodoc.doc.enumSituacao === 'H' && !isSGQ)
+                        }
+                        // disabled
                       >
                         {/* <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} /> */}
                         <PrintIcon sx={{ color: '#cacaca' }} />
@@ -555,17 +560,15 @@ const InfodocList = () => {
                             color="primary"
                             onClick={event => onCancelClicked(infodoc, event)}
                             disabled={
-                              infodoc.doc.enumSituacao === 'C' ||
-                              (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
-                              (infodoc.doc.enumSituacao === 'H' && !isSGQ)
+                              infodoc.doc.enumSituacao !== 'H' ||
+                              (infodoc.doc.enumSituacao === 'H' && !isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id)
                             }
                           >
                             <CancelIcon
                               sx={{
                                 color:
-                                  infodoc.doc.enumSituacao === 'C' ||
-                                  (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
-                                  (infodoc.doc.enumSituacao === 'H' && !isSGQ)
+                                  infodoc.doc.enumSituacao !== 'H' ||
+                                  (infodoc.doc.enumSituacao === 'H' && !isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id)
                                     ? '#cacaca'
                                     : '#FF0000',
                               }}
