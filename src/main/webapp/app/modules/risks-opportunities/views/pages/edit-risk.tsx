@@ -60,7 +60,7 @@ const EditRisk = () => {
       return null;
     }
 
-    const filteredMaps: Array<RawMap> = maps.filter(m => m.tipoRO === 'O');
+    const filteredMaps: Array<RawMap> = maps.filter(m => m.tipoRO === 'R');
     return filteredMaps.length > 0 ? filteredMaps[0] : null;
   }, [maps]);
 
