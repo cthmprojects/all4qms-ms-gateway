@@ -50,6 +50,10 @@ const AnalysisDetails = ({
     setSeverities(secondConfigurations);
   }, [secondConfigurations]);
 
+  useEffect(() => {
+    setValue('descricaoDecisao', description);
+  }, [description]);
+
   return (
     <Stack spacing={2}>
       <Typography variant="h6">Detalhamento</Typography>

@@ -14,7 +14,6 @@ import { ChangePassword } from './password-change';
 export const PasswordResetFinishPage = () => {
   const [oldPassword, setOldPassword] = useState({ value: '', error: false });
   const [password, setPassword] = useState({ value: '', error: false });
-  const [confirmPassword, setConfirmPassword] = useState({ value: '', error: false });
   const [passwordErrorMsg, setPasswordErrorMsg] = useState('');
 
   const validateOldPassword = (txt: string) => {
@@ -46,22 +45,6 @@ export const PasswordResetFinishPage = () => {
     } else {
       setPasswordErrorMsg('');
       setPassword({ value: txt, error: false });
-    }
-  };
-
-  const validateConfirmPassword = (txt: string) => {
-    if (!txt) {
-      setPasswordErrorMsg('A senha é obrigatória.');
-      setConfirmPassword({ value: txt, error: true });
-    } else if (txt.length < 4) {
-      setPasswordErrorMsg('A senha deve ter pelo menos 4 caracteres');
-      setConfirmPassword({ value: txt, error: true });
-    } else if (txt.length > 50) {
-      setPasswordErrorMsg('A senha não pode ter mais de 50 caracteres');
-      setConfirmPassword({ value: txt, error: true });
-    } else {
-      setPasswordErrorMsg('');
-      setConfirmPassword({ value: txt, error: false });
     }
   };
 
@@ -123,7 +106,7 @@ export const PasswordResetFinishPage = () => {
             />
           </FormControl>
 
-          <FormControl variant="outlined" className="mt-2">
+          {/* <FormControl variant="outlined" className="mt-2">
             <InputLabel htmlFor="confirm-password">Confirmar senha</InputLabel>
             <OutlinedInput
               id="confirm-password"
@@ -134,7 +117,7 @@ export const PasswordResetFinishPage = () => {
               error={confirmPassword.error}
               onChange={e => validateConfirmPassword(e.target.value)}
             />
-          </FormControl>
+          </FormControl> */}
 
           <span className="mt-2" style={{ color: 'red' }}>
             {passwordErrorMsg}
@@ -145,7 +128,7 @@ export const PasswordResetFinishPage = () => {
             color="primary"
             style={{ width: '300px', background: '#e6b200', color: '#4e4d4d' }}
             className="mt-3"
-            disabled={password.error || confirmPassword.error || !password.value || !confirmPassword.value}
+            disabled={password.error || !password.value}
             onClick={() => handleValidSubmit({ oldPassword: oldPassword.value, newPassword: password.value })}
           >
             Salvar
