@@ -41,7 +41,7 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
     }
 
     if (!measurement) {
-      return 'red';
+      return 'black';
     }
 
     const diff: number = measurement - goal;
@@ -103,7 +103,7 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
             for (let i = 0; i < 12; i++) {
               if (goals[i] && measurements[i]) {
                 avgs[i] = (measurements[i] / goals[i]) * 100;
-                avgsToShow[i] = `${avgs[i].toFixed(2)}%`;
+                avgsToShow[i] = `${measurements[i].toFixed(2)}%`;
               } else {
                 avgs[i] = 0;
                 avgsToShow[i] = '-';
