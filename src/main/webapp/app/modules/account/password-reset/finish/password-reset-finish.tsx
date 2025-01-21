@@ -14,6 +14,7 @@ import { ChangePassword } from './password-change';
 export const PasswordResetFinishPage = () => {
   const [oldPassword, setOldPassword] = useState({ value: '', error: false });
   const [password, setPassword] = useState({ value: '', error: false });
+  const [confirmPassword, setConfirmPassword] = useState({ value: '', error: false });
   const [passwordErrorMsg, setPasswordErrorMsg] = useState('');
 
   const validateOldPassword = (txt: string) => {
@@ -46,6 +47,10 @@ export const PasswordResetFinishPage = () => {
       setPasswordErrorMsg('');
       setPassword({ value: txt, error: false });
     }
+  };
+
+  const validateConfirmPassword = (txt: string) => {
+    setConfirmPassword({ value: txt, error: false });
   };
 
   const handleValidSubmit = ({ oldPassword, newPassword }) => {
@@ -106,7 +111,7 @@ export const PasswordResetFinishPage = () => {
             />
           </FormControl>
 
-          {/* <FormControl variant="outlined" className="mt-2">
+          <FormControl variant="outlined" className="mt-2">
             <InputLabel htmlFor="confirm-password">Confirmar senha</InputLabel>
             <OutlinedInput
               id="confirm-password"
@@ -117,10 +122,11 @@ export const PasswordResetFinishPage = () => {
               error={confirmPassword.error}
               onChange={e => validateConfirmPassword(e.target.value)}
             />
-          </FormControl> */}
+          </FormControl>
 
           <span className="mt-2" style={{ color: 'red' }}>
             {passwordErrorMsg}
+            {confirmPassword.value && confirmPassword.value != password.value && !passwordErrorMsg && 'As senhas digitadas não conferem'}
           </span>
 
           <Button
@@ -128,7 +134,7 @@ export const PasswordResetFinishPage = () => {
             color="primary"
             style={{ width: '300px', background: '#e6b200', color: '#4e4d4d' }}
             className="mt-3"
-            disabled={password.error || !password.value}
+            disabled={password.error || confirmPassword.error || !password.value || !confirmPassword.value}
             onClick={() => handleValidSubmit({ oldPassword: oldPassword.value, newPassword: password.value })}
           >
             Salvar
