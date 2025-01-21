@@ -38,6 +38,7 @@ import { deleteAnalise, saveRiskOpportunity } from '../../service';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useConfirmDialog } from 'app/shared/hooks/useConfirmDialog';
+import { addToast } from 'app/shared/util/add-toast';
 
 type BaseDetailsProps = {
   enums: Enums;
@@ -193,24 +194,28 @@ const BaseDetails = ({
     controlActionFormMethods.setValue('severity', severity);
   }, [controlActionFormMethods, riskOpportunity, firstConfigurations, secondConfigurations]);
 
-  const fetchAnalysis = async (analysis: RawRiskOpportunityAnalysis): Promise<void> => {
-    const approvalId: number = analysis.idAprovacaoNC;
-    const investigationId: number = analysis.idInvestigacao;
-    const planId: number = analysis.idPlano;
+  const fetchAnalysis = addToast(
+    async (analysis: RawRiskOpportunityAnalysis): Promise<void> => {
+      const approvalId: number = analysis.idAprovacaoNC;
+      const investigationId: number = analysis.idInvestigacao;
+      const planId: number = analysis.idPlano;
 
-    const aprovacao: RawApproval = await getApprovalById(approvalId);
-    const investigation: RawInvestigation = await getInvestigationById(investigationId);
-    const acoesPlano = (await getPlanById(planId)).acoes;
-    const ishikawa: RawIshikawaInvestigation = investigation.idCausaEfeito ? await getIshikawaById(investigation.idCausaEfeito) : null;
-    const porques: RawCauseEffectInvestigation = investigation.idPorques ? await getReasonsById(investigation.idPorques) : null;
+      const aprovacao: RawApproval = await getApprovalById(approvalId);
+      const investigation: RawInvestigation = await getInvestigationById(investigationId);
+      const acoesPlano = (await getPlanById(planId)).acoes;
+      const ishikawa: RawIshikawaInvestigation = investigation.idCausaEfeito ? await getIshikawaById(investigation.idCausaEfeito) : null;
+      const porques: RawCauseEffectInvestigation = investigation.idPorques ? await getReasonsById(investigation.idPorques) : null;
 
-    const analise = {
-      ...analysis,
-      criadoPor: isAdmin.id,
-    };
+      const analise = {
+        ...analysis,
+        criadoPor: isAdmin.id,
+      };
 
-    append({ aprovacao, acoesPlano, ishikawa, porques, analise } as RawCompleteAnalysis);
-  };
+      append({ aprovacao, acoesPlano, ishikawa, porques, analise } as RawCompleteAnalysis);
+    },
+    '',
+    'Erro ao buscar análise'
+  );
 
   useEffect(() => {
     (async () => {

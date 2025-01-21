@@ -50,19 +50,7 @@ export const PasswordResetFinishPage = () => {
   };
 
   const validateConfirmPassword = (txt: string) => {
-    if (!txt) {
-      setPasswordErrorMsg('A senha é obrigatória.');
-      setConfirmPassword({ value: txt, error: true });
-    } else if (txt.length < 4) {
-      setPasswordErrorMsg('A senha deve ter pelo menos 4 caracteres');
-      setConfirmPassword({ value: txt, error: true });
-    } else if (txt.length > 50) {
-      setPasswordErrorMsg('A senha não pode ter mais de 50 caracteres');
-      setConfirmPassword({ value: txt, error: true });
-    } else {
-      setPasswordErrorMsg('');
-      setConfirmPassword({ value: txt, error: false });
-    }
+    setConfirmPassword({ value: txt, error: false });
   };
 
   const handleValidSubmit = ({ oldPassword, newPassword }) => {
@@ -138,6 +126,7 @@ export const PasswordResetFinishPage = () => {
 
           <span className="mt-2" style={{ color: 'red' }}>
             {passwordErrorMsg}
+            {confirmPassword.value && confirmPassword.value != password.value && !passwordErrorMsg && 'As senhas digitadas não conferem'}
           </span>
 
           <Button

@@ -74,8 +74,8 @@ export const Similarities = ({ description, onChanged, rncs, similarId }: Simila
   const renderLoaded = () => {
     return (
       <>
-        {similarRncs.length > 0 && (
-          <>
+        {
+          /* similarRncs.length > 0 && */ <>
             <Typography>Este problema tem similaridade com as seguintes decisões anteriores, deseja proceder da mesma forma?</Typography>
 
             <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
@@ -83,13 +83,13 @@ export const Similarities = ({ description, onChanged, rncs, similarId }: Simila
                 <TableHead>
                   <TableRow>
                     <TableCell align="left">Vincular</TableCell>
-                    <TableCell align="left">%</TableCell>
+                    <TableCell align="left">Nível de Proximidade</TableCell>
                     <TableCell align="left">Decisão</TableCell>
                     <TableCell align="left">Visualizar</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {similarRncs.map(rnc => {
+                  {similarRncs.map((rnc, index) => {
                     const data: RncData = rnc.dados;
                     const nc: Rnc = rnc.nc;
 
@@ -98,7 +98,7 @@ export const Similarities = ({ description, onChanged, rncs, similarId }: Simila
                         <TableCell>
                           <Checkbox checked={similarId === nc.id} onChange={_ => onChanged(nc.id)} />
                         </TableCell>
-                        <TableCell>{'-'}</TableCell>
+                        <TableCell>{index + 1}</TableCell>
                         <TableCell>{data.descricao}</TableCell>
                         <TableCell>
                           <Tooltip title="Visualizar">
@@ -119,7 +119,7 @@ export const Similarities = ({ description, onChanged, rncs, similarId }: Simila
               </Table>
             </TableContainer>
           </>
-        )}
+        }
 
         {similarRncIds.length <= 0 && <Typography>Não foi possível encontrar similaridades para o problema atual.</Typography>}
       </>
