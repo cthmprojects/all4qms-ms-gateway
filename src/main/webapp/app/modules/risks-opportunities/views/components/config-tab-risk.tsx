@@ -7,6 +7,7 @@ import { saveConfiguration, updateConfiguration } from '../../reducers/configura
 import { saveMap, updateMap } from '../../reducers/maps.reducer';
 import ConfigComplexityMatrix from './config-complexity-matrix';
 import ConfigurationsDegrees, { ConfigurationsClassificationType, ConfigurationsDegreesType } from './config-degrees';
+import { getColorRoConfig, getWeightRoConfig } from '../../service';
 
 type ConfigurationTabRiskProps = {
   configurations: Array<Configuration>;
@@ -46,17 +47,17 @@ const ConfigurationsTabRisk = ({ configurations, levels, loading, map, onSaved, 
       const { code, name, value } = level;
 
       allProbabilities.push({
-        color: getColor(value),
+        color: getColorRoConfig(value),
         description: getDescription('P', name),
         label: value,
-        weight: getWeight(value),
+        weight: getWeightRoConfig(value),
       });
 
       allSeverities.push({
-        color: getColor(value),
+        color: getColorRoConfig(value),
         description: getDescription('S', name),
         label: value,
-        weight: getWeight(value),
+        weight: getWeightRoConfig(value),
       });
     }
     setProbabilities(allProbabilities);
@@ -90,30 +91,10 @@ const ConfigurationsTabRisk = ({ configurations, levels, loading, map, onSaved, 
     setNewMap({ ...map });
   }, [map]);
 
-  const getWeight = (level: string): number => {
-    if (level.toUpperCase() === 'ALTO') {
-      return 3;
-    } else if (level.toUpperCase() === 'MEDIO') {
-      return 2;
-    } else {
-      return 1;
-    }
-  };
-
   const getCode = (level: string): string => {
     const filteredLevels: Array<Option> = levels.filter(l => l.value === level);
 
     return filteredLevels.length > 0 ? filteredLevels[0].name : '';
-  };
-
-  const getColor = (level: string): string => {
-    if (level.toUpperCase() === 'ALTO') {
-      return 'lightsalmon';
-    } else if (level.toUpperCase() === 'MEDIO') {
-      return 'lightgoldenrodyellow';
-    } else {
-      return 'lightgreen';
-    }
   };
 
   const getDescription = (type: string, name: string): string => {
