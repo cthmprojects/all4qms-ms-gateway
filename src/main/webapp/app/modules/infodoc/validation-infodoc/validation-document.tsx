@@ -106,6 +106,7 @@ export const ValidationDocument = () => {
   const [idOldFile, setIdOldFile] = useState<number>(-1);
   const [fileUploaded, SetFile] = useState<File>();
   const [timerGetIA, SetTimerGetIA] = useState<any>();
+  const [countTryGetIA, setCountTryGetIA] = useState<number>(0);
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
@@ -167,7 +168,7 @@ export const ValidationDocument = () => {
   };
 
   const consultResumeIA = async tokenResumeIA => {
-    if (!tokenResumeIA) {
+    if (!tokenResumeIA || countTryGetIA > 10) {
       clearInterval(timerGetIA);
       setDocumentDescription('Servidor de IA fora do ar. Tente novamente mais tarde.');
       console.error('Erro ao carrecar IA resume, token undefined: ', tokenResumeIA);
@@ -187,8 +188,10 @@ export const ValidationDocument = () => {
 
     switch (resumeIA.Status) {
       case 1:
+        setCountTryGetIA(countTryGetIA + 1);
         return;
       case 2:
+        setCountTryGetIA(countTryGetIA + 1);
         return;
       case 3:
         clearInterval(timerGetIA);
