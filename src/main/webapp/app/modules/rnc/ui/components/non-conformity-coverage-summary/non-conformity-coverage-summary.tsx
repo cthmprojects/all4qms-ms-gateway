@@ -9,7 +9,7 @@ type NonConformityCoverageSummaryProps = {
 const NonConformityCoverageSummary = ({ coverage }: NonConformityCoverageSummaryProps) => {
   return (
     <Card>
-      <CardHeader title="Análise de Abrangência da NC" />
+      <CardHeader title="Análise de Abrangência" />
       <CardContent>
         <Stack spacing={2}>
           <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>

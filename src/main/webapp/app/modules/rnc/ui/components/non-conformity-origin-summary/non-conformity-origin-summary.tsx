@@ -30,7 +30,7 @@ const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummar
     const monthStr: string = month.toString().padStart(2, '0');
     const dayStr: string = day.toString().padStart(2, '0');
 
-    return `${yearStr}/${monthStr}/${dayStr}`;
+    return `${dayStr}/${monthStr}/${yearStr}`;
   };
 
   function identificadoNoLabel(value: string) {
@@ -48,7 +48,7 @@ const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummar
         {origin?.auditoria && (
           <Stack direction="row" spacing={2}>
             <TextField disabled label="Norma" placeholder="Norma" value={origin?.auditoria.normaAuditoria} />
-            <TextField disabled label="Número NC" placeholder="Número NC" value={origin?.auditoria.idNaoConformidade} />
+            <TextField disabled label="Número da notação" placeholder="Número da notação" value={origin?.auditoria.idNaoConformidade} />
             <TextField
               disabled
               label="Requisito(s) da Norma"
