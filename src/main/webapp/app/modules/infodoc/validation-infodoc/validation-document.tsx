@@ -306,9 +306,11 @@ export const ValidationDocument = () => {
       const resDoc: InfoDoc = (respUpdt.payload as AxiosResponse).data || {};
 
       await dispatch(getInfoDocById(id!!));
+      setIsLoading(false);
       return resDoc;
     } else {
       toast.error('Erro ao salvar documento, tente novamente.');
+      setIsLoading(false);
       return;
     }
   };
@@ -336,6 +338,10 @@ export const ValidationDocument = () => {
         setValidDate(new Date(2999, 11, 31));
         setNotificationPreviousDate('0');
       }
+
+      if (actualInfoDoc.doc.enumSituacao == EnumSituacao.REVISAO || actualInfoDoc.doc?.idDocumentacaoAnterior) {
+        setIdNewFile(actualInfoDoc.doc.idArquivo!!);
+      }
     }
   }, [actualInfoDoc]);
 
@@ -343,6 +349,7 @@ export const ValidationDocument = () => {
     setIsLoading(true);
     const resSave = await saveDocument();
     if (!resSave) {
+      setIsLoading(false);
       return;
     }
     await axios
@@ -372,6 +379,7 @@ export const ValidationDocument = () => {
         toast.error('Erro ao aprovar documento.');
         setIsLoading(false);
       });
+    setIsLoading(false);
   };
 
   useEffect(() => {
