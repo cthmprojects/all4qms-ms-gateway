@@ -121,3 +121,24 @@ export const editRiskOpportunity = addToast(
   'Registro editado com sucesso!',
   'Erro ao salvar edição do registro'
 );
+
+export const getWeightRoConfig = (level: string): number => {
+  const localLevel = level.toUpperCase();
+  if (localLevel.includes('PRIORIDADE 1')) {
+    return 3;
+  } else if (localLevel.includes('PRIORIDADE 2')) {
+    return 2;
+  } else {
+    return 1;
+  }
+};
+export const getColorRoConfig = (level: string): string => {
+  const localLevel = level.toUpperCase();
+  if (localLevel.includes('PRIORIDADE 1')) {
+    return 'lightsalmon';
+  } else if (localLevel.includes('PRIORIDADE 2')) {
+    return 'lightgoldenrodyellow';
+  } else {
+    return 'lightgreen';
+  }
+};
