@@ -1,21 +1,42 @@
-export interface DetahleDistribuicao {
-  id: number;
+export interface DetalheDistribuicao {
+  id?: number;
   idDistribuicaoDoc: number;
   cometarioSolicitacao: string;
-  idUsuarioEntrega: number;
-  dataEntrega: Date;
-  comentarioEntrega: string;
-  idUsuarioDevolucao: number;
-  dataDevolucao: Date;
-  comentarioDevolucao: string;
+  idUsuarioEntrega?: number;
+  dataEntrega?: Date;
+  comentarioEntrega?: string;
+  idUsuarioDevolucao?: number;
+  dataDevolucao?: Date;
+  comentarioDevolucao?: string;
 }
 export interface Distribuicao {
-  id: number;
+  id?: number;
   idDocumentacao: number;
-  enumTipoControleDoc: string;
+  enumTipoControleDoc: EnumTipoControleDoc;
   idProcesso: number;
   qtdCopiaEletronica: number;
   qtdCopiaFisica: number;
+}
+
+export interface DistribuicaoCompleta {
+  idDistribuicaoDoc: number;
+  idDetalhesDistDoc: number;
+  idDocumentacao: number;
+  idProcesso: number;
+  idUsuarioEntrega: number;
+  idUsuarioDevolucao: number;
+  idMovimentacaoDoc: number;
+  enumTipoControleDoc: string;
+  enumStatusDoc: string;
+  codigo: string;
+  titulo: string;
+  revisao: number;
+  qtdCopiaEletronica: number;
+  qtdCopiaFisica: number;
+  recebidoPor: string;
+  dataEntrega: Date;
+  devolvidoPor: string;
+  dataDevolucao: Date;
 }
 
 export enum EnumTipoMovDoc {
@@ -23,4 +44,9 @@ export enum EnumTipoMovDoc {
   DISTRIBUIR = 'D',
   REVISAR = 'R',
   CANCELAR = 'C',
+}
+
+export enum EnumTipoControleDoc {
+  C = 'Controlada',
+  N = 'Nao Controlada',
 }

@@ -4,23 +4,26 @@ import axios from 'axios';
 import { Movimentacao } from '../models';
 import { ListPagination } from '../../goals-objectives/reducers/metas-list.reducer';
 import { buildQueryParams } from '../../strategic-planning/reducers/swot.reducer';
-import { Distribuicao } from '../models/distribuicao';
+import { DetalheDistribuicao, Distribuicao, DistribuicaoCompleta } from '../models/distribuicao';
 
 const apiDistribuicaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/distribuicao-documentos';
 const apiDetailDistribuicaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/detalhes-distribuicao';
 
-const initialState: EntityState<Distribuicao> = {
+const initialState: EntityState<DistribuicaoCompleta> = {
   entities: [],
   entity: null,
-
+  totalItems: 0,
   errorMessage: null,
   loading: false,
   updateSuccess: false,
   updating: false,
   links: null,
 };
-
-export const listarDistribuicao = createAsyncThunk('distribuicao/listar', async listMetasParams => {
+interface ListParams {
+  page?: number;
+  size?: number;
+}
+export const listarDistribuicao = createAsyncThunk('distribuicao/listar', async (listMetasParams: ListParams) => {
   const query = buildQueryParams(listMetasParams);
 
   const url: string = `${apiDistribuicaoUrl}/paginado${query}`;
@@ -43,8 +46,24 @@ export const cadastrarDistribuicao = createAsyncThunk('distribuicao/criar', asyn
   return await axios.post(apiDistribuicaoUrl, data);
 });
 
+export const cadastrarDetailDistribuicao = createAsyncThunk('distribuicao-detail/criar', async (data: DetalheDistribuicao) => {
+  return await axios.post(apiDetailDistribuicaoUrl, data);
+});
+
+export const buscarDetailDistribuicao = createAsyncThunk('distribuicao-detail/buscar', async (id: number | string) => {
+  return await axios.get<DetalheDistribuicao>(`${apiDetailDistribuicaoUrl}/${id}`);
+});
+
+export const deletarDetailDistribuicao = createAsyncThunk('distribuicao-detail/remover', async (id: number | string) => {
+  return await axios.delete(`${apiDetailDistribuicaoUrl}/${id}`);
+});
+
+export const atualizarDetailDistribuicao = createAsyncThunk('distribuicao-detail/atualizar', async (data: DetalheDistribuicao) => {
+  return await axios.put<DetalheDistribuicao>(`${apiDetailDistribuicaoUrl}/${data.id}`, data);
+});
+
 const DistribuicaoReducer = createEntitySlice({
-  name: 'movimentacao',
+  name: 'distribuicao',
   initialState,
   extraReducers(builder) {
     builder
@@ -56,16 +75,17 @@ const DistribuicaoReducer = createEntitySlice({
           ...state,
           entities: action.payload.data.content,
           entity: null,
+          totalItems: action.payload.data.totalElements,
         };
       })
-      .addMatcher(isFulfilled(buscarDistribuicao), (state, action) => {
-        const { data, headers } = action.payload;
+      // .addMatcher(isFulfilled(buscarDistribuicao), (state, action) => {
+      //   const { data, headers } = action.payload;
 
-        return {
-          ...state,
-          entity: data,
-        };
-      })
+      //   return {
+      //     ...state,
+      //     entity: data,
+      //   };
+      // })
       .addMatcher(isFulfilled(atualizarDistribuicao), (state, action) => {
         state.loading = false;
       })
