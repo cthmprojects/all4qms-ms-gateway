@@ -27,10 +27,10 @@ export interface ListPaginationRequestSwot {
   pesquisa?: string;
 }
 
-export const buildQueryParams = (params: ListPaginationRequestSwot): string => {
+export const buildQueryParams = (params: any): string => {
   const queryParams = Object.entries(params)
     .filter(([_, value]) => value !== undefined)
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`);
+    .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`);
 
   queryParams.push(`cacheBuster=${new Date().getTime()}`);
 
