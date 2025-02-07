@@ -60,6 +60,8 @@ import axios, { AxiosResponse } from 'axios';
 import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
 import { hasAnyAuthority } from 'app/shared/auth/private-route';
 import { AUTHORITIES } from 'app/config/constants';
+import { listarDistribuicao } from '../../reducers/distribuicao.reducer';
+import { DistribuicaoCompleta } from '../../models/distribuicao';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -101,6 +103,8 @@ const getSituacaoIcon = situacao => {
       return { icon: <BlockIcon />, text: 'Obsoleto' };
     case 'C':
       return { icon: <CancelIcon />, text: 'Cancelado' };
+    case 'D':
+      return { icon: <CancelIcon />, text: 'Em Distribuição' };
     default:
       return { icon: <InfoIcon />, text: 'Indefinido' };
   }
@@ -158,6 +162,7 @@ const InfodocList = () => {
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
   const totalItems = useAppSelector(state => state.all4qmsmsgateway.infodoc.totalItems);
+  const distribuitions: Array<DistribuicaoCompleta> = useAppSelector(state => state.all4qmsmsgateway.distribuicao.entities);
 
   /**
    * Filters
@@ -223,6 +228,8 @@ const InfodocList = () => {
         page: 0,
       })
     );
+
+    dispatch(listarDistribuicao({ page: page, size: pageSize }));
 
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' })).then(() => {
       getUsersSGQ();
@@ -296,13 +303,13 @@ const InfodocList = () => {
       case 2:
         type = 'R';
         break;
-      case 4:
+      case 3:
         type = 'C';
         break;
-      case 5:
+      case 4:
         type = 'O';
         break;
-      case 6:
+      case 5:
         type = 'H';
         break;
       default:
@@ -312,9 +319,14 @@ const InfodocList = () => {
     return type;
   };
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (event: React.SyntheticEvent | null, newValue: number) => {
     const type: string = switchSituationByTab(newValue);
 
+    if (type == 'D') {
+      dispatch(listarDistribuicao({ page: page, size: pageSize }));
+      setValue(newValue);
+      return;
+    }
     const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
     dispatch(
       listdocs({
@@ -359,6 +371,7 @@ const InfodocList = () => {
 
   const handleDistributionModal = () => {
     setDistributionModal(false);
+    handleChange(null, 0);
   };
 
   const formatDateToString = (date: Date) => {
@@ -374,7 +387,7 @@ const InfodocList = () => {
   };
 
   const onEditClicked = (infodoc: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    setIdDocUpdating(infodoc.doc.id);
+    setIdDocUpdating(infodoc.doc.id!!);
     setUploadFileUpdate(true);
 
     // H - homolog
@@ -406,7 +419,8 @@ const InfodocList = () => {
   const onPrintClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
     // navigate(`/somepath/${id}`);
     setCurrentInfodoc(infodocEvent);
-    alert('Imprimir Doc - Em Desenvolvimento!');
+    setDistributionModal(true);
+    // alert('Imprimir Doc - Em Desenvolvimento!');
   };
 
   const onCancelClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -540,8 +554,8 @@ const InfodocList = () => {
                         id="btn-print"
                         title="Imprimir"
                         color="primary"
-                        // onClick={event => onPrintClicked(infodoc, event)}
-                        onClick={event => setDistributionModal(true)}
+                        onClick={event => onPrintClicked(infodoc, event)}
+                        // onClick={event => setDistributionModal(true)}
                         disabled={
                           infodoc.doc.enumSituacao === 'C' ||
                           (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
@@ -549,8 +563,8 @@ const InfodocList = () => {
                         }
                         // disabled
                       >
-                        {/* <PrintIcon sx={{ color: infodoc.doc.enumSituacao == 'C' ? '#cacaca' : '#03AC59' }} /> */}
-                        <PrintIcon sx={{ color: '#cacaca' }} />
+                        <PrintIcon sx={{ color: infodoc.doc.enumSituacao != 'H' ? '#cacaca' : '#03AC59' }} />
+                        {/* <PrintIcon sx={{ color: '#cacaca' }} /> */}
                       </IconButton>
                       <Tooltip title="Somente SGQ e usuario criador podem cancelar">
                         <Box>
@@ -625,6 +639,131 @@ const InfodocList = () => {
     }
   };
 
+  const renderTableDistribuition = () => {
+    if (distribuitions?.length > 0) {
+      return (
+        <>
+          <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
+            <Table sx={{ width: '100%' }}>
+              <TableHead>
+                <TableRow>
+                  {columns.map(col => (
+                    // eslint-disable-next-line react/jsx-key
+                    <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {distribuitions?.map((distribuicao: DistribuicaoCompleta) => (
+                  <TableRow key={distribuicao.idDistribuicaoDoc} style={{ cursor: 'pointer' }} onClick={event => null}>
+                    <Tooltip title={distribuicao.codigo}>
+                      <TableCell>{distribuicao.codigo}</TableCell>
+                    </Tooltip>
+                    <TableCell>{distribuicao.titulo}</TableCell>
+                    <TableCell>{filterUser(distribuicao.idUsuarioDevolucao)?.nome}</TableCell>
+                    <TableCell>{distribuicao.revisao}</TableCell>
+                    <TableCell>{distribuicao.dataEntrega ? formatDateToString(new Date(distribuicao.dataEntrega)) : '-'}</TableCell>
+                    <TableCell>{filterProcess(distribuicao.idProcesso)}</TableCell>
+                    <TableCell>{filterOrigin('')}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon('H').text}</Box>
+                    </TableCell>
+                    {/* <TableCell onClick={event => openDocToValidation(event, distribuicao)}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(distribuicao.doc.status).icon}</Box>
+                    </TableCell> */}
+                    <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
+                      {/* <IconButton
+                        title="Revisar"
+                        color="primary"
+                        disabled={distribuicao.doc.enumSituacao !== 'H' || !isSGQ}
+                        onClick={event => onEditClicked(distribuicao, event)}
+                        // onClick={event => openDocToValidation(event, distribuicao)}
+                      >
+                        <EditIcon sx={{ color: distribuicao.doc.enumSituacao !== 'H' || !isSGQ ? '#cacaca' : '#e6b200' }} />
+                      </IconButton> */}
+                      <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => null}>
+                        <VisibilityIcon sx={{ color: '#0EBDCE' }} />
+                      </IconButton>
+                      {/* <IconButton
+                        id="btn-print"
+                        title="Imprimir"
+                        color="primary"
+                        onClick={event => onPrintClicked(infodoc, event)}
+                        // onClick={event => setDistributionModal(true)}
+                        disabled={
+                          infodoc.doc.enumSituacao === 'C' ||
+                          (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
+                          (infodoc.doc.enumSituacao === 'H' && !isSGQ)
+                        }
+                      >
+                        <PrintIcon sx={{ color: '#cacaca' }} />
+                      </IconButton> */}
+                      <Tooltip title="Somente SGQ e usuario criador podem cancelar">
+                        <Box>
+                          <IconButton
+                            id="btn-cancel"
+                            title="Cancelar"
+                            color="primary"
+                            onClick={event => null}
+                            disabled={isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id}
+                          >
+                            <CancelIcon
+                              sx={{
+                                color: !isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id ? '#cacaca' : '#FF0000',
+                              }}
+                            />
+                          </IconButton>
+                        </Box>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
+            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
+            <TablePagination
+              component="div"
+              count={totalItems}
+              labelDisplayedRows={displayedRowsLabel}
+              labelRowsPerPage="Itens por página:"
+              onPageChange={onPageChanged}
+              onRowsPerPageChange={onRowsPerPageChanged}
+              page={page}
+              rowsPerPage={pageSize}
+              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
+            />
+          </Row>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <Row className="justify-content-center mt-5">
+            <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
+          </Row>
+          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
+            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
+            <TablePagination
+              component="div"
+              count={totalItems}
+              labelDisplayedRows={displayedRowsLabel}
+              labelRowsPerPage="Itens por página:"
+              onPageChange={onPageChanged}
+              onRowsPerPageChange={onRowsPerPageChanged}
+              page={page}
+              rowsPerPage={pageSize}
+              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
+            />
+          </Row>
+        </>
+      );
+    }
+  };
+
   const account = useAppSelector(state => state.authentication.account);
   const isSgq = hasAnyAuthority(account.authorities, [AUTHORITIES.SGQ]);
 
@@ -633,9 +772,18 @@ const InfodocList = () => {
     <div className="padding-container">
       <div className="container-style">
         <UploadInfoFileUpdate open={uploadFileUpdate} handleClose={handleCloseUpdateModal} id={idDocUpdating} />
-        <DistributionDialog open={distributionModal} handleClose={handleDistributionModal} documentTitle={currentInfodoc?.doc?.titulo} />
+        <DistributionDialog
+          open={distributionModal}
+          handleClose={handleDistributionModal}
+          documentTitle={currentInfodoc?.doc?.titulo!!}
+          idDoc={currentInfodoc?.doc.id}
+        />
         <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
-        <RequestCopyDialog open={requestCopyModal} handleClose={handleCloseRequestCopyModal} documentTitle={currentInfodoc?.doc?.titulo} />
+        <RequestCopyDialog
+          open={requestCopyModal}
+          handleClose={handleCloseRequestCopyModal}
+          documentTitle={currentInfodoc?.doc?.titulo!!}
+        />
         <CancelDocumentDialog
           open={cancelDocumentModal}
           handleClose={handleCancelDocumentModal}
@@ -734,14 +882,14 @@ const InfodocList = () => {
               <Tab label="Cópia Controlada" {...a11yProps(0)} />
               <Tab label="Solicitação e Validação" {...a11yProps(1)} />
               <Tab label="Aprovação" {...a11yProps(2)} />
-              <Tab label="Lista Mestra" {...a11yProps(3)} />
+              {/* <Tab label="Lista Mestra" {...a11yProps(3)} /> */}
               {isSgq && <Tab label="Cancelado" {...a11yProps(4)} />}
               {isSgq && <Tab label="Obsoleto" {...a11yProps(5)} />}
               {isSgq && <Tab label="Homologados" {...a11yProps(6)} />}
             </Tabs>
           </Box>
           <CustomTabPanel value={value} index={0}>
-            {renderTable()}
+            {renderTableDistribuition()}
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
             {renderTable()}
@@ -752,7 +900,13 @@ const InfodocList = () => {
           <CustomTabPanel value={value} index={3}>
             {renderTable()}
           </CustomTabPanel>
+          {/* <CustomTabPanel value={value} index={4}>
+            {renderTable()}
+          </CustomTabPanel> */}
           <CustomTabPanel value={value} index={4}>
+            {renderTable()}
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={5}>
             {renderTable()}
           </CustomTabPanel>
         </Box>
