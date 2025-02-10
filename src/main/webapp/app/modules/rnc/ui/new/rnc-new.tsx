@@ -832,6 +832,7 @@ export const RNCNew = () => {
                   onDescriptionsEvidencesChanged={onDescriptionEvidencesChanged}
                   requirements={requirements}
                   rncId={id}
+                  type={rnc ? rnc.tipoNC : firstForm.type.value}
                 />
               </Row>
               <Row className="ms-3 me-3 mt-3" fullWidth>

@@ -243,6 +243,7 @@ const RncList = ({}) => {
 
   const columns = [
     'Número',
+    'Tipo',
     'Emissão',
     'Emissor',
     'Descrição',
@@ -367,6 +368,7 @@ const RncList = ({}) => {
                   return (
                     <TableRow key={id}>
                       <TableCell>{id}</TableCell>
+                      <TableCell>{tipoNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
                       <TableCell>{emissor}</TableCell>
                       <TableCell> {descricao ?? '-'}</TableCell>

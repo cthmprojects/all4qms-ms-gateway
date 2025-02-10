@@ -170,6 +170,19 @@ export const saveAudit = createAsyncThunk('rnc/audit/save', async (audit: RncAud
   return await axiosSaveAudit(audit);
 });
 
+export const cancelRnc = createAsyncThunk('rnc/cancel', async (id: number) => {
+  const getResponse = await axios.get(`${apiUrl}/${id}`);
+
+  if (getResponse.status !== 200) {
+    return null;
+  }
+
+  const rnc = getResponse.data;
+
+  const response = await axios.patch(`${apiUrl}/${rnc.id}`, { ...rnc, statusAtual: 'CANCELADO' });
+  return response;
+});
+
 export const axiosSaveAudit = async (audit: RncAudit) => {
   const response = await axios.post(auditApiUrl, {
     sequecialAuditoria: audit.sequence,
