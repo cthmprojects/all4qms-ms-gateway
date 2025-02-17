@@ -198,7 +198,7 @@ export const UpdateDocument = () => {
       enumSituacao: situation ? situation : EnumSituacao.EDICAO,
       tipoDoc: 'MA',
       // revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
-      idDocumentacaoAnterior: parseInt(id!!),
+      // idDocumentacaoAnterior: parseInt(id!!),
     };
 
     if (!noValidate) {

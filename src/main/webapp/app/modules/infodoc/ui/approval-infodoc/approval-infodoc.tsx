@@ -116,6 +116,7 @@ export const ApprovalDocument = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, _] = useState<UserQMS>(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
+  const [isSGQ, setIsSGQ] = useState(false);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -127,6 +128,9 @@ export const ApprovalDocument = () => {
         setSelectedProcess(data[0].id);
       }
     });
+    const roles = Storage.local.get('ROLE');
+    const isSGQ = ['ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(isSGQ);
   }, []);
 
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -211,8 +215,8 @@ export const ApprovalDocument = () => {
       setCode(actualInfoDoc.doc?.codigo!!);
       setEmitter(actualInfoDoc.doc?.idUsuarioCriacao!!);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
-      setDescription(actualInfoDoc.doc?.justificativa!!);
-      setDocumentDescription(actualInfoDoc.doc?.descricaoDoc!!);
+      setDescription(actualInfoDoc.doc?.descricaoDoc!!);
+      setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
       setTitle(actualInfoDoc.doc?.titulo!!);
       setOrigin(actualInfoDoc.doc?.origem!!);
       setSelectedProcess(actualInfoDoc.doc?.idProcesso!!);
@@ -284,7 +288,7 @@ export const ApprovalDocument = () => {
     // Incrementando Revisão
     await dispatch(
       updateInfoDoc({
-        data: { ...actualInfoDoc.doc, revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 0 },
+        data: { ...actualInfoDoc.doc, revisao: (actualInfoDoc.doc?.revisao ?? -1) + 1 || 0 },
         id: id!!,
       })
     );
@@ -389,7 +393,7 @@ export const ApprovalDocument = () => {
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
                   {statusMoviment}
                 </h3>
-                <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
+                {/* <img src="../../../../content/images/icone-emissao.png" className="ms-2" /> */}
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center' }} className="ms-2">
@@ -399,7 +403,7 @@ export const ApprovalDocument = () => {
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
                   {actualInfoDoc?.doc?.revisao && actualInfoDoc?.doc?.revisao > 1 ? 'Revisão' : 'Edição'}
                 </h3>
-                <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
+                {/* <img src="../../../../content/images/icone-emissao.png" className="ms-2" /> */}
               </div>
 
               <FormControl className="ms-2 mt-4">
@@ -569,6 +573,7 @@ export const ApprovalDocument = () => {
               color="primary"
               style={{ background: '#A23900', color: '#fff' }}
               onClick={() => repproveDocument()}
+              disabled={!isSGQ}
             >
               Reprovar
             </Button>
@@ -578,6 +583,7 @@ export const ApprovalDocument = () => {
               color="primary"
               onClick={() => approveDocument()}
               style={{ background: '#e6b200', color: '#4e4d4d' }}
+              disabled={!isSGQ}
             >
               Aprovar
             </Button>

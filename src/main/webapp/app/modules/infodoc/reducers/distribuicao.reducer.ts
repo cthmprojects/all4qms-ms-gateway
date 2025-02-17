@@ -22,6 +22,7 @@ const initialState: EntityState<DistribuicaoCompleta> = {
 interface ListParams {
   page?: number;
   size?: number;
+  sort?: string;
 }
 export const listarDistribuicao = createAsyncThunk('distribuicao/listar', async (listMetasParams: ListParams) => {
   const query = buildQueryParams(listMetasParams);

@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
 import { IUsuario } from '../../../../../shared/model/usuario.model';
-import { notifyEmailInfoDoc } from '../../../reducers/infodoc.reducer';
+import { notifyEmailInfoDoc, reproveDocument } from '../../../reducers/infodoc.reducer';
 import { UserQMS } from '../../../../../entities/usuario/reducers/usuario.reducer';
 
 const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
@@ -38,12 +38,13 @@ export const RejectDocumentDialog = ({ open, handleClose, documentTitle, current
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
 
   const reprovalDocument = async () => {
-    await axios
-      .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/cancelar/${currentDocument?.doc?.id}`, {
-        idDocumento: currentDocument?.doc?.id,
-        idUsuario: currentUser ? currentUser.id : 0,
-        justificativa: description,
+    await dispatch(
+      reproveDocument({
+        id: currentDocument?.doc?.id,
+        userLoginID: currentUser ? currentUser.id : 0,
+        justify: description,
       })
+    )
       .then(async () => {
         toast.success('Documento rejeitado!');
         const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == currentDocument.doc?.idUsuarioCriacao)[0];
