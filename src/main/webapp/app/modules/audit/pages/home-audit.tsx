@@ -33,7 +33,7 @@ export const HomeAudit = () => {
             <Tabs value={tabIndex} onChange={onTabChange} aria-label="basic tabs example">
               <Tab label="Cronogramas" />
               <Tab label="Planejamentos" />
-              <Tab label="Auditorias" />
+              <Tab label="Agendas" />
               <Tab label="Modelos de Auditorias" />
             </Tabs>
           </Box>

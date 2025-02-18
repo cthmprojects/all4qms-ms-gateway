@@ -87,7 +87,7 @@ export const ModelAuditNewEdit = () => {
             render={renderPayload => (
               <TextField
                 className="me-2"
-                label="Nome da Auditoria"
+                label="Tipo de auditoria"
                 style={{ minWidth: '20vw' }}
                 placeholder="Auditoria"
                 {...formField(renderPayload)}

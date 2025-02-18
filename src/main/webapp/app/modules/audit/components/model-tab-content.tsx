@@ -31,7 +31,7 @@ export const ModelTabContent = () => {
 
   const filtro = useWatch({ control });
 
-  const columns = ['Tipo de Auditoria', 'Frequência', 'Tipo', 'Ações'];
+  const columns = ['Modelo de Auditoria', 'Frequência', 'Tipo', 'Ações'];
 
   const { data: modelList, isLoading: isLoadingmodelList } = useQuery({
     queryKey: ['model/list'],

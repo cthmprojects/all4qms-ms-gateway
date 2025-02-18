@@ -17,17 +17,18 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Row, Table } from 'reactstrap';
 import { useDebounce } from 'use-debounce';
 import { queryClientAudit } from '..';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
 import { TiposAuditoria } from 'app/shared/model/constants';
 import { MaterialSelect } from 'app/shared/components/select/material-select';
-import { getPaginatedAgendamento, getPaginatedPlanejamento } from '../audit-service';
+import { getPaginatedAgendamento, getPaginatedPlanejamento, getProcessos } from '../audit-service';
 import { handleFilter, renderValueCronograma } from '../audit-helper';
 import { AgendamentoAuditoria, CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
 import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
 import { capitalize } from 'lodash';
+import { Process } from 'app/modules/rnc/models';
 
-const columns = ['Data', 'Tipo de Auditoria', 'RNC', 'ROM', 'Início', 'Término', 'Ações'];
+const columns = ['Código', 'Processo', 'Data', 'Início', 'Término', 'RNC', 'ROM', 'Ações'];
 
 export const AuditorshipTabContent = () => {
   const navigate = useNavigate();
@@ -58,6 +59,15 @@ export const AuditorshipTabContent = () => {
   useEffect(() => {
     queryClientAudit.invalidateQueries({ queryKey: ['schedule/list'] });
   }, [page, pageSize, filtro]);
+
+  const { data: processes, mutate: listProcesses } = useMutation({
+    mutationFn: () => getProcessos(),
+  });
+
+  function pickProccess(id: number) {
+    return processes?.find(item => item.id == id) as Process;
+  }
+  useEffect(listProcesses, []);
 
   return (
     <div>
@@ -119,12 +129,13 @@ export const AuditorshipTabContent = () => {
                 key={schedule.id}
                 sx={schedule.isReagendado ? { opacity: 0.5, pointerEvents: 'none', cursor: 'not-allowed', height: '57px' } : {}}
               >
+                <TableCell>{schedule?.planejamento.identificadorPlanejamento || '-'}</TableCell>
+                <TableCell>{pickProccess(schedule.idProcesso)?.nome || '-'}</TableCell>
                 <TableCell>{schedule.dataAuditoria.toLocaleDateString('pt-BR')}</TableCell>
-                <TableCell>{schedule?.planejamento?.cronograma?.modelo?.tipo}</TableCell>
-                <TableCell>{schedule.ncsNumber}</TableCell>
-                <TableCell>{schedule.omsNumber}</TableCell>
                 <TableCell>{schedule.horaInicial.toLocaleTimeString('pt-BR')}</TableCell>
                 <TableCell>{schedule.horaFinal.toLocaleTimeString('pt-BR')}</TableCell>
+                <TableCell>{schedule.ncsNumber}</TableCell>
+                <TableCell>{schedule.omsNumber}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
                     {schedule.isReagendado ? (
