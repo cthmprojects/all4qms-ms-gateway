@@ -560,11 +560,15 @@ export const GeneralRegister = () => {
     }
 
     if (_rnc && showPlanoAcaoCorretiva) {
-      if (plans.length > 0) {
+      const currentPlans = await getPlanoByRnc(_rnc.id);
+
+      if (currentPlans.length > 0) {
+        const currentPlan = currentPlans[0].plano;
+
         dispatch(
           updatePlan({
             actionPlans: listaAcoesCorretivas,
-            plan: plans[0],
+            plan: currentPlan,
           })
         ).then(() => {
           sendNotifications();
