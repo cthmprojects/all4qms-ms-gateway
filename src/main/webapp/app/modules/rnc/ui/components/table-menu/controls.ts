@@ -49,5 +49,10 @@ export const canAccessValidationPage = ({ rnc, userRole }: props) => {
 
 export const canAccessRncCancelButton = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
-  return (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) && statusAtual !== 'CANCELADO';
+  return (
+    (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) &&
+    statusAtual !== 'CANCELADO' &&
+    statusAtual !== 'PREENCHIMENTO' &&
+    statusAtual !== 'DETALHAMENTO'
+  );
 };

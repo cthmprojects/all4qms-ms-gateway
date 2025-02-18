@@ -1,9 +1,9 @@
-import { Box, Breadcrumbs, Stack, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Button, Stack, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { IUsuario } from 'app/shared/model/usuario.model';
 import { useEffect, useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { CompleteNc, Enums, NonConformityDescriptionSummary as NcDescriptionSummary, NonConformityDescription } from '../../models';
 import { findCompleteNonConformity } from '../../reducers/complete-non-conformity.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
@@ -21,6 +21,7 @@ import {
 
 const RncDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const enums = useAppSelector<Enums | null>(state => state.all4qmsmsgateway.enums.enums);
@@ -193,6 +194,15 @@ const RncDetails = () => {
               </Box>
             )}
           </Stack>
+
+          <Button
+            variant="contained"
+            className="me-3"
+            sx={{ background: '#d9d9d9', color: '#4e4d4d', marginTop: 3 }}
+            onClick={() => navigate('/rnc')}
+          >
+            Voltar
+          </Button>
         </Box>
       </div>
     </div>

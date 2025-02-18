@@ -96,6 +96,8 @@ export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans,
   for (let i = 0; i < actionPlans.length; i++) {
     const actionPlan: ActionPlan = actionPlans[i];
 
+    console.log(`erickson actionPlan[${i}]`, actionPlan);
+
     if (actionPlan.id) {
       const response = await axios.patch(`${actionPlanApiUrl}/${actionPlan.id}`, {
         id: actionPlan.id,
@@ -111,7 +113,7 @@ export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans,
         planoId: savedPlan.id,
       });
     } else {
-      const response = await axios.post(actionPlanApiUrl, {
+      const payload = {
         idPlano: savedPlan.id,
         descricaoAcao: actionPlan.descricaoAcao,
         prazoAcao: formatDate(actionPlan.prazoAcao, true),
@@ -122,7 +124,11 @@ export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans,
         idAnexosExecucao: actionPlan.idAnexosExecucao,
         dataConclusaoAcao: formatDate(actionPlan.dataConclusaoAcao),
         planoId: savedPlan.id,
-      });
+      };
+
+      console.log(`erickson save[${i}]`, payload, plan.id, savedPlan.id);
+
+      const response = await axios.post(actionPlanApiUrl, payload);
     }
   }
 });
