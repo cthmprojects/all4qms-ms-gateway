@@ -17,18 +17,24 @@ const NonConformityDescriptionSummary = ({ descriptions }: NonConformityDescript
               <TextField
                 disabled
                 label="Não conformidade"
+                maxRows={5}
+                multiline
                 placeholder="Não conformidade"
                 value={description?.descricaoNaoConformidade.detalhesNaoConformidade ?? ''}
               />
               <TextField
                 disabled
                 label="Requisito descumprido"
+                maxRows={5}
+                multiline
                 placeholder="Requisito descumprido"
                 value={description?.descricaoNaoConformidade.requisitoDescumprido ?? ''}
               />
               <TextField
                 disabled
                 label="Evidência objetiva"
+                maxRows={5}
+                multiline
                 placeholder="Evidência objetiva"
                 value={description?.descricaoNaoConformidade.evidenciaObjetiva ?? ''}
               />

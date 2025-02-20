@@ -461,7 +461,7 @@ export const GeneralRegister = () => {
     return true;
   };
 
-  const saveOrUpdate = () => {
+  const saveOrUpdate = async (): Promise<void> => {
     // if(!newGeneralRegister) {
     //   return;
     // }
@@ -499,18 +499,22 @@ export const GeneralRegister = () => {
     saveProductDecision();
 
     if (_rnc) {
-      getInvestigations().then(async res => {
-        const ids: Array<number> = res.map(r => r.id);
+      const allInvestigations = await getInvestigations();
 
-        for (let i = 0; i < ids.length; i++) {
-          const id: number = ids[i];
-          await deleteInvestigation(id);
-        }
-      });
+      const ids: Array<number> = allInvestigations.filter(i => i.idNaoConformidade === _rnc.id).map(i => i.id);
 
-      getInvestigationByRnc(id).then(async i => {
-        const ishikawa = i.ishikawa;
-        const reasons = i.porques;
+      for (let i = 0; i < ids.length; i++) {
+        const id: number = ids[i];
+        await deleteInvestigation(id);
+      }
+
+      const currentInvestigations = await getInvestigationByRnc(id);
+
+      for (let i = 0; i < currentInvestigations.length; i++) {
+        const currentInvestigation = currentInvestigations[i];
+
+        const ishikawa = currentInvestigation.ishikawa;
+        const reasons = currentInvestigation.porques;
 
         if (ishikawa) {
           const id: number = ishikawa.id;
@@ -525,43 +529,46 @@ export const GeneralRegister = () => {
             await deleteReason(id);
           }
         }
+      }
 
-        for (let i = 0; i < reasonsInvestigations.length; i++) {
-          const reasonInvestigation: ReasonsInvestigation = reasonsInvestigations[i];
-          await saveInvestigation(id, null, {
-            cause: reasonInvestigation?.cause,
-            fifth: reasonInvestigation?.fifth,
-            first: reasonInvestigation?.first,
-            forth: reasonInvestigation?.fourth,
-            problem: descriptionEntity?.detalhesNaoConformidade,
-            second: reasonInvestigation?.second,
-            third: reasonInvestigation?.third,
-          });
-        }
+      for (let i = 0; i < reasonsInvestigations.length; i++) {
+        const reasonInvestigation: ReasonsInvestigation = reasonsInvestigations[i];
+        await saveInvestigation(id, null, {
+          cause: reasonInvestigation?.cause,
+          fifth: reasonInvestigation?.fifth,
+          first: reasonInvestigation?.first,
+          forth: reasonInvestigation?.fourth,
+          problem: descriptionEntity?.detalhesNaoConformidade,
+          second: reasonInvestigation?.second,
+          third: reasonInvestigation?.third,
+        });
+      }
 
-        await saveInvestigation(
-          id,
-          {
-            description: descriptionEntity?.detalhesNaoConformidade,
-            environment: ishikawaInvestigation?.environment.join(';'),
-            machine: ishikawaInvestigation?.machine.join(';'),
-            measurement: ishikawaInvestigation?.measurement.join(';'),
-            method: ishikawaInvestigation?.method.join(';'),
-            rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
-            workforce: ishikawaInvestigation?.manpower.join(';'),
-          },
-          null
-        );
-      });
-      toast.success('RNC atualizada com sucesso!');
+      await saveInvestigation(
+        id,
+        {
+          description: descriptionEntity?.detalhesNaoConformidade,
+          environment: ishikawaInvestigation?.environment.join(';'),
+          machine: ishikawaInvestigation?.machine.join(';'),
+          measurement: ishikawaInvestigation?.measurement.join(';'),
+          method: ishikawaInvestigation?.method.join(';'),
+          rawMaterial: ishikawaInvestigation?.rawMaterial.join(';'),
+          workforce: ishikawaInvestigation?.manpower.join(';'),
+        },
+        null
+      );
     }
 
     if (_rnc && showPlanoAcaoCorretiva) {
-      if (plans.length > 0) {
+      const currentPlans = await getPlanoByRnc(_rnc.id);
+
+      if (currentPlans.length > 0) {
+        const currentPlan = currentPlans[0].plano;
+
         dispatch(
           updatePlan({
             actionPlans: listaAcoesCorretivas,
-            plan: plans[0],
+            plan: currentPlan,
           })
         ).then(() => {
           sendNotifications();

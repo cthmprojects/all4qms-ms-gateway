@@ -202,8 +202,6 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               disableClearable
               renderInput={params => <TextField {...params} label="Máquina" />}
             />
-          </div>
-          <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
             <Autocomplete
               multiple
               className="m-2"
@@ -238,8 +236,6 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               disableClearable
               renderInput={params => <TextField {...params} label="Medição" />}
             />
-          </div>
-          <div className="flex-col" style={{ marginTop: '19px', width: '100%' }}>
             <Autocomplete
               multiple
               className="m-2"

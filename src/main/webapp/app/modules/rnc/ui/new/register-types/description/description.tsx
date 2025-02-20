@@ -1,7 +1,7 @@
 import { Add, Delete, DeleteOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { Card, Divider, Fab, IconButton, Stack, TextField, Tooltip } from '@mui/material';
 import { useAppDispatch } from 'app/config/store';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './description.css';
 
 type RncDescriptionProps = {
@@ -9,6 +9,7 @@ type RncDescriptionProps = {
   evidences: Array<string>;
   requirements: Array<string>;
   rncId?: string | number;
+  type: string;
   onDescriptionsChanged: (values: Array<string>) => void;
   onEvidencesChanged: (values: Array<string>) => void;
   onRequirementsChanged: (values: Array<string>) => void;
@@ -26,6 +27,7 @@ export const DescriptionRnc = ({
   evidences,
   requirements,
   rncId,
+  type,
   onDescriptionsChanged,
   onEvidencesChanged,
   onRequirementsChanged,
@@ -68,6 +70,13 @@ export const DescriptionRnc = ({
   }, [descriptions, evidences, requirements]);
 
   const onAddDescription = () => {
+    if (descriptions.length === 0 && requirements.length === 0 && evidences.length === 0) {
+      onDescriptionsChanged(['']);
+      onRequirementsChanged(['']);
+      onEvidencesChanged(['']);
+      return;
+    }
+
     if (
       !descriptions ||
       !requirements ||
@@ -130,6 +139,24 @@ export const DescriptionRnc = ({
     document.body.removeChild(a);
   };
 
+  const getDescriptionLabel = useCallback(
+    (index: number) => {
+      const prefix: string = type === 'NC' ? 'Não conformidade ' : 'Oportunidade de melhoria ';
+
+      return prefix + index;
+    },
+    [type]
+  );
+
+  const getRequirementsLabel = useCallback(
+    (index: number) => {
+      const prefix: string = type === 'NC' ? 'Requisito descumprido ' : 'Detalhes ';
+
+      return prefix + index;
+    },
+    [type]
+  );
+
   const renderRncDescriptions = () => {
     if (rncDescriptions.length > 0) {
       return (
@@ -142,8 +169,10 @@ export const DescriptionRnc = ({
                 <Stack spacing={2}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <TextField
-                      label={`Não conformidade ${index + 1}`}
+                      label={getDescriptionLabel(index + 1)}
                       fullWidth
+                      maxRows={5}
+                      multiline
                       sx={{ mt: 2 }}
                       value={description}
                       onChange={event => {
@@ -156,8 +185,10 @@ export const DescriptionRnc = ({
 
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <TextField
-                      label={`Requisito descumprido ${index + 1}`}
+                      label={getRequirementsLabel(index + 1)}
                       fullWidth
+                      maxRows={5}
+                      multiline
                       sx={{ mt: 2 }}
                       value={requirement}
                       onChange={event => {
@@ -172,6 +203,8 @@ export const DescriptionRnc = ({
                     <TextField
                       label={`Evidência objetiva ${index + 1}`}
                       fullWidth
+                      maxRows={5}
+                      multiline
                       sx={{ mt: 2 }}
                       value={evidence}
                       onChange={event => {

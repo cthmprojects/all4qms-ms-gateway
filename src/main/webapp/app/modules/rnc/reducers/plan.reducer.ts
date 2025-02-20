@@ -61,7 +61,7 @@ export const savePlan = createAsyncThunk('/plan/save', async ({ actionPlans, pla
   for (let i = 0; i < actionPlans.length; i++) {
     const actionPlan: ActionPlan = actionPlans[i];
 
-    const response = await axios.post(actionPlanApiUrl, {
+    const payload = {
       idPlano: savedPlan.id,
       descricaoAcao: actionPlan.descricaoAcao,
       prazoAcao: formatDate(actionPlan.prazoAcao, true),
@@ -72,7 +72,9 @@ export const savePlan = createAsyncThunk('/plan/save', async ({ actionPlans, pla
       idAnexosExecucao: actionPlan.idAnexosExecucao,
       dataConclusaoAcao: formatDate(actionPlan.dataConclusaoAcao),
       planoId: savedPlan.id,
-    });
+    };
+
+    const response = await axios.post(actionPlanApiUrl, payload);
   }
 });
 
@@ -111,7 +113,7 @@ export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans,
         planoId: savedPlan.id,
       });
     } else {
-      const response = await axios.post(actionPlanApiUrl, {
+      const payload = {
         idPlano: savedPlan.id,
         descricaoAcao: actionPlan.descricaoAcao,
         prazoAcao: formatDate(actionPlan.prazoAcao, true),
@@ -122,7 +124,9 @@ export const updatePlan = createAsyncThunk('/plan/update', async ({ actionPlans,
         idAnexosExecucao: actionPlan.idAnexosExecucao,
         dataConclusaoAcao: formatDate(actionPlan.dataConclusaoAcao),
         planoId: savedPlan.id,
-      });
+      };
+
+      const response = await axios.post(actionPlanApiUrl, payload);
     }
   }
 });

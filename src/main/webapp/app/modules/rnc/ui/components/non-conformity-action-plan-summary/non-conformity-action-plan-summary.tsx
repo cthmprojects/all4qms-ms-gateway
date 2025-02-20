@@ -45,7 +45,7 @@ const NonConformityActionPlanSummary = ({ actionPlan }: NonConformityActionPlanS
     const monthStr: string = month.toString().padStart(2, '0');
     const dayStr: string = day.toString().padStart(2, '0');
 
-    return `${yearStr}/${monthStr}/${dayStr}`;
+    return `${dayStr}/${monthStr}/${yearStr}`;
   };
 
   return (
