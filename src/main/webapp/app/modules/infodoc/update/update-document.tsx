@@ -28,7 +28,7 @@ import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
 import { Doc, EnumSituacao, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
-import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
+import { createInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
@@ -78,14 +78,14 @@ export const UpdateDocument = () => {
   const navigate = useNavigate();
   const { id, idFile } = useParams();
 
-  const [emitter, setEmitter] = useState('');
+  const [emitter, setEmitter] = useState<number>();
   const [emittedDate, setEmittedDate] = useState(new Date());
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
   const [origin, setOrigin] = useState('externa');
   const [processes, setProcesses] = useState([]);
-  const [selectedProcess, setSelectedProcess] = useState('');
+  const [selectedProcess, setSelectedProcess] = useState<number>();
   const [noValidate, setNoValidate] = useState(false);
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
@@ -102,6 +102,10 @@ export const UpdateDocument = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
+
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -184,8 +188,8 @@ export const UpdateDocument = () => {
 
   const saveDoc = (situation?: EnumSituacao): Doc => {
     const newInfoDoc: Doc = {
-      id: parseInt(id!!),
-      idUsuarioCriacao: parseInt(emitter),
+      // id: parseInt(id!!),
+      idUsuarioCriacao: emitter,
       dataCricao: emittedDate,
       descricaoDoc: description,
       justificativa: documentDescription,
@@ -193,11 +197,11 @@ export const UpdateDocument = () => {
       titulo: title,
       origem: origin,
       idArquivo: parseInt(idFile!!),
-      idProcesso: parseInt(selectedProcess),
+      idProcesso: selectedProcess,
       ignorarValidade: true,
       enumSituacao: situation ? situation : EnumSituacao.EDICAO,
       tipoDoc: 'MA',
-      // revisao: actualInfoDoc.doc?.revisao ? parseInt(actualInfoDoc.doc?.revisao) + 1 : 1,
+      revisao: actualInfoDoc.doc?.revisao ?? undefined,
       // idDocumentacaoAnterior: parseInt(id!!),
     };
 
@@ -213,9 +217,15 @@ export const UpdateDocument = () => {
     setIsLoading(true);
     const newInfoDoc = saveDoc(situation);
 
-    const resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
+    let resStoreDoc;
+    if (actualInfoDoc?.doc?.enumSituacao === EnumSituacao.HOMOLOGACAO) {
+      resStoreDoc = await dispatch(createInfoDoc({ ...newInfoDoc, idDocumentacaoAnterior: Number(id) }));
+    } else {
+      resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: parseInt(id!!) }));
+    }
 
     const resDoc: InfoDoc = (resStoreDoc.payload as AxiosResponse).data || {};
+
     if (resDoc) {
       setIsLoading(false);
       setInfoDocId(resDoc?.doc?.id || -1);
@@ -236,14 +246,14 @@ export const UpdateDocument = () => {
       return null;
     }
 
-    const resDoc = await saveDocument(EnumSituacao.REVISAO);
+    const resDoc = await saveDocument();
 
     if (resDoc) {
       const novaMovimentacao: Movimentacao = {
         id: infoDocMovimentacao < 1 ? resDoc?.movimentacao?.id : infoDocMovimentacao,
         enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
         enumStatus: EnumStatusDoc.VALIDAREV,
-        idDocumentacao: infoDocId,
+        idDocumentacao: resDoc?.doc.id!!,
         idUsuarioCriacao: currentUser.id,
       };
 
@@ -260,20 +270,16 @@ export const UpdateDocument = () => {
     navigate('/infodoc');
   };
 
-  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
-  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
-  const actualInfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
-
   useEffect(() => {
     if (actualInfoDoc) {
-      setCode(actualInfoDoc.doc?.codigo);
-      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+      setCode(actualInfoDoc.doc.codigo!!);
+      setEmitter(actualInfoDoc.doc.idUsuarioCriacao!!);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
-      setDescription(actualInfoDoc.doc?.descricaoDoc);
-      setDocumentDescription(actualInfoDoc.doc?.justificativa);
-      setTitle(actualInfoDoc.doc?.titulo);
-      setOrigin(actualInfoDoc.doc?.origem);
-      setSelectedProcess(actualInfoDoc.doc?.idProcesso);
+      setDescription(actualInfoDoc.doc?.descricaoDoc!!);
+      setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
+      setTitle(actualInfoDoc.doc?.titulo!!);
+      setOrigin(actualInfoDoc.doc?.origem!!);
+      setSelectedProcess(actualInfoDoc.doc?.idProcesso!!);
       if (actualInfoDoc.doc?.dataValidade) {
         setNoValidate(false);
         setValidDate(new Date(actualInfoDoc.doc.dataValidade));
@@ -321,7 +327,7 @@ export const UpdateDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(Number(event.target.value))}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -408,10 +414,10 @@ export const UpdateDocument = () => {
 
             <FormControl sx={{ width: '22%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+              <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(Number(event.target.value))}>
                 {processes.map((process, i) => (
-                  <MenuItem value={process.id} key={`process-${i}`}>
-                    {process.nome}
+                  <MenuItem value={process?.id} key={`process-${i}`}>
+                    {process.nome!!}
                   </MenuItem>
                 ))}
               </Select>

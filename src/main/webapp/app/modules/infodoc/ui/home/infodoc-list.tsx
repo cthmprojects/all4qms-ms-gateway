@@ -357,6 +357,19 @@ const InfodocList = () => {
     'Ações',
   ];
 
+  const columnsDistribuicao = [
+    'Código',
+    'Título',
+    // 'Emissor',
+    'Revisão',
+    'Data',
+    'Área/Processo',
+    // 'Origem',
+    'Status',
+    // 'Status',
+    // 'Distribuição',
+    'Ações',
+  ];
   const handleCloseUploadFileModal = () => {
     setUploadFileModal(false);
   };
@@ -367,6 +380,7 @@ const InfodocList = () => {
 
   const handleCancelDocumentModal = () => {
     setCancelDocumentModal(false);
+    handleChange(null, 3);
   };
 
   const handleDistributionModal = () => {
@@ -417,7 +431,7 @@ const InfodocList = () => {
   };
 
   const onViewClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    downloadDocument(infodocEvent.doc?.idArquivo);
+    downloadDocument(infodocEvent.doc?.idArquivo!!);
   };
 
   const onPrintClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -529,7 +543,7 @@ const InfodocList = () => {
                       <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                         {filterUser(infodoc.doc.idUsuarioCriacao)?.nome}
                       </TableCell>
-                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.revisao}</TableCell>
+                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.revisao ?? 0}</TableCell>
                       <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                         {infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}
                       </TableCell>
@@ -572,18 +586,22 @@ const InfodocList = () => {
                           <PrintIcon sx={{ color: infodoc.doc.enumSituacao != 'H' ? '#cacaca' : '#03AC59' }} />
                           {/* <PrintIcon sx={{ color: '#cacaca' }} /> */}
                         </IconButton>
-                        <Tooltip title="Somente SGQ e usuario criador podem cancelar">
+                        <Tooltip title="Somente SGQ pode Cancelar documentos homologados">
                           <Box>
                             <IconButton
                               id="btn-cancel"
                               title="Cancelar"
                               color="primary"
                               onClick={event => onCancelClicked(infodoc, event)}
-                              disabled={!isSGQ || infodoc.doc.idUsuarioCriacao !== userQMS.id}
+                              // disabled={infodoc.doc.enumSituacao === 'H' && !isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id}
+                              disabled={infodoc.doc.enumSituacao !== 'H' && !isSGQ}
                             >
                               <CancelIcon
                                 sx={{
-                                  color: isSGQ || infodoc.doc.idUsuarioCriacao == userQMS.id ? '#FF0000' : '#cacaca',
+                                  color:
+                                    infodoc.doc.enumSituacao === 'H' && (isSGQ || infodoc.doc.idUsuarioCriacao == userQMS.id)
+                                      ? '#FF0000'
+                                      : '#cacaca',
                                 }}
                               />
                             </IconButton>
@@ -646,32 +664,36 @@ const InfodocList = () => {
             <Table sx={{ width: '100%' }}>
               <TableHead>
                 <TableRow>
-                  {columns.map(col => (
+                  {columnsDistribuicao.map(col => (
                     // eslint-disable-next-line react/jsx-key
                     <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {distribuitions?.map((distribuicao: DistribuicaoCompleta) => (
-                  <TableRow key={distribuicao.idDistribuicaoDoc} style={{ cursor: 'pointer' }} onClick={event => null}>
-                    <Tooltip title={distribuicao.codigo}>
-                      <TableCell>{distribuicao.codigo}</TableCell>
-                    </Tooltip>
-                    <TableCell>{distribuicao.titulo}</TableCell>
-                    <TableCell>{filterUser(distribuicao.idUsuarioDevolucao)?.nome}</TableCell>
-                    <TableCell>{distribuicao.revisao}</TableCell>
-                    <TableCell>{distribuicao.dataEntrega ? formatDateToString(new Date(distribuicao.dataEntrega)) : '-'}</TableCell>
-                    <TableCell>{filterProcess(distribuicao.idProcesso)}</TableCell>
-                    <TableCell>{filterOrigin('')}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon('H').text}</Box>
-                    </TableCell>
-                    {/* <TableCell onClick={event => openDocToValidation(event, distribuicao)}>
+                {distribuitions
+                  ?.filter((distribuicao: DistribuicaoCompleta) =>
+                    userQMS.processos.some(processo => processo.id === distribuicao.idProcesso)
+                  )
+                  ?.map((distribuicao: DistribuicaoCompleta) => (
+                    <TableRow key={distribuicao.idDistribuicaoDoc} style={{ cursor: 'pointer' }} onClick={event => null}>
+                      <Tooltip title={distribuicao.codigo}>
+                        <TableCell>{distribuicao.codigo}</TableCell>
+                      </Tooltip>
+                      <TableCell>{distribuicao.titulo}</TableCell>
+                      {/* <TableCell>{filterUser(distribuicao.idUsuarioDevolucao)?.nome}</TableCell> */}
+                      <TableCell>{distribuicao.revisao}</TableCell>
+                      <TableCell>{distribuicao.dataEntrega ? formatDateToString(new Date(distribuicao.dataEntrega)) : '-'}</TableCell>
+                      <TableCell>{filterProcess(distribuicao.idProcesso)}</TableCell>
+                      {/* <TableCell>{filterOrigin('')}</TableCell> */}
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{distribuicao.enumStatusDoc}</Box>
+                      </TableCell>
+                      {/* <TableCell onClick={event => openDocToValidation(event, distribuicao)}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(distribuicao.doc.status).icon}</Box>
                     </TableCell> */}
-                    <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
-                      {/* <IconButton
+                      <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
+                        {/* <IconButton
                         title="Revisar"
                         color="primary"
                         disabled={distribuicao.doc.enumSituacao !== 'H' || !isSGQ}
@@ -680,10 +702,10 @@ const InfodocList = () => {
                       >
                         <EditIcon sx={{ color: distribuicao.doc.enumSituacao !== 'H' || !isSGQ ? '#cacaca' : '#e6b200' }} />
                       </IconButton> */}
-                      <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => null}>
-                        <VisibilityIcon sx={{ color: '#0EBDCE' }} />
-                      </IconButton>
-                      {/* <IconButton
+                        <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => null}>
+                          <VisibilityIcon sx={{ color: '#0EBDCE' }} />
+                        </IconButton>
+                        {/* <IconButton
                         id="btn-print"
                         title="Imprimir"
                         color="primary"
@@ -697,26 +719,26 @@ const InfodocList = () => {
                       >
                         <PrintIcon sx={{ color: '#cacaca' }} />
                       </IconButton> */}
-                      <Tooltip title="Somente SGQ e usuario criador podem cancelar">
-                        <Box>
-                          <IconButton
-                            id="btn-cancel"
-                            title="Cancelar"
-                            color="primary"
-                            onClick={event => null}
-                            disabled={isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id}
-                          >
-                            <CancelIcon
-                              sx={{
-                                color: !isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id ? '#cacaca' : '#FF0000',
-                              }}
-                            />
-                          </IconButton>
-                        </Box>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        <Tooltip title="Somente SGQ e usuario criador podem cancelar">
+                          <Box>
+                            <IconButton
+                              id="btn-cancel"
+                              title="Cancelar"
+                              color="primary"
+                              onClick={event => null}
+                              disabled={isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id}
+                            >
+                              <CancelIcon
+                                sx={{
+                                  color: !isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id ? '#cacaca' : '#FF0000',
+                                }}
+                              />
+                            </IconButton>
+                          </Box>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
