@@ -46,3 +46,13 @@ export const canAccessValidationPage = ({ rnc, userRole }: props) => {
   const { statusAtual } = rnc;
   return userRole.includes('ROLE_SGQ') && statusAtual === 'VALIDACAO';
 };
+
+export const canAccessRncCancelButton = ({ rnc, userId, userRole }: props) => {
+  const { statusAtual, idEmissorNC } = rnc;
+  return (
+    (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) &&
+    statusAtual !== 'CANCELADO' &&
+    statusAtual !== 'PREENCHIMENTO' &&
+    statusAtual !== 'DETALHAMENTO'
+  );
+};

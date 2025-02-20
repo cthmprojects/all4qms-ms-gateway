@@ -4,16 +4,17 @@ import { useAppDispatch } from 'app/config/store';
 import { Rnc } from 'app/modules/rnc/models';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteRnc } from '../../../reducers/rnc.reducer';
+import { cancelRnc, deleteRnc } from '../../../reducers/rnc.reducer';
 import {
-  canAccessFillingPage,
   canAccessDetailingInfo,
-  canAccessInvestigationPage,
   canAccessElaborationPage,
   canAccessExecutionPage,
-  canAccessVerificationPage,
-  canAccessValidationPage,
+  canAccessFillingPage,
+  canAccessInvestigationPage,
+  canAccessRncCancelButton,
   canAccessRncDeleteButton,
+  canAccessValidationPage,
+  canAccessVerificationPage,
 } from './controls';
 
 interface props {
@@ -43,6 +44,11 @@ const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
 
   const deleteRncById = (id: number) => {
     dispatch(deleteRnc(id));
+    reload();
+  };
+
+  const cancelRncById = (id: number) => {
+    dispatch(cancelRnc(id));
     reload();
   };
 
@@ -86,6 +92,14 @@ const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
           onClick={() => goToPage(`/rnc/general/implementacao/fechamento/${rnc.id}`)}
         >
           Fechamento
+        </MenuItem>
+        <MenuItem
+          disabled={!canAccessRncCancelButton({ rnc, userId, userRole })}
+          onClick={() => cancelRncById(rnc.id)}
+          style={{ display: 'flex', justifyContent: 'space-between' }}
+        >
+          Cancelar
+          <FontAwesomeIcon icon="cancel" className="ms-2" color="#ff0000" />
         </MenuItem>
         <MenuItem
           disabled={!canAccessRncDeleteButton({ rnc, userId, userRole })}

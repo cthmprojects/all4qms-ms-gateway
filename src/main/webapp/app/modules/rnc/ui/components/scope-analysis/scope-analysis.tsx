@@ -64,7 +64,7 @@ const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnal
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
         <Typography variant="h5" component="div">
-          Análise de Abrangência da NC
+          Análise de Abrangência
         </Typography>
         <br />
         <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">

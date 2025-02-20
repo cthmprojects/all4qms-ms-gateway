@@ -20,22 +20,18 @@ const IshikawaSummary = ({ description, ishikawa }: IshikawaSummaryProps) => {
         <Stack direction="row" spacing={2}>
           <TextField disabled label="NC" placeholder="NC" value={description} />
 
-          <Stack spacing={2}>
-            <Stack direction="row" spacing={2}>
-              <TextField disabled label="Meio Ambiente" placeholder="Meio Ambiente" value={ishikawa?.meioAmbiente} />
+          <Stack spacing={2} sx={{ flexGrow: 1 }}>
+            <TextField disabled label="Meio Ambiente" placeholder="Meio Ambiente" value={ishikawa?.meioAmbiente} />
 
-              <TextField disabled label="Mão de Obra" placeholder="Mão de Obra" value={ishikawa?.maoDeObra} />
+            <TextField disabled label="Mão de Obra" placeholder="Mão de Obra" value={ishikawa?.maoDeObra} />
 
-              <TextField disabled label="Método" placeholder="Método" value={ishikawa?.metodo} />
-            </Stack>
+            <TextField disabled label="Método" placeholder="Método" value={ishikawa?.metodo} />
 
-            <Stack direction="row" spacing={2}>
-              <TextField disabled label="Máquina" placeholder="Máquina" value={ishikawa?.maquina} />
+            <TextField disabled label="Máquina" placeholder="Máquina" value={ishikawa?.maquina} />
 
-              <TextField disabled label="Medição" placeholder="Medição" value={ishikawa?.medicao} />
+            <TextField disabled label="Medição" placeholder="Medição" value={ishikawa?.medicao} />
 
-              <TextField disabled label="Matéria Prima" placeholder="Matéria Prima" value={ishikawa?.materiaPrima} />
-            </Stack>
+            <TextField disabled label="Matéria Prima" placeholder="Matéria Prima" value={ishikawa?.materiaPrima} />
           </Stack>
         </Stack>
       </CardContent>
