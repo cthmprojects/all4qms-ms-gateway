@@ -676,7 +676,11 @@ const InfodocList = () => {
                     userQMS.processos.some(processo => processo.id === distribuicao.idProcesso)
                   )
                   ?.map((distribuicao: DistribuicaoCompleta) => (
-                    <TableRow key={distribuicao.idDistribuicaoDoc} style={{ cursor: 'pointer' }} onClick={event => null}>
+                    <TableRow
+                      key={distribuicao.idDistribuicaoDoc}
+                      style={{ cursor: 'pointer' }}
+                      onClick={event => navigate(`receive/${distribuicao.idDistribuicaoDoc}`)}
+                    >
                       <Tooltip title={distribuicao.codigo}>
                         <TableCell>{distribuicao.codigo}</TableCell>
                       </Tooltip>

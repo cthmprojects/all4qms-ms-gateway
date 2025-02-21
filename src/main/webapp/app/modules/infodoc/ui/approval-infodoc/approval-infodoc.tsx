@@ -128,9 +128,6 @@ export const ApprovalDocument = () => {
         setSelectedProcess(data[0].id);
       }
     });
-    const roles = Storage.local.get('ROLE');
-    const isSGQ = ['ROLE_SGQ'].some(item => roles.includes(item));
-    setIsSGQ(isSGQ);
   }, []);
 
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -230,6 +227,10 @@ export const ApprovalDocument = () => {
         setNotificationPreviousDate('0');
       }
     }
+
+    const roles = Storage.local.get('ROLE');
+    const isSGQ = ['ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(isSGQ);
   }, [actualInfoDoc]);
 
   const approveDocumentCancel = async () => {
