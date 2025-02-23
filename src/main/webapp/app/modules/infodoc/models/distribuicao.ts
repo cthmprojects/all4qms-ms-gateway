@@ -1,7 +1,7 @@
 export interface DetalheDistribuicao {
   id?: number;
   idDistribuicaoDoc: number;
-  cometarioSolicitacao: string;
+  cometarioSolicitacao?: string;
   idUsuarioEntrega?: number;
   dataEntrega?: Date;
   comentarioEntrega?: string;

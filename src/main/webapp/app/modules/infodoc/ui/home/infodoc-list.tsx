@@ -44,7 +44,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './infodoc.css';
 import { EnumStatusDoc, EnumTipoMovDoc, InfoDoc, StatusEnum } from '../../models';
-import { listdocs } from '../../reducers/infodoc.reducer';
+import { getInfoDocById, listdocs } from '../../reducers/infodoc.reducer';
 import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
 import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
 import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
@@ -448,6 +448,14 @@ const InfodocList = () => {
     setCancelDocumentModal(true);
   };
 
+  const onCancelDistribuition = async (distribuition: DistribuicaoCompleta, event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+    const resDoc = await dispatch(getInfoDocById(distribuition.idDocumentacao!!));
+    const infoDoc = resDoc.payload as InfoDoc;
+
+    setCurrentInfodoc(infoDoc);
+    setCancelDocumentModal(true);
+  };
+
   const handleCloseUpdateModal = () => {
     setUploadFileUpdate(false);
   };
@@ -517,6 +525,9 @@ const InfodocList = () => {
 
   // const verifyUser = (doc: InfoDoc) => doc.doc.idUsuarioCriacao == userLoginID
 
+  const handleClickDistribuition = (distribuicao: DistribuicaoCompleta) => {
+    navigate(`receive/${distribuicao.idDistribuicaoDoc}`, { state: distribuicao });
+  };
   const renderTable = () => {
     if (infodocs?.length > 0) {
       return (
@@ -679,7 +690,7 @@ const InfodocList = () => {
                     <TableRow
                       key={distribuicao.idDistribuicaoDoc}
                       style={{ cursor: 'pointer' }}
-                      onClick={event => navigate(`receive/${distribuicao.idDistribuicaoDoc}`)}
+                      onClick={event => handleClickDistribuition(distribuicao)}
                     >
                       <Tooltip title={distribuicao.codigo}>
                         <TableCell>{distribuicao.codigo}</TableCell>
@@ -729,8 +740,11 @@ const InfodocList = () => {
                               id="btn-cancel"
                               title="Cancelar"
                               color="primary"
-                              onClick={event => null}
-                              disabled={isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id}
+                              onClick={event => {
+                                event.stopPropagation();
+                                onCancelDistribuition(distribuicao, event);
+                              }}
+                              disabled={!isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id}
                             >
                               <CancelIcon
                                 sx={{

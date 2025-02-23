@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers, UserQMS } from 'app/entities/usuario/reducers/usuario.reducer';
@@ -47,8 +47,8 @@ import { Storage } from 'react-jhipster';
 import { getUsersAsAdminSGQ } from '../../../administration/user-management/user-management.reducer';
 import { getUsersByProcess } from '../../../../entities/usuario/reducers/usuario.reducer';
 import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
-import { Distribuicao, DistribuicaoCompleta } from '../../models/distribuicao';
-import { buscarDistribuicao } from '../../reducers/distribuicao.reducer';
+import { DetalheDistribuicao, Distribuicao, DistribuicaoCompleta } from '../../models/distribuicao';
+import { atualizarDetailDistribuicao, buscarDetailDistribuicao, buscarDistribuicao } from '../../reducers/distribuicao.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -89,6 +89,8 @@ export const ComproveRecebimento = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
+  const distribuicao = location.state as DistribuicaoCompleta;
 
   const [idProcesso, setIdProcesso] = useState<number>(-1);
   const [idUsuarioEntrega, setIdUsuarioEntrega] = useState<number>(-1);
@@ -103,6 +105,7 @@ export const ComproveRecebimento = () => {
   const [comentarioEntrega, setComentarioEntrega] = useState<string>('');
   const [comentarioDevolucao, setComentarioDevolucao] = useState<string>('');
 
+  const [isJustify, setIsJustify] = useState(false);
   const [isRecebido, setIsRecebido] = useState(false);
   const [isDevolvido, setIsDevolvido] = useState(false);
   const [processes, setProcesses] = useState([]);
@@ -112,14 +115,11 @@ export const ComproveRecebimento = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
-  const distribuition: DistribuicaoCompleta = useAppSelector(state => state.all4qmsmsgateway.distribuicao.entity);
-  const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
+  const distribuition: DetalheDistribuicao = useAppSelector(state => state.all4qmsmsgateway.distribuicao.entity);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
-    dispatch(buscarDistribuicao(Number(id)));
-
-    setIdUsuarioEntrega(currentUser.id);
+    dispatch(buscarDetailDistribuicao(Number(id)));
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -131,19 +131,28 @@ export const ComproveRecebimento = () => {
   }, []);
 
   const requestDoc = async () => {
-    const resDoc = await dispatch(getInfoDocById(distribuition.idDocumentacao!!));
-    const infoDoc: InfoDoc = resDoc.payload as AxiosResponse;
+    const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao!!));
+    const infoDoc = resDoc.payload as InfoDoc;
 
-    setCodigo(infoDoc.doc.codigo ?? '');
-    setTitulo(infoDoc.doc.titulo ?? '');
     setTipoControleDoc(infoDoc.doc.tipoDoc ?? '');
   };
 
   useEffect(() => {
     if (distribuition) {
       requestDoc();
-      setIdUsuarioEntrega(distribuition.idUsuarioEntrega ?? -1);
-      setIdProcesso(distribuition.idProcesso ?? -1);
+      setIdUsuarioEntrega(distribuicao.idUsuarioEntrega ?? -1);
+      setIdProcesso(distribuicao.idProcesso ?? -1);
+
+      setCodigo(distribuicao.codigo ?? '');
+      setTitulo(distribuicao.titulo ?? '');
+      setDataEntrega(new Date(distribuition.dataEntrega ?? ''));
+      setDataDevolucao(new Date(distribuition.dataDevolucao ?? ''));
+      setComentarioEntrega(distribuition.comentarioEntrega ?? '');
+      setComentarioDevolucao(distribuition.comentarioDevolucao ?? '');
+      setIdUsuarioDevolucao(distribuition.idUsuarioDevolucao ?? -1);
+      setIsRecebido(!!distribuition.idUsuarioEntrega);
+      setIsDevolvido(!!distribuition.comentarioDevolucao?.trim());
+      setIsJustify(!!distribuition.comentarioEntrega?.trim());
     }
   }, [distribuition]);
 
@@ -164,58 +173,42 @@ export const ComproveRecebimento = () => {
     navigate('/infodoc');
   };
 
-  // const saveDocument = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const newInfoDoc: Doc = {
-  //       idUsuarioCriacao: parseInt(emitter),
-  //       dataCricao: emittedDate,
-  //       descricaoDoc: description,
-  //       justificativa: '',
-  //       codigo: '',
-  //       titulo: '',
-  //       origem: 'I',
-  //       idProcesso: parseInt(selectedProcess),
-  //       idArquivo: parseInt(id!!),
-  //       ignorarValidade: true,
-  //       enumSituacao: EnumSituacao.EDICAO,
-  //       tipoDoc: 'MA',
-  //       revisao: 0,
-  //     };
+  const saveDocument = async () => {
+    setIsLoading(true);
+    try {
+      const distri: DetalheDistribuicao = {
+        // ...distribuition,
+        id: distribuicao.idDistribuicaoDoc!!,
+        idDistribuicaoDoc: distribuicao.idDistribuicaoDoc!!,
+        idUsuarioEntrega: idUsuarioEntrega < 0 ? distribuicao.idUsuarioEntrega : idUsuarioEntrega,
+        dataEntrega: dataEntrega!!,
+        comentarioEntrega: comentarioEntrega,
+        idUsuarioDevolucao: idUsuarioDevolucao < 0 ? distribuicao.idUsuarioDevolucao : idUsuarioDevolucao,
+        dataDevolucao: dataDevolucao!!,
+        comentarioDevolucao: comentarioDevolucao,
+      };
 
-  //     if (!noValidate) {
-  //       newInfoDoc.ignorarValidade = false;
-  //       newInfoDoc.dataValidade = validDate;
-  //     }
+      const resStoreDist = await dispatch(atualizarDetailDistribuicao(distri));
 
-  //     let resStoreDoc;
-  //     if (infoDocId > 0) {
-  //       newInfoDoc.id = infoDocId;
-  //       resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
-  //     } else {
-  //       resStoreDoc = await dispatch(createInfoDoc(newInfoDoc));
-  //     }
+      const resDist: DetalheDistribuicao = (resStoreDist.payload as AxiosResponse).data || {};
+      if (resDist) {
+        setIsLoading(false);
+        toast.success(`Distribuição recebida com sucesso!`);
 
-  //     const resDoc: InfoDoc = (resStoreDoc.payload as AxiosResponse).data || {};
-  //     if (resDoc) {
-  //       setIsLoading(false);
-  //       setInfoDocId(resDoc?.doc?.id || -1);
-  //       setInfoDocMovimentacao(resDoc?.movimentacao?.id || -1);
-  //       toast.success(`Documento ${resDoc?.doc?.id} Salvo com sucesso!`);
-
-  //       return resDoc;
-  //     } else {
-  //       toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
-  //       setIsLoading(false);
-  //       return null;
-  //     }
-  //   } catch (err) {
-  //     console.error('Error new document:', err);
-  //     toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
-  //     setIsLoading(false);
-  //     return null;
-  //   }
-  // };
+        navigate('/infodoc');
+        return resDist;
+      } else {
+        toast.error(`Não foi possivel receber distribuição de Documento, tente novamente mais tarde!`);
+        setIsLoading(false);
+        return null;
+      }
+    } catch (err) {
+      console.error('Error new document:', err);
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
+    }
+  };
 
   return (
     <>
@@ -245,8 +238,15 @@ export const ComproveRecebimento = () => {
               autoComplete="off"
               value={titulo}
               onChange={e => setTitulo(e.target.value)}
+              slotProps={{ input: { readOnly: true } }}
             />
-            <TextField label="Tipo" name="Tipo" value={TipoControleDoc} onChange={e => setTipoControleDoc(e.target.value)} />
+            <TextField
+              label="Tipo"
+              name="Tipo"
+              value={TipoControleDoc}
+              slotProps={{ input: { readOnly: true } }}
+              onChange={e => setTipoControleDoc(e.target.value)}
+            />
           </Stack>
           <Stack direction="row" spacing={2}>
             <FormControl style={{ width: '50%' }}>
@@ -314,7 +314,7 @@ export const ComproveRecebimento = () => {
             </FormControl>
             <FormControl style={{ width: '17.5%' }}>
               <InputLabel>Justificado</InputLabel>
-              <Select label="Justificado" value={String(isRecebido)} onChange={event => setIsRecebido(event.target.value === 'true')}>
+              <Select label="Justificado" value={String(isJustify)} onChange={event => setIsJustify(event.target.value === 'true')}>
                 {['Sim', 'Não'].map((label, index) => (
                   <MenuItem key={index} value={String(index === 0)}>
                     {label}
@@ -363,7 +363,7 @@ export const ComproveRecebimento = () => {
             >
               Voltar
             </Button>
-            <Button onClick={() => null} style={{ background: '#e6b200', color: '#4e4d4d' }}>
+            <Button onClick={saveDocument} style={{ background: '#e6b200', color: '#4e4d4d' }}>
               Confirmar
             </Button>
             {/* <Button

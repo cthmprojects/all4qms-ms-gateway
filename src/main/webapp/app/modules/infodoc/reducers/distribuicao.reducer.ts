@@ -9,7 +9,7 @@ import { DetalheDistribuicao, Distribuicao, DistribuicaoCompleta } from '../mode
 const apiDistribuicaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/distribuicao-documentos';
 const apiDetailDistribuicaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/detalhes-distribuicao';
 
-const initialState: EntityState<DistribuicaoCompleta> = {
+const initialState: EntityState<DistribuicaoCompleta | DetalheDistribuicao> = {
   entities: [],
   entity: null,
   totalItems: 0,
@@ -79,7 +79,7 @@ const DistribuicaoReducer = createEntitySlice({
           totalItems: action.payload.data.totalElements,
         };
       })
-      .addMatcher(isFulfilled(buscarDistribuicao), (state, action) => {
+      .addMatcher(isFulfilled(buscarDetailDistribuicao), (state, action) => {
         const { data, headers } = action.payload;
 
         return {
