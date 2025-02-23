@@ -167,6 +167,18 @@ export const cancelDocument = createAsyncThunk('docs/cancel', async ({ id, userL
   }
 });
 
+export const reproveDocument = createAsyncThunk('docs/reprove', async ({ id, userLoginID, justify }: cancelDocParams) => {
+  if (id) {
+    const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;
+    const data = {
+      idDocumento: id,
+      idUsuario: userLoginID,
+      justificativa: justify,
+    };
+    return await axios.put(reproveUrl, data);
+  }
+});
+
 export const aprovarCancelDocument = createAsyncThunk('docs/aprova-cancel', async ({ id, userLoginID, justify }: cancelDocParams) => {
   if (id) {
     // const reproveUrl = `services/all4qmsmsinfodoc/api/infodoc/documentos/reprovacao/${id}`;

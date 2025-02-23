@@ -30,6 +30,8 @@ import { buscarDistribuicao, cadastrarDetailDistribuicao, cadastrarDistribuicao 
 import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { LoadingButton } from '@mui/lab';
+import { Storage } from 'react-jhipster';
+import { UserQMS } from '../../../../../entities/usuario/reducers/usuario.reducer';
 
 const getProcesses = async () => {
   const apiUrl = 'services/all4qmsmsgateway/api/processos';
@@ -67,6 +69,7 @@ export const DistributionDialog = ({ open, handleClose, documentTitle, idDoc }: 
   const [motivoSolicitacao, setMotivoSolicitacao] = useState('');
   const [isNextPageJustify, setIsNextPageJustify] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userQMS, setUserQMS] = useState<UserQMS>(JSON.parse(Storage.session.get('USUARIO_QMS')));
 
   useEffect(() => {
     getProcesses().then(data => {
@@ -121,6 +124,7 @@ export const DistributionDialog = ({ open, handleClose, documentTitle, idDoc }: 
     const novaDetailDistribuicao: DetalheDistribuicao = {
       idDistribuicaoDoc: distribuicao?.id!!,
       cometarioSolicitacao: motivoSolicitacao,
+      idUsuarioEntrega: userQMS.id,
     };
 
     await dispatch(cadastrarDetailDistribuicao(novaDetailDistribuicao));
