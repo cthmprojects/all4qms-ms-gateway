@@ -9,7 +9,7 @@ import { DetalheDistribuicao, Distribuicao, DistribuicaoCompleta } from '../mode
 const apiDistribuicaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/distribuicao-documentos';
 const apiDetailDistribuicaoUrl = 'services/all4qmsmsinfodoc/api/infodoc/detalhes-distribuicao';
 
-const initialState: EntityState<DistribuicaoCompleta> = {
+const initialState: EntityState<DistribuicaoCompleta | DetalheDistribuicao> = {
   entities: [],
   entity: null,
   totalItems: 0,
@@ -22,6 +22,7 @@ const initialState: EntityState<DistribuicaoCompleta> = {
 interface ListParams {
   page?: number;
   size?: number;
+  sort?: string;
 }
 export const listarDistribuicao = createAsyncThunk('distribuicao/listar', async (listMetasParams: ListParams) => {
   const query = buildQueryParams(listMetasParams);
@@ -31,11 +32,11 @@ export const listarDistribuicao = createAsyncThunk('distribuicao/listar', async 
 });
 
 export const buscarDistribuicao = createAsyncThunk('distribuicao/buscar', async (id: number | string) => {
-  return await axios.get<Distribuicao>(`${apiDistribuicaoUrl}/${id}`);
+  return await axios.get<DistribuicaoCompleta>(`${apiDistribuicaoUrl}/${id}`);
 });
 
 export const atualizarDistribuicao = createAsyncThunk('distribuicao/atualizar', async (data: Distribuicao) => {
-  return await axios.put<Distribuicao>(`${apiDistribuicaoUrl}/${data.id}`, data);
+  return await axios.put<DistribuicaoCompleta>(`${apiDistribuicaoUrl}/${data.id}`, data);
 });
 
 export const deletarDistribuicao = createAsyncThunk('distribuicao/remover', async (id: number | string) => {
@@ -59,7 +60,7 @@ export const deletarDetailDistribuicao = createAsyncThunk('distribuicao-detail/r
 });
 
 export const atualizarDetailDistribuicao = createAsyncThunk('distribuicao-detail/atualizar', async (data: DetalheDistribuicao) => {
-  return await axios.put<DetalheDistribuicao>(`${apiDetailDistribuicaoUrl}/${data.id}`, data);
+  return await axios.put<DistribuicaoCompleta>(`${apiDetailDistribuicaoUrl}/${data.id}`, data);
 });
 
 const DistribuicaoReducer = createEntitySlice({
@@ -78,14 +79,14 @@ const DistribuicaoReducer = createEntitySlice({
           totalItems: action.payload.data.totalElements,
         };
       })
-      // .addMatcher(isFulfilled(buscarDistribuicao), (state, action) => {
-      //   const { data, headers } = action.payload;
+      .addMatcher(isFulfilled(buscarDetailDistribuicao), (state, action) => {
+        const { data, headers } = action.payload;
 
-      //   return {
-      //     ...state,
-      //     entity: data,
-      //   };
-      // })
+        return {
+          ...state,
+          entity: data,
+        };
+      })
       .addMatcher(isFulfilled(atualizarDistribuicao), (state, action) => {
         state.loading = false;
       })

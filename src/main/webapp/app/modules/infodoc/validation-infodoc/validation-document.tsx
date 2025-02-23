@@ -269,7 +269,7 @@ export const ValidationDocument = () => {
     navigate('/infodoc');
   };
 
-  const saveDoc = (): Doc => {
+  const saveDoc = (situacao?: EnumSituacao): Doc => {
     const newInfoDoc: Doc = {
       ...actualInfoDoc.doc,
       idUsuarioCriacao: parseInt(emitter),
@@ -282,10 +282,10 @@ export const ValidationDocument = () => {
       idArquivo: idNewFile > 0 ? idNewFile : actualInfoDoc.doc?.idArquivo,
       idProcesso: parseInt(selectedProcess),
       ignorarValidade: true,
-      enumSituacao: EnumSituacao.REVISAO,
+      enumSituacao: situacao || undefined,
       tipoDoc: 'MA',
       // revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1,
-      idDocumentacaoAnterior: parseInt(id!!),
+      // idDocumentacaoAnterior: parseInt(id!!),
     };
 
     if (!noValidate) {
@@ -296,9 +296,9 @@ export const ValidationDocument = () => {
     return newInfoDoc;
   };
 
-  const saveDocument = async () => {
+  const saveDocument = async (situacao?: EnumSituacao) => {
     setIsLoading(true);
-    const newInfoDoc = saveDoc();
+    const newInfoDoc = saveDoc(situacao);
 
     const respUpdt = await dispatch(updateInfoDoc({ data: newInfoDoc, id: newInfoDoc.id!! }));
 
@@ -339,21 +339,22 @@ export const ValidationDocument = () => {
         setNotificationPreviousDate('0');
       }
 
-      if (actualInfoDoc.doc.enumSituacao == EnumSituacao.REVISAO || actualInfoDoc.doc?.idDocumentacaoAnterior) {
-        setIdNewFile(actualInfoDoc.doc.idArquivo!!);
-      }
+      // if (actualInfoDoc.doc.enumSituacao == EnumSituacao.REVISAO || actualInfoDoc.doc?.idDocumentacaoAnterior) {
+      //   setIdNewFile(actualInfoDoc.doc.idArquivo!!);
+      // }
     }
   }, [actualInfoDoc]);
 
   const approveDocument = async () => {
     setIsLoading(true);
-    const resSave = await saveDocument();
+    const resSave = await saveDocument(EnumSituacao.REVISAO);
     if (!resSave) {
       setIsLoading(false);
       return;
     }
     await axios
       .put(`services/all4qmsmsinfodoc/api/infodoc/documentos/aprovacao-sgq/${id}`, {
+        //esse endpoint deveria mudar a situação para R - revisão
         idDocumento: id,
         idUsuario: currentUser.id,
       })
@@ -397,7 +398,7 @@ export const ValidationDocument = () => {
         handleClose={handleCloseRejectModal}
         currentUser={currentUser}
         currentDocument={actualInfoDoc}
-        documentTitle="Documento M4-04-001 - Manual da Qualidade Tellescom Revisao - 04"
+        documentTitle={`Documento - ${actualInfoDoc?.doc?.codigo} - ${actualInfoDoc?.doc?.titulo}`}
       ></RejectDocumentDialog>
       <UploadInfoFile
         open={openUploadFile}
@@ -442,7 +443,7 @@ export const ValidationDocument = () => {
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
                   Em validação
                 </h3>
-                <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
+                {/* <img src="../../../../content/images/icone-emissao.png" className="ms-2" /> */}
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center' }} className="ms-2">
@@ -452,7 +453,7 @@ export const ValidationDocument = () => {
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
                   {actualInfoDoc?.doc?.revisao && actualInfoDoc?.doc?.revisao > 1 ? 'Revisão' : 'Edição'}
                 </h3>
-                <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
+                {/* <img src="../../../../content/images/icone-emissao.png" className="ms-2" /> */}
               </div>
 
               <FormControl className="ms-2 mt-4">

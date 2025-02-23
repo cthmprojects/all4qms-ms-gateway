@@ -51,6 +51,23 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
     setIsSGQ(_isSGQ);
   }, []);
 
+  const sendPendenciasSGQ = () => {
+    toast.success('Documento Cancelado!');
+    const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == infodoc.doc?.idUsuarioCriacao.toString())[0];
+    dispatch(
+      notifyEmailInfoDoc({
+        to: userEmitter?.email || '', // Email
+        subject: 'Documento Cancelado por SGQ',
+        tipo: 'REPROVAR',
+        nomeEmissor: userEmitter?.nome || '', // nome
+        tituloDocumento: 'Documento Cancelado',
+        dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
+        descricao: `Documento Cancelado por ${currentUser.nome} com o email ${currentUser.email}`,
+        motivoReprovacao: '',
+      })
+    );
+  };
+
   const requestCancelInfoDoc = (justify: string) => {
     if (!justify) {
       toast.error('Motivo do cancelamento não pode estar vazio');
@@ -61,26 +78,12 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
 
     if (isSGQ) {
       dispatch(aprovarCancelDocument(params));
+      sendPendenciasSGQ();
     } else {
       dispatch(solicitarCancelDocument(params));
     }
-    // dispatch(cancelDocument(params)).then(
-    //   (response: any) => {
-    //     if (response?.error) {
-    //       console.error('requestCancelInfoDoc:', response?.error);
-    //       handleClose();
-    //       return;
-    //     }
-
-    //     usersSGQ.map(user => sendPendenciasSGQ(user));
-    //     setJustifyValue('');
-
-    //     handleClose();
-    //   },
-    //   err => {
-    //     return;
-    //   }
-    // );
+    setJustifyValue('');
+    // navigate('/infodoc');
     handleClose();
   };
 
@@ -114,7 +117,7 @@ export const CancelDocumentDialog = ({ open, handleClose, documentTitle, infodoc
             style={{ background: '#A23900', color: '#fff' }}
             onClick={() => requestCancelInfoDoc(justifyValue)}
           >
-            Solicitar
+            {isSGQ ? 'Cancelar' : 'Solicitar'}
           </Button>
         </DialogActions>
       </Dialog>

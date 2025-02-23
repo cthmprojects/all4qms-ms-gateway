@@ -213,7 +213,7 @@ export const NewDocument = () => {
         ignorarValidade: true,
         enumSituacao: EnumSituacao.EDICAO,
         tipoDoc: 'MA',
-        revisao: 0,
+        // revisao: 0,
       };
 
       if (!noValidate) {
@@ -265,7 +265,7 @@ export const NewDocument = () => {
         id: resDoc.movimentacao?.id,
         enumTipoMovDoc: EnumTipoMovDoc.EMITIR,
         enumStatus: EnumStatusDoc.VALIDACAO,
-        idDocumentacao: resDoc.doc.id,
+        idDocumentacao: resDoc.doc.id!!,
         idUsuarioCriacao: currentUser.id,
       };
 
@@ -336,7 +336,7 @@ export const NewDocument = () => {
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
                   Em emissão
                 </h3>
-                <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
+                {/* <img src="../../../../content/images/icone-emissao.png" className="ms-2" /> */}
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center' }} className="ms-2">
@@ -346,7 +346,7 @@ export const NewDocument = () => {
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
                   Edição
                 </h3>
-                <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
+                {/* <img src="../../../../content/images/icone-emissao.png" className="ms-2" /> */}
               </div>
 
               <FormControl className="ms-2 mt-4">
