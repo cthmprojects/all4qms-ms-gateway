@@ -2,7 +2,7 @@ import React from 'react';
 import { ValidatedField } from 'react-jhipster';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Alert, Row, Col, Form } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { FieldError, useForm } from 'react-hook-form';
 
 export interface ILoginModalProps {
   showModal: boolean;
@@ -53,7 +53,7 @@ const LoginModal = (props: ILoginModalProps) => {
                 data-cy="username"
                 validate={{ required: 'Username cannot be empty!' }}
                 register={register}
-                error={errors.username}
+                error={errors.username as FieldError}
                 isTouched={touchedFields.username}
               />
               <ValidatedField
@@ -65,7 +65,7 @@ const LoginModal = (props: ILoginModalProps) => {
                 data-cy="password"
                 validate={{ required: 'Password cannot be empty!' }}
                 register={register}
-                error={errors.password}
+                error={errors.password as FieldError}
                 isTouched={touchedFields.password}
               />
               <ValidatedField name="rememberMe" type="checkbox" check label="Manter-me logado" value={true} register={register} />

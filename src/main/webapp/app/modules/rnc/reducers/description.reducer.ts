@@ -30,15 +30,20 @@ export const getDescription = async (id: string | number) => {
   return response;
 };
 
+export const clearDescriptions = async (id: string | number) => {
+  return await axios.delete(`${apiUrl}/byidrnc/${id}`);
+};
+
 const rncDescriptionSlice = createEntitySlice({
   name: 'description',
   initialState,
   extraReducers(builder) {
-    builder.addMatcher(isFulfilled(getById), (state, action) => {
-      state.loading = false;
-      state.entity = action.payload.data;
-    }),
-      builder.addMatcher(isFulfilled(getDescriptionByRNCId), (state, action) => {
+    builder
+      .addMatcher(isFulfilled(getById), (state, action) => {
+        state.loading = false;
+        state.entity = action.payload.data;
+      })
+      .addMatcher(isFulfilled(getDescriptionByRNCId), (state, action) => {
         state.loading = false;
         state.entities = action.payload.data;
         state.entity = action.payload.data.length > 0 ? action.payload.data[0] : null;

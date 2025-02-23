@@ -22,6 +22,8 @@ import { Storage } from 'react-jhipster';
 import { IPendencia } from '../../model/pendencia.model';
 import { getEntitiesById as getPendenciasByUser, getPendenciasCount } from '../../../entities/pendencia/pendencia.reducer';
 import { AxiosResponse } from 'axios';
+import { EnableComponent } from 'app/shared/auth/enable-component';
+import { AUTHORITIES } from 'app/config/constants';
 
 export interface IHeaderProps {
   isAuthenticated: boolean;
@@ -81,7 +83,8 @@ const Header = (props: IHeaderProps) => {
 
   const getAllPendencias = async () => {
     try {
-      const user = userQms?.id ? userQms : JSON.parse(await Storage.session.get('USUARIO_QMS'));
+      // TODO: Pendência sem ref. Verificar backend
+      /* const user = userQms?.id ? userQms : JSON.parse(await Storage.session.get('USUARIO_QMS'));
       const resPendencias = await dispatch(
         getPendenciasByUser({
           page: 1,
@@ -94,7 +97,7 @@ const Header = (props: IHeaderProps) => {
       const pendencias: IPendencia[] = (resPendencias.payload as AxiosResponse).data;
 
       setPendenciasList(pendencias.filter((pend: IPendencia) => !pend.status));
-      setCoutPendencias((resCountPend.payload as AxiosResponse).data);
+      setCoutPendencias((resCountPend.payload as AxiosResponse).data); */
     } catch (err) {
       console.error('header getAllEntities: ', err);
     }
@@ -206,7 +209,12 @@ const Header = (props: IHeaderProps) => {
                 <MenuItem onClick={() => navigate('/funcao')}>Funções</MenuItem>
                 <MenuItem onClick={() => navigate('/setor')}>Setores</MenuItem>
                 <MenuItem onClick={() => navigate('/processo')}>Processos</MenuItem>
-                <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem>
+                {/* <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem> */}
+                <MenuItem onClick={() => navigate('/goals/resources')}>Recursos</MenuItem>
+                <EnableComponent
+                  hasAnyAuthorities={[AUTHORITIES.SGQ]}
+                  component={<MenuItem onClick={() => navigate('/audit/maintenance')}>Auditores</MenuItem>}
+                />
                 <MenuItem onClick={() => navigate('/account/reset/finish')}>Alterar senha</MenuItem>
               </Menu>
               <Button startIcon={<AccountCircleIcon />} className="remove-margin-top-icon" onClick={handleOpenProfileMenu}>

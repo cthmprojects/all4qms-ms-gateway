@@ -1,12 +1,17 @@
 import {
   Breadcrumbs,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
+  Stack,
   TextField,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -18,15 +23,18 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
 import { updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
+import { toast } from 'react-toastify';
+import { IUser } from 'app/shared/model/user.model';
 
 export const RegisterImplementationVerification = ({ handleTela, handlePrazoVerificacao }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { id } = useParams();
 
+  const account = useAppSelector(state => state.authentication.accountQms) as IUser;
+
   useEffect(() => {
     dispatch(getUsers({}));
-
     if (id) {
       dispatch(getById(parseInt(id)));
     }
@@ -34,7 +42,7 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
 
   const [firstForm, setFirstForm] = useState({
     date: { value: new Date(), error: false },
-    emitter: { value: '', error: false },
+    emitter: { value: '' as unknown as number, error: false },
     verified: { value: false, error: false },
     description: { value: '', error: false },
   });
@@ -51,19 +59,44 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
           ...verification,
           possuiEficacia: firstForm.verified.value,
           dataEficacia: firstForm.date.value,
-          responsavelEficacia: users.find(user => user.nome === firstForm.emitter.value)?.id,
+          responsavelEficacia: users.find(user => user.id === firstForm.emitter.value)?.id,
           descEficacia: firstForm.description.value,
         })
       );
+      toast.success('RNC Atualizada com sucesso!');
     }
+  };
+
+  const updateStatusButtonHandler = () => {
+    if (!firstForm.verified.value) {
+      setOpen(true);
+      return;
+    }
+    updateStatus();
   };
 
   const updateStatus = () => {
     if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'VALIDACAO' }));
-      setTimeout(() => {
-        navigate('/rnc');
-      }, 1000);
+      dispatch(
+        updateApprovalNC({
+          ...verification,
+          possuiEficacia: firstForm.verified.value,
+          dataEficacia: firstForm.date.value,
+          responsavelEficacia: users.find(user => user.id === firstForm.emitter.value)?.id,
+          descEficacia: firstForm.description.value,
+        })
+      );
+
+      let newStatus: string = '';
+      if (firstForm.verified.value) {
+        newStatus = 'VALIDACAO';
+      } else {
+        newStatus = 'ELABORACAO';
+      }
+
+      dispatch(update({ ..._rnc, statusAtual: newStatus })).then(() => navigate('/rnc'));
+
+      toast.success('RNC Atualizada com sucesso!');
     }
   };
   const _rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
@@ -78,17 +111,23 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
 
   useEffect(() => {
     if (verification) {
+      const idResponsavelEficacia = users.find(user => user.id === verification.responsavelEficacia)?.id;
+      const definitiveId = idResponsavelEficacia || account?.id;
       setFirstForm({
         date: { value: verification.dataEficacia ? new Date(verification.dataEficacia) : new Date(), error: false },
         emitter: {
-          value: verification.responsavelEficacia ? users.find(user => user.id === verification.responsavelEficacia)?.nome : '',
+          value: definitiveId || '',
           error: false,
         },
         verified: { value: verification.possuiEficacia, error: false },
         description: { value: verification.descEficacia, error: false },
       });
+    } else {
+      setFirstForm({ ...firstForm, emitter: { value: account.id, error: false } });
     }
-  }, [verification, users]);
+  }, [verification, users, account]);
+
+  const [open, setOpen] = useState(false);
 
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
@@ -147,13 +186,13 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
             <Select
               label="Responsável"
               name="forwarded"
-              value={firstForm.emitter.value}
+              value={firstForm.emitter.value as any}
               onChange={(e: SelectChangeEvent<string>) => {
-                setFirstForm({ ...firstForm, emitter: { value: e.target.value, error: false } });
+                setFirstForm({ ...firstForm, emitter: { value: parseInt(e.target.value), error: false } });
               }}
             >
               {users.map((user, i) => (
-                <MenuItem value={user.nome} key={`user-${i}`}>
+                <MenuItem value={user.id as number} key={`user-${i}`}>
                   {user.nome}
                 </MenuItem>
               ))}
@@ -180,12 +219,33 @@ export const RegisterImplementationVerification = ({ handleTela, handlePrazoVeri
             variant="contained"
             color="primary"
             style={{ background: '#e6b200', color: '#4e4d4d' }}
-            onClick={() => updateStatus()}
+            onClick={() => updateStatusButtonHandler()}
           >
             Avançar
           </Button>
         </div>
       </div>
+      <Dialog open={open}>
+        <DialogTitle>Confirmar reinício?</DialogTitle>
+        <DialogContent>A resposta em "não" irá reiniciar o processo. Tem certeza que quer avançar?</DialogContent>
+        <DialogActions>
+          <Stack justifyContent="flex-end" gap="2.5rem" flexDirection="row" mt="20px">
+            <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => setOpen(false)}>
+              Voltar
+            </Button>
+
+            <Button
+              type="submit"
+              onClick={updateStatus}
+              variant="contained"
+              color="primary"
+              style={{ background: '#e6b200', color: '#4e4d4d' }}
+            >
+              Confirmar
+            </Button>
+          </Stack>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

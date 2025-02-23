@@ -17,8 +17,12 @@ import ErrorBoundary from 'app/shared/error/error-boundary';
 import { AUTHORITIES } from 'app/config/constants';
 import AppRoutes from 'app/routes';
 import 'react-datepicker/dist/react-datepicker.css';
+import { registerLocale } from 'react-datepicker';
+import ptBR from 'date-fns/locale/pt-BR';
+import axios from 'axios';
 
 const baseHref = document.querySelector('base').getAttribute('href').replace(/\/$/, '');
+// axios.defaults.baseURL = 'http://localhost:3000';
 
 export const App = () => {
   const dispatch = useAppDispatch();
@@ -26,6 +30,7 @@ export const App = () => {
   useEffect(() => {
     dispatch(getSession());
     dispatch(getProfile());
+    registerLocale('pt-BR', ptBR);
   }, []);
 
   let isAuthenticated = useAppSelector(state => state.authentication.isAuthenticated);
@@ -45,7 +50,7 @@ export const App = () => {
   return (
     <BrowserRouter basename={baseHref}>
       <div>
-        <ToastContainer position={toast.POSITION.TOP_LEFT} className="toastify-container" toastClassName="toastify-toast" />
+        <ToastContainer position={toast.POSITION.TOP_RIGHT} className="toastify-container" toastClassName="toastify-toast" />
         <ErrorBoundary>
           <Header
             isAuthenticated={isAuthenticated}

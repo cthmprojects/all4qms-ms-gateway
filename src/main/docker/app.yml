@@ -1,7 +1,7 @@
 # This configuration is intended for development purpose, it's **your** responsibility to harden it for production
 version: '3.9'
 services:
-  all4qmsmsgateway-app:
+  gateway:
     image: all4qmsmsgateway
     environment:
       - _JAVA_OPTIONS=-Xmx512m -Xms256m
@@ -11,12 +11,12 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
       - SPRING_R2DBC_URL=r2dbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
-      - JHIPSTER_SLEEP=15 # gives time for microservices to boot before the gateway, the entire stack will be ready to accept incoming requests.
+      - JHIPSTER_SLEEP=30 # gives time for microservices to boot before the gateway, the entire stack will be ready to accept incoming requests.
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
     ports:
       - 8080:8080
-  all4qmsmsrnc-app:
+  rnc:
     image: all4qmsmsrnc
     volumes:
       - /c/QMS/Anexos/DNC:/tmp/anexos/dnc
@@ -26,15 +26,16 @@ services:
       - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/eureka
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
-      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
-      - JHIPSTER_SLEEP=30
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsnsrnc
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsnsrnc
+      - JHIPSTER_SLEEP=40
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
       - IA-HOST=https://all4qms-ia.cthmprojetos.com
+      - SERVER_GATEWAY=http://gateway:8080
     ports:
       - 8082:8082
-  all4qmsmsinfodoc-app:
+  infodoc:
     image: all4qms-ms-infodoc
     volumes:
       - /c/QMS/Anexos/DOCS:/tmp/anexos/docs
@@ -44,49 +45,90 @@ services:
       - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/eureka
       - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
-      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsMsGateway
-      - JHIPSTER_SLEEP=30
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsinfodoc
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsinfodoc
+      - JHIPSTER_SLEEP=50
       - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
       - QMS_REGISTRY_PROTOCOLO=https
       - IA-HOST=https://all4qms-ia.cthmprojetos.com
     ports:
       - 8083:8083
-  all4qmsmsgateway-postgresql:
-    image: postgres:14.5
-    volumes:
-      - ~/volumes/all4qmsMsGateway/postgresql/:/var/lib/postgresql/data/
+  risco:
+    image: all4qmsmsrisco
     environment:
-      - POSTGRES_USER=all4qmsMsGateway
-      - POSTGRES_PASSWORD=
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    ports:
-      - 5432:5432
-  jhipster-registry:
-    image: jhipster/jhipster-registry:v7.3.0
-    volumes:
-      - ./central-server-config:/central-config
-    environment:
-      - JHIPSTER_SLEEP=5
       - _JAVA_OPTIONS=-Xmx512m -Xms256m
       - SPRING_PROFILES_ACTIVE=prod,api-docs
-      - SPRING_SECURITY_USER_PASSWORD=admin
-      - JHIPSTER_REGISTRY_PASSWORD=admin
-      - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_TYPE=native
-      - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_SEARCH_LOCATIONS=file:./central-config/docker-config/
-      #- SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_TYPE=git
-      #- SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_URI=https://github.com/jhipster/jhipster-registry/
-      #- SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_SEARCH_PATHS=central-config
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsrisco
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsrisco
+      - JHIPSTER_SLEEP=40
+      - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
+      - QMS_REGISTRY_PROTOCOLO=https
+      - IA-HOST=https://all4qms-ia.cthmprojetos.com
+      - SERVER_RNC=http://rnc:8082
+      - SERVER_GATEWAY=http://gateway:8080
     ports:
-      - 8761:8761
+      - 8084:8084
+
+  metaind:
+    image: all4qmsmsmetaind
+    volumes:
+      - /c/QMS/Anexos/META:/tmp/anexos/meta
+    environment:
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+      - SPRING_PROFILES_ACTIVE=prod,api-docs
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsmetaind
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsmetaind
+      - JHIPSTER_SLEEP=50
+      - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
+      - QMS_REGISTRY_PROTOCOLO=https
+      - IA-HOST=https://all4qms-ia.cthmprojetos.com
+    ports:
+      - 8085:8085
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:8085/management/health
+      interval: 5s
+      timeout: 5s
+      retries: 40
+  auditplan:
+    image: all4qmsmsauditplan
+    environment:
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+      - SPRING_PROFILES_ACTIVE=prod,api-docs
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/eureka
+      - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsauditplan
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/all4qmsmsauditplan
+      - JHIPSTER_SLEEP=60
+      - QMS_REGISTRY_HOST=all4qms-registry.cthmprojetos.com
+      - QMS_REGISTRY_PROTOCOLO=https
+      - IA-HOST=https://all4qms-ia.cthmprojetos.com
+    ports:
+      - 8086:8086
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:8086/management/health
+      interval: 5s
+      timeout: 5s
+      retries: 40
   tunnel:
     container_name: cloudflared-tunnel
-    image: cloudflare/cloudflared
+    image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --no-autoupdate run --token eyJhIjoiMWI0NWU0MDk3OWM3YmQ5MDc1YjNkOGU0ZDgyMWExZTEiLCJ0IjoiMTI0MzM0MzItOGUyOC00YjdhLTg5ZTEtODdiNGI5OWU1NGNiIiwicyI6IlkyVmpNMkkzTlRNdFptUm1PQzAwTm1FeUxUZ3hPV1V0TldVM1pUWTBNRFk0TW1NMCJ9
-    depends_on:
-      - all4qmsmsgateway-app
-      - all4qmsmsrnc-app
+    command: tunnel --no-autoupdate run --token eyJhIjoiMWI0NWU0MDk3OWM3YmQ5MDc1YjNkOGU0ZDgyMWExZTEiLCJ0IjoiMTI0MzM0MzItOGUyOC00YjdhLTg5ZTEtODdiNGI5OWU1NGNiIiwicyI6Ik9UZG1OVEF5TTJJdE5HSmhaaTAwWW1JeUxXRmtaR1l0TlRSa1lqRXpOR0V6WVdNeSJ9
 networks:
   default:
     name: all4qms

@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import './product-register.css';
-import { EditOutlined, UploadFileOutlined } from '@mui/icons-material';
-import DatePicker from 'react-datepicker';
-import { RawMaterial } from 'app/modules/rnc/models';
+import { Card, Divider, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { useAppSelector } from 'app/config/store';
+import { RawMaterial } from 'app/modules/rnc/models';
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import './product-register.css';
 
 // TODO: Receber os dados do cliente e preencher os campos
 // TODO: Validação de error dos campos
@@ -30,9 +29,9 @@ export const ProductRegister = ({ initialData, onProductRegisterChange }: RawMat
     line: '',
     nqa: '',
     operator: '',
-    opNumber: 0,
+    opNumber: '',
     rejectionRate: 0,
-    requestNumber: 0,
+    requestNumber: '',
     samples: 0,
     shift: '',
     traceability: {
@@ -235,7 +234,7 @@ export const ProductRegister = ({ initialData, onProductRegisterChange }: RawMat
               sx={{ width: '10% !important' }}
             />
             <TextField
-              value={(rawMaterial.defects / rawMaterial.samples) * 100}
+              value={((rawMaterial.defects / rawMaterial.samples) * 100).toFixed(2)}
               onChange={e => validatePercentageFields({ ...rawMaterial, rejectionRate: parseInt(e.target.value) }, e.target.value)}
               label="% Rejeição"
               name="rejection-rate"
@@ -282,18 +281,16 @@ export const ProductRegister = ({ initialData, onProductRegisterChange }: RawMat
             </FormControl>
             <TextField
               value={rawMaterial.requestNumber}
-              onChange={e => validateNegativeFields({ ...rawMaterial, requestNumber: parseInt(e.target.value) }, e.target.value)}
+              onChange={e => setRawMaterial({ ...rawMaterial, requestNumber: e.target.value })}
               label="Número do pedido"
-              type="number"
               name="request-number"
               className="m-2"
               sx={{ width: '25% !important' }}
             />
             <TextField
               value={rawMaterial.opNumber}
-              onChange={e => validateNegativeFields({ ...rawMaterial, opNumber: parseInt(e.target.value) }, e.target.value)}
+              onChange={e => setRawMaterial({ ...rawMaterial, opNumber: e.target.value })}
               label="Número OP"
-              type="number"
               name="op-number"
               className="m-2"
               sx={{ width: '25% !important' }}

@@ -9,6 +9,7 @@ import com.tellescom.all4qms.security.AuthoritiesConstants;
 import com.tellescom.all4qms.security.SecurityUtils;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
 import com.tellescom.all4qms.service.dto.UserDTO;
+import com.tellescom.all4qms.service.mapper.UserMapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -183,7 +184,6 @@ public class UserService {
      * @param userDTO user to update.
      * @return updated user.
      */
-    @Transactional
     public Mono<AdminUserDTO> updateUser(AdminUserDTO userDTO) {
         return userRepository
             .findById(userDTO.getId())
@@ -292,6 +292,20 @@ public class UserService {
             .then();
     }
 
+    @Transactional
+    public Mono<Void> resetPassword(Long id) {
+        return userRepository
+            .findById(id)
+            .flatMap(user -> {
+                String encryptedPassword = passwordEncoder.encode("all4qms" + LocalDate.now().getYear());
+                user.setPassword(encryptedPassword);
+                return Mono.just(user);
+            })
+            .flatMap(this::saveUser)
+            .doOnNext(user -> log.debug("Reset password for User: {}", user))
+            .then();
+    }
+
     @Transactional(readOnly = true)
     public Flux<AdminUserDTO> getAllManagedUsers(Pageable pageable) {
         return userRepository.findAllWithAuthorities(pageable).map(AdminUserDTO::new);
@@ -339,10 +353,22 @@ public class UserService {
 
     /**
      * Gets a list of all the authorities.
+     *
      * @return a list of all the authorities.
      */
     @Transactional(readOnly = true)
     public Flux<String> getAuthorities() {
         return authorityRepository.findAll().map(Authority::getName);
+    }
+
+    /**
+     * Gets a list of all users of the given authority.
+     *
+     * @return a list of all users of the given authority.
+     */
+    @Transactional(readOnly = true)
+    public Flux<UserDTO> getUsersByAuthority(String authority) {
+        UserMapper userMapper = new UserMapper();
+        return userRepository.findAllUsersByAuthority(authority).map(userMapper::userToUserDTO);
     }
 }

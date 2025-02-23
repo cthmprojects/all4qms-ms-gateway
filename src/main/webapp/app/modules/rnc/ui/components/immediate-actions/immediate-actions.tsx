@@ -29,7 +29,7 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
   const [deadline, setDeadline] = useState<Date>(new Date());
   const [description, setDescription] = useState<string>('');
   const [responsible, setResponsible] = useState<string>('');
-  const [status, setStatus] = useState<string>('');
+  const [status, setStatus] = useState<string>('RETRABALHO');
 
   useEffect(() => {
     if (readonly && action) {
@@ -41,14 +41,28 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
   }, [action, readonly]);
 
   const canAddAction = (): boolean => {
-    return description && description !== '' && responsible && responsible !== '' && status && status !== '';
+    let value: boolean = true;
+
+    if (!description || description.length === 0) {
+      value = false;
+    }
+
+    if (!responsible || responsible.length === 0) {
+      value = false;
+    }
+
+    if (!deadline) {
+      value = false;
+    }
+
+    return value;
   };
 
   const clearFields = (): void => {
     setDeadline(new Date());
     setDescription('');
     setResponsible('');
-    setStatus('');
+    setStatus('RETRABALHO');
   };
 
   const onActionAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -117,6 +131,9 @@ const ImmediateAction = ({ action, onAdded, onRemoved, readonly, users }: Immedi
                 label="Prazo"
                 onChange={onDeadlineChanged}
                 selected={deadline}
+                popperProps={{
+                  strategy: 'fixed',
+                }}
               />
             </FormControl>
             <FormControl className="rnc-form-field m-2">

@@ -11,6 +11,11 @@ export const canAccessFillingPage = ({ rnc, userId, userRole }: props) => {
   return (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) && statusAtual === 'PREENCHIMENTO';
 };
 
+export const canAccessRncDeleteButton = ({ rnc, userId, userRole }: props) => {
+  const { statusAtual, idEmissorNC } = rnc;
+  return (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) && (statusAtual === 'PREENCHIMENTO' || statusAtual === 'DETALHAMENTO');
+};
+
 export const canAccessDetailingInfo = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
 
@@ -40,4 +45,14 @@ export const canAccessVerificationPage = ({ rnc, userRole }: props) => {
 export const canAccessValidationPage = ({ rnc, userRole }: props) => {
   const { statusAtual } = rnc;
   return userRole.includes('ROLE_SGQ') && statusAtual === 'VALIDACAO';
+};
+
+export const canAccessRncCancelButton = ({ rnc, userId, userRole }: props) => {
+  const { statusAtual, idEmissorNC } = rnc;
+  return (
+    (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) &&
+    statusAtual !== 'CANCELADO' &&
+    statusAtual !== 'PREENCHIMENTO' &&
+    statusAtual !== 'DETALHAMENTO'
+  );
 };

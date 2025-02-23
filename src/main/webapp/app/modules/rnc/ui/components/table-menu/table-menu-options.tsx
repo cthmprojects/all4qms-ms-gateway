@@ -4,15 +4,17 @@ import { useAppDispatch } from 'app/config/store';
 import { Rnc } from 'app/modules/rnc/models';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteRnc } from '../../../reducers/rnc.reducer';
+import { cancelRnc, deleteRnc } from '../../../reducers/rnc.reducer';
 import {
-  canAccessFillingPage,
   canAccessDetailingInfo,
-  canAccessInvestigationPage,
   canAccessElaborationPage,
   canAccessExecutionPage,
-  canAccessVerificationPage,
+  canAccessFillingPage,
+  canAccessInvestigationPage,
+  canAccessRncCancelButton,
+  canAccessRncDeleteButton,
   canAccessValidationPage,
+  canAccessVerificationPage,
 } from './controls';
 
 interface props {
@@ -45,6 +47,11 @@ const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
     reload();
   };
 
+  const cancelRncById = (id: number) => {
+    dispatch(cancelRnc(id));
+    reload();
+  };
+
   return (
     <>
       <IconButton color="primary" aria-label="add to shopping cart" onClick={handleClickOptions}>
@@ -69,24 +76,36 @@ const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
           Investigação
         </MenuItem>
         <MenuItem disabled={!canAccessElaborationPage({ rnc, userId, userRole })} onClick={() => goToPage(`/rnc/general/${rnc.id}`)}>
-          Elaboração
+          Plano de Ação
         </MenuItem>
         <MenuItem disabled={!canAccessExecutionPage({ rnc, userRole })} onClick={() => goToPage(`/rnc/general/implementacao/${rnc.id}`)}>
-          Execução
+          Verificação Implementação
         </MenuItem>
         <MenuItem
           disabled={!canAccessVerificationPage({ rnc, userRole })}
           onClick={() => goToPage(`/rnc/general/implementacao/validacao/${rnc.id}`)}
         >
-          Verificação
+          Verificação Eficácia
         </MenuItem>
         <MenuItem
           disabled={!canAccessValidationPage({ rnc, userRole })}
           onClick={() => goToPage(`/rnc/general/implementacao/fechamento/${rnc.id}`)}
         >
-          Validação
+          Fechamento
         </MenuItem>
-        <MenuItem onClick={() => deleteRncById(rnc.id)} style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <MenuItem
+          disabled={!canAccessRncCancelButton({ rnc, userId, userRole })}
+          onClick={() => cancelRncById(rnc.id)}
+          style={{ display: 'flex', justifyContent: 'space-between' }}
+        >
+          Cancelar
+          <FontAwesomeIcon icon="cancel" className="ms-2" color="#ff0000" />
+        </MenuItem>
+        <MenuItem
+          disabled={!canAccessRncDeleteButton({ rnc, userId, userRole })}
+          onClick={() => deleteRncById(rnc.id)}
+          style={{ display: 'flex', justifyContent: 'space-between' }}
+        >
           Excluir
           <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
         </MenuItem>

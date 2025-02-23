@@ -5,8 +5,11 @@
   background-color: #fff;
   border: 2px rgba(0, 0, 0, 0.4) dashed;
   border-radius: 13px;
-  font-size: 3rem;
-  font-weight: 500;
+  line-height: 25px;
+  /* display: flex; */
+  /* flex-direction: column;
+  justify-content: center;
+  align-items: center; */
 }
 
 .uploaded-file {
@@ -16,7 +19,7 @@
   background-color: #fff;
   border: 2px rgba(0, 0, 0, 0.4) solid;
   border-radius: 13px;
-  font-size: 3rem;
+  font-size: '12px';
   font-weight: 500;
   display: flex;
   flex-direction: column;
@@ -25,6 +28,7 @@
 }
 
 .file-actions button {
+  /* height: 20px; */
   background-color: transparent;
   border: none;
   font-size: 20px;
@@ -39,8 +43,13 @@
   margin-top: 0;
 }
 
-.button-upload span {
-  font-size: 15px;
+.span-upload {
+  font-size: 20px;
+  text-align: center;
+  font-weight: 500;
+  overflow: hidden; /* Oculta o conteúdo que ultrapassa o limite*/
+  text-overflow: ellipsis;
+  word-wrap: break-word;
 }
 
 .icon {
@@ -57,12 +66,26 @@
 
 .file-info span {
   color: rgb(77, 77, 77);
+  /* background-color: #f30000; */
   padding-top: 10px;
+  max-height: 150px;
+  /* width: 100%; */
+  font-size: 1vh;
+  text-align: center;
+  word-break: break-word; /* Quebra as palavras longas que ultrapassam o contêiner */
+  word-wrap: break-word; /* Alternativa para garantir quebra */
+  white-space: normal;
+  /*word-break: break-all;  Garante que o texto se ajuste */
 }
 
 .file-info {
+  width: 400px;
+  /* background-color: #ebc139; */
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Oculta o conteúdo que ultrapassa o limite*/
 }
 
 .files-list {

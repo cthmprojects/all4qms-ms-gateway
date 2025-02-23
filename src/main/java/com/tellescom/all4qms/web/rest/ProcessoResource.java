@@ -1,24 +1,22 @@
 package com.tellescom.all4qms.web.rest;
 
+import com.tellescom.all4qms.domain.response.ProcessoResponse;
 import com.tellescom.all4qms.repository.ProcessoRepository;
 import com.tellescom.all4qms.service.ProcessoService;
 import com.tellescom.all4qms.service.dto.ProcessoDTO;
+import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +34,7 @@ import tech.jhipster.web.util.reactive.ResponseUtil;
  * REST controller for managing {@link com.tellescom.all4qms.domain.Processo}.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/processos")
 public class ProcessoResource {
 
     private final Logger log = LoggerFactory.getLogger(ProcessoResource.class);
@@ -56,13 +54,13 @@ public class ProcessoResource {
     }
 
     /**
-     * {@code POST  /processos} : Create a new processo.
+     * {@code POST  } : Create a new processo.
      *
      * @param processoDTO the processoDTO to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new processoDTO, or with status {@code 400 (Bad Request)} if the processo has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/processos")
+    @PostMapping("")
     public Mono<ResponseEntity<ProcessoDTO>> createProcesso(@Valid @RequestBody ProcessoDTO processoDTO) throws URISyntaxException {
         log.debug("REST request to save Processo : {}", processoDTO);
         if (processoDTO.getId() != null) {
@@ -83,7 +81,7 @@ public class ProcessoResource {
     }
 
     /**
-     * {@code PUT  /processos/:id} : Updates an existing processo.
+     * {@code PUT  /:id} : Updates an existing processo.
      *
      * @param id the id of the processoDTO to save.
      * @param processoDTO the processoDTO to update.
@@ -92,7 +90,7 @@ public class ProcessoResource {
      * or with status {@code 500 (Internal Server Error)} if the processoDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/processos/{id}")
+    @PutMapping("/{id}")
     public Mono<ResponseEntity<ProcessoDTO>> updateProcesso(
         @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody ProcessoDTO processoDTO
@@ -125,7 +123,7 @@ public class ProcessoResource {
     }
 
     /**
-     * {@code PATCH  /processos/:id} : Partial updates given fields of an existing processo, field will ignore if it is null
+     * {@code PATCH  /:id} : Partial updates given fields of an existing processo, field will ignore if it is null
      *
      * @param id the id of the processoDTO to save.
      * @param processoDTO the processoDTO to update.
@@ -135,7 +133,7 @@ public class ProcessoResource {
      * or with status {@code 500 (Internal Server Error)} if the processoDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/processos/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public Mono<ResponseEntity<ProcessoDTO>> partialUpdateProcesso(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody ProcessoDTO processoDTO
@@ -169,14 +167,14 @@ public class ProcessoResource {
     }
 
     /**
-     * {@code GET  /processos} : get all the processos.
+     * {@code GET  } : get all the processos.
      *
      * @param pageable the pagination information.
      * @param request a {@link ServerHttpRequest} request.
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of processos in body.
      */
-    @GetMapping(value = "/processos", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<List<ProcessoDTO>>> getAllProcessos(
         Pageable pageable,
         ServerHttpRequest request,
@@ -200,12 +198,12 @@ public class ProcessoResource {
     }
 
     /**
-     * {@code GET  /processos/:id} : get the "id" processo.
+     * {@code GET  /:id} : get the "id" processo.
      *
      * @param id the id of the processoDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the processoDTO, or with status {@code 404 (Not Found)}.
      */
-    @GetMapping("/processos/{id}")
+    @GetMapping("/{id}")
     public Mono<ResponseEntity<ProcessoDTO>> getProcesso(@PathVariable Long id) {
         log.debug("REST request to get Processo : {}", id);
         Mono<ProcessoDTO> processoDTO = processoService.findOne(id);
@@ -213,12 +211,12 @@ public class ProcessoResource {
     }
 
     /**
-     * {@code DELETE  /processos/:id} : delete the "id" processo.
+     * {@code DELETE  /:id} : delete the "id" processo.
      *
      * @param id the id of the processoDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/processos/{id}")
+    @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteProcesso(@PathVariable Long id) {
         log.debug("REST request to delete Processo : {}", id);
         return processoService
@@ -231,5 +229,23 @@ public class ProcessoResource {
                         .build()
                 )
             );
+    }
+
+    @GetMapping("/user-by-processo/{id}")
+    public Flux<UsuarioDTO> buscaUsuariosPorProcessoId(@PathVariable("id") Long id) {
+        log.debug("REST request to get all Usuarios By processo id");
+        return processoService.buscarUsuariosPorIdProcesso(id);
+    }
+
+    @GetMapping("/iduser-by-processo/{id}")
+    public Flux<Long> buscaIdUsuarioPorProcessoId(@PathVariable("id") Long id) {
+        log.debug("REST request to get all Usuarios By processo id");
+        return processoService.buscarIdUserByIdProcesso(id);
+    }
+
+    @GetMapping("/minimo")
+    public Mono<List<ProcessoResponse>> buscaTodosProcessos() {
+        log.debug("Busca todos os processos retornando somente id e nome");
+        return processoService.buscaTodosProcessosResponse();
     }
 }

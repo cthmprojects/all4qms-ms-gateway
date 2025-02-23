@@ -1,30 +1,45 @@
 import { Card, CardContent, CardHeader, Stack, TextField } from '@mui/material';
-import { NonConformityOrigin } from 'app/modules/rnc/models';
-import React from 'react';
+import { Enums, NonConformityOrigin } from 'app/modules/rnc/models';
 
 type NonConformityOriginSummaryProps = {
+  enums: Enums | null;
   origin: NonConformityOrigin;
 };
 
-const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps) => {
+const NonConformityOriginSummary = ({ enums, origin }: NonConformityOriginSummaryProps) => {
   const formatTimestamp = (timestamp: Date): string => {
     const date: Date = new Date(timestamp);
     const year: number = date.getFullYear();
     const month: number = date.getMonth() + 1;
     const day: number = date.getDate();
-    const hours: number = date.getHours();
-    const minutes: number = date.getMinutes();
-    const seconds: number = date.getSeconds();
 
     const yearStr: string = year.toString().padStart(4, '0');
     const monthStr: string = month.toString().padStart(2, '0');
     const dayStr: string = day.toString().padStart(2, '0');
-    const hoursStr: string = hours.toString().padStart(2, '0');
-    const minutesStr: string = minutes.toString().padStart(2, '0');
-    const secondsStr: string = seconds.toString().padStart(2, '0');
 
-    return `${yearStr}/${monthStr}/${dayStr} ${hoursStr}:${minutesStr}:${secondsStr}`;
+    return `${yearStr}/${monthStr}/${dayStr}`;
   };
+
+  const formatDate = (timestamp: Date): string => {
+    const date: Date = new Date(timestamp);
+    const year: number = date.getFullYear();
+    const month: number = date.getMonth() + 1;
+    const day: number = date.getDate();
+
+    const yearStr: string = year.toString().padStart(4, '0');
+    const monthStr: string = month.toString().padStart(2, '0');
+    const dayStr: string = day.toString().padStart(2, '0');
+
+    return `${dayStr}/${monthStr}/${yearStr}`;
+  };
+
+  function identificadoNoLabel(value: string) {
+    const labels = {
+      process: 'Processo',
+      reception: 'Recebimento',
+    };
+    return labels[value] || 'Carregando...';
+  }
 
   return (
     <Card>
@@ -33,7 +48,7 @@ const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps)
         {origin?.auditoria && (
           <Stack direction="row" spacing={2}>
             <TextField disabled label="Norma" placeholder="Norma" value={origin?.auditoria.normaAuditoria} />
-            <TextField disabled label="Número NC" placeholder="Número NC" value={origin?.auditoria.idNaoConformidade} />
+            <TextField disabled label="Número da notação" placeholder="Número da notação" value={origin?.auditoria.idNaoConformidade} />
             <TextField
               disabled
               label="Requisito(s) da Norma"
@@ -70,7 +85,12 @@ const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps)
                 placeholder="Quantidade rejeitada"
                 value={origin?.cliente.produto.qtdRejeicao}
               />
-              <TextField disabled label="% defeito" placeholder="% defeito" value={origin?.cliente.produto.qtdDefeito} />
+              <TextField
+                disabled
+                label="% defeito"
+                placeholder="% defeito"
+                value={origin?.cliente.produto.qtdDefeito || (origin?.cliente.produto.qtdRejeicao / origin?.cliente.produto.qtdLote) * 100}
+              />
             </Stack>
             <Stack direction="row" spacing={2}>
               <TextField disabled label="Lote" placeholder="Lote" value={origin?.cliente.produto.lote} />
@@ -78,10 +98,10 @@ const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps)
                 disabled
                 label="Data da entrega"
                 placeholder="Data da entrega"
-                value={formatTimestamp(origin?.cliente.rastreabilidade.dtEntregaNF)}
+                value={formatDate(origin?.cliente.rastreabilidade.dtEntregaNF)}
               />
               <TextField disabled label="Nota fiscal" placeholder="Nota fiscal" value={origin?.cliente.rastreabilidade.numNF} />
-              <TextField disabled label="Data NF" placeholder="Data NF" value={formatTimestamp(origin?.cliente.rastreabilidade.dtNF)} />
+              <TextField disabled label="Data NF" placeholder="Data NF" value={formatDate(origin?.cliente.rastreabilidade.dtNF)} />
               <TextField disabled label="Número de pedido" placeholder="Número de pedido" value={origin?.cliente.produto.numPedido} />
               <TextField disabled label="Número OP" placeholder="Número OP" value={origin?.cliente.produto.numOP} />
             </Stack>
@@ -93,7 +113,12 @@ const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps)
             <Stack direction="row" spacing={2}>
               <TextField disabled label="Código" placeholder="Código" value={origin?.mpprod.produto.codigoProduto} />
               <TextField disabled label="Descrição" placeholder="Descrição" value={origin?.mpprod.produto.nomeProduto} />
-              <TextField disabled label="Identificado no" placeholder="Identificado no" value={origin?.mpprod.produto.identificador} />
+              <TextField
+                disabled
+                label="Identificado no"
+                placeholder="Identificado no"
+                value={identificadoNoLabel(origin?.mpprod.produto.identificador)}
+              />
             </Stack>
             <Stack direction="row" spacing={2}>
               <TextField disabled label="Turno" placeholder="Turno" value={origin?.mpprod.operador.turnoOperador} />
@@ -113,17 +138,17 @@ const NonConformityOriginSummary = ({ origin }: NonConformityOriginSummaryProps)
               <TextField disabled label="NQA" placeholder="NQA" value={origin?.mpprod.produto.nqa} />
               <TextField disabled label="Número de amostras" placeholder="Número de amostras" value={origin?.mpprod.produto.qtdAmostra} />
               <TextField disabled label="Número de defeitos" placeholder="Número de defeitos" value={origin?.mpprod.produto.qtdDefeito} />
-              <TextField disabled label="% Rejeição" placeholder="% Rejeição" value={origin?.mpprod.produto.qtdRejeicao} />
+              <TextField disabled label="% Rejeição" placeholder="% Rejeição" value={origin?.mpprod.produto.qtdRejeicao?.toFixed(2)} />
             </Stack>
             <Stack direction="row" spacing={2}>
               <TextField
                 disabled
                 label="Data da entrega"
                 placeholder="Data da entrega"
-                value={formatTimestamp(origin?.mpprod.rastreabilidade.dtEntregaNF)}
+                value={formatDate(origin?.mpprod.rastreabilidade.dtEntregaNF)}
               />
               <TextField disabled label="Nota fiscal" placeholder="Nota fiscal" value={origin?.mpprod.rastreabilidade.numNF} />
-              <TextField disabled label="Data NF" placeholder="Data NF" value={formatTimestamp(origin?.mpprod.rastreabilidade.dtNF)} />
+              <TextField disabled label="Data NF" placeholder="Data NF" value={formatDate(origin?.mpprod.rastreabilidade.dtNF)} />
               <TextField disabled label="Número de pedido" placeholder="Número de pedido" value={origin?.mpprod.produto.numPedido} />
               <TextField disabled label="Número OP" placeholder="Número OP" value={origin?.mpprod.produto.numOP} />
             </Stack>

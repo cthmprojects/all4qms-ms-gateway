@@ -6,3 +6,8 @@ export const getEffectCause = async () => {
   const response = await axios.get(effectCauseApiUrl);
   return response.data;
 };
+
+export const deleteEffectCause = async (id: number) => {
+  const response = await axios.delete(`${effectCauseApiUrl}/${id}`);
+  return response.data;
+};

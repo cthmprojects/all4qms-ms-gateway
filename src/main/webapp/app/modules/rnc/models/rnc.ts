@@ -21,9 +21,10 @@ export type Rnc = {
   tipoNC: string;
   vinculoAuditoria?: number;
   vinculoCliente?: number;
-  vinculoDocAnterior?: Array<number>;
+  vinculoDocAnterior?: number;
   vinculoProduto?: number;
   aprovacao?: AprovacaoNC;
+  qtdPorques: number;
 };
 
 export type RNC = {
@@ -78,6 +79,7 @@ export type NonConformity = {
   decisaoNC: number;
   aprovacaoNC: number;
   vinculoDocAnterior: number;
+  qtdPorques: number;
 };
 
 export type NonConformityAttachment = {
@@ -315,9 +317,9 @@ export type CompleteNc = {
   origem: NonConformityOrigin;
   abrangencia: NonConformityCoverage;
   acaoImediata: Array<NonConformityImmediateAction>;
-  decisao: NonConformityDecision;
+  decisao: Array<NonConformityDecision>;
   ishikawa: NonConformityCauseEffect;
-  porques: NonConformityReason;
+  porques: Array<NonConformityReason>;
   acaoPlano: Array<NonConformityActionPlan>;
   aprovacao: NonConformityApproval;
 };

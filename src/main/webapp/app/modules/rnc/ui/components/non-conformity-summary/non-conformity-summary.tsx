@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, Stack, TextField } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import { NonConformity } from 'app/modules/rnc/models';
+import { Enums, NonConformity } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type NonConformitySummaryProps = {
+  enums: Enums | null;
   nonConformity: NonConformity | null;
 };
 
-const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
+const NonConformitySummary = ({ enums, nonConformity }: NonConformitySummaryProps) => {
   const [emitterName, setEmitterName] = useState<string>('');
   const [emitterProcessName, setEmitterProcessName] = useState<string>('');
   const [receiverName, setReceiverName] = useState<string>('');
@@ -58,6 +59,17 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
     setReceiverName(receiver?.nome ?? '');
   }, [nonConformity, users]);
 
+  const formatOrigin = useCallback(
+    (origin: string): string => {
+      if (!enums || !enums.originTypes || enums.originTypes.length <= 0) {
+        return '';
+      }
+
+      return enums.originTypes.find(o => o.name === origin)?.value ?? '';
+    },
+    [enums]
+  );
+
   const filterProcess = (id: number) => {
     const filteredProcesses = processes.filter(process => process.id === id);
     return filteredProcesses.length > 0 ? filteredProcesses[0] : null;
@@ -77,18 +89,12 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
     const year: number = date.getFullYear();
     const month: number = date.getMonth() + 1;
     const day: number = date.getDate();
-    const hours: number = date.getHours();
-    const minutes: number = date.getMinutes();
-    const seconds: number = date.getSeconds();
 
     const yearStr: string = year.toString().padStart(4, '0');
     const monthStr: string = month.toString().padStart(2, '0');
     const dayStr: string = day.toString().padStart(2, '0');
-    const hoursStr: string = hours.toString().padStart(2, '0');
-    const minutesStr: string = minutes.toString().padStart(2, '0');
-    const secondsStr: string = seconds.toString().padStart(2, '0');
 
-    return `${yearStr}/${monthStr}/${dayStr} ${hoursStr}:${minutesStr}:${secondsStr}`;
+    return `${dayStr}/${monthStr}/${yearStr}`;
   };
 
   return (
@@ -97,16 +103,17 @@ const NonConformitySummary = ({ nonConformity }: NonConformitySummaryProps) => {
       <CardContent>
         <Stack spacing={2}>
           <Stack direction="row" spacing={2}>
-            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.numNC ?? ''} />
+            <TextField disabled label="Nº" placeholder="Nº" value={nonConformity?.id ?? ''} />
             <TextField disabled label="Emitido por" placeholder="Emitido por" value={emitterName} />
             <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={emitterProcessName} />
             <TextField disabled label="Encaminhado para" placeholder="Encaminhado para" value={receiverName} />
             <TextField disabled label="Processo ou Empresa" placeholder="Processo ou Empresa" value={receiverProcessName} />
-            <TextField disabled label="Data" placeholder="Data" value={formatTimestamp(nonConformity?.dtNC)} />
           </Stack>
           <Stack direction="row" spacing={2}>
+            <TextField disabled label="Data" placeholder="Data" value={formatTimestamp(nonConformity?.dtNC)} />
             <TextField disabled label="Tipo" placeholder="Tipo" value={nonConformity?.tipoNC ?? ''} />
-            <TextField disabled label="Origem" placeholder="Origem" value={nonConformity?.origemNC ?? ''} />
+            <TextField disabled label="Origem" placeholder="Origem" value={formatOrigin(nonConformity?.origemNC)} />
+            <TextField disabled label="Qtd porquês" placeholder="Qtd porquês" value={nonConformity?.qtdPorques ?? ''} />
           </Stack>
         </Stack>
       </CardContent>

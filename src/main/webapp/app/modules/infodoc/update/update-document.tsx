@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
 import {
+  Box,
   Breadcrumbs,
   Checkbox,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   IconButton,
@@ -22,13 +24,14 @@ import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
 import { AddCircle, Download, UploadFile } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../ui/dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, Movimentacao } from '../models';
-import { createInfoDoc, deleteInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
+import { Doc, EnumSituacao, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from '../models';
+import { createInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodoc.reducer';
 import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
+import { toast } from 'react-toastify';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -75,14 +78,14 @@ export const UpdateDocument = () => {
   const navigate = useNavigate();
   const { id, idFile } = useParams();
 
-  const [emitter, setEmitter] = useState('');
+  const [emitter, setEmitter] = useState<number>();
   const [emittedDate, setEmittedDate] = useState(new Date());
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
   const [origin, setOrigin] = useState('externa');
   const [processes, setProcesses] = useState([]);
-  const [selectedProcess, setSelectedProcess] = useState('');
+  const [selectedProcess, setSelectedProcess] = useState<number>();
   const [noValidate, setNoValidate] = useState(false);
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
@@ -92,13 +95,22 @@ export const UpdateDocument = () => {
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
+  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const [isSGQ, setIsSGQ] = useState<Boolean>(false);
+  const [infoDocId, setInfoDocId] = useState(Number(id));
+  const [infoDocMovimentacao, setInfoDocMovimentacao] = useState(-1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [openRejectModal, setOpenRejectModal] = useState(false);
+
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
-    dispatch(getInfoDocById(id));
+    dispatch(getInfoDocById(id!!));
 
     getProcesses().then(data => {
       setProcesses(data);
@@ -106,6 +118,10 @@ export const UpdateDocument = () => {
         setSelectedProcess(data[0].id);
       }
     });
+
+    const roles = Storage.local.get('ROLE');
+    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    setIsSGQ(isSGQ);
   }, []);
 
   const onKeywordChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -138,12 +154,13 @@ export const UpdateDocument = () => {
   };
 
   const validateFields = () => {
-    return emitter && emittedDate && documentDescription && code && title && selectedProcess;
+    return emitter && emittedDate && title && selectedProcess;
   };
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsLoading(true);
     if (actualInfoDoc) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc.idArquivo}`;
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${idFile ? idFile : actualInfoDoc.doc.idArquivo}`;
 
       await axios
         .request({
@@ -158,28 +175,34 @@ export const UpdateDocument = () => {
           var fileDownload = require('js-file-download');
           let fileName = result.headers['content-disposition'].split(';')[1];
           fileName = fileName.split('=')[1];
+          fileName = fileName.split('_').slice(5).join('_');
 
           const file = new Blob([result.data], { type: 'application/octet-stream' });
 
-          fileDownload(file, `${fileName}.pdf`);
+          fileDownload(file, `${fileName}`);
+          setIsLoading(false);
         });
+      setIsLoading(false);
     }
   };
 
-  const saveDoc = (): Doc => {
+  const saveDoc = (situation?: EnumSituacao): Doc => {
     const newInfoDoc: Doc = {
-      idUsuarioCriacao: parseInt(emitter),
+      // id: parseInt(id!!),
+      idUsuarioCriacao: emitter,
       dataCricao: emittedDate,
-      descricaoDoc: documentDescription,
+      descricaoDoc: description,
+      justificativa: documentDescription,
       codigo: code,
       titulo: title,
       origem: origin,
-      idArquivo: parseInt(idFile),
-      idProcesso: parseInt(selectedProcess),
+      idArquivo: parseInt(idFile!!),
+      idProcesso: selectedProcess,
       ignorarValidade: true,
-      enumSituacao: 'E',
+      enumSituacao: situation ? situation : EnumSituacao.EDICAO,
       tipoDoc: 'MA',
-      idDocumentacaoAnterior: parseInt(id),
+      revisao: actualInfoDoc.doc?.revisao ?? undefined,
+      // idDocumentacaoAnterior: parseInt(id!!),
     };
 
     if (!noValidate) {
@@ -190,48 +213,89 @@ export const UpdateDocument = () => {
     return newInfoDoc;
   };
 
-  const saveDocument = () => {
-    const newInfoDoc = saveDoc();
+  const saveDocument = async (situation?: EnumSituacao) => {
+    setIsLoading(true);
+    const newInfoDoc = saveDoc(situation);
 
-    dispatch(createInfoDoc(newInfoDoc))
-      .then(() => {
-        navigate('/infodoc');
-      })
-      .catch(() => {});
+    let resStoreDoc;
+    if (actualInfoDoc?.doc?.enumSituacao === EnumSituacao.HOMOLOGACAO) {
+      resStoreDoc = await dispatch(createInfoDoc({ ...newInfoDoc, idDocumentacaoAnterior: Number(id) }));
+    } else {
+      resStoreDoc = await dispatch(updateInfoDoc({ data: newInfoDoc, id: parseInt(id!!) }));
+    }
+
+    const resDoc: InfoDoc = (resStoreDoc.payload as AxiosResponse).data || {};
+
+    if (resDoc) {
+      setIsLoading(false);
+      setInfoDocId(resDoc?.doc?.id || -1);
+      setInfoDocMovimentacao(resDoc?.movimentacao?.id || -1);
+      toast.success(`Documento ${resDoc?.doc?.id} Salvo com sucesso!`);
+
+      return resDoc;
+    } else {
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
+    }
   };
 
-  const fowardDocument = () => {
-    const newInfoDoc = saveDoc();
-    newInfoDoc.enumSituacao = 'R';
+  const fowardDocument = async () => {
+    if (!validateFields()) {
+      toast.warn(`Os campos de Emissor, Área/Proceso, Descrição, Código e Titulo , SÃO OBRIGATÓRIOS!`);
+      return null;
+    }
 
-    dispatch(createInfoDoc(newInfoDoc))
-      .then((response: any) => {
-        const newStatus: Movimentacao = {
-          enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
-          idDocumentacao: response.payload?.data?.id,
-          enumStatus: EnumStatusDoc.REVISAO,
-          idUsuarioCriacao: 0,
-        };
-        dispatch(cadastrarMovimentacao(newStatus));
-      })
-      .catch(() => {});
-    navigate('/infodoc');
+    const resDoc = await saveDocument();
+
+    if (resDoc) {
+      const novaMovimentacao: Movimentacao = {
+        id: infoDocMovimentacao < 1 ? resDoc?.movimentacao?.id : infoDocMovimentacao,
+        enumTipoMovDoc: EnumTipoMovDoc.REVISAR,
+        enumStatus: EnumStatusDoc.VALIDAREV,
+        idDocumentacao: resDoc?.doc.id!!,
+        idUsuarioCriacao: currentUser.id,
+      };
+
+      dispatch(atualizarMovimentacao(novaMovimentacao));
+      navigate('/infodoc');
+    } else {
+      toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
+      setIsLoading(false);
+      return null;
+    }
   };
 
   const cancelUpdate = () => {
-    dispatch(deleteInfoDoc(idFile));
     navigate('/infodoc');
   };
 
-  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
-  const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
-  const actualInfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
-
   useEffect(() => {
     if (actualInfoDoc) {
-      setCode(actualInfoDoc.doc?.codigo);
+      setCode(actualInfoDoc.doc.codigo!!);
+      setEmitter(actualInfoDoc.doc.idUsuarioCriacao!!);
+      setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
+      setDescription(actualInfoDoc.doc?.descricaoDoc!!);
+      setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
+      setTitle(actualInfoDoc.doc?.titulo!!);
+      setOrigin(actualInfoDoc.doc?.origem!!);
+      setSelectedProcess(actualInfoDoc.doc?.idProcesso!!);
+      if (actualInfoDoc.doc?.dataValidade) {
+        setNoValidate(false);
+        setValidDate(new Date(actualInfoDoc.doc.dataValidade));
+      } else {
+        setNoValidate(true);
+        setValidDate(new Date(2999, 11, 31));
+        setNotificationPreviousDate('0');
+      }
     }
   }, [actualInfoDoc]);
+
+  useEffect(() => {
+    if (users && actualInfoDoc) {
+      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+    }
+  }, [users]);
 
   useEffect(() => {
     setOriginList(enums?.origem);
@@ -253,7 +317,7 @@ export const UpdateDocument = () => {
               Informações documentadas
             </Link>
             <Link to={'/infodoc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Editar
+              Revisar
             </Link>
             {/* <Typography style={{ color: '#606060' }}>Ficha de estoque</Typography> */}
           </Breadcrumbs>
@@ -263,9 +327,9 @@ export const UpdateDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(Number(event.target.value))}>
                 {users.map((user, i) => (
-                  <MenuItem value={user.nome} key={`user-${i}`}>
+                  <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
                   </MenuItem>
                 ))}
@@ -277,7 +341,7 @@ export const UpdateDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em validação
+                  Em Revisão
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -287,7 +351,7 @@ export const UpdateDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Edição
+                  Revisão
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -348,12 +412,12 @@ export const UpdateDocument = () => {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ width: '25%' }} className="me-2 ms-2">
+            <FormControl sx={{ width: '22%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+              <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(Number(event.target.value))}>
                 {processes.map((process, i) => (
-                  <MenuItem value={process.id} key={`process-${i}`}>
-                    {process.nome}
+                  <MenuItem value={process?.id} key={`process-${i}`}>
+                    {process.nome!!}
                   </MenuItem>
                 ))}
               </Select>
@@ -375,6 +439,7 @@ export const UpdateDocument = () => {
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
+              disabled
             />
             <FormControl className="me-2 ms-2 mt-4">
               <DatePicker
@@ -382,7 +447,7 @@ export const UpdateDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled={noValidate}
+                disabled
               />
               <label htmlFor="" className="rnc-date-label">
                 Validade
@@ -392,10 +457,10 @@ export const UpdateDocument = () => {
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
                 style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd' }}
-                label="Notificar:"
+                label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled={noValidate}
+                disabled
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -415,15 +480,16 @@ export const UpdateDocument = () => {
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <TextField
               id="text-field-keyword"
               label="Escreva aqui..."
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
+              disabled
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded}>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>
@@ -431,21 +497,19 @@ export const UpdateDocument = () => {
             {keywordList.map((keyword: string, index: number) => (
               <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
-          </div>
+          </div> */}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => cancelUpdate()}>
               VOLTAR
             </Button>
-            <Button disabled={!validateFields()} onClick={() => saveDocument()}>
-              SALVAR
-            </Button>
+            <Button onClick={() => saveDocument()}>SALVAR</Button>
             <Button
+              disabled={infoDocId <= 0}
               className="ms-3"
               variant="contained"
               color="primary"
               onClick={() => fowardDocument()}
-              disabled={!validateFields()}
               style={{ background: '#e6b200', color: '#4e4d4d' }}
             >
               ENCAMINHAR
@@ -474,6 +538,25 @@ export const UpdateDocument = () => {
           </div>
         </div>
       </div>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            opacity: 0.5,
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
     </>
   );
 };

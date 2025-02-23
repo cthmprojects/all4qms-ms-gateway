@@ -58,6 +58,12 @@
 .file-info span {
   color: rgb(77, 77, 77);
   padding-top: 10px;
+  width: 90%;
+  font-size: 2vh;
+  text-align: center;
+  word-break: break-word; /* Quebra as palavras longas que ultrapassam o contêiner */
+  word-wrap: break-word; /* Alternativa para garantir quebra */
+  white-space: normal; /* Permite quebra de linha */
 }
 
 .file-info {

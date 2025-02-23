@@ -40,6 +40,9 @@ import { listAprovacaoNC, reset } from '../../reducers/rnc.reducer';
 import MenuOptions from '../components/table-menu/table-menu-options';
 import './rnc.css';
 import { VisibilityOutlined } from '@mui/icons-material';
+import { resetAudit } from '../../reducers/audit.reducer';
+import { resetImplementation } from '../../reducers/approval.reducer';
+import { useDebouncedCallback } from 'use-debounce';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -73,6 +76,7 @@ const RncList = ({}) => {
   const [value, setValue] = useState(0);
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
+  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
   const [page, setPage] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(5);
@@ -90,20 +94,35 @@ const RncList = ({}) => {
 
   const handleApplyFilters = () => {
     const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
+    const formatter = new Intl.DateTimeFormat('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    console.table({ dtFim, dtIni });
     dispatch(
       listNonConformities({
-        page: 0,
+        page: page,
         size: pageSize,
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
         statusAtual,
         processoNC,
         tipoNC,
         descricao,
-        origemNC,
+        origemNC: getType(origemNC),
+        ...(dtIni ? { dtIni: formatter.format(dtIni) } : {}),
+        ...(dtFim ? { dtFim: formatter.format(dtFim) } : {}),
       })
     );
   };
+
+  function autoSearch() {
+    const { origemNC } = filters;
+    dispatch(
+      listNonConformities({
+        page: page,
+        size: pageSize,
+        origemNC: getType(origemNC),
+      })
+    );
+  }
+
+  const debouncedAutSearch = useDebouncedCallback(autoSearch, 300);
 
   useEffect(() => {
     const value: string | null = description.length > 0 ? description : null;
@@ -157,20 +176,19 @@ const RncList = ({}) => {
     dispatch(listEnums());
     dispatch(getManagementUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(getProcesses());
+    dispatch(resetAudit());
+    dispatch(reset());
+    dispatch(resetImplementation());
   }, []);
 
   useEffect(() => {
-    if (page <= 0) {
-      return;
-    }
+    debouncedAutSearch();
+  }, [page, pageSize, filters.origemNC]);
 
-    dispatch(listNonConformities({ page: page, size: pageSize }));
-  }, [page]);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  function getType(value: number) {
     let type: string = '';
 
-    switch (newValue) {
+    switch (value) {
       case 1:
         type = 'AUDITORIA';
         break;
@@ -187,30 +205,21 @@ const RncList = ({}) => {
         type = 'PROCEDIMENTO_OUTROS';
         break;
       default:
+        type = '';
         break;
     }
+    return type;
+  }
 
-    const { dtIni, dtFim, statusAtual, processoNC, tipoNC, descricao, origemNC } = filters;
-    dispatch(
-      listNonConformities({
-        page: 0,
-        size: pageSize,
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
-        statusAtual,
-        processoNC,
-        tipoNC,
-        descricao,
-        origemNC: type,
-      })
-    );
-
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setFilters({ ...filters, origemNC: newValue });
+    setPage(0);
     setValue(newValue);
   };
 
-  useEffect(() => {
+  /* useEffect(() => {
     dispatch(listAprovacaoNC({}));
-  }, [nonConformities]);
+  }, [nonConformities]); */
 
   const reloadInfo = () => {
     dispatch(reset());
@@ -234,6 +243,7 @@ const RncList = ({}) => {
 
   const columns = [
     'Número',
+    'Tipo',
     'Emissão',
     'Emissor',
     'Descrição',
@@ -247,6 +257,21 @@ const RncList = ({}) => {
     '',
     '',
   ];
+
+  const formatStatus = status => {
+    switch (status) {
+      case 'ELABORACAO':
+        return 'PLANO DE AÇÃO';
+      case 'EXECUCAO':
+        return 'VERIFICAÇÃO IMPLEMENTAÇÃO';
+      case 'VERIFICACAO':
+        return 'VERIFICAÇÃO EFICÁCIA';
+      case 'VALIDACAO':
+        return 'FECHAMENTO';
+    }
+
+    return status;
+  };
 
   const formatDateToString = (date: Date | null | undefined) => {
     if (!date) {
@@ -342,7 +367,8 @@ const RncList = ({}) => {
 
                   return (
                     <TableRow key={id}>
-                      <TableCell>{numNC}</TableCell>
+                      <TableCell>{id}</TableCell>
+                      <TableCell>{tipoNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
                       <TableCell>{emissor}</TableCell>
                       <TableCell> {descricao ?? '-'}</TableCell>
@@ -352,14 +378,14 @@ const RncList = ({}) => {
                       <TableCell> {verificacao ? formatDateToString(new Date(verificacao)) : '-'} </TableCell>
                       <TableCell> {eficacia ? formatDateToString(new Date(eficacia)) : '-'} </TableCell>
                       <TableCell> {fechamento ? formatDateToString(new Date(fechamento)) : '-'} </TableCell>
-                      <TableCell>{statusAtual}</TableCell>
+                      <TableCell>{formatStatus(statusAtual)}</TableCell>
                       <TableCell>
                         <IconButton onClick={event => onViewClicked(id, event)}>
                           <VisibilityOutlined />
                         </IconButton>
                       </TableCell>
                       <TableCell>
-                        <MenuOptions rnc={nc} userId={userId} userRole={userRole} reload={reloadInfo} />
+                        <MenuOptions rnc={nc} userId={currentUser?.id ?? 0} userRole={userRole} reload={reloadInfo} />
                       </TableCell>
                     </TableRow>
                   );
@@ -378,7 +404,7 @@ const RncList = ({}) => {
               page={page}
               rowsPerPage={pageSize}
               rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-              style={{ display: 'flex', alignContent: 'center', width: '370px' }}
+              style={{ display: 'flex', alignContent: 'center', width: '400px' }}
             />
           </Row>
         </>
@@ -446,7 +472,7 @@ const RncList = ({}) => {
               value={filters.statusAtual}
               onChange={event => setFilters({ ...filters, statusAtual: event.target.value as string })}
             >
-              {enums?.nonConformityStatuses.map((type, idx) => (
+              {enums?.nonConformityStatuses?.map((type, idx) => (
                 <MenuItem value={type.name} key={`type-${idx}`}>
                   {type.value}
                 </MenuItem>

@@ -4,31 +4,68 @@ import React, { useEffect, useState } from 'react';
 import './external-audit.css';
 
 type ExternalAuditRegisterProps = {
+  audit: GeneralAudit;
   onChanged: (externalAudit: GeneralAudit) => void;
 };
 
-export const ExternalAuditRegister = ({ onChanged }: ExternalAuditRegisterProps) => {
-  const [external, setExternal] = useState<GeneralAudit>({
-    ncNumber: 0,
-    norm: '',
-    normRequirements: '',
-    reportNumber: 0,
-  });
+export const ExternalAuditRegister = ({ audit, onChanged }: ExternalAuditRegisterProps) => {
+  const [nc, setNc] = useState<string>('');
+  const [norm, setNorm] = useState<string>('');
+  const [report, setReport] = useState<string>('');
+  const [requirement, setRequirement] = useState<string>('');
 
   useEffect(() => {
-    onChanged(external);
-  }, [external]);
+    onChanged({
+      ncNumber: nc,
+      norm: norm,
+      normRequirements: requirement,
+      reportNumber: parseInt(report),
+    });
+  }, [nc, norm, report, requirement]);
 
-  const validateNegativeFields = (data, value) => {
-    if (parseFloat(value) < 0) {
+  useEffect(() => {
+    if (!audit) {
       return;
     }
 
-    if (parseFloat(value) > 999999999) {
-      return;
+    setNc(audit.ncNumber.toString());
+    setNorm(audit.norm);
+    setRequirement(audit.normRequirements);
+    setReport(audit.reportNumber.toString());
+  }, [audit]);
+
+  const validateNegativeFields = (value: string): string => {
+    const parsed: number = parseFloat(value);
+
+    if (parsed < 0 || parsed > 999999999) {
+      return '';
     }
 
-    setExternal(data);
+    return value;
+  };
+
+  const onNcChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
+    const { value } = event.target;
+
+    setNc(validateNegativeFields(value));
+  };
+
+  const onNormChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
+    const { value } = event.target;
+
+    setNorm(value);
+  };
+
+  const onReportChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
+    const { value } = event.target;
+
+    setReport(validateNegativeFields(value));
+  };
+
+  const onRequirementChanged = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
+    const { value } = event.target;
+
+    setRequirement(value);
   };
 
   return (
@@ -37,30 +74,15 @@ export const ExternalAuditRegister = ({ onChanged }: ExternalAuditRegisterProps)
         <h2 className="m-3">Auditoria Externa</h2>
         <Divider variant="middle" sx={{ marginRight: '0px !important', marginLeft: '0px !important' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <TextField
-            fullWidth
-            label="Norma"
-            name="norma"
-            className="form-field m-3"
-            value={external.norm}
-            onChange={e => setExternal({ ...external, norm: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Número NC"
-            name="numeroNC"
-            className="form-field m-3"
-            type="number"
-            value={external.ncNumber}
-            onChange={e => validateNegativeFields({ ...external, ncNumber: parseInt(e.target.value) }, e.target.value)}
-          />
+          <TextField fullWidth label="Norma" name="norma" className="form-field m-3" value={norm} onChange={onNormChanged} />
+          <TextField fullWidth label="Número NC" name="numeroNC" className="form-field m-3" value={nc} onChange={onNcChanged} />
           <TextField
             fullWidth
             label="Requisito(s) da Norma"
             name="requisitosNorma"
             className="form-field m-3"
-            value={external.normRequirements}
-            onChange={e => setExternal({ ...external, normRequirements: e.target.value })}
+            value={requirement}
+            onChange={onRequirementChanged}
           />
           <TextField
             fullWidth
@@ -68,8 +90,8 @@ export const ExternalAuditRegister = ({ onChanged }: ExternalAuditRegisterProps)
             name="numeroRelatorio"
             type="number"
             className="form-field m-3"
-            value={external.reportNumber}
-            onChange={e => validateNegativeFields({ ...external, reportNumber: parseInt(e.target.value) }, e.target.value)}
+            value={report}
+            onChange={onReportChanged}
           />
         </div>
       </Card>

@@ -1,3 +1,4 @@
+import { Movimentacao } from './movimentacao';
 import { Permissao } from './permissao';
 
 export enum StatusEnum {
@@ -14,19 +15,27 @@ export enum StatusEnum {
   CONCLUIDO = 'Concluido',
 }
 
+export enum EnumSituacao {
+  EDICAO = 'E',
+  HOMOLOGACAO = 'H',
+  REVISAO = 'R',
+  OBSOLETO = 'O',
+  CANCELADO = 'C',
+}
 export type InfoDoc = {
   doc: Doc;
   permissaodoc: Permissao[];
+  movimentacao?: Movimentacao;
 };
 
 export type Doc = {
   id?: number;
-  codigo: string;
-  titulo: string;
+  codigo?: string;
+  titulo?: string;
   revisao?: number;
   descricaoDoc?: string;
   idArquivo?: number;
-  enumSituacao?: string;
+  enumSituacao?: EnumSituacao;
   origem?: string;
   tipoDoc?: string;
   idProcesso?: number;
@@ -41,6 +50,7 @@ export type Doc = {
   areaProcesso?: string;
   distribuicao?: string;
   status?: StatusEnum;
+  justificativa?: string;
 };
 
 export type DocAttachment = {

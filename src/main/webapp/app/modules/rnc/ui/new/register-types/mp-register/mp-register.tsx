@@ -25,20 +25,50 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
     line: '',
     nqa: '',
     operator: '',
-    opNumber: 0,
+    opNumber: '',
     rejectionRate: 0,
-    requestNumber: 0,
+    requestNumber: '',
     samples: 0,
     shift: '',
-    traceability: null,
+    traceability: {
+      deliveredAt: new Date(),
+      identifier: '',
+      date: new Date(),
+      rncId: 0,
+    },
   });
 
   useEffect(() => {
     if (!initialData) {
       return;
     }
-
-    setRawMaterial(initialData);
+    setRawMaterial({
+      batch: initialData.batch,
+      batchSize: initialData.batchSize,
+      code: initialData.code,
+      defects: initialData.defects,
+      deliveredAt: new Date(initialData.deliveredAt),
+      description: initialData.description,
+      identifier: initialData.identifier,
+      inspectionRule: initialData.inspectionRule,
+      inspector: initialData.inspector,
+      invoice: initialData.invoice,
+      invoiceDate: new Date(initialData.invoiceDate),
+      line: initialData.line,
+      nqa: initialData.nqa,
+      operator: initialData.operator,
+      opNumber: initialData.opNumber,
+      rejectionRate: initialData.rejectionRate,
+      requestNumber: initialData.requestNumber,
+      samples: initialData.samples,
+      shift: initialData.shift,
+      traceability: {
+        deliveredAt: new Date(initialData.traceability.deliveredAt),
+        identifier: initialData.traceability.identifier,
+        date: new Date(initialData.traceability.date),
+        rncId: initialData.traceability.rncId,
+      },
+    });
   }, [initialData]);
 
   useEffect(() => {
@@ -172,12 +202,13 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
               sx={{ width: '10% !important' }}
             />
             <TextField
-              value={rawMaterial.rejectionRate}
+              value={((rawMaterial.defects / rawMaterial.samples) * 100).toFixed(2)}
               onChange={e => setRawMaterial({ ...rawMaterial, rejectionRate: parseInt(e.target.value.slice(0, 10), 10) })}
               label="% Rejeição"
               name="rejection-rate"
               type="number"
               className="m-2"
+              disabled
               sx={{ width: '10% !important' }}
             />
           </div>
@@ -218,18 +249,16 @@ export const MPRegister = ({ initialData, onChanged }: RawMaterialProps) => {
             </FormControl>
             <TextField
               value={rawMaterial.requestNumber}
-              onChange={e => setRawMaterial({ ...rawMaterial, requestNumber: parseInt(e.target.value.slice(0, 10), 10) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, requestNumber: e.target.value })}
               label="Número do pedido"
-              type="number"
               name="request-number"
               className="m-2"
               sx={{ width: '25% !important' }}
             />
             <TextField
               value={rawMaterial.opNumber}
-              onChange={e => setRawMaterial({ ...rawMaterial, opNumber: parseInt(e.target.value.slice(0, 10), 10) })}
+              onChange={e => setRawMaterial({ ...rawMaterial, opNumber: e.target.value })}
               label="Número OP"
-              type="number"
               name="op-number"
               className="m-2"
               sx={{ width: '25% !important' }}

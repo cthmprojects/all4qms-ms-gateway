@@ -17,6 +17,12 @@ const initialState: EntityState<IUsuario> = {
 
 const apiUrl = 'api/usuarios';
 
+interface IPayload {
+  usuario: IUsuario;
+  login: string;
+  perfis: Array<string>;
+}
+
 // Actions
 
 export const getEntities = createAsyncThunk('usuario/fetch_entity_list', async ({ page, size, sort }: IQueryParams) => {
@@ -32,6 +38,11 @@ export const getEntity = createAsyncThunk(
   },
   { serializeError: serializeAxiosError }
 );
+
+export const getUsersAsGQ = createAsyncThunk('userManagement/fetch_users_as_sgq', async (role: any) => {
+  const requestUrl = `${apiUrl}/users-by-role${role ? `?role=${role}` : ''}`;
+  return axios.get<IUsuario[]>(requestUrl);
+});
 
 export const createEntity = createAsyncThunk(
   'usuario/create_entity',
@@ -55,8 +66,12 @@ export const updateEntity = createAsyncThunk(
 
 export const partialUpdateEntity = createAsyncThunk(
   'usuario/partial_update_entity',
-  async (entity: IUsuario, thunkAPI) => {
-    const result = await axios.patch<IUsuario>(`${apiUrl}/${entity.id}`, cleanEntity(entity));
+  async (payload: IPayload, thunkAPI) => {
+    const result = await axios.patch<IUsuario>(`${apiUrl}/${payload.usuario.id}`, {
+      usuario: cleanEntity(payload.usuario),
+      login: payload.login,
+      perfis: payload.perfis,
+    });
     thunkAPI.dispatch(getEntities({}));
     return result;
   },

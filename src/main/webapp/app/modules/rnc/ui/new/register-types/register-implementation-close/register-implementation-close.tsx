@@ -18,11 +18,15 @@ import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { Rnc } from 'app/modules/rnc/models';
 import { updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
+import { toast } from 'react-toastify';
+import { IUser } from 'app/shared/model/user.model';
 
 export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFechamento }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const account = useAppSelector(state => state.authentication.accountQms) as IUser;
 
   useEffect(() => {
     dispatch(getUsers({}));
@@ -50,20 +54,30 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
         updateApprovalNC({
           ...completion,
           dataFechamento: firstForm.date.value,
-          responsavelFechamento: users.find(user => user.nome === firstForm.emitter.value)?.id,
+          responsavelFechamento: users.find(user => user.id === firstForm.emitter.value)?.id,
           alteracaoRisco: firstForm.changeRisk.value,
           descFechamento: firstForm.description.value,
         })
       );
+      toast.success('Fechamento salvo com sucesso!');
     }
   };
 
   const updateStatus = () => {
     if (_rnc) {
-      dispatch(update({ ..._rnc, statusAtual: 'CONCLUIDO' }));
-      setTimeout(() => {
+      dispatch(
+        updateApprovalNC({
+          ...completion,
+          dataFechamento: firstForm.date.value,
+          responsavelFechamento: users.find(user => user.id === firstForm.emitter.value)?.id,
+          alteracaoRisco: firstForm.changeRisk.value,
+          descFechamento: firstForm.description.value,
+        })
+      );
+      dispatch(update({ ..._rnc, statusAtual: 'CONCLUIDO' })).then(() => {
         navigate('/rnc');
-      }, 1000);
+      });
+      toast.success('Fechamento salvo com sucesso!');
     }
   };
 
@@ -79,17 +93,20 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
 
   useEffect(() => {
     if (completion) {
+      const idResponsavelFechamento = users.find(user => user.id === completion.responsavelFechamento)?.id;
+      const definitiveId = idResponsavelFechamento || account?.id;
+
       setFirstForm({
         date: { value: completion.dataFechamento ? new Date(completion.dataFechamento) : new Date(), error: false },
         emitter: {
-          value: completion.responsavelFechamento ? users.find(user => user.id === completion.responsavelFechamento)?.nome : '',
+          value: definitiveId || '',
           error: false,
         },
         changeRisk: { value: completion.alteracaoRisco, error: false },
         description: { value: completion.descFechamento, error: false },
       });
     }
-  }, [completion]);
+  }, [completion, users, account]);
 
   return (
     <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5">
@@ -134,7 +151,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
               value={firstForm.emitter.value}
             >
               {users.map((user, i) => (
-                <MenuItem value={user.nome} key={`user-${i}`}>
+                <MenuItem value={user.id} key={`user-${i}`}>
                   {user.nome}
                 </MenuItem>
               ))}

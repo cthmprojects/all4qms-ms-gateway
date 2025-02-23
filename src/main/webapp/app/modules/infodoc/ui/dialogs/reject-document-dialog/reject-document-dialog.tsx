@@ -4,8 +4,14 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao } from 'app/modules/infodoc/models';
 import { cadastrarMovimentacao } from 'app/modules/infodoc/reducers/movimentacao.reducer';
 import { StyledLabel, StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
+import axios from 'axios';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Button } from 'reactstrap';
+import { IUsuario } from '../../../../../shared/model/usuario.model';
+import { notifyEmailInfoDoc, reproveDocument } from '../../../reducers/infodoc.reducer';
+import { UserQMS } from '../../../../../entities/usuario/reducers/usuario.reducer';
 
 const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
   const id = React.useId();
@@ -21,23 +27,48 @@ type RejectDialogProps = {
   open: boolean;
   handleClose: () => void;
   documentTitle: string;
-  currentUser: any;
+  currentUser: UserQMS;
   currentDocument: InfoDoc;
 };
 export const RejectDocumentDialog = ({ open, handleClose, documentTitle, currentUser, currentDocument }: RejectDialogProps) => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [description, setDescription] = useState('');
 
-  const reprovalDocument = () => {
-    let movimentacao: Movimentacao = {
-      enumTipoMovDoc: EnumTipoMovDoc.CANCELAR,
-      enumStatus: EnumStatusDoc.CANCELAMENTO,
-      idDocumentacao: currentDocument?.doc?.id,
-      idUsuarioCriacao: currentUser ? parseInt(currentUser.id) : 0,
-      comentarioCancelamento: description,
-    };
+  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
 
-    dispatch(cadastrarMovimentacao(movimentacao));
+  const reprovalDocument = async () => {
+    await dispatch(
+      reproveDocument({
+        id: currentDocument?.doc?.id,
+        userLoginID: currentUser ? currentUser.id : 0,
+        justify: description,
+      })
+    )
+      .then(async () => {
+        toast.success('Documento rejeitado!');
+        const userEmitter: IUsuario = users.filter(usr => usr.id?.toString() == currentDocument.doc?.idUsuarioCriacao)[0];
+        dispatch(
+          notifyEmailInfoDoc({
+            to: userEmitter?.email || '', // Email
+            subject: 'Documento REPROVADO por SGQ',
+            tipo: 'REPROVAR',
+            nomeEmissor: userEmitter?.nome || '', // nome
+            tituloDocumento: 'Documento REPROVADO',
+            dataCriacao: new Date(Date.now()).toLocaleDateString('pt-BR'),
+            descricao: `Documento rejeitado por ${currentUser.nome} com o email ${currentUser.email}`,
+            motivoReprovacao: '',
+          })
+        );
+
+        setDescription('');
+        navigate('/infodoc');
+      })
+      .catch(e => {
+        toast.error('Erro ao rejeitar documento');
+      });
+
+    handleClose();
   };
 
   return (

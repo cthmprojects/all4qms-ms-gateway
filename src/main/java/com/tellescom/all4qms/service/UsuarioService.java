@@ -1,31 +1,39 @@
 package com.tellescom.all4qms.service;
 
-import com.tellescom.all4qms.domain.Processo;
+import com.tellescom.all4qms.domain.Authority;
 import com.tellescom.all4qms.domain.User;
 import com.tellescom.all4qms.domain.Usuario;
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
+import com.tellescom.all4qms.domain.request.UsuarioUpdateRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
+import com.tellescom.all4qms.domain.response.UsuarioResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.service.dto.AdminUserDTO;
-import com.tellescom.all4qms.service.dto.ProcessoDTO;
+import com.tellescom.all4qms.service.dto.UserDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
 import com.tellescom.all4qms.service.mapper.UsuarioMapper;
+import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
+import io.micrometer.core.instrument.binder.db.MetricsDSLContext;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tech.jhipster.web.util.HeaderUtil;
 
 /**
  * Service Implementation for managing {@link Usuario}.
@@ -46,18 +54,22 @@ public class UsuarioService {
 
     private final ProcessoService processoService;
 
+    private final JavaMailSender emailSender;
+
     public UsuarioService(
         UsuarioRepository usuarioRepository,
         UsuarioMapper usuarioMapper,
         PasswordEncoder passwordEncoder,
         UserService userService,
-        ProcessoService processoService
+        ProcessoService processoService,
+        JavaMailSender emailSender
     ) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.processoService = processoService;
+        this.emailSender = emailSender;
     }
 
     /**
@@ -74,12 +86,46 @@ public class UsuarioService {
     /**
      * Update a usuario.
      *
-     * @param usuarioDTO the entity to save.
+     * @param request the entity to save.
      * @return the persisted entity.
      */
-    public Mono<UsuarioDTO> update(UsuarioDTO usuarioDTO) {
-        log.debug("Request to update Usuario : {}", usuarioDTO);
-        return usuarioRepository.save(usuarioMapper.toEntity(usuarioDTO)).map(usuarioMapper::toDto);
+    public Mono<UsuarioDTO> update(UsuarioUpdateRequest request) {
+        log.debug("Request to update Usuario : {}", request);
+        return usuarioRepository
+            .existsById(request.getUsuario().getId())
+            .flatMap(exists -> {
+                if (!exists) {
+                    return Mono.error(new BadRequestAlertException("Entity not found", "usuario", "idnotfound"));
+                }
+                AdminUserDTO adminUserDTO = new AdminUserDTO();
+                adminUserDTO.setId(request.getUsuario().getUser().getId());
+                adminUserDTO.setActivated(true);
+                adminUserDTO.setEmail(request.getUsuario().getEmail());
+                String[] nome = request.getUsuario().getNome().split(" ");
+                if (nome.length > 1) {
+                    adminUserDTO.setFirstName(nome[0]);
+                    adminUserDTO.setLastName(nome[1]);
+                }
+                adminUserDTO.setFirstName(nome[0]);
+                adminUserDTO.setLogin(request.getLogin());
+                if (request.getPerfis() != null) {
+                    adminUserDTO.setAuthorities(request.getPerfis());
+                }
+
+                // Encadear as operações reativas
+                return userService
+                    .updateUser(adminUserDTO) // Executa o updateUser primeiro
+                    .flatMap(updatedUser -> { // Após o updateUser ser concluído, continua com o próximo processamento
+                        return usuarioRepository
+                            .save(usuarioMapper.toEntity(request.getUsuario())) // Salva o usuário no repository
+                            .map(usuarioMapper::toDto); // Mapeia o resultado para UsuarioDTO
+                    });
+            });
+    }
+
+    public Mono<UsuarioDTO> updatePut(UsuarioDTO request) {
+        log.debug("Request to update Usuario : {}", request);
+        return usuarioRepository.save(usuarioMapper.toEntity(request)).map(usuarioMapper::toDto);
     }
 
     /**
@@ -108,11 +154,6 @@ public class UsuarioService {
      * @param pageable the pagination information.
      * @return the list of entities.
      */
-    //    @Transactional(readOnly = true)
-    //    public Flux<UsuarioDTO> findAll(Pageable pageable) {
-    //        log.debug("Request to get all Usuarios");
-    //        return usuarioRepository.findAllBy(pageable).map(usuarioMapper::toDto);
-    //    }
     @Transactional(readOnly = true)
     public Flux<UsuarioDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Usuarios");
@@ -242,5 +283,63 @@ public class UsuarioService {
     public Mono<UsuarioDTO> findAllByUserJhId(Long id) {
         log.debug("Request to get all Usuarios");
         return usuarioRepository.findByUser(id).flatMap(usuario -> findOne(usuario.getId()));
+    }
+
+    public Flux<UsuarioDTO> processarUsuariosPorIdProcesso(Long processoId) {
+        return processoService.buscarIdUserByIdProcesso(processoId).collectList().flatMapMany(ids -> findMany(Flux.fromIterable(ids)));
+    }
+
+    public Flux<UsuarioDTO> findMany(Flux<Long> idFlux) {
+        return idFlux.flatMap(id ->
+            processoService
+                .buscarProcessosPorIdUsuario(id)
+                .collect(Collectors.toSet())
+                .flatMap(processos ->
+                    usuarioRepository
+                        .findById(id)
+                        .map(usuario -> {
+                            UsuarioDTO usuarioDTO = usuarioMapper.toDto(usuario);
+                            usuarioDTO.setProcessos(processos);
+                            return usuarioDTO;
+                        })
+                )
+        );
+    }
+
+    public Mono<ResponseEntity<Flux<UserDTO>>> getByRole(String role) {
+        return userService.countManagedUsers().map(headers -> ResponseEntity.ok().body(userService.getUsersByAuthority(role)));
+    }
+
+    public Mono<List<UsuarioResponse>> findAllUsuariosMinimos() {
+        return usuarioRepository.findAll().map(usuarioMapper::toResponse).collectList();
+    }
+
+    public Flux<UsuarioResponse> findlAllAprovadoresByProcesso(long processoId) {
+        Flux<UsuarioDTO> usuariosAprovadoresPorProcesso = this.processarUsuariosPorIdProcesso(processoId);
+        Flux<UserDTO> usersPorRole = userService.getUsersByAuthority("ROLE_SGQ");
+
+        return usersPorRole
+            .map(UserDTO::getId) // Extrai os IDs de UserDTO
+            .collect(Collectors.toSet()) // Coleta os IDs em um conjunto
+            .flatMapMany(idsDeUsers ->
+                usuariosAprovadoresPorProcesso
+                    .filter(usuario -> usuario.getUser() != null && idsDeUsers.contains(usuario.getUser().getId()))
+                    .map(usuarioMapper::toResponseWithMail)
+            );
+    }
+
+    public Flux<UsuarioResponse> findAllUsersSgq() {
+        return userService
+            .getUsersByAuthority("ROLE_SGQ")
+            .map(UserDTO::getId)
+            .flatMap(this::findAllByUserJhId)
+            .map(usuarioMapper::toResponseWithMail);
+    }
+
+    public Mono<Void> resetPassword(Long id) {
+        Mono<UsuarioDTO> usuarioDTO = this.findOne(id);
+        return usuarioDTO.flatMap(user -> {
+            return userService.resetPassword(user.getUser().getId());
+        });
     }
 }

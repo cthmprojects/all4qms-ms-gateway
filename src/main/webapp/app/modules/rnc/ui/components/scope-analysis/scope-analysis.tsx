@@ -19,12 +19,12 @@ const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnal
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (!description || description.length <= 0 || disabled) {
+    if (!description || description.length <= 0 || disabled || (keywordList && keywordList.length > 0)) {
       return;
     }
 
     dispatch(postHashtagRNC(description));
-  }, [description, disabled]);
+  }, [description, disabled, keywordList]);
 
   const onKeywordAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setKeywordList([...keywordList, keyword]);
@@ -33,7 +33,7 @@ const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnal
   };
 
   useEffect(() => {
-    if (!hashtags || disabled) {
+    if (!hashtags || disabled || (keywordList && keywordList.length > 0)) {
       return;
     }
 
@@ -64,7 +64,7 @@ const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnal
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
         <Typography variant="h5" component="div">
-          Análise de Abrangência da NC
+          Análise de Abrangência
         </Typography>
         <br />
         <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">

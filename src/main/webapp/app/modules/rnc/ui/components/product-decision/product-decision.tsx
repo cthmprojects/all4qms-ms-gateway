@@ -1,5 +1,8 @@
+import { AddOutlined } from '@mui/icons-material';
 import {
+  Button,
   Card,
+  CardContent,
   Checkbox,
   FormControl,
   InputLabel,
@@ -7,12 +10,12 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
 import { Decision } from 'app/modules/rnc/models/decision';
-import { initial } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DatePicker from 'react-datepicker';
 
 type ProductDecisionProps = {
@@ -38,29 +41,29 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
   const [decisionType, setDecisionType] = useState<string>('');
   const [responsibles, setResponsibles] = useState<Array<string>>([]);
 
-  useEffect(() => {
-    if (!initialData) {
-      return;
+  const calculateRate = (a: number, b: number): number => {
+    const total: number = a + b;
+
+    if (total === 0) {
+      return 0;
     }
 
-    setDecisionType(initialData.type);
-    setResponsibles(initialData.responsibles.split(';'));
-    setDecision({ ...initialData });
-  }, [initialData]);
+    return b / total;
+  };
 
-  useEffect(() => {
-    onChanged(decision);
+  const rejectionRate = useMemo<number>(() => {
+    if (!decision) {
+      return 0;
+    }
+
+    const approved: number = decision?.approved ?? 0;
+    const reproved: number = decision?.reproved ?? 0;
+
+    return calculateRate(approved, reproved);
   }, [decision]);
-
-  useEffect(() => {
-    setDecision({ ...decision, responsibles: responsibles.join(';') });
-  }, [responsibles]);
 
   return (
     <div className="fake-card mt-3">
-      <Typography variant="h5" component="div">
-        {title}
-      </Typography>
       <br />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className="mt-2 mb-2">
         <FormControl className="mb-2 rnc-form-field me-2" sx={{ display: 'flex', maxWidth: '40%' }} disabled={readonly}>
@@ -68,32 +71,30 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
           <Select
             label="Decisão"
             name="decision"
-            value={decisionType}
+            value={initialData.type}
             onChange={event => {
               const type: string = event.target.value;
-              setDecision({ ...decision, type: type });
-              setDecisionType(type);
+              onChanged({ ...decision, type: type });
             }}
           >
-            <MenuItem value="retrabalho">Retrabalho</MenuItem>
-            <MenuItem value="seleção">Seleção</MenuItem>
+            <MenuItem value="RETRABALHO">Retrabalho</MenuItem>
+            <MenuItem value="SELEÇÃO">Seleção</MenuItem>
           </Select>
         </FormControl>
         <TextField
           sx={{ height: '60px', maxWidth: '50% !important' }}
           label="Descrição da decisão"
-          name="number"
           id="rnc-text-field"
-          onChange={event => setDecision({ ...decision, description: event.target.value })}
-          value={decision.description}
+          onChange={event => onChanged({ ...initialData, description: event.target.value })}
+          value={initialData.description}
           className="rnc-form-field me-2 mb-2"
           disabled={readonly}
         />
 
         <FormControl className="mb-2 rnc-form-field me-2">
           <DatePicker
-            selected={decision.date}
-            onChange={date => setDecision({ ...decision, date: date })}
+            selected={new Date(initialData.date)}
+            onChange={date => onChanged({ ...initialData, date: date })}
             className="date-picker"
             dateFormat={'dd/MM/yyyy'}
             id="date-picker-general-register"
@@ -121,13 +122,15 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
             <InputLabel>Responsáveis</InputLabel>
             <Select
               multiple
-              value={responsibles}
+              value={initialData.responsibles.split(';')}
               onChange={event => {
                 const { value } = event.target;
                 if (typeof value === 'string') {
                   setResponsibles(value.split(','));
+                  onChanged({ ...initialData, responsibles: value.split(',').join(';') });
                 } else {
                   setResponsibles(value);
+                  onChanged({ ...initialData, responsibles: value.join(';') });
                 }
               }}
               input={<OutlinedInput label="Responsáveis" />}
@@ -135,7 +138,7 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
             >
               {users.map((user, idx) => (
                 <MenuItem value={user} key={`user-${idx}`}>
-                  <Checkbox checked={responsibles.indexOf(user) > -1} />
+                  <Checkbox checked={initialData.responsibles.split(';').indexOf(user) > -1} />
                   <ListItemText primary={user} />
                 </MenuItem>
               ))}
@@ -152,8 +155,8 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
               className="m-2"
               sx={{ width: '20% !important' }}
               type="number"
-              onChange={event => setDecision({ ...decision, current: parseInt(event.target.value) })}
-              value={decision.current}
+              onChange={event => onChanged({ ...initialData, current: parseInt(event.target.value) })}
+              value={initialData.current}
               disabled={readonly}
             />
             <TextField
@@ -161,8 +164,8 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
               className="m-2"
               sx={{ width: '20% !important' }}
               type="number"
-              onChange={event => setDecision({ ...decision, approved: parseInt(event.target.value) })}
-              value={decision.approved}
+              onChange={event => onChanged({ ...initialData, approved: parseInt(event.target.value) })}
+              value={initialData.approved}
               disabled={readonly}
             />
             <TextField
@@ -170,8 +173,8 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
               className="m-2"
               sx={{ width: '20% !important' }}
               type="number"
-              onChange={event => setDecision({ ...decision, reproved: parseInt(event.target.value) })}
-              value={decision.reproved}
+              onChange={event => onChanged({ ...initialData, reproved: parseInt(event.target.value) })}
+              value={initialData.reproved}
               disabled={readonly}
             />
             <TextField
@@ -179,9 +182,9 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
               className="m-2"
               sx={{ width: '20% !important' }}
               type="number"
-              onChange={event => setDecision({ ...decision, rejected: parseInt(event.target.value) })}
-              value={decision.rejected}
-              disabled={readonly}
+              onChange={event => onChanged({ ...initialData, rejected: parseInt(event.target.value) })}
+              value={(calculateRate(initialData.approved, initialData.reproved) * 100).toFixed(2)}
+              disabled
             />
           </Card>
         </div>
@@ -191,4 +194,76 @@ const ProductDecision = ({ initialData, onChanged, readonly, title, users }: Pro
   );
 };
 
-export default ProductDecision;
+type ProductDecisionsProps = {
+  allowAdding: boolean;
+  decisions: Array<Decision>;
+  onChanged: (decisions: Array<Decision>) => void;
+  readonly?: boolean;
+  title: string;
+  users: Array<string>;
+};
+
+const ProductDecisions = ({ allowAdding, decisions, onChanged, title, users, readonly }: ProductDecisionsProps) => {
+  useEffect(() => {
+    if (decisions.length > 0) {
+      return;
+    }
+
+    onAdded();
+  }, [decisions]);
+
+  const onAdded = (): void => {
+    onChanged([
+      ...decisions,
+      {
+        approved: 0,
+        current: 0,
+        date: new Date(),
+        description: '',
+        rejected: 0,
+        reproved: 0,
+        responsibles: '',
+        rncId: 0,
+        type: 'retrabalho',
+      },
+    ]);
+  };
+
+  const onProductDecisionChanged = (decision: Decision, index: number): void => {
+    const newDecisions = [...decisions];
+    newDecisions[index] = decision;
+    onChanged(newDecisions);
+  };
+
+  return (
+    <Card className="mt-3 mb-2">
+      <CardContent>
+        <Stack direction="row" spacing={2}>
+          <Typography variant="h5">{title}</Typography>
+
+          {allowAdding && (
+            <Button
+              onClick={() => {
+                onAdded();
+              }}
+            >
+              <AddOutlined />
+            </Button>
+          )}
+        </Stack>
+        {decisions.map((decision, index) => (
+          <ProductDecision
+            onChanged={decision => onProductDecisionChanged(decision, index)}
+            title={title}
+            users={users}
+            initialData={decision}
+            key={index}
+            readonly={readonly}
+          />
+        ))}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ProductDecisions;

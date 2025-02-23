@@ -1,21 +1,24 @@
-import React from 'react';
-import { Route } from 'react-router-dom';
-import Loadable from 'react-loadable';
-
-import Login from 'app/modules/login/login';
-import Register from 'app/modules/account/register/register';
-import Activate from 'app/modules/account/activate/activate';
-import PasswordResetInit from 'app/modules/account/password-reset/init/password-reset-init';
-import PasswordResetFinish from 'app/modules/account/password-reset/finish/password-reset-finish';
-import Logout from 'app/modules/login/logout';
+import { AUTHORITIES } from 'app/config/constants';
 import EntitiesRoutes from 'app/entities/routes';
+import Activate from 'app/modules/account/activate/activate';
+import PasswordResetFinish from 'app/modules/account/password-reset/finish/password-reset-finish';
+import PasswordResetInit from 'app/modules/account/password-reset/init/password-reset-init';
+import Register from 'app/modules/account/register/register';
+import Login from 'app/modules/login/login';
+import Logout from 'app/modules/login/logout';
 import PrivateRoute from 'app/shared/auth/private-route';
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import PageNotFound from 'app/shared/error/page-not-found';
-import { AUTHORITIES } from 'app/config/constants';
+import Loadable from 'react-loadable';
+import { Route } from 'react-router-dom';
+import GoalsObjectivesRoutes from './modules/goals-objectives';
 import { Home } from './modules/home/home';
-import RncRoutes from './modules/rnc';
 import InfodocRoutes from './modules/infodoc';
+import PerformanceIndicatorsRoutes from './modules/performance-indicators';
+import RisksOpportunitiesRoutes from './modules/risks-opportunities';
+import RncRoutes from './modules/rnc';
+import StrategicPlaningRoutes from './modules/strategic-planning';
+import { AuditRoutes } from './modules/audit';
 
 const loading = <div>loading ...</div>;
 
@@ -49,6 +52,19 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route path="logout" element={<Logout />} />
         <Route path="rnc/*" element={<RncRoutes />} />
         <Route path="infodoc/*" element={<InfodocRoutes />} />
+        <Route path="risks-opportunities/*" element={<RisksOpportunitiesRoutes />} />
+        <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
+        <Route path="performance-indicators/*" element={<PerformanceIndicatorsRoutes />} />
+        <Route path="strategic-planning/*" element={<StrategicPlaningRoutes />} />
+        <Route
+          path="audit/*"
+          element={
+            <PrivateRoute hasAnyAuthorities={[AUTHORITIES.SGQ]}>
+              <AuditRoutes />
+            </PrivateRoute>
+          }
+        />
+
         <Route path="account">
           <Route
             path="*"
