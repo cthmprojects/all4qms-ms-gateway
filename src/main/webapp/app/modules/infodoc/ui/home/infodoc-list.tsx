@@ -565,8 +565,7 @@ const InfodocList = () => {
                           {getSituacaoIcon(infodoc?.doc.enumSituacao).text}
                         </Box>
                       </TableCell>
-                      {
-
+                       {/* <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
                     </TableCell> */}
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
