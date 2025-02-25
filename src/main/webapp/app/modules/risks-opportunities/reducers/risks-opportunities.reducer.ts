@@ -402,6 +402,29 @@ export const saveRiskOpportunity = createAsyncThunk('ro/save', async (payload: R
   return resource;
 });
 
+export const saveMinimalRiskOpportunity = createAsyncThunk('ro/minimal/save', async (riskOpportunity: RawRiskOpportunity) => {
+  const idInterestedPart = await saveInterestedPartAsync({
+    atualizadoEm: null,
+    atualizadoPor: null,
+    criadoEm: null,
+    criadoPor: null,
+    id: null,
+    nomeParteInteressada: '',
+  });
+
+  riskOpportunity.idPartesInteressadas = idInterestedPart;
+
+  const response = await axios.post<RawRiskOpportunity>(apiRiscoOportunidadeUrl, riskOpportunity);
+
+  if (response.status !== 201) {
+    return null;
+  }
+
+  const resource: RawRiskOpportunity = response.data;
+
+  return resource;
+});
+
 function actionPlanParser(payload: any) {
   return {
     ...payload,
@@ -499,6 +522,9 @@ const ROSlice = createEntitySlice({
       .addMatcher(isFulfilled(editRiskOpportunity), (state, action) => {
         state.loading = false;
         state.entity = action.payload;
+      })
+      .addMatcher(isFulfilled(saveMinimalRiskOpportunity), (state, action) => {
+        state.loading = false;
       });
   },
 });

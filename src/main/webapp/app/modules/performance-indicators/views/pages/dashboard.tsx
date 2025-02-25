@@ -116,7 +116,9 @@ const Dashboard = () => {
       return {
         name,
         goal: sumGoals,
+        metas: sumGoals,
         measured: sumMeasurements,
+        medições: sumMeasurements,
       };
     });
   }, [indicators, indicatorGoals, summarizedProcesses]);
