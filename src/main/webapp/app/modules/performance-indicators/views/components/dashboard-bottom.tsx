@@ -4,51 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { GoalMeasured, Pair } from '../../models';
 import { DataChart } from '../../models/charts';
 
-const data = [
-  {
-    name: 'Indicador A',
-    Ind1: 4000,
-    Ind2: 2400,
-    Ind3: 2400,
-  },
-  {
-    name: 'Indicador B',
-    Ind1: 3000,
-    Ind2: 1398,
-    Ind3: 2210,
-  },
-  {
-    name: 'Indicador C',
-    Ind1: 2000,
-    Ind2: 9800,
-    Ind3: 2290,
-  },
-  {
-    name: 'Indicador D',
-    Ind1: 2780,
-    Ind2: 3908,
-    Ind3: 2000,
-  },
-  {
-    name: 'Indicador E',
-    Ind1: 1890,
-    Ind2: 4800,
-    Ind3: 2181,
-  },
-  {
-    name: 'Indicador F',
-    Ind1: 2390,
-    Ind2: 3800,
-    Ind3: 2500,
-  },
-  {
-    name: 'Indicador G',
-    Ind1: 3490,
-    Ind2: 4300,
-    Ind3: 2100,
-  },
-];
-
 type DashboardBottomProps = {
   comparisonByPeriod: Array<GoalMeasured>;
   metasPeriodo: Array<DataChart>;
@@ -76,8 +31,8 @@ const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomPr
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="goal" fill="#344BFD" activeBar={<Rectangle fill="pink" stroke="blue" />} />
-            <Bar dataKey="measured" fill="#FF9359" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+            <Bar dataKey="metas" fill="#344BFD" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+            <Bar dataKey="medições" fill="#FF9359" activeBar={<Rectangle fill="pink" stroke="blue" />} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -100,7 +55,7 @@ const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomPr
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="meta  " stackId="a" fill="#344BFD" />
+            <Bar dataKey="meta" stackId="a" fill="#344BFD" />
             <Bar dataKey="realizado" stackId="a" fill="#E9ECF1" />
           </BarChart>
         </ResponsiveContainer>

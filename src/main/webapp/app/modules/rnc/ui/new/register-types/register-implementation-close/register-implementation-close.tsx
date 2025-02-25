@@ -1,25 +1,16 @@
-import {
-  Breadcrumbs,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  TextField,
-} from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Button, Row } from 'reactstrap';
-import DatePicker from 'react-datepicker';
+import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
+import { saveMinimalRiskOpportunity } from 'app/modules/risks-opportunities/reducers/risks-opportunities.reducer';
 import { Rnc } from 'app/modules/rnc/models';
-import { updateApprovalNC, getApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
-import { toast } from 'react-toastify';
+import { getApprovalNC, updateApprovalNC } from 'app/modules/rnc/reducers/approval.reducer';
+import { getById, update } from 'app/modules/rnc/reducers/rnc.reducer';
 import { IUser } from 'app/shared/model/user.model';
+import { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Button, Row } from 'reactstrap';
 
 export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFechamento }) => {
   const dispatch = useAppDispatch();
@@ -27,6 +18,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
   const { id } = useParams();
 
   const account = useAppSelector(state => state.authentication.accountQms) as IUser;
+  const rnc: Rnc = useAppSelector(state => state.all4qmsmsgateway.rnc.entity);
 
   useEffect(() => {
     dispatch(getUsers({}));
@@ -41,6 +33,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
     emitter: { value: '', error: false },
     changeRisk: { value: false, error: false },
     description: { value: '', error: false },
+    riskOpportunity: { value: '', error: false },
   });
 
   const handleChangeDate = (value: any) => {
@@ -50,13 +43,18 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
 
   const saveCompletion = () => {
     if (completion) {
+      const closingDate: Date = firstForm.date.value;
+      const changeRisk: boolean = firstForm.changeRisk.value ?? false;
+      const description: string = firstForm.description.value;
+      const responsible: number | null = users.find(user => user.id === firstForm.emitter.value)?.id;
+
       dispatch(
         updateApprovalNC({
           ...completion,
-          dataFechamento: firstForm.date.value,
-          responsavelFechamento: users.find(user => user.id === firstForm.emitter.value)?.id,
-          alteracaoRisco: firstForm.changeRisk.value,
-          descFechamento: firstForm.description.value,
+          dataFechamento: closingDate,
+          responsavelFechamento: responsible,
+          alteracaoRisco: changeRisk,
+          descFechamento: description,
         })
       );
       toast.success('Fechamento salvo com sucesso!');
@@ -65,13 +63,54 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
 
   const updateStatus = () => {
     if (_rnc) {
+      const closingDate: Date = firstForm.date.value;
+      const changeRisk: boolean = firstForm.changeRisk.value ?? false;
+      const description: string = firstForm.description.value;
+      const responsible: number | null = users.find(user => user.id === firstForm.emitter.value)?.id;
+      const riskOpportunity: string = firstForm.riskOpportunity.value;
+
+      const shouldCreateRiskOpportunity: boolean = changeRisk && riskOpportunity.length > 0;
+
+      if (shouldCreateRiskOpportunity) {
+        dispatch(
+          saveMinimalRiskOpportunity({
+            atualizadoEm: null,
+            atualizadoPor: null,
+            criadoEm: null,
+            criadoPor: null,
+            dataRegistro: closingDate,
+            descricao1: description,
+            descricao2: description,
+            descricao3: description,
+            descricaoControle: description,
+            id: null,
+            idEmissor: responsible,
+            idLinhaConfigControle1: null,
+            idLinhaConfigControle2: null,
+            idPartesInteressadas: null,
+            idProcesso: rnc.processoNC,
+            idsAnaliseROS: [],
+            nomeAtividade: '',
+            nomeFluxo: '',
+            tipoRO: riskOpportunity === 'risk' ? 'R' : 'O',
+            analiseROS: null,
+            linhaConfigControle1: null,
+            linhaConfigControle2: null,
+            partesInteressadas: null,
+          })
+        );
+
+        const message: string = riskOpportunity === 'risk' ? 'Novo risco salvo' : 'Nova oportunidade salva';
+        toast.success(`${message} com sucesso!`);
+      }
+
       dispatch(
         updateApprovalNC({
           ...completion,
-          dataFechamento: firstForm.date.value,
-          responsavelFechamento: users.find(user => user.id === firstForm.emitter.value)?.id,
-          alteracaoRisco: firstForm.changeRisk.value,
-          descFechamento: firstForm.description.value,
+          dataFechamento: closingDate,
+          responsavelFechamento: responsible,
+          alteracaoRisco: changeRisk,
+          descFechamento: description,
         })
       );
       dispatch(update({ ..._rnc, statusAtual: 'CONCLUIDO' })).then(() => {
@@ -104,6 +143,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
         },
         changeRisk: { value: completion.alteracaoRisco, error: false },
         description: { value: completion.descFechamento, error: false },
+        riskOpportunity: { value: '', error: false },
       });
     }
   }, [completion, users, account]);
@@ -157,7 +197,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
               ))}
             </Select>
           </FormControl>
-          {/* <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="me-5">
             <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Alterar Risco/Oportunidade</h2>
             <div className="mt-3" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
               <FormControlLabel
@@ -182,11 +222,18 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           </div>
           <FormControl className="mb-2 rnc-form-field me-2 mt-5" style={{ maxWidth: '25%' }}>
             <InputLabel>Risco / Oportunidade alterada</InputLabel>
-            <Select label="Risco / Oportunidade alterada" name="processOrigin">
-              <MenuItem value="1">Risco</MenuItem>
-              <MenuItem value="2">Oportunidade</MenuItem>
+            <Select
+              label="Risco / Oportunidade alterada"
+              name="processOrigin"
+              onChange={event => {
+                const value: string = event.target.value as string;
+                setFirstForm({ ...firstForm, riskOpportunity: { value: value, error: false } });
+              }}
+            >
+              <MenuItem value="risk">Risco</MenuItem>
+              <MenuItem value="opportunity">Oportunidade</MenuItem>
             </Select>
-          </FormControl> */}
+          </FormControl>
         </div>
         <div className="mt-4">
           <h2 style={{ fontSize: '20px', color: '#000000DE' }}>Descrição do Fechamento</h2>
