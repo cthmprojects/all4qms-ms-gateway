@@ -159,7 +159,7 @@ export const NewGoalObjective = () => {
 
         <div className="container-style ms-3" style={{ margin: '0' }}>
           <h1 className="mt-4" style={{ fontSize: '1.5rem', margin: '0 auto 1rem 0', padding: '0px' }}>
-            Indicador
+            Política
           </h1>
           <hr style={{ margin: '0 -1rem 1rem -2rem' }}></hr>
           <div
@@ -176,7 +176,7 @@ export const NewGoalObjective = () => {
               multiline
               rows={3}
               fullWidth
-              label="Política de Qualidade"
+              label="Descrição"
               name="ncAreaA"
               value={metaObj.politicaSGQ || ''}
               onChange={e => setMetaObj({ ...metaObj, politicaSGQ: e.target.value })}
@@ -198,7 +198,7 @@ export const NewGoalObjective = () => {
               multiline
               rows={3}
               fullWidth
-              label="Desdobramento da Política de Qualidade"
+              label="Desdobramento"
               name="ncAreaB"
               value={metaObj.desdobramentoSGQ || ''}
               onChange={e => setMetaObj({ ...metaObj, desdobramentoSGQ: e.target.value })}
@@ -219,7 +219,7 @@ export const NewGoalObjective = () => {
               multiline
               rows={3}
               fullWidth
-              label="Objetivos de Qualidade"
+              label="Objetivo"
               value={metaObj.objetivoSGQ || ''}
               onChange={e => setMetaObj({ ...metaObj, objetivoSGQ: e.target.value })}
             />
@@ -345,7 +345,7 @@ export const NewGoalObjective = () => {
                     <Box display="flex" flexDirection="column" width="100%" gap=".8rem">
                       <TextField
                         fullWidth
-                        label="Monitoramento / Controle"
+                        label="Indicador / Controle"
                         value={goal.monitoramentoControle}
                         onChange={e => onChangeInputsMetas(index, 'monitoramentoControle', e.target.value)}
                       />
@@ -354,7 +354,7 @@ export const NewGoalObjective = () => {
                         multiline
                         rows={3}
                         fullWidth
-                        label="Descrição Monitoramento / Controle"
+                        label="Descrição do Indicador / Controle"
                         value={goal.descricaoMonitoramentoControle || ''}
                         onChange={e => onChangeInputsMetas(index, 'descricaoMonitoramentoControle', e.target.value)}
                       />
