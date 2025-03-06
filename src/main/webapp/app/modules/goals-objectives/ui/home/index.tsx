@@ -81,7 +81,7 @@ const HomeGoalsList = () => {
   const { page, pageSize, paginator } = usePaginator(metasLista.totalElements);
 
   useEffect(() => {
-    if (page <= 0) {
+    if (page < 0) {
       return;
     }
 
@@ -111,7 +111,7 @@ const HomeGoalsList = () => {
     // fetchMetasAllFilter();
 
     const roles = Storage.local.get('ROLE');
-    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles.includes(item));
+    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles?.includes(item));
     setIsSGQ(isSGQ);
   }, []);
 
@@ -121,7 +121,7 @@ const HomeGoalsList = () => {
 
   //---------------------------------------------------------------
 
-  const columns = ['Metas', 'Resultados', 'Situação', 'Atualização', 'Ações'];
+  const columns = ['Metas', 'Monitoramento/Controle', 'Resultados', 'Situação', 'Atualização', 'Ações'];
   const getSituacaoIcon = (parcial, metaAtingida) => {
     if (parcial && metaAtingida) return { icon: <CheckIcon color="success" />, text: 'Meta Atingida' };
     if (!parcial && metaAtingida) return { icon: <TaskAltIcon color="success" />, text: 'Meta Parcial' };
@@ -180,45 +180,46 @@ const HomeGoalsList = () => {
                 {metasLista?.content.map((goalResult: ListMeta, index) => (
                   // <Tooltip title={goalResult.meta.metaObjetivo.desdobramentoSGQ}>
                   <Tooltip title={''}>
-                    <TableRow className="table-row" key={index}>
+                    <TableRow key={index}>
                       {/* <TableCell onClick={event => null}>{goalResult.meta.descricao}</TableCell> */}
-                      <TableCell onClick={event => null}>{goalResult.descricao}</TableCell>
+                      <TableCell>{goalResult.descricao}</TableCell>
+                      <TableCell>{goalResult.indicadorControle}</TableCell>
                       {/* <TableCell onClick={event => null}>{goalResult.meta.avaliacaoResultado}</TableCell> */}
-                      <TableCell onClick={event => null}>
+                      <TableCell>
                         {goalResult.avaliacao}
                         <br />
                         {goalResult.analise}
                       </TableCell>
-                      <TableCell onClick={event => null}>
+                      <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           {getSituacaoIcon(goalResult.parcial, goalResult.metaAtingida).icon}
                         </Box>
                       </TableCell>
-                      <TableCell onClick={event => null}>
-                        {goalResult.lancadoEm ? formatDateToString(new Date(goalResult.lancadoEm)) : '-'}
-                      </TableCell>
-                      <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
-                        {isSGQ ? (
+                      <TableCell>{goalResult.lancadoEm ? formatDateToString(new Date(goalResult.lancadoEm)) : '-'}</TableCell>
+                      <TableCell sx={{ justifyContent: 'center' }}>
+                        <Box display="flex">
+                          {isSGQ ? (
+                            <IconButton
+                              title="Editar"
+                              color="primary"
+                              onClick={() => navigate(`/goals/edit/${goalResult.idMeta}`, { state: goalResult })}
+                            >
+                              <EditIcon sx={{ color: '#e6b200' }} />
+                            </IconButton>
+                          ) : (
+                            <IconButton title="Visualizar" color="primary" onClick={event => null}>
+                              <VisibilityIcon sx={{ color: '#e6b200' }} />
+                            </IconButton>
+                          )}
                           <IconButton
-                            title="Editar"
+                            id="btn-view"
+                            title="Resultado"
                             color="primary"
-                            onClick={() => navigate(`/goals/edit/${goalResult.idMeta}`, { state: goalResult })}
+                            onClick={() => navigate(`/goals/${goalResult.idMeta}/results`)}
                           >
-                            <EditIcon sx={{ color: '#e6b200' }} />
+                            <NoteAltOutlinedIcon sx={{ color: '#2196F3' }} />
                           </IconButton>
-                        ) : (
-                          <IconButton title="Visualizar" color="primary" onClick={event => null}>
-                            <VisibilityIcon sx={{ color: '#e6b200' }} />
-                          </IconButton>
-                        )}
-                        <IconButton
-                          id="btn-view"
-                          title="Resultado"
-                          color="primary"
-                          onClick={() => navigate(`/goals/${goalResult.idMeta}/results`)}
-                        >
-                          <NoteAltOutlinedIcon sx={{ color: '#2196F3' }} />
-                        </IconButton>
+                        </Box>
                       </TableCell>
                     </TableRow>
                   </Tooltip>

@@ -180,7 +180,9 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               disabled={!newIshikawa}
               freeSolo
               renderTags={(value: readonly string[], getTagProps) =>
-                value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                value.map((option: string, index: number) => (
+                  <Chip clickable label={option} onClick={() => navigator.clipboard.writeText(option)} {...getTagProps({ index })} />
+                ))
               }
               disableClearable
               renderInput={params => <TextField {...params} label="Meio Ambiente" />}
@@ -197,7 +199,9 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               }}
               freeSolo
               renderTags={(value: readonly string[], getTagProps) =>
-                value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                value.map((option: string, index: number) => (
+                  <Chip clickable label={option} onClick={() => navigator.clipboard.writeText(option)} {...getTagProps({ index })} />
+                ))
               }
               disableClearable
               renderInput={params => <TextField {...params} label="Máquina" />}
@@ -214,7 +218,9 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               }}
               freeSolo
               renderTags={(value: readonly string[], getTagProps) =>
-                value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                value.map((option: string, index: number) => (
+                  <Chip clickable label={option} onClick={() => navigator.clipboard.writeText(option)} {...getTagProps({ index })} />
+                ))
               }
               disableClearable
               renderInput={params => <TextField {...params} label="Mão de obra" />}
@@ -231,7 +237,9 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               }}
               freeSolo
               renderTags={(value: readonly string[], getTagProps) =>
-                value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                value.map((option: string, index: number) => (
+                  <Chip clickable label={option} onClick={() => navigator.clipboard.writeText(option)} {...getTagProps({ index })} />
+                ))
               }
               disableClearable
               renderInput={params => <TextField {...params} label="Medição" />}
@@ -248,7 +256,9 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               }}
               freeSolo
               renderTags={(value: readonly string[], getTagProps) =>
-                value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                value.map((option: string, index: number) => (
+                  <Chip clickable label={option} onClick={() => navigator.clipboard.writeText(option)} {...getTagProps({ index })} />
+                ))
               }
               disableClearable
               renderInput={params => <TextField {...params} label="Método" />}
@@ -265,7 +275,9 @@ const IshikawaInvestigation = ({ description, onChanged, ishikawa, newIshikawa }
               }}
               freeSolo
               renderTags={(value: readonly string[], getTagProps) =>
-                value.map((option: string, index: number) => <Chip label={option} {...getTagProps({ index })} />)
+                value.map((option: string, index: number) => (
+                  <Chip clickable label={option} onClick={() => navigator.clipboard.writeText(option)} {...getTagProps({ index })} />
+                ))
               }
               disableClearable
               renderInput={params => <TextField {...params} label="Matéria-prima" />}

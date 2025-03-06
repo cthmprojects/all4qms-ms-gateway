@@ -1,5 +1,5 @@
 import { Box, Breadcrumbs, Button, Fab, FormControl, FormControlLabel, IconButton, Switch, TextField, Typography } from '@mui/material';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { Controller, UseFormReturn, useForm, useWatch } from 'react-hook-form';
 import { QueryClient, useMutation, useQuery } from '@tanstack/react-query';
@@ -146,22 +146,23 @@ const ResultItem = ({ save, initialPayload, onDelete, isPending }: ResultItemPro
           </IconButton>
         )}
       </Box>
-      <TextField
-        disabled={isDisabled}
-        multiline
-        rows={3}
-        fullWidth
-        label="Descrição dos Resultados (Ações Planejadas)"
-        {...field('avaliacao')}
+
+      <Controller
+        control={control}
+        name="avaliacao"
+        render={({ field }) => (
+          <TextField disabled={isDisabled} multiline rows={3} fullWidth label="Descrição dos Resultados (Ações Planejadas)" {...field} />
+        )}
       />
-      <TextField
-        disabled={isDisabled}
-        multiline
-        rows={3}
-        fullWidth
-        label="Análise Crítica / Eficácia dos Resultados"
-        {...field('analise')}
+
+      <Controller
+        control={control}
+        name="analise"
+        render={({ field }) => (
+          <TextField disabled={isDisabled} multiline rows={3} fullWidth label="Análise Crítica / Eficácia dos Resultados" {...field} />
+        )}
       />
+
       {!isDisabled && (
         <Box display="flex" justifyContent="flex-end">
           <Button disabled={isPending || !formState.isValid} variant="contained" onClick={() => save(formMethods)} color="primary">
@@ -243,6 +244,8 @@ export const ResultPage = () => {
     }
   };
 
+  const navigate = useNavigate();
+
   return (
     <div className="padding-container">
       <div className="container-style">
@@ -275,6 +278,19 @@ export const ResultPage = () => {
           <ResultItem save={debouncedSave} key={field.id} initialPayload={field} onDelete={() => deleteMetaResult(field.id)} />
         ))}
       </Box>
+
+      {/* Botões de salvar ou cancelar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px', margin: '0 3rem 3rem auto' }} className="mt-5">
+        <Button
+          variant="contained"
+          color="secondary"
+          className="me-3"
+          style={{ background: '#d9d9d9', color: '#4e4d4d' }}
+          onClick={() => navigate(-1)}
+        >
+          Voltar
+        </Button>
+      </div>
     </div>
   );
 };
