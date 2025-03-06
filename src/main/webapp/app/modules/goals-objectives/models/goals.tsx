@@ -10,6 +10,7 @@ export interface ListMeta {
   parcial: Boolean;
   metaAtingida: Boolean;
   lancadoEm: Date;
+  indicadorControle: string;
 }
 
 export type MetaObjetivo = {
