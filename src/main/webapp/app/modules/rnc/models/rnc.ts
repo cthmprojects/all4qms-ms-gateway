@@ -49,6 +49,7 @@ export type RncData = {
   verificacao: Date;
   eficacia: Date;
   fechamento: Date;
+  alterarRisco?: boolean;
 };
 
 export type ExtendedNc = {
