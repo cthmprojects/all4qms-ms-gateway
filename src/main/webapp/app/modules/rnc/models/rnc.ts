@@ -25,6 +25,7 @@ export type Rnc = {
   vinculoProduto?: number;
   aprovacao?: AprovacaoNC;
   qtdPorques: number;
+  justificativa?: string;
 };
 
 export type RNC = {
