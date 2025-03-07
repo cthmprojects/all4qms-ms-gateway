@@ -55,6 +55,10 @@ export const GeneralRegister = () => {
       value: '',
       error: false,
     },
+    analysis: {
+      value: '',
+      error: false,
+    },
     keywords: {
       value: [],
       error: false,
@@ -263,6 +267,10 @@ export const GeneralRegister = () => {
             value: keylist,
             error: registerForm.keywords.error,
             editable: false,
+          },
+          analysis: {
+            value: data.analiseAbrangencia,
+            error: registerForm.analysis.error,
           },
         });
 
@@ -484,7 +492,9 @@ export const GeneralRegister = () => {
     // ação imediata
     //
     if (registerForm.keywords.editable) {
-      dispatch(saveRange({ description: registerForm.keywords.value.join(';'), rncId: _rnc.id })).then(() => {
+      dispatch(
+        saveRange({ description: registerForm.keywords.value.join(';'), analysis: registerForm.analysis.value, rncId: _rnc.id })
+      ).then(() => {
         setRegisterForm({
           ...registerForm,
           keywords: {
@@ -827,10 +837,20 @@ export const GeneralRegister = () => {
         <div className="container-style">
           {/* Análise de Abrangência NC */}
           <ScopeAnalysis
+            analysis={registerForm.analysis.value}
             description={descriptionEntity?.detalhesNaoConformidade}
             disabled={!registerForm.keywords.editable}
             keywords={registerForm.keywords.value}
-            onChanged={newKeyWords =>
+            onAnalysisChanged={analysis =>
+              handleChange({
+                ...registerForm,
+                analysis: {
+                  value: analysis,
+                  error: registerForm.analysis.error,
+                },
+              })
+            }
+            onKeywordsChanged={newKeyWords =>
               handleChange({
                 ...registerForm,
                 keywords: {

@@ -552,6 +552,7 @@ export const saveRange = createAsyncThunk('rnc/range/save', async (range: RncRan
   const response = await axios.post(rangeApiUrl, {
     descricaoAbrangencia: range.description,
     idNaoConformidade: range.rncId,
+    analiseAbrangencia: range.analysis,
   });
   return response;
 });

@@ -174,6 +174,7 @@ export type NonConformityReason = {
 
 export type NonConformityCoverage = {
   id: number;
+  analiseAbrangencia: string;
   descricaoAbrangencia: string;
   criadoEm: Date;
   atualizadoEm: Date;
