@@ -359,14 +359,14 @@ const RncList = ({}) => {
                     vinculoDocAnterior,
                     vinculoProduto,
                   } = nc;
-                  const { descricao, eficacia, emissor, fechamento, idNc, responsavel, verificacao } = dados;
+                  const { alterarRisco, descricao, eficacia, emissor, fechamento, idNc, responsavel, verificacao } = dados;
 
                   const emissorNc = filterUser(idEmissorNC);
                   const receptorNc = filterUser(idReceptorNC);
                   const usuarioAtual = filterUser(idUsuarioAtual);
 
                   return (
-                    <TableRow key={id}>
+                    <TableRow key={id} sx={{ background: !alterarRisco ? 'none' : 'rgba(230, 178, 0, 0.4)' }}>
                       <TableCell>{id}</TableCell>
                       <TableCell>{tipoNC}</TableCell>
                       <TableCell>{formatDateToString(new Date(criadoEm))}</TableCell>
