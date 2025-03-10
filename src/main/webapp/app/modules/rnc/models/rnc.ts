@@ -25,6 +25,7 @@ export type Rnc = {
   vinculoProduto?: number;
   aprovacao?: AprovacaoNC;
   qtdPorques: number;
+  justificativa?: string;
 };
 
 export type RNC = {
@@ -49,6 +50,7 @@ export type RncData = {
   verificacao: Date;
   eficacia: Date;
   fechamento: Date;
+  alterarRisco?: boolean;
 };
 
 export type ExtendedNc = {
@@ -172,6 +174,7 @@ export type NonConformityReason = {
 
 export type NonConformityCoverage = {
   id: number;
+  analiseAbrangencia: string;
   descricaoAbrangencia: string;
   criadoEm: Date;
   atualizadoEm: Date;

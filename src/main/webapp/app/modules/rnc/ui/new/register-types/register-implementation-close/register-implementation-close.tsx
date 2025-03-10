@@ -53,7 +53,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           ...completion,
           dataFechamento: closingDate,
           responsavelFechamento: responsible,
-          alteracaoRisco: changeRisk,
+          alterarRisco: changeRisk,
           descFechamento: description,
         })
       );
@@ -109,7 +109,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           ...completion,
           dataFechamento: closingDate,
           responsavelFechamento: responsible,
-          alteracaoRisco: changeRisk,
+          alterarRisco: changeRisk,
           descFechamento: description,
         })
       );
@@ -141,7 +141,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
           value: definitiveId || '',
           error: false,
         },
-        changeRisk: { value: completion.alteracaoRisco, error: false },
+        changeRisk: { value: completion.alterarRisco, error: false },
         description: { value: completion.descFechamento, error: false },
         riskOpportunity: { value: '', error: false },
       });

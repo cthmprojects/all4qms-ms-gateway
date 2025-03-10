@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Stack, TextField } from '@mui/material';
 import { useAppDispatch } from 'app/config/store';
 import { Rnc } from 'app/modules/rnc/models';
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cancelRnc, deleteRnc } from '../../../reducers/rnc.reducer';
 import {
@@ -27,10 +27,20 @@ interface props {
 const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openOptions = Boolean(anchorEl);
+
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState<boolean>(false);
+  const [reason, setReason] = useState<string>('');
+
   const handleCloseOptions = () => {
     setAnchorEl(null);
+  };
+
+  const cancel = (id: number) => {
+    dispatch(cancelRnc({ id, reason }));
+    reload();
   };
 
   const handleClickOptions = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -48,8 +58,7 @@ const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
   };
 
   const cancelRncById = (id: number) => {
-    dispatch(cancelRnc(id));
-    reload();
+    setIsConfirmationOpen(true);
   };
 
   return (
@@ -110,6 +119,37 @@ const MenuOptions = ({ rnc, userId, userRole, reload }: props) => {
           <FontAwesomeIcon icon="trash" className="ms-2" color="#ff0000" />
         </MenuItem>
       </Menu>
+      <Dialog open={isConfirmationOpen} fullWidth maxWidth="lg">
+        <DialogTitle>Confirmar cancelamento</DialogTitle>
+        <DialogContent sx={{ margin: 1 }}>
+          <TextField
+            label="Justificativa"
+            maxRows={5}
+            multiline
+            placeholder="Justificativa"
+            onChange={event => setReason(event.target.value)}
+            sx={{ width: '100%' }}
+            value={reason}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Stack justifyContent="flex-end" gap="2.5rem" flexDirection="row" mt="20px">
+            <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => setIsConfirmationOpen(false)}>
+              Voltar
+            </Button>
+
+            <Button
+              type="submit"
+              onClick={() => cancel(rnc.id)}
+              variant="contained"
+              color="primary"
+              style={{ background: '#e6b200', color: '#4e4d4d' }}
+            >
+              Confirmar
+            </Button>
+          </Stack>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

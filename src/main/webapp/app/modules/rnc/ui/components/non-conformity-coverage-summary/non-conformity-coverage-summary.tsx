@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Chip, Stack } from '@mui/material';
+import { Card, CardContent, CardHeader, Chip, Stack, TextField } from '@mui/material';
 import { NonConformityCoverage } from 'app/modules/rnc/models';
 import React from 'react';
 
@@ -12,6 +12,15 @@ const NonConformityCoverageSummary = ({ coverage }: NonConformityCoverageSummary
       <CardHeader title="Análise de Abrangência" />
       <CardContent>
         <Stack spacing={2}>
+          <TextField
+            disabled
+            maxRows={5}
+            multiline
+            placeholder="Análise de Abrangência"
+            sx={{ width: '100%' }}
+            value={coverage?.analiseAbrangencia}
+          />
+
           <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
             {coverage?.descricaoAbrangencia.split(';').map((keyword: string, index: number) => (
               <Chip disabled label={keyword} className="me-2" />

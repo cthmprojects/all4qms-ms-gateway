@@ -74,6 +74,11 @@ interface ClientComplaint {
   client: RncClient;
 }
 
+interface CancelPayload {
+  id: number;
+  reason: string;
+}
+
 export const list = createAsyncThunk('rnc/list', async (params: ListParams) => {
   const { statusAtual, processoNC, tipoNC, dtIni, dtFim, page, size, descricao, origemNC } = params;
   const queryParams: string[] = [];
@@ -170,7 +175,9 @@ export const saveAudit = createAsyncThunk('rnc/audit/save', async (audit: RncAud
   return await axiosSaveAudit(audit);
 });
 
-export const cancelRnc = createAsyncThunk('rnc/cancel', async (id: number) => {
+export const cancelRnc = createAsyncThunk('rnc/cancel', async (payload: CancelPayload) => {
+  const { id, reason } = payload;
+
   const getResponse = await axios.get(`${apiUrl}/${id}`);
 
   if (getResponse.status !== 200) {
@@ -179,7 +186,7 @@ export const cancelRnc = createAsyncThunk('rnc/cancel', async (id: number) => {
 
   const rnc = getResponse.data;
 
-  const response = await axios.patch(`${apiUrl}/${rnc.id}`, { ...rnc, statusAtual: 'CANCELADO' });
+  const response = await axios.patch(`${apiUrl}/${rnc.id}`, { ...rnc, statusAtual: 'CANCELADO', justificativa: reason });
   return response;
 });
 
@@ -545,6 +552,7 @@ export const saveRange = createAsyncThunk('rnc/range/save', async (range: RncRan
   const response = await axios.post(rangeApiUrl, {
     descricaoAbrangencia: range.description,
     idNaoConformidade: range.rncId,
+    analiseAbrangencia: range.analysis,
   });
   return response;
 });

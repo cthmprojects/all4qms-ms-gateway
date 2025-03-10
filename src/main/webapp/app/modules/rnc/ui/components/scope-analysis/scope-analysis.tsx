@@ -6,13 +6,15 @@ import { postHashtagRNC } from 'app/modules/rnc/reducers/hashtag.reducer';
 import React, { useEffect, useState } from 'react';
 
 type ScopeAnalysisProps = {
+  analysis: string;
   description: string;
   keywords: Array<string>;
-  onChanged: (value: Array<string>) => void;
+  onAnalysisChanged: (value: string) => void;
+  onKeywordsChanged: (value: Array<string>) => void;
   disabled?: boolean;
 };
 
-const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnalysisProps) => {
+const ScopeAnalysis = ({ analysis, description, keywords, onAnalysisChanged, onKeywordsChanged, disabled }: ScopeAnalysisProps) => {
   const [keywordList, setKeywordList] = useState<Array<string>>(keywords);
   const [keyword, setKeyword] = useState<string>('');
   const hashtags = useAppSelector<Hashtag[]>(state => state.all4qmsmsgateway.hashtag.hashtags);
@@ -29,7 +31,7 @@ const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnal
   const onKeywordAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setKeywordList([...keywordList, keyword]);
     setKeyword('');
-    onChanged([...keywordList, keyword]);
+    onKeywordsChanged([...keywordList, keyword]);
   };
 
   useEffect(() => {
@@ -39,7 +41,7 @@ const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnal
 
     const generatedTags: Array<string> = hashtags.map(h => h.text);
     const allKeywords: Array<string> = [...keywords].concat(generatedTags);
-    onChanged(allKeywords);
+    onKeywordsChanged(allKeywords);
     setKeyword('');
   }, [hashtags, disabled]);
 
@@ -57,7 +59,7 @@ const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnal
   const onKeywordRemoved = (event: any, index: number): void => {
     if (disabled) return;
     setKeywordList(keywordList.filter((_, idx) => idx !== index));
-    onChanged(keywordList);
+    onKeywordsChanged(keywordList);
   };
 
   return (
@@ -67,6 +69,17 @@ const ScopeAnalysis = ({ description, keywords, onChanged, disabled }: ScopeAnal
           Análise de Abrangência
         </Typography>
         <br />
+
+        <TextField
+          disabled={disabled}
+          label="Escreva aqui..."
+          maxRows={5}
+          multiline
+          onChange={event => onAnalysisChanged(event.target.value)}
+          sx={{ width: '100%' }}
+          value={analysis}
+        />
+
         <div style={{ display: 'flex', alignItems: 'center' }} className="mt-2 mb-2">
           <span className="me-2" style={{ fontWeight: '500', fontSize: '16px', marginTop: '0px', color: '#384150' }}>
             Palavra chave
