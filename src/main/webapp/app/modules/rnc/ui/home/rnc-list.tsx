@@ -76,7 +76,7 @@ const RncList = ({}) => {
   const [value, setValue] = useState(0);
   const [userId, setUserId] = useState(Storage.session.get('ID_USUARIO'));
   const [userLogin, setUserLogin] = useState(Storage.session.get('LOGIN'));
-  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
+  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS') ?? null));
   const [userRole, setUserRole] = useState(Storage.local.get('ROLE'));
   const [page, setPage] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(5);

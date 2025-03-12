@@ -57,7 +57,9 @@ export const UsarioOptions = ({ userRole, user, deleteUser }) => {
         }}
       >
         {isAdmin && <MenuItem onClick={show}>Resetar senha</MenuItem>}
-        <MenuItem onClick={() => navigate(`${user.id}/edit`)}>Editar usuário</MenuItem>
+        <MenuItem disabled={!isAdmin} onClick={() => navigate(`${user.id}/edit`)}>
+          Editar usuário
+        </MenuItem>
         {userRole.includes('ROLE_ADMIN') && (
           <MenuItem onClick={() => handleDeleteUser(user.user.login, user.id)}>
             Deletar usuário
