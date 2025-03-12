@@ -28,7 +28,7 @@ import DatePicker from 'react-datepicker';
 import { handleFilter, partesLabel, renderValueModelo } from '../audit-helper';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useDebounce } from 'use-debounce';
-const columns = ['Modelo de auditoria', 'Data', 'Parte', 'Status', 'Ações'];
+const columns = ['Modelo de auditoria', 'Data', 'Escopo', 'Status', 'Ações'];
 
 const Custom = forwardRef(({ children, onClick }: any, ref) => (
   <Box onClick={onClick} ref={ref}>
@@ -76,7 +76,7 @@ export const TimelineTabContent = () => {
           onClick={() => navigate('/audit/timeline/new')}
           title="Novo Registro"
         >
-          Novo Cronograma
+          Nova Auditoria
         </Button>
 
         <Stack gap="12px" flexDirection="row" sx={{ flexGrow: 0.4, display: 'inline-flex' }}>
@@ -161,7 +161,7 @@ export const TimelineTabContent = () => {
                     }
                   />
                 </TableCell>
-                <TableCell>{partesLabel(timeline.parte)}</TableCell>
+                <TableCell>{timeline.escopo}</TableCell>
                 <TableCell>{timeline.status}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

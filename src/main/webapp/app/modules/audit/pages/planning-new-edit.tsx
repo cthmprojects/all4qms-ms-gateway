@@ -219,7 +219,9 @@ export const PlanningNewEdit = () => {
             name="escopo"
             control={control}
             rules={defaultRule}
-            render={renderPayload => <TextField multiline rows="3" fullWidth label="Escopo" {...formField(renderPayload)} />}
+            render={renderPayload => (
+              <TextField multiline rows="3" fullWidth label="Requisitos específicos" {...formField(renderPayload)} />
+            )}
           />
         </Box>
       </div>
