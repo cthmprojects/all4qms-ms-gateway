@@ -50,12 +50,54 @@ const AppRoutes = (props: IRoutesProps) => {
         />
         <Route path="login" element={<Login />} />
         <Route path="logout" element={<Logout />} />
-        <Route path="rnc/*" element={<RncRoutes />} />
-        <Route path="infodoc/*" element={<InfodocRoutes />} />
-        <Route path="risks-opportunities/*" element={<RisksOpportunitiesRoutes />} />
-        <Route path="goals/*" element={<GoalsObjectivesRoutes />} />
-        <Route path="performance-indicators/*" element={<PerformanceIndicatorsRoutes />} />
-        <Route path="strategic-planning/*" element={<StrategicPlaningRoutes />} />
+        <Route
+          path="rnc/*"
+          element={
+            <PrivateRoute>
+              <RncRoutes />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="infodoc/*"
+          element={
+            <PrivateRoute>
+              <InfodocRoutes />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="risks-opportunities/*"
+          element={
+            <PrivateRoute>
+              <RisksOpportunitiesRoutes />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="goals/*"
+          element={
+            <PrivateRoute>
+              <GoalsObjectivesRoutes />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="performance-indicators/*"
+          element={
+            <PrivateRoute>
+              <PerformanceIndicatorsRoutes />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="strategic-planning/*"
+          element={
+            <PrivateRoute>
+              <StrategicPlaningRoutes />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="audit/*"
           element={

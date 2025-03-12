@@ -435,6 +435,18 @@ export const RNCNew = () => {
   };
 
   const goToNextStep = () => {
+    for (let i = 0; i < evidences.length; i++) {
+      const description = descriptions[i];
+      const evidence = evidences[i];
+      const requirement = requirements[i];
+
+      if (!description || !evidence || !requirement) {
+        toast.error('Existem campos não preenchidos');
+
+        return;
+      }
+    }
+
     saveInternalAudit();
     saveExternalAudit();
 
