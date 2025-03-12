@@ -6,51 +6,61 @@ interface props {
   userRole: string;
 }
 
+const matchesRole = (userRole: string, role: string) => {
+  if (!userRole || !role) {
+    return false;
+  }
+
+  return userRole.includes(role);
+};
+
 export const canAccessFillingPage = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
-  return (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) && statusAtual === 'PREENCHIMENTO';
+  return (userId === idEmissorNC || matchesRole(userRole, 'ROLE_SGQ')) && statusAtual === 'PREENCHIMENTO';
 };
 
 export const canAccessRncDeleteButton = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
-  return (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) && (statusAtual === 'PREENCHIMENTO' || statusAtual === 'DETALHAMENTO');
+  return (
+    (userId === idEmissorNC || matchesRole(userRole, 'ROLE_SGQ')) && (statusAtual === 'PREENCHIMENTO' || statusAtual === 'DETALHAMENTO')
+  );
 };
 
 export const canAccessDetailingInfo = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
 
-  return (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) && statusAtual === 'DETALHAMENTO';
+  return (userId === idEmissorNC || matchesRole(userRole, 'ROLE_SGQ')) && statusAtual === 'DETALHAMENTO';
 };
 
 export const canAccessInvestigationPage = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idReceptorNC } = rnc;
-  return (userId === idReceptorNC || userRole.includes('ROLE_SGQ')) && statusAtual === 'LEVANTAMENTO';
+  return (userId === idReceptorNC || matchesRole(userRole, 'ROLE_SGQ')) && statusAtual === 'LEVANTAMENTO';
 };
 
 export const canAccessElaborationPage = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idReceptorNC } = rnc;
-  return (userId === idReceptorNC || userRole.includes('ROLE_SGQ')) && statusAtual === 'ELABORACAO';
+  return (userId === idReceptorNC || matchesRole(userRole, 'ROLE_SGQ')) && statusAtual === 'ELABORACAO';
 };
 
 export const canAccessExecutionPage = ({ rnc, userRole }: props) => {
   const { statusAtual } = rnc;
-  return userRole.includes('ROLE_SGQ') && statusAtual === 'EXECUCAO';
+  return matchesRole(userRole, 'ROLE_SGQ') && statusAtual === 'EXECUCAO';
 };
 
 export const canAccessVerificationPage = ({ rnc, userRole }: props) => {
   const { statusAtual } = rnc;
-  return userRole.includes('ROLE_SGQ') && statusAtual === 'VERIFICACAO';
+  return matchesRole(userRole, 'ROLE_SGQ') && statusAtual === 'VERIFICACAO';
 };
 
 export const canAccessValidationPage = ({ rnc, userRole }: props) => {
   const { statusAtual } = rnc;
-  return userRole.includes('ROLE_SGQ') && statusAtual === 'VALIDACAO';
+  return matchesRole(userRole, 'ROLE_SGQ') && statusAtual === 'VALIDACAO';
 };
 
 export const canAccessRncCancelButton = ({ rnc, userId, userRole }: props) => {
   const { statusAtual, idEmissorNC } = rnc;
   return (
-    (userId === idEmissorNC || userRole.includes('ROLE_SGQ')) &&
+    (userId === idEmissorNC || matchesRole(userRole, 'ROLE_SGQ')) &&
     statusAtual !== 'CANCELADO' &&
     statusAtual !== 'PREENCHIMENTO' &&
     statusAtual !== 'DETALHAMENTO'
