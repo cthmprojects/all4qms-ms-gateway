@@ -1,4 +1,14 @@
-import { Breadcrumbs, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import {
+  Breadcrumbs,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Radio,
+  Select,
+  SelectChangeEvent,
+} from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { saveMinimalRiskOpportunity } from 'app/modules/risks-opportunities/reducers/risks-opportunities.reducer';
@@ -203,7 +213,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
               <FormControlLabel
                 label="Sim"
                 control={
-                  <Checkbox
+                  <Radio
                     onChange={() => setFirstForm({ ...firstForm, changeRisk: { value: true, error: false } })}
                     checked={firstForm.changeRisk.value}
                   />
@@ -212,7 +222,7 @@ export const RegisterImplementationClose = ({ handleTela, save, handlePrazoFecha
               <FormControlLabel
                 label="Não"
                 control={
-                  <Checkbox
+                  <Radio
                     onChange={() => setFirstForm({ ...firstForm, changeRisk: { value: false, error: false } })}
                     checked={!firstForm.changeRisk.value}
                   />
