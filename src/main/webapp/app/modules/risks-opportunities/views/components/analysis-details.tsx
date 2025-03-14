@@ -66,7 +66,7 @@ const AnalysisDetails = ({
             <Autocomplete
               disableClearable
               disabled={readonly}
-              getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
+              getOptionLabel={option => `${option.pesoRO} - ${option.descricaoRO}`}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               options={probabilities}
               renderInput={params => <TextField {...params} label={isOpportunity ? 'Complexidade' : 'Probabilidade'} />}
@@ -84,7 +84,7 @@ const AnalysisDetails = ({
             <Autocomplete
               disableClearable
               disabled={readonly}
-              getOptionLabel={option => `${option.grauRO} - ${option.descricaoRO}`}
+              getOptionLabel={option => `${option.pesoRO} - ${option.descricaoRO}`}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               options={severities}
               renderInput={params => <TextField {...params} label={isOpportunity ? 'Melhoria' : 'Severidade'} />}
@@ -97,7 +97,12 @@ const AnalysisDetails = ({
       </Stack>
 
       <Stack direction="row" spacing={2}>
-        <TextField disabled label="Significância" placeholder="Significância" value={points.toString()} />
+        <TextField
+          disabled
+          label={isOpportunity ? 'Viabilidade' : 'Significância'}
+          placeholder={isOpportunity ? 'Viabilidade' : 'Significância'}
+          value={points.toString()}
+        />
         <TextField
           disabled
           label="Descrição da decisão"
