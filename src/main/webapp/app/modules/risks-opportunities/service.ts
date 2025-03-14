@@ -124,9 +124,9 @@ export const editRiskOpportunity = addToast(
 
 export const getWeightRoConfig = (level: string): number => {
   const localLevel = level.toUpperCase();
-  if (localLevel.includes('PRIORIDADE 1')) {
+  if (localLevel.includes('ALTO')) {
     return 3;
-  } else if (localLevel.includes('PRIORIDADE 2')) {
+  } else if (localLevel.includes('MÉDIO')) {
     return 2;
   } else {
     return 1;
@@ -134,9 +134,9 @@ export const getWeightRoConfig = (level: string): number => {
 };
 export const getColorRoConfig = (level: string): string => {
   const localLevel = level.toUpperCase();
-  if (localLevel.includes('PRIORIDADE 1')) {
+  if (localLevel.includes('ALTO')) {
     return 'lightsalmon';
-  } else if (localLevel.includes('PRIORIDADE 2')) {
+  } else if (localLevel.includes('MÉDIO')) {
     return 'lightgoldenrodyellow';
   } else {
     return 'lightgreen';

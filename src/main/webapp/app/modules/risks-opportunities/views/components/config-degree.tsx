@@ -49,6 +49,8 @@ const ConfigDegree = ({ code, color, decision, description, label, title, weight
         placeholder={`Descrição do grau de ${title ?? ''}`}
         value={desc}
         sx={{ flexGrow: 1 }}
+        multiline
+        rows="3"
       />
     </Stack>
   );

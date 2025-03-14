@@ -20,6 +20,7 @@ import ActionPlan from './action-plan';
 import AnalysisDetails from './analysis-details';
 import CauseInvestigation from './cause-investigation';
 import Closing from './closing';
+import { getColorRoConfig } from '../../service';
 
 type AnalysisProps = {
   enums: Enums;
@@ -58,16 +59,6 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
 
     const filteredLevels: Array<Option> = enums.levelOptions.filter(l => l.name === configuration.grauRO);
     return filteredLevels.length > 0 ? filteredLevels[0] : null;
-  };
-
-  const getColor = (level: string): string => {
-    if (level === 'Aceito Risco') {
-      return 'lightgreen';
-    } else if (level === 'Prioridade 2 (médio)') {
-      return 'lightgoldenrodyellow';
-    } else {
-      return 'lightsalmon';
-    }
   };
 
   useEffect(() => {
@@ -177,14 +168,14 @@ const Analysis = ({ enums, firstConfigurations, map, secondConfigurations, reado
                     <TableCell>{analysisSummary?.date?.toLocaleDateString?.('pt-BR')}</TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={2}>
-                        <Circle sx={{ fill: getColor(analysisSummary.probability), marginRight: 50 }} />
+                        <Circle sx={{ fill: getColorRoConfig(analysisSummary.probability), marginRight: 50 }} />
 
                         {analysisSummary.probability}
                       </Stack>
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={2}>
-                        <Circle sx={{ fill: getColor(analysisSummary.severity), marginRight: 50 }} />
+                        <Circle sx={{ fill: getColorRoConfig(analysisSummary.severity), marginRight: 50 }} />
 
                         {analysisSummary.severity}
                       </Stack>

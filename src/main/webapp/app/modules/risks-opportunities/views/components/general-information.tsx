@@ -42,11 +42,11 @@ const GeneralInformation = ({ isOpportunity, summarizedProcesses, readonly }: Ge
   }, [summarizedProcesses]);
 
   const getFirstAuxiliaryDescriptionLabel = (): string => {
-    return !isOpportunity ? 'Causa' : 'Fraqueza';
+    return !isOpportunity ? 'Causa' : 'Recurso';
   };
 
   const getSecondAuxiliaryDescriptionLabel = (): string => {
-    return !isOpportunity ? 'Efeito' : 'Benefício';
+    return !isOpportunity ? 'Efeito' : 'Efeito';
   };
 
   const onInterestedPartAdded = (event: React.MouseEvent<HTMLButtonElement>): void => {
