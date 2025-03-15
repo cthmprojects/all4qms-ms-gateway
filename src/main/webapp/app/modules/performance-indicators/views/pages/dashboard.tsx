@@ -101,24 +101,27 @@ const Dashboard = () => {
     return summarizedProcesses.map(p => {
       const name: string = p.name;
 
-      let sumMeasurements = 0;
-      let sumGoals = 0;
-      indicatorGoals.forEach(element => {
-        element.measurements.forEach(num => {
-          if (num) sumMeasurements += num;
-        });
+      let measurements = 0;
+      let goals = 0;
 
-        element.goals.forEach(num => {
-          if (num) sumGoals += num;
-        });
-      });
+      const currentIndicators: Array<Indicator> = indicators.filter(o => o.processId === p.id);
+      const currentIndicatorIds: Set<number> = new Set<number>(currentIndicators.map(o => o.id));
+
+      const currentGoals: Array<IndicatorGoal> = indicatorGoals.filter(o => currentIndicatorIds.has(o.indicator.id));
+
+      for (let i = 0; i < currentGoals.length; i++) {
+        const currentGoal: IndicatorGoal = currentGoals[i];
+
+        measurements += currentGoal.measurements.filter(m => m).reduce((acc, curr) => acc + curr, 0);
+        goals += currentGoal.goals.filter(m => m).reduce((acc, curr) => acc + curr, 0);
+      }
 
       return {
         name,
-        goal: sumGoals,
-        metas: sumGoals,
-        measured: sumMeasurements,
-        medições: sumMeasurements,
+        goal: goals,
+        metas: goals,
+        measured: measurements,
+        medições: measurements,
       };
     });
   }, [indicators, indicatorGoals, summarizedProcesses]);
