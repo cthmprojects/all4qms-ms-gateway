@@ -136,6 +136,7 @@ const Dashboard = () => {
     }
 
     const indicatorsCount: number = indicators.length;
+    const now: Date = new Date();
 
     let completedIndicators: number = 0;
 
@@ -152,24 +153,35 @@ const Dashboard = () => {
         continue;
       }
 
-      let expectedMeasurements: number = 0;
+      const all: Array<number> = indicatorGoal.measurements;
+      const month: number = now.getMonth();
+      let isComplete: boolean = true;
+      let step: number = 1;
+
       if (indicatorGoal.frequency === 'MENSAL') {
-        expectedMeasurements = 12;
+        step = 1;
       } else if (indicatorGoal.frequency === 'BIMESTRAL') {
-        expectedMeasurements = 6;
+        step = 2;
       } else if (indicatorGoal.frequency === 'TRIMESTRAL') {
-        expectedMeasurements = 4;
+        step = 3;
       } else if (indicatorGoal.frequency === 'QUADRIMESTRAL') {
-        expectedMeasurements = 3;
+        step = 4;
       } else if (indicatorGoal.frequency === 'SEMESTRAL') {
-        expectedMeasurements = 2;
+        step = 6;
       } else {
-        expectedMeasurements = 1;
+        step = 12;
       }
 
-      const measurements: number = indicatorGoal.measurements.filter(m => m).length;
+      for (let i = 0; i <= month; i = i + step) {
+        const currentMeasurement: number | null = all[i];
 
-      if (measurements === expectedMeasurements) {
+        if (!currentMeasurement) {
+          isComplete = false;
+          break;
+        }
+      }
+
+      if (isComplete) {
         completedIndicators++;
       }
     }
