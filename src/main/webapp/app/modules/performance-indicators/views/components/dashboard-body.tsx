@@ -2,7 +2,6 @@ import { Stack } from '@mui/material';
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Pair } from '../../models';
 import './dashboard-body.css';
-import { ArrowDownward } from '@mui/icons-material';
 
 type DashboardBodyProps = {
   goalsByProcess: Array<Pair>;
@@ -14,15 +13,6 @@ type DashboardBodyProps = {
 const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding, qualityProductionValue, productionVariation }: DashboardBodyProps) => {
   return (
     <Stack direction="row" spacing={2}>
-      <div className="featuredItem">
-        <span className="featuredTitle"> Qualidade Geral de Produção</span>
-        <div className="featuredMoneyContainer">
-          <span className="featuredMoney"> {qualityProductionValue}% </span>
-          <span className="featuredMoneyRate">
-            {productionVariation} <ArrowDownward className="featuredIcon negative" />
-          </span>
-        </div>
-      </div>
       <div style={{ width: '100%', height: 400 }}>
         <ResponsiveContainer>
           <PieChart width={400} height={400} title="Metas por Processo">
