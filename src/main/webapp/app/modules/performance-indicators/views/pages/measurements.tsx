@@ -41,7 +41,7 @@ const Measurements = () => {
   }, [id]);
 
   const back = (): void => {
-    navigate('../');
+    navigate('../analytics');
   };
 
   const save = async (): Promise<void> => {
@@ -85,7 +85,7 @@ const Measurements = () => {
       );
     }
 
-    navigate('../');
+    navigate('../analytics');
   };
 
   const enums: Enums = useAppSelector<Enums>(state => state.all4qmsmsgatewaymetaind.enums.entity);
