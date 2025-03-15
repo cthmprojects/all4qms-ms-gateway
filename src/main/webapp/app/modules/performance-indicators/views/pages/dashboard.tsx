@@ -202,7 +202,6 @@ const Dashboard = () => {
   }, [indicators, indicatorGoals, summarizedProcesses]);
 
   const metasPeriodo = charts.metaPeriodo;
-  // console.log("Charts Values: " +charts);
   const qualityProductionValue = charts.qualidadeProducao;
   const productionVariation = charts.variacao;
 

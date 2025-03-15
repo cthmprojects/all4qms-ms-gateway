@@ -1,8 +1,7 @@
-import { Title } from '@mui/icons-material';
-import './dashboard-body.css';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Rectangle } from 'recharts';
-import { GoalMeasured, Pair } from '../../models';
+import { Bar, BarChart, CartesianGrid, Legend, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { GoalMeasured } from '../../models';
 import { DataChart } from '../../models/charts';
+import './dashboard-body.css';
 
 type DashboardBottomProps = {
   comparisonByPeriod: Array<GoalMeasured>;
@@ -10,6 +9,18 @@ type DashboardBottomProps = {
 };
 
 const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomProps) => {
+  const brownPalette: Array<string> = ['#A23900', '#B96B40', '#D19C80', '#E7CDBF'];
+
+  const yellowPalette: Array<string> = ['#EBC139', '#F0D16B', '#F5E09C'];
+
+  const bluePalette: Array<string> = ['#0EBFCF', '#4ACFDB', '#87DFE7'];
+
+  const greenPalette: Array<string> = ['#00AE59', '#40C283', '#80D7AC'];
+
+  const lilacPalette: Array<string> = ['#4A148C', '#774FA9', '#A58AC6', '#D1C4E2'];
+
+  const palette: Array<string> = brownPalette.concat(yellowPalette).concat(bluePalette).concat(greenPalette).concat(lilacPalette);
+
   return (
     <div className="parent">
       <div className="child" style={{ width: '50%', height: 400 }}>
@@ -31,8 +42,8 @@ const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomPr
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="metas" fill="#344BFD" activeBar={<Rectangle fill="pink" stroke="blue" />} />
-            <Bar dataKey="medições" fill="#FF9359" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+            <Bar dataKey="metas" fill={lilacPalette[0]} activeBar={<Rectangle fill="pink" stroke="blue" />} />
+            <Bar dataKey="medições" fill={bluePalette[0]} activeBar={<Rectangle fill="pink" stroke="blue" />} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -55,8 +66,8 @@ const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomPr
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="meta" stackId="a" fill="#344BFD" />
-            <Bar dataKey="realizado" stackId="a" fill="#E9ECF1" />
+            <Bar dataKey="meta" stackId="a" fill={yellowPalette[0]} />
+            <Bar dataKey="realizado" stackId="a" fill={greenPalette[0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
