@@ -1,3 +1,4 @@
+import { Stack, Typography } from '@mui/material';
 import { Bar, BarChart, CartesianGrid, Legend, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { GoalMeasured } from '../../models';
 import { DataChart } from '../../models/charts';
@@ -22,14 +23,12 @@ const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomPr
   const palette: Array<string> = brownPalette.concat(yellowPalette).concat(bluePalette).concat(greenPalette).concat(lilacPalette);
 
   return (
-    <div className="parent">
-      <div className="child" style={{ width: '50%', height: 400 }}>
-        <ResponsiveContainer>
+    <Stack direction="row" spacing={2}>
+      <Stack width="100%" display="flex" justifyContent="center" alignItems="center">
+        <Typography fontWeight="bold">Metas vs Medições</Typography>
+        <ResponsiveContainer width="100%" height={350}>
           <BarChart
-            width={500}
-            height={300}
             data={comparisonByPeriod}
-            title="Comparação por Períodos"
             margin={{
               top: 5,
               right: 30,
@@ -46,14 +45,13 @@ const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomPr
             <Bar dataKey="medições" fill={bluePalette[0]} activeBar={<Rectangle fill="pink" stroke="blue" />} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
-      <div className="child" style={{ width: '50%', height: 400 }}>
-        <ResponsiveContainer>
+      </Stack>
+
+      <Stack width="100%" display="flex" justifyContent="center" alignItems="center">
+        <Typography fontWeight="bold">Metas por Período</Typography>
+        <ResponsiveContainer width="100%" height={350}>
           <BarChart
-            width={500}
-            height={300}
             data={metasPeriodo}
-            title="Metas por Período"
             margin={{
               top: 20,
               right: 30,
@@ -70,8 +68,8 @@ const DashboardBottom = ({ comparisonByPeriod, metasPeriodo }: DashboardBottomPr
             <Bar dataKey="realizado" stackId="a" fill={greenPalette[0]} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 };
 export default DashboardBottom;

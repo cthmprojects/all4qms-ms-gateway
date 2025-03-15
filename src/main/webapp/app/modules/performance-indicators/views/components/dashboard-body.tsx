@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Pair } from '../../models';
 import './dashboard-body.css';
@@ -25,9 +25,10 @@ const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding, qualityProductio
 
   return (
     <Stack direction="row" spacing={2}>
-      <div style={{ width: '100%', height: 400 }}>
-        <ResponsiveContainer>
-          <PieChart width={400} height={400} title="Metas por Processo">
+      <Stack width="100%" display="flex" justifyContent="center" alignItems="center">
+        <Typography fontWeight="bold">Metas por Processo</Typography>
+        <ResponsiveContainer width="100%" height={350}>
+          <PieChart>
             <Pie data={goalsByProcess} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} label>
               {goalsByProcess.map((entry, index) => (
                 <Cell fill={lilacPalette[index % lilacPalette.length]} />
@@ -37,10 +38,12 @@ const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding, qualityProductio
             <Legend layout="horizontal" align="center" verticalAlign="bottom" />
           </PieChart>
         </ResponsiveContainer>
-      </div>
-      <div style={{ width: '100%', height: 400 }}>
-        <ResponsiveContainer>
-          <PieChart width={400} height={400} title="Preenchimento dos Indicadores">
+      </Stack>
+
+      <Stack width="100%" display="flex" justifyContent="center" alignItems="center">
+        <Typography fontWeight="bold">Preenchimento dos Indicadores</Typography>
+        <ResponsiveContainer width="100%" height={350}>
+          <PieChart>
             <Pie data={indicatorGoalsFeeding} dataKey="value" cx="50%" cy="50%" innerRadius={60} outerRadius={80} label>
               {indicatorGoalsFeeding.map((entry, index) => (
                 <Cell fill={brownPalette[index % brownPalette.length]} />
@@ -50,7 +53,7 @@ const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding, qualityProductio
             <Legend layout="horizontal" align="center" verticalAlign="bottom" />
           </PieChart>
         </ResponsiveContainer>
-      </div>
+      </Stack>
     </Stack>
   );
 };
