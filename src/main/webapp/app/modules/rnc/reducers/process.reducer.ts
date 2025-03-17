@@ -17,7 +17,7 @@ const initialState: EntityState<Process> = {
 const apiUrl = 'services/all4qmsmsgateway/api/processos';
 
 export const getProcesses = createAsyncThunk('rnc/process/list', async () => {
-  return axios.get<Array<Process>>(`${apiUrl}`);
+  return axios.get<Array<Process>>(`${apiUrl}?cacheBuster=${new Date().getTime()}`);
 });
 
 const RncProcess = createEntitySlice({

@@ -101,24 +101,27 @@ const Dashboard = () => {
     return summarizedProcesses.map(p => {
       const name: string = p.name;
 
-      let sumMeasurements = 0;
-      let sumGoals = 0;
-      indicatorGoals.forEach(element => {
-        element.measurements.forEach(num => {
-          if (num) sumMeasurements += num;
-        });
+      let measurements = 0;
+      let goals = 0;
 
-        element.goals.forEach(num => {
-          if (num) sumGoals += num;
-        });
-      });
+      const currentIndicators: Array<Indicator> = indicators.filter(o => o.processId === p.id);
+      const currentIndicatorIds: Set<number> = new Set<number>(currentIndicators.map(o => o.id));
+
+      const currentGoals: Array<IndicatorGoal> = indicatorGoals.filter(o => currentIndicatorIds.has(o.indicator.id));
+
+      for (let i = 0; i < currentGoals.length; i++) {
+        const currentGoal: IndicatorGoal = currentGoals[i];
+
+        measurements += currentGoal.measurements.filter(m => m).reduce((acc, curr) => acc + curr, 0);
+        goals += currentGoal.goals.filter(m => m).reduce((acc, curr) => acc + curr, 0);
+      }
 
       return {
         name,
-        goal: sumGoals,
-        metas: sumGoals,
-        measured: sumMeasurements,
-        medições: sumMeasurements,
+        goal: goals,
+        metas: goals,
+        measured: measurements,
+        medições: measurements,
       };
     });
   }, [indicators, indicatorGoals, summarizedProcesses]);
@@ -136,6 +139,7 @@ const Dashboard = () => {
     }
 
     const indicatorsCount: number = indicators.length;
+    const now: Date = new Date();
 
     let completedIndicators: number = 0;
 
@@ -152,24 +156,35 @@ const Dashboard = () => {
         continue;
       }
 
-      let expectedMeasurements: number = 0;
+      const all: Array<number> = indicatorGoal.measurements;
+      const month: number = now.getMonth();
+      let isComplete: boolean = true;
+      let step: number = 1;
+
       if (indicatorGoal.frequency === 'MENSAL') {
-        expectedMeasurements = 12;
+        step = 1;
       } else if (indicatorGoal.frequency === 'BIMESTRAL') {
-        expectedMeasurements = 6;
+        step = 2;
       } else if (indicatorGoal.frequency === 'TRIMESTRAL') {
-        expectedMeasurements = 4;
+        step = 3;
       } else if (indicatorGoal.frequency === 'QUADRIMESTRAL') {
-        expectedMeasurements = 3;
+        step = 4;
       } else if (indicatorGoal.frequency === 'SEMESTRAL') {
-        expectedMeasurements = 2;
+        step = 6;
       } else {
-        expectedMeasurements = 1;
+        step = 12;
       }
 
-      const measurements: number = indicatorGoal.measurements.filter(m => m).length;
+      for (let i = 0; i <= month; i = i + step) {
+        const currentMeasurement: number | null = all[i];
 
-      if (measurements === expectedMeasurements) {
+        if (!currentMeasurement) {
+          isComplete = false;
+          break;
+        }
+      }
+
+      if (isComplete) {
         completedIndicators++;
       }
     }
@@ -187,7 +202,6 @@ const Dashboard = () => {
   }, [indicators, indicatorGoals, summarizedProcesses]);
 
   const metasPeriodo = charts.metaPeriodo;
-  // console.log("Charts Values: " +charts);
   const qualityProductionValue = charts.qualidadeProducao;
   const productionVariation = charts.variacao;
 

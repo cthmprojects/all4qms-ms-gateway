@@ -53,7 +53,7 @@ const AddIndicator = () => {
   };
 
   const back = (): void => {
-    navigate('../');
+    navigate('../analytics');
   };
 
   const save = async (): Promise<void> => {
