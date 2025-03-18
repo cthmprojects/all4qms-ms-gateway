@@ -2,12 +2,13 @@ import { Box, Breadcrumbs, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoalMeasured, Indicator, IndicatorGoal, Pair, SummarizedProcess } from '../../models';
-import { Charts } from '../../models/charts';
+import { Charts, DataChart, MetaPeriodo, SummaryChart } from '../../models/charts';
 import {
   getComparacaoPeriodo,
+  getGoalsPerPeriod,
   getMetasPeriodo,
   getMetasProcesso,
   getPreenchimentoIndicadores,
@@ -20,6 +21,9 @@ import DashboardBody from '../components/dashboard-body';
 import DashboardBottom from '../components/dashboard-bottom';
 
 const Dashboard = () => {
+  const [allGoalsPerPeriod, setAllGoalsPerPeriod] = useState<Array<Array<SummaryChart>>>([]);
+  const [allGoalsLabels, setAllGoalsLabels] = useState<Array<string>>([]);
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -201,9 +205,99 @@ const Dashboard = () => {
     ];
   }, [indicators, indicatorGoals, summarizedProcesses]);
 
-  const metasPeriodo = charts.metaPeriodo;
   const qualityProductionValue = charts.qualidadeProducao;
   const productionVariation = charts.variacao;
+
+  const getReferences = (frequency: string): Array<string> => {
+    if (frequency === 'Mensal') {
+      return ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+    } else if (frequency === 'Bimestral') {
+      return ['1º B', '2º B', '3º B', '4º B', '5º B', '6º B'];
+    } else if (frequency === 'Trimestral') {
+      return ['1º T', '2º T', '3º T', '4º T'];
+    } else if (frequency === 'Quadrimestral') {
+      return ['1º Q', '2º Q', '3º Q'];
+    } else if (frequency === 'Semestral') {
+      return ['1º S', '2º S'];
+    } else {
+      const now: Date = new Date();
+      const year: number = now.getFullYear();
+
+      return [year.toString()];
+    }
+  };
+
+  const parseRawGoalsPerPeriod = (rawData: Array<DataChart>): Array<SummaryChart> => {
+    const metasPeriodo: Array<DataChart> = rawData;
+    const data: Array<SummaryChart> = [];
+
+    if (!metasPeriodo || metasPeriodo.length <= 0) {
+      return [];
+    }
+
+    const references: Array<string> = getReferences(metasPeriodo[0].unidadeTemporal);
+
+    for (let i = 0; i < metasPeriodo.length; i++) {
+      const metaPeriodo: DataChart = metasPeriodo[i];
+      data.push({
+        meta: metaPeriodo.meta,
+        realizado: metaPeriodo.realizado,
+        referencia: references[i],
+      });
+    }
+
+    return data;
+  };
+
+  const goalsPerPeriod = useMemo<Array<SummaryChart>>(() => {
+    if (!charts || !charts.metaPeriodo || charts.metaPeriodo.length <= 0) {
+      return [];
+    }
+
+    return parseRawGoalsPerPeriod(charts.metaPeriodo);
+  }, [charts]);
+
+  const getAllGoals = async (indicators: Array<Indicator>): Promise<void> => {
+    const now: Date = new Date();
+    const year: number = now.getFullYear();
+
+    const allGoals: Array<Array<SummaryChart>> = [];
+    const labels: Array<string> = [];
+
+    for (let i = 0; i < indicators.length; i++) {
+      const indicator: Indicator = indicators[i];
+
+      const rawGoalsPerPeriod: MetaPeriodo | null = await getGoalsPerPeriod({
+        idIndicador: indicator.id,
+        idProcesso: indicator.processId,
+        anoIndicador: year.toString(),
+      });
+
+      if (!rawGoalsPerPeriod) {
+        continue;
+      }
+
+      const parsed: Array<SummaryChart> = parseRawGoalsPerPeriod(rawGoalsPerPeriod.dados);
+
+      if (parsed.length > 0) {
+        allGoals.push(parsed);
+        labels.push(indicator.name);
+      }
+    }
+
+    setAllGoalsPerPeriod(allGoals);
+    setAllGoalsLabels(labels);
+  };
+
+  useEffect(() => {
+    if (!indicators || indicators.length <= 0) {
+      setAllGoalsPerPeriod([]);
+      setAllGoalsLabels([]);
+      return;
+    }
+
+    getAllGoals(indicators);
+  }, [indicators]);
 
   return (
     <div className="padding-container">
@@ -236,7 +330,12 @@ const Dashboard = () => {
             />
           </Box>
           <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
-            <DashboardBottom comparisonByPeriod={indicatorComparisonByPeriod} metasPeriodo={metasPeriodo} />
+            <DashboardBottom
+              comparisonByPeriod={indicatorComparisonByPeriod}
+              metasPeriodo={goalsPerPeriod}
+              allGoalsPerPeriod={allGoalsPerPeriod}
+              allGoalsLabels={allGoalsLabels}
+            />
           </Box>
         </Box>
       </div>
