@@ -21,6 +21,12 @@ const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding, qualityProductio
 
   const lilacPalette: Array<string> = ['#4A148C', '#774FA9', '#A58AC6', '#D1C4E2'];
 
+  const mixedPaletteDark: Array<string> = [lilacPalette[0], bluePalette[0], greenPalette[0], yellowPalette[0], brownPalette[0]];
+
+  const mixedPaletteRegular: Array<string> = [lilacPalette[1], bluePalette[1], greenPalette[1], yellowPalette[1], brownPalette[1]];
+
+  const mixedPaletteLight: Array<string> = [lilacPalette[2], bluePalette[2], greenPalette[2], yellowPalette[2], brownPalette[2]];
+
   const palette: Array<string> = brownPalette.concat(yellowPalette).concat(bluePalette).concat(greenPalette).concat(lilacPalette);
 
   return (
@@ -31,7 +37,7 @@ const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding, qualityProductio
           <PieChart>
             <Pie data={goalsByProcess} dataKey="value" cx="50%" cy="50%" innerRadius={70} outerRadius={90} label>
               {goalsByProcess.map((entry, index) => (
-                <Cell fill={lilacPalette[index % lilacPalette.length]} />
+                <Cell fill={mixedPaletteDark[index % mixedPaletteDark.length]} />
               ))}
             </Pie>
             <Tooltip />
@@ -46,7 +52,7 @@ const DashboardBody = ({ goalsByProcess, indicatorGoalsFeeding, qualityProductio
           <PieChart>
             <Pie data={indicatorGoalsFeeding} dataKey="value" cx="50%" cy="50%" innerRadius={60} outerRadius={80} label>
               {indicatorGoalsFeeding.map((entry, index) => (
-                <Cell fill={brownPalette[index % brownPalette.length]} />
+                <Cell fill={mixedPaletteLight[index % mixedPaletteLight.length]} />
               ))}
             </Pie>
             <Tooltip />
