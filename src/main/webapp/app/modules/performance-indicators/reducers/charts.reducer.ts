@@ -53,6 +53,34 @@ export const getMetasPeriodo = createAsyncThunk('charts/metasPeriodo', async (pa
   return axios.get<Array<MetaPeriodo>>(`${indicadoresChartsApiUrl}/metas-periodo${queryString ? `?${queryString}` : ''}`);
 });
 
+export const getGoalsPerPeriod = async (params: ListParams): Promise<MetaPeriodo | null> => {
+  const { anoIndicador, idIndicador, idProcesso } = params;
+
+  const queryParams: string[] = [];
+
+  if (idIndicador) {
+    queryParams.push(`indicador=${idIndicador}`);
+  }
+
+  if (idProcesso) {
+    queryParams.push(`processo=${idProcesso}`);
+  }
+
+  if (anoIndicador) {
+    queryParams.push(`ano=${anoIndicador}`);
+  }
+
+  const queryString = queryParams.join('&');
+
+  const response = await axios.get<MetaPeriodo>(`${indicadoresChartsApiUrl}/metas-periodo${queryString ? `?${queryString}` : ''}`);
+
+  if (response.status !== 200) {
+    return null;
+  }
+
+  return response.data;
+};
+
 export const getQualidadeProducao = createAsyncThunk('charts/qualidadeProducao', async (params: ListParams) => {
   const { anoIndicador, idIndicador, idProcesso } = params;
 

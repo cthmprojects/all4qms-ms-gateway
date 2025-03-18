@@ -1,7 +1,9 @@
 export type MetaPeriodo = {
   idIndicador: number;
   idProcesso: number;
-  anoIndicador: string;
+  anoIndicador: number;
+  frequencia: string;
+  tipo: string;
   dados: Array<DataChart>;
 };
 
@@ -10,6 +12,12 @@ export type DataChart = {
   unidadeMedida: string;
   meta: number;
   realizado: number;
+};
+
+export type SummaryChart = {
+  meta: number;
+  realizado: number;
+  referencia: string;
 };
 
 export type Charts = {
