@@ -21,14 +21,13 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
 import { TiposAuditoria } from 'app/shared/model/constants';
 import { MaterialSelect } from 'app/shared/components/select/material-select';
-import { getPaginatedAgendamento, getPaginatedPlanejamento, getProcessos } from '../audit-service';
-import { handleFilter, renderValueCronograma } from '../audit-helper';
-import { AgendamentoAuditoria, CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
+import { getPaginatedAgendamento, getPlanOptions, getProcessos, getUsuarios } from '../audit-service';
+import { handleFilter } from '../audit-helper';
 import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
-import { capitalize } from 'lodash';
 import { Process } from 'app/modules/rnc/models';
+import { IUsuario } from 'app/shared/model/usuario.model';
 
-const columns = ['Código', 'Processo', 'Data', 'Início', 'Término', 'RNC', 'ROM', 'Ações'];
+const columns = ['Planejamento', 'Tipo', 'Processo', 'Responsável', 'Data', 'Início / Término', 'Requisito Específico', 'Ações'];
 
 export const AuditorshipTabContent = () => {
   const navigate = useNavigate();
@@ -48,6 +47,7 @@ export const AuditorshipTabContent = () => {
       search: '',
       tipo: '',
       finalizado: false,
+      planejamento: '',
     },
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -64,10 +64,27 @@ export const AuditorshipTabContent = () => {
     mutationFn: () => getProcessos(),
   });
 
+  const { data: users, mutate: listUsers } = useMutation({
+    mutationFn: () => getUsuarios(),
+  });
+
+  const { data: planOptions, mutate: listPlanOptions } = useMutation({
+    mutationFn: () => getPlanOptions(),
+  });
+
   function pickProccess(id: number) {
     return processes?.find(item => item.id == id) as Process;
   }
-  useEffect(listProcesses, []);
+
+  function pickUser(id: number) {
+    return users?.find(item => item.id == id) as IUsuario;
+  }
+
+  useEffect(() => {
+    listProcesses();
+    listPlanOptions();
+    listUsers();
+  }, []);
 
   return (
     <div>
@@ -83,10 +100,23 @@ export const AuditorshipTabContent = () => {
       >
         <Stack gap="12px" flexDirection="row" sx={{ flexGrow: 0.4, display: 'inline-flex' }}>
           <Controller
+            name="planejamento"
+            control={control}
+            render={({ field }) => (
+              <MaterialSelect onChange={null} label="Planejamento" fullWidth {...field} sx={{ minWidth: '120px' }}>
+                {(planOptions || []).map(item => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.identificadorPlanejamento}
+                  </MenuItem>
+                ))}
+              </MaterialSelect>
+            )}
+          />
+          <Controller
             name="tipo"
             control={control}
             render={({ field }) => (
-              <MaterialSelect onChange={null} label="Tipo de auditoria" fullWidth {...field} sx={{ minWidth: '190px' }}>
+              <MaterialSelect onChange={null} label="Tipo de auditoria" fullWidth {...field} sx={{ minWidth: '120px' }}>
                 {TiposAuditoria.map(item => (
                   <MenuItem key={item.name} value={item.value}>
                     {item.name}
@@ -125,17 +155,18 @@ export const AuditorshipTabContent = () => {
           <TableBody>
             {schedules?.content.map((schedule, index) => (
               <TableRow
-                className="table-row"
                 key={schedule.id}
                 sx={schedule.isReagendado ? { opacity: 0.5, pointerEvents: 'none', cursor: 'not-allowed', height: '57px' } : {}}
               >
                 <TableCell>{schedule?.planejamento.identificadorPlanejamento || '-'}</TableCell>
+                <TableCell>{schedule?.planejamento.cronograma.modelo.tipo || '-'}</TableCell>
                 <TableCell>{pickProccess(schedule.idProcesso)?.nome || '-'}</TableCell>
+                <TableCell>{pickUser(schedule.responsavelAuditoria)?.nome || '-'}</TableCell>
                 <TableCell>{schedule.dataAuditoria.toLocaleDateString('pt-BR')}</TableCell>
-                <TableCell>{schedule.horaInicial.toLocaleTimeString('pt-BR')}</TableCell>
-                <TableCell>{schedule.horaFinal.toLocaleTimeString('pt-BR')}</TableCell>
-                <TableCell>{schedule.ncsNumber}</TableCell>
-                <TableCell>{schedule.omsNumber}</TableCell>
+                <TableCell>
+                  {schedule.horaInicial.toLocaleTimeString('pt-BR')} até {schedule.horaFinal.toLocaleTimeString('pt-BR')}
+                </TableCell>
+                <TableCell>{schedule.planejamento.escopo}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
                     {schedule.isReagendado ? (
