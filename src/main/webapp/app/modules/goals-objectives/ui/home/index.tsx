@@ -121,7 +121,7 @@ const HomeGoalsList = () => {
 
   //---------------------------------------------------------------
 
-  const columns = ['Metas', 'Monitoramento/Controle', 'Resultados', 'Situação', 'Atualização', 'Ações'];
+  const columns = ['Metas', 'Indicador/Controle', 'Resultados', 'Situação', 'Atualização', 'Ações'];
   const getSituacaoIcon = (parcial, metaAtingida) => {
     if (parcial && metaAtingida) return { icon: <CheckIcon color="success" />, text: 'Meta Atingida' };
     if (!parcial && metaAtingida) return { icon: <TaskAltIcon color="success" />, text: 'Meta Parcial' };

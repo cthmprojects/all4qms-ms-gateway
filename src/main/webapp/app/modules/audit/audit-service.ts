@@ -450,3 +450,17 @@ export const getListNcsOmsAuditoria = addToast(
   '',
   'Erro ao buscar lista NC/OM'
 );
+
+export const getPlanOptions = addToast(
+  async () => {
+    const { data } = await axios.get<
+      {
+        id: number;
+        identificadorPlanejamento: string;
+      }[]
+    >(`${AuditBaseUrl}/auditoria/planejamentos/plan-select`);
+    return data;
+  },
+  '',
+  'Erro ao buscar lista NC/OM'
+);
