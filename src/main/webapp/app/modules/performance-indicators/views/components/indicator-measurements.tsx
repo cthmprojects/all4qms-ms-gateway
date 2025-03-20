@@ -10,6 +10,7 @@ type IndicatorMeasurementsProps = {
   initialAnalysis: Array<Analysis>;
   initialFrequency?: string;
   initialValues?: Array<Array<number | null>>;
+  readonly?: boolean;
   unit: string;
   indicatorYear: string;
   onChanged: (measurements: Array<Array<number | null>>, allAnalysis: Array<Analysis | null>) => void;
@@ -22,6 +23,7 @@ const IndicatorMeasurements = ({
   initialFrequency,
   initialValues,
   indicatorYear,
+  readonly,
   unit,
   onChanged,
 }: IndicatorMeasurementsProps) => {
@@ -172,6 +174,7 @@ const IndicatorMeasurements = ({
             initialValues={[...measurement]}
             initialYear={indicatorYear}
             inputOnly
+            readonly={readonly}
             onChanged={(frequency, year, values) => onIndicatorValuesChanged(frequency, year, values, idx)}
             unit={unit}
           />

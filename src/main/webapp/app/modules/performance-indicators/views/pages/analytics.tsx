@@ -104,6 +104,7 @@ const Analytics = () => {
 
             <AnalyticsHeader
               onAddIndicatorRequested={goToAddIndicator}
+              onClearRequested={() => {}}
               onDashboardRequested={goToDashboard}
               onSearchRequested={onSearch}
               processes={summarizedProcesses}

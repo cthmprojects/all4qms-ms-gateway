@@ -9,10 +9,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
+import { useMemo } from 'react';
+import { Storage } from 'react-jhipster';
 import { Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
 
 type AnalyticsTableProps = {
@@ -23,6 +24,18 @@ type AnalyticsTableProps = {
 };
 
 const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsRequested, processes }: AnalyticsTableProps) => {
+  const matchesRole = (userRole: string, role: string) => {
+    if (!userRole || !role) {
+      return false;
+    }
+
+    return userRole.includes(role);
+  };
+
+  const userRole = useMemo<string>(() => {
+    return Storage.local.get('ROLE');
+  }, []);
+
   const getIndicator = (id: number): Indicator | null => {
     const filteredIndicators: Array<Indicator> = indicators.filter(i => i.id === id);
 
@@ -66,6 +79,29 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
     );
   };
 
+  const getCurrentGoal = (measurements: Array<number | null>, frequency: string): number => {
+    const now: Date = new Date();
+    const month: number = now.getMonth();
+
+    if (frequency === 'MENSAL') {
+      return measurements[month];
+    } else if (frequency === 'BIMESTRAL') {
+      const index: number = month - (month % 2);
+      return measurements[index];
+    } else if (frequency === 'TRIMESTRAL') {
+      const index: number = month - (month % 3);
+      return measurements[index];
+    } else if (frequency === 'QUADRIMESTRAL') {
+      const index: number = month - (month % 4);
+      return measurements[index];
+    } else if (frequency === 'SEMESTRAL') {
+      const index: number = month - (month % 6);
+      return measurements[index];
+    } else {
+      return measurements[0];
+    }
+  };
+
   return (
     <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
       <Table sx={{ width: '100%' }}>
@@ -73,7 +109,8 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
           <TableRow>
             <TableCell align="left">Indicador</TableCell>
             <TableCell align="left">Processo</TableCell>
-            <TableCell align="left">Acumulado</TableCell>
+            <TableCell align="left">Meta Atual</TableCell>
+            <TableCell align="left">Frequência</TableCell>
             <TableCell align="left">JAN</TableCell>
             <TableCell align="left">FEV</TableCell>
             <TableCell align="left">MAR</TableCell>
@@ -109,27 +146,19 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
                 avgsToShow[i] = '-';
               }
             }
-            const validGoalsQty: Array<number> = goals.filter(g => g > 0);
-            const sumGoals = goals.reduce((acc, value) => acc + value);
-            console.log('sumgoals ', sumGoals);
-            console.log('filteredGoals.length ', validGoalsQty.length);
-            const goal: number = goals.length > 0 && validGoalsQty.length > 0 ? sumGoals / validGoalsQty.length : 0;
 
-            const filteredGoals: Array<number> = avgs.filter(g => g > 0);
-            const accumulated = filteredGoals.length > 0 ? filteredGoals.reduce((acc, value) => acc + value) / validGoalsQty.length : 0;
+            const currentGoal: number | null = getCurrentGoal(measurements, frequency);
 
             return (
               <TableRow key={id}>
                 <TableCell>{completeIndicator?.name ?? '-'}</TableCell>
                 <TableCell>{process?.name ?? '-'}</TableCell>
-                {/*<TableCell>{goal.toFixed(2) ?? '-'}</TableCell> */} {/* Metas */}
-                {/* Acumulado */}
-                <TableCell sx={{ color: getColor(accumulated, 100, completeIndicator.trend) }}>
-                  {accumulated.toFixed(2) ?? '-'}%
-                </TableCell>{' '}
+                <TableCell sx={{ color: 'black' }}>{currentGoal?.toFixed(2) ?? '-'}%</TableCell> <TableCell>{frequency}</TableCell>
                 {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(month => render(measurements[month], goals[month], avgsToShow[month], trend))}
                 <TableCell>
-                  <Tooltip title="Editar">
+                  <Tooltip
+                    title={matchesRole(userRole, 'ROLE_SGQ') || matchesRole(userRole, 'ROLE_ADMIN') ? 'Editar' : 'Incluir Resultados'}
+                  >
                     <IconButton color="primary" onClick={() => onManageMeasurementsRequested(id)}>
                       <EditOutlined sx={{ color: '#e6b200' }} />
                     </IconButton>

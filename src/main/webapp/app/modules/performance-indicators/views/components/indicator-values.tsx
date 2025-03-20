@@ -11,6 +11,7 @@ type IndicatorValuesProps = {
   initialValues?: Array<number | null>;
   initialYear?: string | null;
   inputOnly?: boolean;
+  readonly?: boolean;
   frequencies: Array<string>;
   unit: string;
   onAdded?: () => void;
@@ -26,6 +27,7 @@ const IndicatorValues = ({
   initialValues,
   initialYear,
   inputOnly,
+  readonly,
   unit,
   onAdded,
   onChanged,
@@ -223,7 +225,12 @@ const IndicatorValues = ({
         {values.map((value, idx) => {
           if (shouldRenderValue(idx)) {
             return (
-              <IndicatorValue label={getValueLabel(idx)} onChanged={value => updateValue(value, idx)} value={value?.toString() ?? ''} />
+              <IndicatorValue
+                label={getValueLabel(idx)}
+                onChanged={value => updateValue(value, idx)}
+                readonly={readonly}
+                value={value?.toString() ?? ''}
+              />
             );
           } else {
             return <></>;
