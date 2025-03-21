@@ -1,4 +1,4 @@
-import { BarChartOutlined, SearchOutlined } from '@mui/icons-material';
+import { BarChartOutlined, ClearOutlined, SearchOutlined } from '@mui/icons-material';
 import { Autocomplete, Button, Stack, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Indicator, SummarizedProcess } from '../../models';
@@ -9,9 +9,16 @@ type AnalyticsHeaderProps = {
   onAddIndicatorRequested: () => void;
   onDashboardRequested: () => void;
   onSearchRequested: (indicator: Indicator, process: SummarizedProcess, year: number, query: string) => void;
+  onClearRequested: () => void;
 };
 
-const AnalyticsHeader = ({ onAddIndicatorRequested, onDashboardRequested, onSearchRequested, processes }: AnalyticsHeaderProps) => {
+const AnalyticsHeader = ({
+  onAddIndicatorRequested,
+  onClearRequested,
+  onDashboardRequested,
+  onSearchRequested,
+  processes,
+}: AnalyticsHeaderProps) => {
   const [indicator, setIndicator] = useState<Indicator | null>(null);
   const [process, setProcess] = useState<SummarizedProcess | null>(null);
   const [query, setQuery] = useState<string>('');
@@ -22,24 +29,12 @@ const AnalyticsHeader = ({ onAddIndicatorRequested, onDashboardRequested, onSear
     setYears(getYearRange());
   }, []);
 
-  useEffect(() => {
-    if (!processes || processes.length <= 0) {
-      return;
-    }
-
-    setProcess(processes[0]);
-  }, [processes]);
-
-  useEffect(() => {
-    if (!years || years.length <= 0) {
-      return;
-    }
-
-    const now: Date = new Date();
-    const currentYear: number = now.getFullYear();
-
-    setYear(currentYear);
-  }, [years]);
+  const onClearClicked = (): void => {
+    setProcess(null);
+    setYear(null);
+    setQuery('');
+    onSearchRequested(indicator, null, null, '');
+  };
 
   return (
     <Stack direction="row" spacing={2}>
@@ -111,6 +106,21 @@ const AnalyticsHeader = ({ onAddIndicatorRequested, onDashboardRequested, onSear
         variant="contained"
       >
         <SearchOutlined />
+      </Button>
+
+      <Button
+        onClick={_ => onClearClicked()}
+        sx={{
+          '& .MuiButton-startIcon': {
+            marginTop: 0,
+          },
+          '& .MuiTouchRipple-root': {
+            marginTop: 0,
+          },
+        }}
+        variant="outlined"
+      >
+        <ClearOutlined />
       </Button>
     </Stack>
   );

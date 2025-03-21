@@ -82,7 +82,7 @@ const AddIndicator = () => {
 
     await dispatch(saveIndicatorGoals(indicatorGoals));
 
-    navigate('../');
+    navigate('../analytics');
   };
 
   const enums: Enums = useAppSelector<Enums>(state => state.all4qmsmsgatewaymetaind.enums.entity);
@@ -145,6 +145,8 @@ const AddIndicator = () => {
 
             <Stack spacing={2}>
               <IndicatorDetails onChanged={onDetailsChanged} processes={summarizedProcesses} trends={trends} units={units} />
+
+              <Typography variant="h5">Metas</Typography>
 
               <IndicatorGoals frequencies={frequencies} onChanged={onIndicatorGoalsChanged} unit={unit} />
             </Stack>
