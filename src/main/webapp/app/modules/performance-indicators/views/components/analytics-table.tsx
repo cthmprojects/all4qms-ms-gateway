@@ -82,24 +82,24 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
   const getCurrentGoal = (measurements: Array<number | null>, frequency: string): number => {
     const now: Date = new Date();
     const month: number = now.getMonth();
+    let index: number = 0;
 
     if (frequency === 'MENSAL') {
+      index = month;
       return measurements[month];
     } else if (frequency === 'BIMESTRAL') {
-      const index: number = month - (month % 2);
-      return measurements[index];
+      index = month - (month % 2);
     } else if (frequency === 'TRIMESTRAL') {
-      const index: number = month - (month % 3);
-      return measurements[index];
+      index = month - (month % 3);
     } else if (frequency === 'QUADRIMESTRAL') {
-      const index: number = month - (month % 4);
-      return measurements[index];
+      index = month - (month % 4);
     } else if (frequency === 'SEMESTRAL') {
-      const index: number = month - (month % 6);
-      return measurements[index];
+      index = month - (month % 6);
     } else {
-      return measurements[0];
+      index = 0;
     }
+
+    return measurements[index];
   };
 
   return (
