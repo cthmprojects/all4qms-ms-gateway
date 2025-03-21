@@ -145,8 +145,8 @@ export const ComproveRecebimento = () => {
 
       setCodigo(distribuicao.codigo ?? '');
       setTitulo(distribuicao.titulo ?? '');
-      setDataEntrega(new Date(distribuition.dataEntrega ?? ''));
-      setDataDevolucao(new Date(distribuition.dataDevolucao ?? ''));
+      setDataEntrega(distribuition.dataEntrega ? new Date(distribuition.dataEntrega) : null);
+      setDataDevolucao(distribuition.dataDevolucao ? new Date(distribuition.dataDevolucao) : null);
       setComentarioEntrega(distribuition.comentarioEntrega ?? '');
       setComentarioDevolucao(distribuition.comentarioDevolucao ?? '');
       setIdUsuarioDevolucao(distribuition.idUsuarioDevolucao ?? -1);
