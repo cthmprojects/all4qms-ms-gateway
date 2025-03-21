@@ -3,14 +3,10 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo, useState } from 'react';
+import { Storage } from 'react-jhipster';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Analysis, Enums, Indicator, IndicatorGoal, SummarizedProcess } from '../../models';
-import {
-  deleteIndicatorAnalysis,
-  getIndicatorAnalysis,
-  saveIndicatorAnalysis,
-  updateIndicatorAnalysis,
-} from '../../reducers/analysis.reducer';
+import { deleteIndicatorAnalysis, getIndicatorAnalysis, saveIndicatorAnalysis } from '../../reducers/analysis.reducer';
 import { getFrequencies, getTrends, getUnits } from '../../reducers/enums.reducer';
 import { getIndicatorGoal, updateIndicatorGoal } from '../../reducers/indicator-goals.reducer';
 import { getIndicator } from '../../reducers/indicators.reducer';
@@ -43,6 +39,18 @@ const Measurements = () => {
   const back = (): void => {
     navigate('../analytics');
   };
+
+  const matchesRole = (userRole: string, role: string) => {
+    if (!userRole || !role) {
+      return false;
+    }
+
+    return userRole.includes(role);
+  };
+
+  const userRole = useMemo<string>(() => {
+    return Storage.local.get('ROLE');
+  }, []);
 
   const save = async (): Promise<void> => {
     // TODO: Save multiple measurements
@@ -223,6 +231,7 @@ const Measurements = () => {
                     initialValues={initialGoalValues}
                     indicatorYear={indicatorGoal?.year}
                     onChanged={onIndicatorGoalsChanged}
+                    readonly={!matchesRole(userRole, 'ROLE_ADMIN') && !matchesRole(userRole, 'ROLE_SGQ')}
                     unit="PERCENTUAL"
                   />
                 </CardContent>
