@@ -141,13 +141,13 @@ const getStatusIcon = status => {
 
 const InfodocList = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [startDate, setStartDate] = useState(new Date());
   const [value, setValue] = useState(0);
   const [distributionModal, setDistributionModal] = useState(false);
   const [uploadFileModal, setUploadFileModal] = useState(false);
   const [requestCopyModal, setRequestCopyModal] = useState(false);
   const [cancelDocumentModal, setCancelDocumentModal] = useState(false);
-  const dispatch = useAppDispatch();
   const statusValues = Object.keys(StatusEnum) as Array<keyof typeof StatusEnum>;
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   const [userQMS, setUserQMS] = useState<UserQMS>(JSON.parse(Storage.session.get('USUARIO_QMS')));
@@ -161,7 +161,8 @@ const InfodocList = () => {
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
-  const totalItems = useAppSelector(state => state.all4qmsmsgateway.infodoc.totalItems);
+  const totalItemsDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.totalItems);
+  const totalItemsDist = useAppSelector(state => state.all4qmsmsgateway.distribuicao.totalItems);
   const distribuitions: Array<DistribuicaoCompleta> = useAppSelector(state => state.all4qmsmsgateway.distribuicao.entities);
 
   /**
@@ -191,6 +192,7 @@ const InfodocList = () => {
   };
 
   const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const totalItems = value == 0 ? totalItemsDist : totalItemsDoc;
     if (parseInt(event.target.value, 10) > totalItems) {
       setPageSize(parseInt(event.target.value, 10));
       setPage(0);
@@ -339,7 +341,6 @@ const InfodocList = () => {
         page: 0,
       })
     );
-
     setValue(newValue);
   };
 
@@ -498,18 +499,22 @@ const InfodocList = () => {
 
     const _situacao = switchSituationByTab(value);
 
-    dispatch(
-      listdocs({
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
-        idProcesso,
-        origem,
-        situacao: _situacao,
-        size: pageSize,
-        pesquisa,
-        page,
-      })
-    );
+    if (_situacao === 'D') {
+      dispatch(listarDistribuicao({ page: page, size: pageSize, sort: 'id,DESC' }));
+    } else {
+      dispatch(
+        listdocs({
+          dtIni: dtIni?.toISOString(),
+          dtFim: dtFim?.toISOString(),
+          idProcesso,
+          origem: origem ?? '',
+          situacao: _situacao,
+          size: pageSize,
+          pesquisa: pesquisa ?? '',
+          page,
+        })
+      );
+    }
   };
 
   const clearFilters = () => {
@@ -565,7 +570,7 @@ const InfodocList = () => {
                           {getSituacaoIcon(infodoc?.doc.enumSituacao).text}
                         </Box>
                       </TableCell>
-                       {/* <TableCell onClick={event => openDocToValidation(event, infodoc)}>
+                      {/* <TableCell onClick={event => openDocToValidation(event, infodoc)}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
                     </TableCell> */}
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -628,7 +633,7 @@ const InfodocList = () => {
             {/* <Pagination count={10} style={{ width: '370px' }} /> */}
             <TablePagination
               component="div"
-              count={totalItems}
+              count={totalItemsDoc}
               labelDisplayedRows={displayedRowsLabel}
               labelRowsPerPage="Itens por página:"
               onPageChange={onPageChanged}
@@ -651,7 +656,7 @@ const InfodocList = () => {
             {/* <Pagination count={10} style={{ width: '370px' }} /> */}
             <TablePagination
               component="div"
-              count={totalItems}
+              count={totalItemsDoc}
               labelDisplayedRows={displayedRowsLabel}
               labelRowsPerPage="Itens por página:"
               onPageChange={onPageChanged}
@@ -764,7 +769,7 @@ const InfodocList = () => {
             {/* <Pagination count={10} style={{ width: '370px' }} /> */}
             <TablePagination
               component="div"
-              count={totalItems}
+              count={totalItemsDist}
               labelDisplayedRows={displayedRowsLabel}
               labelRowsPerPage="Itens por página:"
               onPageChange={onPageChanged}
@@ -787,7 +792,7 @@ const InfodocList = () => {
             {/* <Pagination count={10} style={{ width: '370px' }} /> */}
             <TablePagination
               component="div"
-              count={totalItems}
+              count={totalItemsDist}
               labelDisplayedRows={displayedRowsLabel}
               labelRowsPerPage="Itens por página:"
               onPageChange={onPageChanged}
