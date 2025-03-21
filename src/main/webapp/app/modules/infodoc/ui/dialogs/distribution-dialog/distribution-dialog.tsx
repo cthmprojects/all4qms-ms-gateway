@@ -109,29 +109,38 @@ export const DistributionDialog = ({ open, handleClose, documentTitle, idDoc }: 
     if (respCad) {
       const resDistri: Distribuicao = (respCad.payload as AxiosResponse).data || {};
       setDistribuicao(resDistri);
+
+      const novaDetailDistribuicao: DetalheDistribuicao = {
+        idDistribuicaoDoc: resDistri?.id!!,
+        cometarioSolicitacao: '',
+        idUsuarioEntrega: userQMS.id,
+      };
+
+      await dispatch(cadastrarDetailDistribuicao(novaDetailDistribuicao));
     }
-    setIsNextPageJustify(true);
-    setIsLoading(false);
-  };
-
-  const handleSolicitar = async () => {
-    setIsLoading(true);
-    if (!motivoSolicitacao) {
-      toast.error('Por favor, justificativa não deve ficar vazia!');
-      return;
-    }
-
-    const novaDetailDistribuicao: DetalheDistribuicao = {
-      idDistribuicaoDoc: distribuicao?.id!!,
-      cometarioSolicitacao: motivoSolicitacao,
-      idUsuarioEntrega: userQMS.id,
-    };
-
-    await dispatch(cadastrarDetailDistribuicao(novaDetailDistribuicao));
+    // setIsNextPageJustify(true);
     setIsLoading(false);
     handleClose();
-    setIsNextPageJustify(false);
   };
+
+  // const handleSolicitar = async () => {
+  //   setIsLoading(true);
+  //   if (!motivoSolicitacao) {
+  //     toast.error('Por favor, justificativa não deve ficar vazia!');
+  //     return;
+  //   }
+
+  //   const novaDetailDistribuicao: DetalheDistribuicao = {
+  //     idDistribuicaoDoc: distribuicao?.id!!,
+  //     cometarioSolicitacao: motivoSolicitacao,
+  //     idUsuarioEntrega: userQMS.id,
+  //   };
+
+  //   await dispatch(cadastrarDetailDistribuicao(novaDetailDistribuicao));
+  //   setIsLoading(false);
+  //   handleClose();
+  //   setIsNextPageJustify(false);
+  // };
   const tableDistribuiiition = () => (
     <Table className="w-100">
       <TableHead>
@@ -226,7 +235,8 @@ export const DistributionDialog = ({ open, handleClose, documentTitle, idDoc }: 
           loading={isLoading}
           disabled={isLoading}
           style={{ background: isLoading ? '#cacaca' : '#EBC139', color: isLoading ? '#cacaca' : '#384150' }}
-          onClick={isNextPageJustify ? handleSolicitar : handleDistribuir}
+          // onClick={isNextPageJustify ? handleSolicitar : handleDistribuir}
+          onClick={handleDistribuir}
         >
           {isNextPageJustify ? 'SOLICITAR' : 'DISTRIBUIR'}
         </LoadingButton>
