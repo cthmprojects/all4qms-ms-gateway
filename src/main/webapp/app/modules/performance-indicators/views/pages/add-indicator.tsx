@@ -12,13 +12,17 @@ import { IndicatorDetails, IndicatorGoals } from '../components';
 const AddIndicator = () => {
   const [code, setCode] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+  const [formation, setFormation] = useState<string>('');
   const [goalFrequencies, setGoalFrequencies] = useState<Array<string>>([]);
   const [goals, setGoals] = useState<Array<Array<number | null>>>([]);
   const [goalYears, setGoalYears] = useState<Array<number>>([]);
   const [name, setName] = useState<string>('');
   const [process, setProcess] = useState<SummarizedProcess | null>(null);
+  const [responsible, setResponsible] = useState<string>('');
+  const [source, setSource] = useState<string>('');
   const [trend, setTrend] = useState<string | null>(null);
   const [unit, setUnit] = useState<string | null>(null);
+  const [verification, setVerification] = useState<string>('');
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -33,17 +37,25 @@ const AddIndicator = () => {
   const onDetailsChanged = (
     code: string,
     description: string,
+    formation: string,
     name: string,
     process: SummarizedProcess,
+    responsible: string,
+    source: string,
     trend: string,
-    unit: string
+    unit: string,
+    verification: string
   ): void => {
     setCode(code);
     setDescription(description);
+    setFormation(formation);
     setName(name);
     setProcess(process);
+    setResponsible(responsible);
+    setSource(source);
     setTrend(trend);
     setUnit(unit);
+    setVerification(verification);
   };
 
   const onIndicatorGoalsChanged = (frequencies: Array<string>, goals: Array<Array<number | null>>, years: Array<number>): void => {
@@ -70,10 +82,14 @@ const AddIndicator = () => {
         indicator: {
           code: code,
           description: description,
+          formation: formation,
           name: name,
           processId: process?.id,
+          responsible: responsible,
+          source: source,
           trend: trend as 'MAIOR' | 'MENOR' | 'ESTABILIZAR',
           unit: unit as 'PERCENTUAL' | 'MONETARIO' | 'UNITARIO' | 'DECIMAL',
+          verification: verification,
         },
         measurements: [null, null, null, null, null, null, null, null, null, null, null, null],
         year: year,

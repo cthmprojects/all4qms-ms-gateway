@@ -4,12 +4,16 @@ export const toIndicator = (indicador: Indicador): Indicator => {
   return {
     code: indicador.codigoIndicador,
     description: indicador.descricaoIndicador,
+    formation: indicador.formacaoIndice,
     id: indicador.id,
     indicatorGoalId: indicador.idMetaIndicador,
     name: indicador.nomeIndicador,
     processId: indicador.idProcesso,
+    responsible: indicador.cargoResponsavel,
+    source: indicador.fonteDeDados,
     trend: indicador.tendencia,
     unit: indicador.unidade,
+    verification: indicador.prazoMaxApuracao,
   };
 };
 
@@ -64,7 +68,7 @@ export const toAnalysis = (analiseIndicator: RawAnalysis): Analysis => {
   const action: string = tokens.length > 0 ? tokens[0] : '';
   const deadline: string = tokens.length > 1 ? tokens[1] : '';
   const description: string = tokens.length > 2 ? tokens[2] : '';
-  const responsible: string = tokens.length > 3 ? tokens[3] : '';
+  const responsible: string = tokens.length > 3 ? tokens[3] : '-1';
 
   return {
     action: action,
@@ -74,7 +78,7 @@ export const toAnalysis = (analiseIndicator: RawAnalysis): Analysis => {
     indicatorGoal: null,
     indicatorGoalId: analiseIndicator.idIndicadorMeta,
     month: analiseIndicator.mes,
-    responsible: responsible,
+    responsible: parseInt(responsible),
     id: analiseIndicator.id,
   };
 };

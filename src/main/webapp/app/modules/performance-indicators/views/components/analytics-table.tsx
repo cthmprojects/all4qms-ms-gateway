@@ -147,7 +147,7 @@ const AnalyticsTable = ({ indicatorGoals, indicators, onManageMeasurementsReques
               }
             }
 
-            const currentGoal: number | null = getCurrentGoal(measurements, frequency);
+            const currentGoal: number | null = getCurrentGoal(goals, frequency);
 
             return (
               <TableRow key={id}>
