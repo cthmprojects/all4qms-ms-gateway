@@ -6,7 +6,7 @@ export type Analysis = {
   deadline: string;
   description: string;
   id?: number;
-  responsible: string;
+  responsible: number;
   month: number;
   indicatorGoal: IndicatorGoal;
   indicatorGoalId: number;
