@@ -2,12 +2,16 @@ import { Analysis, Enumerador, Indicador, Indicator, IndicatorGoal, MetaIndicado
 
 export const toRawIndicator = (indicator: Indicator): Indicador => {
   return {
+    cargoResponsavel: indicator.responsible,
     codigoIndicador: indicator.code,
     descricaoIndicador: indicator.description,
+    fonteDeDados: indicator.source,
+    formacaoIndice: indicator.formation,
     id: indicator.id,
     idMetaIndicador: indicator.indicatorGoalId,
     idProcesso: indicator.processId,
     nomeIndicador: indicator.name,
+    prazoMaxApuracao: indicator.verification,
     tendencia: indicator.trend,
     unidade: indicator.unit,
   };

@@ -1,5 +1,6 @@
 import { Autocomplete, Box, Breadcrumbs, Button, Card, CardContent, CardHeader, Stack, TextField, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
 import { Process } from 'app/modules/infodoc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
 import { useEffect, useMemo, useState } from 'react';
@@ -14,7 +15,7 @@ import { getYearRange } from '../../utils';
 import { IndicatorDetails, IndicatorMeasurements } from '../components';
 
 const Measurements = () => {
-  const [allAnalysis, setAllAnalysis] = useState<Array<Analysis | null>>([]);
+  const [allAnalysis, setAllAnalysis] = useState<Array<Array<Analysis>>>([]);
   const [goals, setGoals] = useState<Array<Array<number | null>>>([]);
   const [measurements, setMeasurements] = useState<Array<Array<number | null>>>([]);
   const { id } = useParams();
@@ -23,6 +24,7 @@ const Measurements = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(getProcesses());
     dispatch(getFrequencies());
     dispatch(getTrends());
@@ -68,29 +70,33 @@ const Measurements = () => {
 
     for (let i = 0; i < allIndicatorGoalAnalysis.length; i++) {
       const analysis: Analysis | null = allIndicatorGoalAnalysis[i];
-
       if (!analysis) {
         continue;
       }
-
       await dispatch(deleteIndicatorAnalysis(analysis));
     }
-
     for (let i = 0; i < allAnalysis.length; i++) {
-      const analysis: Analysis | null = allAnalysis[i];
-
-      if (!analysis) {
+      const currentAnalysis: Array<Analysis> = allAnalysis[i];
+      if (currentAnalysis.length <= 0) {
         continue;
       }
 
-      await dispatch(
-        saveIndicatorAnalysis({
-          ...analysis,
-          id: null,
-          indicatorGoal: indicatorGoal,
-          indicatorGoalId: indicatorGoal.id,
-        })
-      );
+      for (let j = 0; j < currentAnalysis.length; j++) {
+        const current: Analysis = currentAnalysis[j];
+
+        if (!current.action && !current.analysisDetails && !current.deadline && !current.description && current.responsible <= 0) {
+          continue;
+        }
+
+        await dispatch(
+          saveIndicatorAnalysis({
+            ...current,
+            id: null,
+            indicatorGoal: indicatorGoal,
+            indicatorGoalId: indicatorGoal.id,
+          })
+        );
+      }
     }
 
     navigate('../analytics');
@@ -101,6 +107,7 @@ const Measurements = () => {
   const indicatorGoal: IndicatorGoal | null = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorGoals.entity);
   const processes: Array<Process> = useAppSelector(state => state.all4qmsmsgatewayrnc.process.entities);
   const allIndicatorGoalAnalysis: Array<Analysis> = useAppSelector(state => state.all4qmsmsgatewaymetaind.indicatorAnalysis.entities);
+  const users = useAppSelector(state => state.all4qmsmsgatewaymetaind.users.entities);
 
   useEffect(() => {
     if (!indicatorGoal || !indicatorGoal.id) {
@@ -108,6 +115,14 @@ const Measurements = () => {
     }
 
     dispatch(getIndicator(indicatorGoal.indicator.id));
+  }, [indicatorGoal]);
+
+  useEffect(() => {
+    if (!indicatorGoal) {
+      return;
+    }
+
+    setGoals([[...indicatorGoal.goals]]);
   }, [indicatorGoal]);
 
   const frequencies = useMemo<Array<string>>(() => {
@@ -118,29 +133,13 @@ const Measurements = () => {
     return enums.frequencies.map(t => t.name);
   }, [enums]);
 
-  const initialGoalValues = useMemo<Array<Array<number | null>> | null>(() => {
-    if (!indicatorGoal) {
-      return null;
-    }
-
-    return [[...indicatorGoal.goals]];
-  }, [indicatorGoal]);
-
   const initialMeasurementValues = useMemo<Array<Array<number | null>> | null>(() => {
     if (!indicatorGoal) {
-      return null;
+      return [];
     }
 
     return [[...indicatorGoal.measurements]];
   }, [indicatorGoal]);
-
-  const initialAnalysis = useMemo<Array<Analysis>>(() => {
-    if (!allIndicatorGoalAnalysis) {
-      return null;
-    }
-
-    return [...allIndicatorGoalAnalysis];
-  }, [allIndicatorGoalAnalysis]);
 
   const trends = useMemo<Array<string>>(() => {
     if (!enums || !enums.trends || enums.trends.length <= 0) {
@@ -175,10 +174,144 @@ const Measurements = () => {
     setGoals(goals);
   };
 
-  const onIndicatorMeasurementsChanged = (measurements: Array<Array<number | null>>, allAnalysis: Array<Analysis | null>): void => {
+  const onIndicatorMeasurementsChanged = (measurements: Array<Array<number | null>>, allAnalysis: Array<Array<Analysis>>): void => {
     setAllAnalysis(allAnalysis);
     setMeasurements(measurements);
   };
+
+  const analysisIndices = useMemo<Array<number>>(() => {
+    if (!indicatorGoal) {
+      return [];
+    }
+
+    const frequency: string = indicatorGoal.frequency;
+
+    const indices: Array<number> = [];
+
+    if (frequency === 'MENSAL') {
+      indices.push(0);
+      indices.push(1);
+      indices.push(2);
+      indices.push(3);
+      indices.push(4);
+      indices.push(5);
+      indices.push(6);
+      indices.push(7);
+      indices.push(8);
+      indices.push(9);
+      indices.push(10);
+      indices.push(11);
+    } else if (frequency === 'BIMESTRAL') {
+      indices.push(0);
+      indices.push(2);
+      indices.push(4);
+      indices.push(6);
+      indices.push(8);
+      indices.push(10);
+    } else if (frequency === 'TRIMESTRAL') {
+      indices.push(0);
+      indices.push(3);
+      indices.push(6);
+      indices.push(9);
+    } else if (frequency === 'QUADRIMESTRAL') {
+      indices.push(0);
+      indices.push(4);
+      indices.push(8);
+    } else if (frequency === 'SEMESTRAL') {
+      indices.push(0);
+      indices.push(6);
+    } else if (frequency === 'ANUAL') {
+      indices.push(0);
+    }
+
+    return indices;
+  }, [indicatorGoal]);
+
+  const analysisLabels = useMemo<Array<string>>(() => {
+    if (!indicatorGoal) {
+      return [];
+    }
+
+    const frequency: string = indicatorGoal.frequency;
+
+    const labels: Array<string> = [];
+
+    if (frequency === 'MENSAL') {
+      labels.push('JAN');
+      labels.push('FEV');
+      labels.push('MAR');
+      labels.push('ABR');
+      labels.push('MAI');
+      labels.push('JUN');
+      labels.push('JUL');
+      labels.push('AGO');
+      labels.push('SET');
+      labels.push('OUT');
+      labels.push('NOV');
+      labels.push('DEZ');
+    } else if (frequency === 'BIMESTRAL') {
+      labels.push('1º B');
+      labels.push('2º B');
+      labels.push('3º B');
+      labels.push('4º B');
+      labels.push('5º B');
+      labels.push('6º B');
+    } else if (frequency === 'TRIMESTRAL') {
+      labels.push('1º T');
+      labels.push('2º T');
+      labels.push('3º T');
+      labels.push('4º T');
+    } else if (frequency === 'QUADRIMESTRAL') {
+      labels.push('1º Q');
+      labels.push('2º Q');
+      labels.push('3º Q');
+    } else if (frequency === 'SEMESTRAL') {
+      labels.push('1º S');
+      labels.push('2º S');
+    } else if (frequency === 'ANUAL') {
+      labels.push('Ano');
+    }
+
+    return labels;
+  }, [indicatorGoal]);
+
+  useEffect(() => {
+    if (!analysisIndices || !analysisLabels || analysisIndices.length !== analysisLabels.length) {
+      return;
+    }
+
+    const arr: Array<Array<Analysis>> = [];
+
+    for (let i = 0; i < analysisIndices.length; i++) {
+      const current: Array<Analysis> =
+        allIndicatorGoalAnalysis.length > 0
+          ? allIndicatorGoalAnalysis.filter(o => o.month === i)
+          : [
+              {
+                action: '',
+                analysisDetails: '',
+                deadline: '',
+                description: '',
+                indicatorGoal: null,
+                indicatorGoalId: -1,
+                month: -1,
+                responsible: -1,
+              },
+            ];
+
+      arr.push(current);
+    }
+
+    setAllAnalysis(arr);
+  }, [analysisIndices, analysisLabels, allIndicatorGoalAnalysis]);
+
+  useEffect(() => {
+    if (!initialMeasurementValues) {
+      return;
+    }
+
+    setMeasurements(initialMeasurementValues);
+  }, [initialMeasurementValues]);
 
   return (
     <div className="padding-container">
@@ -228,11 +361,13 @@ const Measurements = () => {
                     frequencies={frequencies}
                     initialAnalysis={[]}
                     initialFrequency={indicatorGoal?.frequency}
-                    initialValues={initialGoalValues}
+                    initialValues={goals}
                     indicatorYear={indicatorGoal?.year}
+                    labels={analysisLabels}
                     onChanged={onIndicatorGoalsChanged}
                     readonly={!matchesRole(userRole, 'ROLE_ADMIN') && !matchesRole(userRole, 'ROLE_SGQ')}
                     unit="PERCENTUAL"
+                    users={users}
                   />
                 </CardContent>
               </Card>
@@ -243,12 +378,14 @@ const Measurements = () => {
                   <IndicatorMeasurements
                     canAddAnalysis
                     frequencies={frequencies}
-                    initialAnalysis={initialAnalysis}
+                    initialAnalysis={allAnalysis}
                     initialFrequency={indicatorGoal?.frequency}
-                    initialValues={initialMeasurementValues}
+                    initialValues={measurements}
                     indicatorYear={indicatorGoal?.year}
+                    labels={analysisLabels}
                     onChanged={onIndicatorMeasurementsChanged}
                     unit="PERCENTUAL"
+                    users={users}
                   />
                 </CardContent>
               </Card>

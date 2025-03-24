@@ -3,6 +3,7 @@ import indicators from './reducers/indicators.reducer';
 import indicatorGoals from './reducers/indicator-goals.reducer';
 import charts from './reducers/charts.reducer';
 import indicatorAnalysis from './reducers/analysis.reducer';
+import users from '../../entities/usuario/reducers/usuario.reducer';
 
 const performanceIndicatorReducers = {
   enums,
@@ -10,6 +11,7 @@ const performanceIndicatorReducers = {
   indicators,
   charts,
   indicatorAnalysis,
+  users,
 };
 
 export default performanceIndicatorReducers;

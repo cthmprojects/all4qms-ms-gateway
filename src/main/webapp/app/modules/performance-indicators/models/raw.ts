@@ -5,12 +5,16 @@ export type Enumerador = {
 };
 
 export type Indicador = {
+  cargoResponsavel: string;
   codigoIndicador: string;
   descricaoIndicador: string;
+  fonteDeDados: string;
+  formacaoIndice: string;
   id?: number;
   idMetaIndicador?: number;
   idProcesso: number;
   nomeIndicador: string;
+  prazoMaxApuracao: string;
   tendencia: 'MAIOR' | 'MENOR' | 'ESTABILIZAR';
   unidade: 'PERCENTUAL' | 'MONETARIO' | 'UNITARIO' | 'DECIMAL';
 };
