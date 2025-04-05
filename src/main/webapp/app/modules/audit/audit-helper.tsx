@@ -29,12 +29,12 @@ export function renderValueAuditor(auditor: Auditor) {
 }
 
 export const renderValueCronograma = (cron: CronogramaAuditoria) => {
-  // return `CRONOGRAMA: "${partesLabel(cron.parte)}, ${capitalize(cron.status)}" | MODELO: "${renderValueModelo(cron.modelo)}"`;
+  if (!cron) return '';
 
   return (
     <Stack>
-      <span>{`CRONOGRAMA: ${partesLabel(cron.parte)}, ${capitalize(cron.status)} (${renderValueModelo(cron.modelo)})`}</span>
-      <span>{`DATAS: de ${cron?.periodoInicial?.toLocaleDateString?.('PT-br')} até ${cron?.periodoFinal?.toLocaleDateString?.(
+      <span>{`Cronograma: ${partesLabel(cron.parte)}, ${capitalize(cron.status)} (${renderValueModelo(cron.modelo)})`}</span>
+      <span>{`Datas: de ${cron?.periodoInicial?.toLocaleDateString?.('PT-br')} até ${cron?.periodoFinal?.toLocaleDateString?.(
         'PT-br'
       )}`}</span>
       {/* <span>{`MODELO: ${renderValueModelo(cron.modelo)}`}</span> */}
@@ -43,7 +43,7 @@ export const renderValueCronograma = (cron: CronogramaAuditoria) => {
 };
 
 export const renderValuePlanejamento = (planejamento: PlanejamentoAuditoria) => {
-  return planejamento.metodo;
+  return planejamento.identificadorPlanejamento;
 };
 
 export const renderValueMultipleAuditores = (auditors: Auditor[]) => auditors.map(item => item.nomeAuditor).join(', ');
