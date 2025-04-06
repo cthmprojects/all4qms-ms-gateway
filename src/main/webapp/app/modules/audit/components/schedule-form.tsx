@@ -1,52 +1,36 @@
-import { Autocomplete, Chip, MenuItem, Stack, TextField } from '@mui/material';
+import { Autocomplete, Chip, MenuItem, Stack, TextField, Tooltip, tooltipClasses } from '@mui/material';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 import { MaterialSelect } from 'app/shared/components/select/material-select';
 import { formField } from 'app/shared/util/form-utils';
 import { Controller, UseFormReturn, useWatch } from 'react-hook-form';
-import { AgendamentoAuditoria, PlanejamentoAuditoria } from '../audit-models';
-import { isEqual, renderValueAuditor, renderValuePlanejamento } from '../audit-helper';
+import { AgendamentoAuditoria, CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
+import { isEqual, renderValueAuditor, renderValueCronograma, renderValuePlanejamento } from '../audit-helper';
 import { Process } from 'app/modules/infodoc/models';
 import { defaultRule } from 'app/shared/model/constants';
 import { IUsuario } from 'app/shared/model/usuario.model';
 
 type ScheduleFormProps = {
-  formObject: UseFormReturn<AgendamentoAuditoria>;
+  formObject: UseFormReturn<any>;
   processes: Process[];
   planning: PlanejamentoAuditoria;
   disabled?: boolean;
   users: IUsuario[];
+  prefix?: string;
 };
 
-export const ScheduleForm = ({ formObject, processes, planning, disabled, users }: ScheduleFormProps) => {
+export const ScheduleForm = ({ formObject, processes, planning, disabled, users, prefix }: ScheduleFormProps) => {
   const { control } = formObject;
   const selectedAuditors = useWatch({ control, name: 'auditores' });
+
+  const withPrefix = (field: keyof AgendamentoAuditoria) => {
+    return prefix ? `${prefix}.${field}` : field;
+  };
 
   return (
     <Stack gap="24px">
       <Stack flexDirection="row" gap="1.5rem" flexWrap={{ xs: 'wrap', md: 'initial' }}>
         <Controller
-          name="planejamento"
-          control={control}
-          render={renderPayload => (
-            <MaterialSelect
-              variant="outlined"
-              label="Planejamento"
-              {...formField(renderPayload)}
-              renderValue={renderValuePlanejamento}
-              disabled
-              sx={{ minWidth: '215px', flexGrow: '1' }}
-            >
-              {
-                // @ts-ignore - necessary to load object into value
-                <MenuItem value={planning}>{planning?.metodo}</MenuItem>
-              }
-            </MaterialSelect>
-          )}
-        />
-
-        {/* {JSON.stringify(processes)} */}
-        <Controller
-          name="idProcesso"
+          name={withPrefix('idProcesso')}
           control={control}
           rules={defaultRule}
           render={renderPayload =>
@@ -72,7 +56,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
         />
 
         <Controller
-          name="dataAuditoria"
+          name={withPrefix('dataAuditoria')}
           control={control}
           rules={defaultRule}
           render={renderPayload => (
@@ -88,7 +72,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
         />
 
         <Controller
-          name="horaInicial"
+          name={withPrefix('horaInicial')}
           control={control}
           rules={defaultRule}
           render={renderPayload => (
@@ -106,7 +90,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
         />
 
         <Controller
-          name="horaFinal"
+          name={withPrefix('horaFinal')}
           control={control}
           rules={defaultRule}
           render={renderPayload => (
@@ -124,7 +108,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
         />
 
         <Controller
-          name="responsavelAuditoria"
+          name={withPrefix('responsavelAuditoria')}
           control={control}
           rules={{ ...defaultRule, min: { value: 1, message: 'Campo obrigatório' } }}
           render={renderPayload => (
@@ -147,7 +131,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users 
         />
       </Stack>
       <Controller
-        name="auditores"
+        name={withPrefix('auditores')}
         control={control}
         rules={{
           validate: value => (value && value.length > 0) || 'Selecione pelo menos um auditor',

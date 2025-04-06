@@ -1,14 +1,49 @@
-import { Box, Breadcrumbs, Dialog, Stack, Typography } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Breadcrumbs,
+  Card,
+  Dialog,
+  Fab,
+  IconButton,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AgendamentoAuditoria, PlanejamentoAuditoria } from '../audit-models';
 import { useMutation } from '@tanstack/react-query';
-import { getAgendamentoById, getPlanejamentoById, getProcessos, getUsuarios, persistAgendamento } from '../audit-service';
+import {
+  getAgendamentoById,
+  getPlanejamentoById,
+  getProcessos,
+  getUsuarios,
+  persistAgendamento,
+  persistManyAgendamentos,
+  reagendar,
+} from '../audit-service';
 import { SyntheticEvent, useEffect, useState } from 'react';
-import { Button } from 'reactstrap';
 import { ScheduleForm } from '../components/schedule-form';
 import { RescheduleForm } from '../components/reschedule-form';
 import { ConfirmContent } from '../components/confim-content';
+import { renderValueCronograma } from '../audit-helper';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import { Button } from 'reactstrap';
+
+const defaultAgendamento = {
+  id: null,
+  planejamento: '' as unknown as PlanejamentoAuditoria,
+  auditores: [],
+  dataAuditoria: '' as unknown as Date,
+  responsavelAuditoria: '' as unknown as number,
+  horaInicial: '' as unknown as Date,
+  horaFinal: '' as unknown as Date,
+  idProcesso: '' as unknown as number,
+} as AgendamentoAuditoria;
 
 export const ScheduleNewEdit = () => {
   const { idPlanning } = useParams();
@@ -21,26 +56,36 @@ export const ScheduleNewEdit = () => {
   const idSchedule = searchParams.get('idSchedule');
 
   const formMethods = useForm<AgendamentoAuditoria>({
+    defaultValues: defaultAgendamento,
+    mode: 'all',
+    reValidateMode: 'onChange',
+  });
+
+  const formForArray = useForm<{ array: AgendamentoAuditoria[] }>({
     defaultValues: {
-      id: null,
-      planejamento: '' as unknown as PlanejamentoAuditoria,
-      auditores: [],
-      dataAuditoria: '' as unknown as Date,
-      responsavelAuditoria: '' as unknown as number,
-      horaInicial: '' as unknown as Date,
-      horaFinal: '' as unknown as Date,
-      idProcesso: '' as unknown as number,
+      array: [],
     },
     mode: 'all',
     reValidateMode: 'onChange',
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: formForArray.control,
+    name: 'array',
+    keyName: 'key',
+    rules: { required: true },
+  });
   const { getValues, setValue, formState, reset } = formMethods;
 
   const navigate = useNavigate();
 
-  const { mutate: saveScheduling, isPending } = useMutation({
-    mutationFn: (newPayload: Partial<AgendamentoAuditoria>) => persistAgendamento({ ...getValues(), ...newPayload }),
+  const { mutate: saveScheduling, isPending } = useMutation<
+    AgendamentoAuditoria | AgendamentoAuditoria[],
+    Error,
+    Partial<AgendamentoAuditoria>
+  >({
+    mutationFn: (newPayload: Partial<AgendamentoAuditoria>) =>
+      newPayload.isFinalizado ? reagendar({ ...getValues(), ...newPayload }) : persistManyAgendamentos(formForArray.getValues().array),
     onSuccess: whenSave,
   });
 
@@ -69,12 +114,7 @@ export const ScheduleNewEdit = () => {
   }
 
   function whenSave(agendamento: AgendamentoAuditoria) {
-    if (agendamento.isFinalizado) {
-      setOpenValidate(false);
-      navigate(`/audit/auditorship/edit/${agendamento.id}`, { replace: true });
-      return;
-    }
-    agendamento.id && navigate(`/audit/planning/${idPlanning}/schedule?idSchedule=${agendamento.id}`, { replace: true });
+    navigate(-1);
   }
 
   function onClose() {
@@ -102,7 +142,66 @@ export const ScheduleNewEdit = () => {
 
   useEffect(() => {
     planning?.id && setValue('planejamento', planning);
+    planning?.id && !fields.length && addInArray();
   }, [planning]);
+
+  const arr1 = useWatch({ control: formForArray.control, name: 'array.0' });
+
+  function addInArray() {
+    const obj = fields.length
+      ? { ...arr1, ...{ idProcesso: '' as unknown as number } }
+      : { ...defaultAgendamento, ...{ planejamento: planning } };
+    append(obj);
+  }
+
+  const hasMoreItens = fields.length > 1;
+
+  function renderForm() {
+    if (!planning?.auditores.length) {
+      return null;
+    }
+
+    if (idSchedule) return <ScheduleForm processes={processes} formObject={formMethods} planning={planning} users={users} />;
+
+    return (
+      <Box display="flex" flexDirection="column" justifyContent="center">
+        {fields.map((item, idx) => (
+          <Card
+            sx={{
+              display: 'flex',
+              gap: '10px',
+              alignItems: 'center',
+              padding: '12px',
+              marginBottom: '32px',
+            }}
+          >
+            <Box width={hasMoreItens ? '95%' : null} paddingBottom="24px">
+              <ScheduleForm
+                key={item.key}
+                prefix={`array.${idx}`}
+                processes={processes}
+                formObject={formForArray}
+                planning={planning}
+                users={users}
+              />
+            </Box>
+            {hasMoreItens ? (
+              <span>
+                <IconButton onClick={() => remove(idx)}>
+                  <DeleteIcon />
+                </IconButton>
+              </span>
+            ) : null}
+          </Card>
+        ))}
+        <Box display="flex" justifyContent="end" position="relative">
+          <Fab onClick={addInArray}>
+            <AddIcon />
+          </Fab>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <div className="padding-container">
@@ -120,8 +219,27 @@ export const ScheduleNewEdit = () => {
         </Breadcrumbs>
 
         <h2 className="title">{idSchedule ? 'Validar' : 'Novo'} Agendamento</h2>
+
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1-content"
+            id="panel1-header"
+            sx={{ backgroundColor: '#f5f5f5', borderBottom: '1px solid #ddd' }}
+          >
+            <Typography variant="h6">Planejamento {planning?.identificadorPlanejamento?.toUpperCase()}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            Escopo: {planning?.escopo}
+            <br />
+            {renderValueCronograma(planning?.cronograma)}
+          </AccordionDetails>
+        </Accordion>
         <Box display="flex" flexDirection="column" gap="24px">
-          {planning?.auditores.length && <ScheduleForm processes={processes} formObject={formMethods} planning={planning} users={users} />}
+          <Box>
+            <br />
+          </Box>
+          {renderForm()}
         </Box>
       </div>
       <Stack justifyContent="flex-end" gap="2.5rem" flexDirection="row" mt="20px">
@@ -154,7 +272,7 @@ export const ScheduleNewEdit = () => {
           </Button>
         ) : (
           <Button
-            disabled={!formState.isValid}
+            disabled={!formForArray.formState.isValid}
             type="submit"
             onClick={() => saveScheduling({})}
             variant="contained"
@@ -167,7 +285,7 @@ export const ScheduleNewEdit = () => {
       </Stack>
 
       <Dialog open={open} onClose={onClose}>
-        <RescheduleForm onClose={onClose} agendamento={localSchedule} />
+        <RescheduleForm onClose={onClose} agendamento={localSchedule} previous={currentSchedule} />
       </Dialog>
 
       <Dialog open={openValidate} onClose={() => setOpenValidate(false)}>

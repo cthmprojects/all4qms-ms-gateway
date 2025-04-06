@@ -10,9 +10,10 @@ import { persistAgendamento } from '../audit-service';
 type RescheduleFormProps = {
   onClose: () => void;
   agendamento: AgendamentoAuditoria;
+  previous: AgendamentoAuditoria;
 };
 
-export const RescheduleForm = forwardRef(({ agendamento, onClose }: RescheduleFormProps, ref) => {
+export const RescheduleForm = forwardRef(({ agendamento, onClose, previous }: RescheduleFormProps, ref) => {
   const { formState, getValues, register, reset } = useForm<AgendamentoAuditoria>({
     mode: 'all',
     reValidateMode: 'onBlur',
@@ -24,7 +25,7 @@ export const RescheduleForm = forwardRef(({ agendamento, onClose }: RescheduleFo
     mutationFn: () => persistAgendamento(getValues()),
     onSuccess: async (schedule: AgendamentoAuditoria) => {
       onClose();
-      await persistAgendamento({ ...agendamento, isReagendado: true });
+      await persistAgendamento({ ...previous, isReagendado: true });
       agendamento.id && navigate(`/audit/planning/${schedule.planejamento.id}/schedule?idSchedule=${schedule.id}`, { replace: true });
     },
   });
