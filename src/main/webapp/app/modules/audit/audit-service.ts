@@ -283,9 +283,26 @@ async function updateAgendamento(agendamento: AgendamentoAuditoria) {
   return parseRawAgendamento(data);
 }
 
+export async function reagendar(agendamento: AgendamentoAuditoria) {
+  const { id, ...rest } = agendamento;
+  const { data } = await axios.post<AgendamentoAuditoria>(`${AuditBaseUrl}/auditoria/agendamentos/reagendar/${id}`, rest);
+  return parseRawAgendamento(data);
+}
+
 export const persistAgendamento = addToast(
   async (agendamento: AgendamentoAuditoria) => {
     const result = await (agendamento?.id ? updateAgendamento(agendamento) : saveAgendamento(agendamento));
+    return result;
+  },
+  'Agendamento salvo com sucesso',
+  'Erro ao salvar agendamento'
+);
+
+export const persistManyAgendamentos = addToast(
+  async (agendamentos: AgendamentoAuditoria[]) => {
+    const promisses = agendamentos.map(agendamento => (agendamento?.id ? updateAgendamento(agendamento) : saveAgendamento(agendamento)));
+
+    const result = await Promise.all(promisses);
     return result;
   },
   'Agendamento salvo com sucesso',
