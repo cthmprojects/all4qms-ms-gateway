@@ -1,12 +1,18 @@
-import React from 'react';
+import SearchIcon from '@mui/icons-material/Search';
 import {
+  Box,
   Breadcrumbs,
   Button,
   FormControl,
+  Grid,
   IconButton,
+  IconButtonProps,
+  InputAdornment,
   InputLabel,
   MenuItem,
+  OutlinedInput,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -14,34 +20,27 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Select,
-  Box,
-  Tooltip,
-  Grid,
-  InputAdornment,
-  OutlinedInput,
-  Switch,
-  IconButtonProps,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { Row } from 'reactstrap';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import { Link, useNavigate } from 'react-router-dom';
-import SearchIcon from '@mui/icons-material/Search';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { registerLocale } from 'react-datepicker';
 import ptBR from 'date-fns/locale/pt-BR';
+import { useCallback, useEffect, useState } from 'react';
+import { registerLocale } from 'react-datepicker';
+import { Link, useNavigate } from 'react-router-dom';
+import { Row } from 'reactstrap';
 
-import { Storage } from 'react-jhipster';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
-import { EixosSwot, SwotList } from '../../models/swot';
+import { Storage } from 'react-jhipster';
+import { EixosSwot } from '../../models/swot';
 import { getSwotAllFilter } from '../../reducers/swot.reducer';
 import { createRiskOportunity } from '../../strategic-planning.service';
+import { RawRiskOpportunity } from 'app/modules/risks-opportunities/models';
+import { listROs } from 'app/modules/risks-opportunities/reducers/risks-opportunities.reducer';
 
 // Registra a localidade
 registerLocale('pt-BR', ptBR);
 
-const columns = ['SWOT', 'Descrição', 'Habilitado', 'Status', 'Ações'];
+const columns = ['SWOT', 'Descrição', 'Analisar?', 'Status', 'Ações'];
 enum StatusType {
   PENDENTE = 'PENDENTE',
   CONTROLADO = 'CONTROLADO',
@@ -73,8 +72,8 @@ const Home = () => {
 
   const swotList: Array<EixosSwot> = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.entities);
   const totalItems = useAppSelector(state => state.all4qmsmsgatewayauditplan.swot.totalItems);
+  const risksAndOpportunities: Array<RawRiskOpportunity> = useAppSelector(state => state.all4qmsmsgatewayauditplan.risco.entities);
   const { page, pageSize, paginator } = usePaginator(totalItems || 0);
-  // const { page, pageSize, paginator } = usePaginator(0);
 
   useEffect(() => {
     if (page <= 0) {
@@ -90,6 +89,7 @@ const Home = () => {
     setIsSGQ(isSGQ);
 
     dispatch(getSwotAllFilter({ size: pageSize, page: page }));
+    dispatch(listROs({}));
   }, []);
 
   useEffect(() => {
@@ -119,24 +119,45 @@ const Home = () => {
     setFilters({});
   };
 
-  function configAction(eixo: EixosSwot) {
-    const isRisk = ['FRAQUEZAS', 'AMEACAS'].includes(eixo.eixo);
-    const title = `${eixo.idRiscoOportunidade ? 'Editar' : 'Criar'} ${isRisk ? 'Risco' : 'Oportunidade'}`;
-    // const onClick= () => navigate('/risks-opportunities/risk', { state: { from: 'strategic-planning', data: eixo } })
-    const onClick = eixo?.idRiscoOportunidade
-      ? () => navigate(`/risks-opportunities/${isRisk ? 'risk' : 'opportunity'}/${eixo.idRiscoOportunidade}`)
-      : async () => {
-          await createRiskOportunity(eixo, isRisk ? 'R' : 'O');
-          setTimeout(() => {
-            handleApplyFilters();
-          }, 150);
-        };
-    return {
-      title,
-      disabled: !eixo.isAnalisar,
-      onClick,
-    } as IconButtonProps;
-  }
+  const isRiskAndOpportunityCreated = useCallback(
+    (eixo: EixosSwot): IconButtonProps => {
+      const isRisk = ['FRAQUEZAS', 'AMEACAS'].includes(eixo.eixo);
+
+      const id: number | null = eixo?.idRiscoOportunidade;
+
+      const isRiskOpportunityAvailable: boolean = id && risksAndOpportunities.some(ro => ro.id === id);
+
+      const title = `${isRiskOpportunityAvailable ? 'Editar' : 'Criar'} ${isRisk ? 'Risco' : 'Oportunidade'}`;
+
+      const onClick = isRiskOpportunityAvailable
+        ? () => navigate(`/risks-opportunities/${isRisk ? 'risk' : 'opportunity'}/${id}`)
+        : async () => {
+            await createRiskOportunity(eixo, isRisk ? 'R' : 'O');
+            setTimeout(() => {
+              handleApplyFilters();
+            }, 150);
+          };
+
+      return {
+        title,
+        disabled: !eixo.isAnalisar,
+        onClick,
+      } as IconButtonProps;
+    },
+    [risksAndOpportunities]
+  );
+
+  const formatValue = (text: string): string => {
+    if (text === 'FORCAS') {
+      return 'FORÇAS';
+    }
+
+    if (text === 'AMEACAS') {
+      return 'AMEAÇAS';
+    }
+
+    return text;
+  };
 
   const renderTable = () => {
     if (swotList.length > 0) {
@@ -156,20 +177,15 @@ const Home = () => {
               <TableBody>
                 {swotList &&
                   swotList.map((swotItem: EixosSwot, index) => (
-                    // <Tooltip title={goalResult.meta.metaObjetivo.desdobramentoSGQ}>
                     <TableRow className="table-row" key={index}>
-                      <TableCell>{swotItem.eixo}</TableCell>
+                      <TableCell>{formatValue(swotItem.eixo)}</TableCell>
                       <TableCell>{swotItem.descricao}</TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Switch checked={swotItem.isAnalisar} />
-                        </Box>
-                      </TableCell>
+                      <TableCell>{swotItem.isAnalisar ? 'Sim' : 'Não'}</TableCell>
                       <TableCell>{swotItem.status}</TableCell>
                       <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                         {isSGQ && (
-                          <IconButton color="primary" {...configAction(swotItem)}>
-                            <EditNoteIcon />
+                          <IconButton color="primary" {...isRiskAndOpportunityCreated(swotItem)}>
+                            <FontAwesomeIcon icon="crosshairs" />
                           </IconButton>
                         )}
                       </TableCell>
@@ -280,7 +296,7 @@ const Home = () => {
                 <MenuItem value={''}>Selecionar</MenuItem>
                 {['FORCAS', 'FRAQUEZAS', 'OPORTUNIDADES', 'AMEACAS']?.map((status, index) => (
                   <MenuItem key={index} value={status}>
-                    {status}
+                    {formatValue(status)}
                   </MenuItem>
                 ))}
               </Select>
