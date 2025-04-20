@@ -1,4 +1,6 @@
+import { addToast } from 'app/shared/util/add-toast';
 import axios from 'axios';
+import { RawInstitutional } from '../strategic-planning/models';
 
 const parserMetaResult = (payload: any) => {
   return {
@@ -31,3 +33,11 @@ export const getMetaResultAttatchment = async (id: number) => {
   const { data } = await axios.get<any>('/services/all4qmsmsmetaind/api/metaobj/anexos/' + id);
   return data;
 };
+
+export const getInstitucional = addToast(
+  async () => {
+    return (await axios.get<RawInstitutional[]>('/services/all4qmsmsauditplan/api/planest/institucionals')).data[0];
+  },
+  '',
+  'Erro ao obter registro do institucional'
+);

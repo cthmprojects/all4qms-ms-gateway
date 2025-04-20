@@ -33,11 +33,15 @@ const RncBaseUrl = 'services/all4qmsmsrnc/api';
 const AuditBaseUrl = 'services/all4qmsmsauditplan/api';
 
 function parseRawCronograma(payload: any) {
-  return {
-    ...payload,
-    periodoInicial: new Date(payload.periodoInicial),
-    periodoFinal: new Date(payload.periodoFinal),
-  } as CronogramaAuditoria;
+  return (
+    payload.id
+      ? {
+          ...payload,
+          periodoInicial: new Date(payload.periodoInicial),
+          periodoFinal: new Date(payload.periodoFinal),
+        }
+      : {}
+  ) as CronogramaAuditoria;
 }
 
 function parseRawPlanejamento(payload: any) {
@@ -179,7 +183,28 @@ export const getPaginatedPlanejamento = addToast(
     const { data } = await axios.get<PaginatedResponse<PlanejamentoAuditoria>>(`${AuditBaseUrl}/auditoria/planejamentos/filter`, {
       params,
     });
-    return { ...data, content: data.content.map(parseRawPlanejamento) };
+    const content = await Promise.all(
+      data.content.map(async item => {
+        const newReturn = parseRawPlanejamento(item);
+        const result = (await getPaginatedAgendamento({ page: 0, size: 100, finalizado: false, planejamento: newReturn.id })).content
+          .filter(item => !item.isReagendado)
+          .reduce(
+            (acc, agendamento) => {
+              acc.responsibleNames.push(agendamento?.responsavelAuditoria?.nome);
+              acc.processNames.push(agendamento.processo.nome);
+              return acc;
+            },
+            { responsibleNames: [], processNames: [] }
+          );
+
+        return {
+          ...newReturn,
+          responsibles: [...new Set(result.responsibleNames)].join('; '),
+          processes: [...new Set(result.processNames)].join('; '),
+        };
+      })
+    );
+    return { ...data, content };
   },
   '',
   'Erro ao consultar planejamentos'
@@ -246,15 +271,32 @@ export const getPaginatedAgendamento = addToast(
     const { data } = await axios.get<PaginatedResponse<AgendamentoAuditoria>>(`${AuditBaseUrl}/auditoria/agendamentos`, {
       params,
     });
-    const allPlans = await Promise.all(data.content.map(item => getPlanejamentoById(item.planejamento.id)));
+    const allPlans = (await Promise.all([...new Set(data.content.map(item => item.planejamento.id))].map(getPlanejamentoById))).reduce(
+      (acc, item) => {
+        acc[item.id] = item;
+        return acc;
+      },
+      {} as Record<number, PlanejamentoAuditoria>
+    );
+
     const allNcOm = await Promise.all(
       data.content.map(item => (item.registro?.id ? getListNcsOmsAuditoria(item.registro) : Promise.resolve(null)))
     );
 
+    const allProccess = (await getProcessos()).reduce((acc, item) => {
+      acc[item.id] = item;
+      return acc;
+    }, {} as Record<number, Process>);
+
+    const allUsers = (await getUsuarios()).reduce((acc, item) => {
+      acc[item.id] = item;
+      return acc;
+    }, {} as Record<number, IUsuario>);
+
     return {
       ...data,
       content: data.content.map((item, index) => {
-        const plan = allPlans[index];
+        const plan = allPlans[item.planejamento.id];
         const ncsOms = allNcOm[index];
 
         const ncsNumber = ncsOms?.filter(nc => nc.tipoDescricao == 'NC').length || 0;
@@ -265,7 +307,14 @@ export const getPaginatedAgendamento = addToast(
           planejamento: parseRawPlanejamento(plan),
           ncsNumber,
           omsNumber,
-        } as AgendamentoAuditoria & { ncsNumber: number; omsNumber: number };
+          responsavelAuditoria: allUsers[item.responsavelAuditoria],
+          processo: allProccess[item.idProcesso],
+        } as Omit<AgendamentoAuditoria, 'idProcesso' | 'responsavelAuditoria'> & {
+          ncsNumber: number;
+          omsNumber: number;
+          responsavelAuditoria: IUsuario;
+          processo: Process;
+        };
       }),
     };
   },

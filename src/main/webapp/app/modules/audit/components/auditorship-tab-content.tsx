@@ -27,7 +27,7 @@ import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
 import { Process } from 'app/modules/rnc/models';
 import { IUsuario } from 'app/shared/model/usuario.model';
 
-const columns = ['Planejamento', 'Tipo', 'Processo', 'Responsável', 'Data', 'Início / Término', 'Requisito Específico', 'Ações'];
+const columns = ['Planejamento', 'Processo', 'Data', 'Início / Término', 'RNC', 'ROM', 'Ações'];
 
 export const AuditorshipTabContent = () => {
   const navigate = useNavigate();
@@ -159,14 +159,13 @@ export const AuditorshipTabContent = () => {
                 sx={schedule.isReagendado ? { opacity: 0.5, pointerEvents: 'none', cursor: 'not-allowed', height: '57px' } : {}}
               >
                 <TableCell>{schedule?.planejamento.identificadorPlanejamento || '-'}</TableCell>
-                <TableCell>{schedule?.planejamento.cronograma.modelo.tipo || '-'}</TableCell>
-                <TableCell>{pickProccess(schedule.idProcesso)?.nome || '-'}</TableCell>
-                <TableCell>{pickUser(schedule.responsavelAuditoria)?.nome || '-'}</TableCell>
+                <TableCell>{schedule?.processo?.nome || '-'}</TableCell>
                 <TableCell>{schedule.dataAuditoria.toLocaleDateString('pt-BR')}</TableCell>
                 <TableCell>
                   {schedule.horaInicial.toLocaleTimeString('pt-BR')} até {schedule.horaFinal.toLocaleTimeString('pt-BR')}
                 </TableCell>
-                <TableCell>{schedule.planejamento.escopo}</TableCell>
+                <TableCell>{schedule.ncsNumber}</TableCell>
+                <TableCell>{schedule.omsNumber}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
                     {schedule.isReagendado ? (
