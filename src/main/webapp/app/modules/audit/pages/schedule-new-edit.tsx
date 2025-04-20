@@ -175,7 +175,7 @@ export const ScheduleNewEdit = () => {
               marginBottom: '32px',
             }}
           >
-            <Box width={hasMoreItens ? '95%' : null} paddingBottom="24px">
+            <Box width="95%" paddingBottom="24px">
               <ScheduleForm
                 key={item.key}
                 prefix={`array.${idx}`}

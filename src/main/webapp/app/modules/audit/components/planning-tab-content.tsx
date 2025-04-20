@@ -28,7 +28,7 @@ import { CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
 import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
 import { capitalize } from 'lodash';
 
-const columns = ['ID', 'Código', 'Tipo de Auditoria', 'Auditoria', 'Escopo', 'Ações'];
+const columns = ['Código', 'Tipo de Auditoria', 'Processos', 'Responsáveis', 'Requisitos Específicos', 'Ações'];
 
 export const PlanningTabContent = () => {
   const navigate = useNavigate();
@@ -152,12 +152,12 @@ export const PlanningTabContent = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {plannings?.content.map((planning: PlanejamentoAuditoria, index) => (
+            {plannings?.content.map((planning, index) => (
               <TableRow className="table-row" key={planning.id}>
-                <TableCell>{planning.id}</TableCell>
                 <TableCell>{planning.identificadorPlanejamento}</TableCell>
                 <TableCell>{capitalize(planning.cronograma.modelo.tipo)}</TableCell>
-                <TableCell>{renderValueCronograma(planning.cronograma as CronogramaAuditoria)}</TableCell>
+                <TableCell>{planning.processes}</TableCell>
+                <TableCell>{planning.responsibles}</TableCell>
                 <TableCell>{planning.escopo}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
