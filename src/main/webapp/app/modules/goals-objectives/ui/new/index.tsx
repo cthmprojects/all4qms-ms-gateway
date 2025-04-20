@@ -25,6 +25,7 @@ import { EnumTemporal } from '../../models/enums';
 import { saveMetaObjetivo } from '../../reducers/meta-objetivo.reducer';
 import { getMeta, saveMetas, updateMeta } from '../../reducers/metas.reducer';
 import { RemoveCircleOutline } from '@mui/icons-material';
+import { getInstitucional } from '../../goal-result.service';
 
 const initMeta = {
   descricao: '',
@@ -81,6 +82,7 @@ export const NewGoalObjective = () => {
       fetchGetMeta();
     }
     dispatch(getAllResources({ page: 0, size: 20 }));
+    getInstitucional().then(res => setMetaObj({ ...metaObj, politicaSGQ: res.politica }));
   }, []);
 
   const cancelNewGoal = () => {

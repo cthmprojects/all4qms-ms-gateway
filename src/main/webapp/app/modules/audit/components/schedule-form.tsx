@@ -66,6 +66,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users,
               label="Data da Auditoria"
               disabled={disabled}
               {...formField(renderPayload)}
+              fullWidth
               sx={{ minWidth: '185px', flexGrow: '.4' }}
             />
           )}
@@ -84,7 +85,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users,
               label="Hora início"
               disabled={disabled}
               {...formField(renderPayload)}
-              sx={{ minWidth: '140px' }}
+              sx={{ minWidth: '160px' }}
             />
           )}
         />
@@ -102,7 +103,7 @@ export const ScheduleForm = ({ formObject, processes, planning, disabled, users,
               label="Hora término"
               disabled={disabled}
               {...formField(renderPayload)}
-              sx={{ minWidth: '140px' }}
+              sx={{ minWidth: '160px' }}
             />
           )}
         />
