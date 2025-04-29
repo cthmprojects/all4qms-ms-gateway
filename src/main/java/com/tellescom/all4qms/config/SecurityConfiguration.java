@@ -105,6 +105,7 @@ public class SecurityConfiguration {
             .pathMatchers("/api/account/reset-password/init").permitAll()
             .pathMatchers("/api/account/reset-password/finish").permitAll()
             .pathMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
+            .pathMatchers("/api/admin/users-by-role").permitAll()
             .pathMatchers("/api/**").permitAll()
             .pathMatchers("/services/*/v3/api-docs").permitAll()
             .pathMatchers("/services/**").permitAll()
