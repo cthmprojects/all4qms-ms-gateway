@@ -268,7 +268,7 @@ public class UserResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body all users.
      */
     @GetMapping("/users-by-role")
-    @PreAuthorize("hasAnyRole(\"" + AuthoritiesConstants.ADMIN + "\", \"ROLE_SGQ\")")
+    //@PreAuthorize("hasAnyRole(\"" + AuthoritiesConstants.ADMIN + "\", \"ROLE_SGQ\")")
     public Mono<ResponseEntity<Flux<UserDTO>>> getAllUsersByAuthority(@RequestParam(required = true) String role) {
         log.debug("REST request to get all User for an admin");
         if (role == null || role.isBlank()) {
