@@ -23,6 +23,10 @@ export const buscarMovimentacao = createAsyncThunk('movimentacao/buscar', async 
   return await axios.get<Movimentacao>(`${apiMovimentacaoUrl}/${id}`);
 });
 
+export const buscarMovimentacaoByInfoDoc = createAsyncThunk('movimentacao/buscarByInfoDoc', async (id: number | string) => {
+  return await axios.get<Movimentacao>(`${apiMovimentacaoUrl}/documento/${id}`);
+});
+
 export const atualizarMovimentacao = createAsyncThunk('movimentacao/atualizar', async (data: Movimentacao) => {
   return await axios.put<Movimentacao>(`${apiMovimentacaoUrl}/${data.id}`, data);
 });

@@ -64,7 +64,7 @@ const JustifyFalta = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements
   return (
     <React.Fragment>
       <StyledTextarea minRows={5} cols={30} {...props} ref={ref} id={id} />
-      <StyledLabel htmlFor={id}>Justificar Falta do Arquivo</StyledLabel>
+      <StyledLabel htmlFor={id}>Comentário de Entrega</StyledLabel>
     </React.Fragment>
   );
 });
@@ -74,7 +74,7 @@ const justifyDevolution = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicEle
   return (
     <React.Fragment>
       <StyledTextarea minRows={5} cols={30} {...props} ref={ref} id={id} />
-      <StyledLabel htmlFor={id}>Justificar Falta da Devolução do Arquivo</StyledLabel>
+      <StyledLabel htmlFor={id}>Comentário de Recebimento</StyledLabel>
     </React.Fragment>
   );
 });

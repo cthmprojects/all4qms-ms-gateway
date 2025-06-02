@@ -24,6 +24,7 @@ import { getEntitiesById as getPendenciasByUser, getPendenciasCount } from '../.
 import { AxiosResponse } from 'axios';
 import { EnableComponent } from 'app/shared/auth/enable-component';
 import { AUTHORITIES } from 'app/config/constants';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
 
 export interface IHeaderProps {
   isAuthenticated: boolean;
@@ -201,22 +202,26 @@ const Header = (props: IHeaderProps) => {
                 pendenciasList={pendenciasList}
                 navigate={navigate}
               />
-              <IconButton onClick={handleOpenUserMenu}>
-                <SettingsIcon />
-              </IconButton>
-              <Menu open={userMenuOpen} anchorEl={anchorEl} onClose={handleCloseUserMenu}>
-                <MenuItem onClick={() => navigate('/usuario')}>Usuários</MenuItem>
-                <MenuItem onClick={() => navigate('/funcao')}>Funções</MenuItem>
-                <MenuItem onClick={() => navigate('/setor')}>Setores</MenuItem>
-                <MenuItem onClick={() => navigate('/processo')}>Processos</MenuItem>
-                {/* <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem> */}
-                <MenuItem onClick={() => navigate('/goals/resources')}>Recursos</MenuItem>
-                <EnableComponent
-                  hasAnyAuthorities={[AUTHORITIES.SGQ]}
-                  component={<MenuItem onClick={() => navigate('/audit/maintenance')}>Auditores</MenuItem>}
-                />
-                <MenuItem onClick={() => navigate('/account/reset/finish')}>Alterar senha</MenuItem>
-              </Menu>
+              {hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]) && (
+                <>
+                  <IconButton onClick={handleOpenUserMenu}>
+                    <SettingsIcon />
+                  </IconButton>
+                  <Menu open={userMenuOpen} anchorEl={anchorEl} onClose={handleCloseUserMenu}>
+                    <MenuItem onClick={() => navigate('/usuario')}>Usuários</MenuItem>
+                    <MenuItem onClick={() => navigate('/funcao')}>Funções</MenuItem>
+                    <MenuItem onClick={() => navigate('/setor')}>Setores</MenuItem>
+                    <MenuItem onClick={() => navigate('/processo')}>Processos</MenuItem>
+                    {/* <MenuItem onClick={() => navigate('/pendencia')}>Pendências</MenuItem> */}
+                    <MenuItem onClick={() => navigate('/goals/resources')}>Recursos</MenuItem>
+                    <EnableComponent
+                      hasAnyAuthorities={[AUTHORITIES.SGQ]}
+                      component={<MenuItem onClick={() => navigate('/audit/maintenance')}>Auditores</MenuItem>}
+                    />
+                    <MenuItem onClick={() => navigate('/account/reset/finish')}>Alterar senha</MenuItem>
+                  </Menu>
+                </>
+              )}
               <Button startIcon={<AccountCircleIcon />} className="remove-margin-top-icon" onClick={handleOpenProfileMenu}>
                 {Storage.session.get('firstName')}
               </Button>
