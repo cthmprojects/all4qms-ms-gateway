@@ -41,7 +41,7 @@ import {
   reprovarCancelDocument,
   updateInfoDoc,
 } from '../../reducers/infodoc.reducer';
-import { buscarMovimentacao, cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
+import { buscarMovimentacaoByInfoDoc, cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
 import { IUsuario } from '../../../../shared/model/usuario.model';
@@ -198,7 +198,7 @@ export const ApprovalDocument = () => {
   const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
   const getMoviment = async () => {
-    const resMov = await dispatch(buscarMovimentacao(id || ''));
+    const resMov = await dispatch(buscarMovimentacaoByInfoDoc(id || ''));
     const moviment: Movimentacao = (resMov.payload as AxiosResponse).data;
     const status = StatusEnum[moviment?.enumStatus as keyof typeof StatusEnum];
     setStatusMoviment(status);

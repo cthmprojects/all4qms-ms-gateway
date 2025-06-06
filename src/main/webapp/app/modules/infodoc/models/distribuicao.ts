@@ -37,6 +37,7 @@ export interface DistribuicaoCompleta {
   dataEntrega?: Date;
   devolvidoPor?: string;
   dataDevolucao?: Date;
+  situacaoDistribuicao?: string;
 }
 
 export enum EnumTipoMovDoc {
