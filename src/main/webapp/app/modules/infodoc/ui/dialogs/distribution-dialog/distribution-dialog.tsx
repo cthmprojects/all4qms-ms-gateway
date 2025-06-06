@@ -82,7 +82,28 @@ export const DistributionDialog = ({ open, handleClose, documentTitle, idDoc }: 
   }, []);
 
   const handleChangeType = (type: CopyType) => {
-    setTypeCopy(prev => (prev === type ? null : type));
+    setTypeCopy(prev => {
+      const newType = prev === type ? null : type;
+      if (newType === 'ELETRONIC') {
+        setAmountCopy(1); // Força quantidade 1 para cópia eletrônica
+      } else if (newType === 'PHYSICAL') {
+        setAmountCopy(1); // Valor padrão 1 para cópia física
+      } else {
+        setAmountCopy(0); // Reseta quando desmarca
+      }
+      return newType;
+    });
+  };
+
+  const handleAmountChange = (value: string) => {
+    const newValue = parseInt(value);
+    if (typeCopy === 'ELETRONIC') {
+      setAmountCopy(1); // Mantém 1 para cópia eletrônica
+    } else if (typeCopy === 'PHYSICAL') {
+      if (newValue > 0) {
+        setAmountCopy(newValue);
+      }
+    }
   };
 
   const handleChangeControl = (event: SelectChangeEvent<EnumTipoControleDoc>) => {
@@ -189,7 +210,9 @@ export const DistributionDialog = ({ open, handleClose, documentTitle, idDoc }: 
               label="Qtd"
               type="number"
               value={amountCopy}
-              onChange={e => setAmountCopy(parseInt(e.target.value))}
+              onChange={e => handleAmountChange(e.target.value)}
+              disabled={typeCopy === 'ELETRONIC'}
+              inputProps={{ min: 1 }}
               sx={{ width: '100px' }}
             />
           </TableCell>

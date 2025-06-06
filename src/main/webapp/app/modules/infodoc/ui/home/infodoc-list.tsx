@@ -25,8 +25,9 @@ import {
 } from '@mui/material';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import PrintIcon from '@mui/icons-material/Print';
+import ShareIcon from '@mui/icons-material/Share';
 import CancelIcon from '@mui/icons-material/Cancel';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import DatePicker from 'react-datepicker';
 import React, { useEffect, useState } from 'react';
 import { Row } from 'reactstrap';
@@ -62,11 +63,17 @@ import { hasAnyAuthority } from 'app/shared/auth/private-route';
 import { AUTHORITIES } from 'app/config/constants';
 import { listarDistribuicao } from '../../reducers/distribuicao.reducer';
 import { DistribuicaoCompleta } from '../../models/distribuicao';
+import ControlledCopyTab from './tabs/controlled-copy-tab';
+import DistributionTab from './tabs/distribution-tab';
+import DocumentsTable from './tabs/documents-table';
+import FilterSection from './components/filter-section';
+import { IUser } from 'app/shared/model/user.model';
+import { toast } from 'react-toastify';
 
 interface TabPanelProps {
   children?: React.ReactNode;
-  index: number;
-  value: number;
+  index: TabIdentifier;
+  value: TabIdentifier;
 }
 
 function CustomTabPanel(props: TabPanelProps) {
@@ -74,19 +81,15 @@ function CustomTabPanel(props: TabPanelProps) {
 
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
 
-function a11yProps(index: number) {
+function a11yProps(id: TabIdentifier) {
   return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
+    id: `simple-tab-${id}`,
+    'aria-controls': `simple-tabpanel-${id}`,
   };
 }
 
@@ -139,6 +142,75 @@ const getStatusIcon = status => {
   }
 };
 
+const getTipoControleText = (tipo: string) => {
+  switch (tipo) {
+    case 'C':
+      return 'CONTROLADA';
+    case 'N':
+      return 'NÃO CONTROLADA';
+    default:
+      return tipo || '-';
+  }
+};
+
+enum TabIdentifier {
+  COPIA_CONTROLADA = 'COPIA_CONTROLADA',
+  DISTRIBUICAO = 'DISTRIBUICAO',
+  SOLICITACAO_VALIDACAO = 'SOLICITACAO_VALIDACAO',
+  APROVACAO = 'APROVACAO',
+  CANCELADO = 'CANCELADO',
+  OBSOLETO = 'OBSOLETO',
+  HOMOLOGADOS = 'HOMOLOGADOS',
+}
+
+interface TabInfo {
+  id: TabIdentifier;
+  label: string;
+  situacao: string;
+  requiresPermission?: string[];
+}
+
+const TABS_CONFIG: TabInfo[] = [
+  { id: TabIdentifier.COPIA_CONTROLADA, label: 'Cópia Controlada', situacao: 'D' },
+  { id: TabIdentifier.DISTRIBUICAO, label: 'Distribuição', situacao: 'D', requiresPermission: [AUTHORITIES.SGQ] },
+  {
+    id: TabIdentifier.SOLICITACAO_VALIDACAO,
+    label: 'Solicitação e Validação',
+    situacao: 'E',
+    requiresPermission: [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR', 'ROLE_APROVADOR'],
+  },
+  {
+    id: TabIdentifier.APROVACAO,
+    label: 'Aprovação',
+    situacao: 'R',
+    requiresPermission: [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_APROVADOR'],
+  },
+  { id: TabIdentifier.CANCELADO, label: 'Cancelado', situacao: 'C', requiresPermission: [AUTHORITIES.SGQ] },
+  { id: TabIdentifier.OBSOLETO, label: 'Obsoleto', situacao: 'O', requiresPermission: [AUTHORITIES.SGQ] },
+  { id: TabIdentifier.HOMOLOGADOS, label: 'Homologados', situacao: 'H', requiresPermission: [AUTHORITIES.SGQ] },
+];
+
+interface DocumentsTableProps {
+  documents: InfoDoc[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  isSGQ: boolean;
+  userQMSId: number;
+  users: IUser[];
+  processes: Process[];
+  enums: any;
+  onPageChange: (event: React.ChangeEvent<unknown>, newPage: number) => void;
+  onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onEditClick: (infodoc: InfoDoc) => void;
+  onViewClick: (infodoc: InfoDoc) => void;
+  onDownloadClick: (infodoc: InfoDoc) => void;
+  onPrintClick: (infodoc: InfoDoc) => void;
+  onCancelClick: (infodoc: InfoDoc) => void;
+  openDocToValidation: (event: React.MouseEvent, infodoc: InfoDoc) => void;
+  currentTab: number;
+}
+
 const InfodocList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -156,6 +228,7 @@ const InfodocList = () => {
   const [idDocUpdating, setIdDocUpdating] = useState(0);
   const [isSGQ, setIsSGQ] = useState(false);
   const [currentInfodoc, setCurrentInfodoc] = useState<InfoDoc>();
+  const [selectedTab, setSelectedTab] = useState<TabIdentifier>(TabIdentifier.COPIA_CONTROLADA);
 
   const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -187,12 +260,12 @@ const InfodocList = () => {
     return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
   }
 
-  const onPageChanged = (event: React.ChangeEvent<unknown>, page: number) => {
-    setPage(page);
+  const onPageChanged = (event: React.ChangeEvent<unknown>, newPage: number) => {
+    setPage(newPage);
   };
 
   const onRowsPerPageChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const totalItems = value == 0 ? totalItemsDist : totalItemsDoc;
+    const totalItems = value === 0 ? totalItemsDist : totalItemsDoc;
     if (parseInt(event.target.value, 10) > totalItems) {
       setPageSize(parseInt(event.target.value, 10));
       setPage(0);
@@ -231,7 +304,7 @@ const InfodocList = () => {
       })
     );
 
-    dispatch(listarDistribuicao({ page: page, size: pageSize, sort: 'id,DESC' }));
+    dispatch(listarDistribuicao({ page, size: pageSize, sort: 'id,DESC' }));
 
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' })).then(() => {
       getUsersSGQ();
@@ -293,42 +366,20 @@ const InfodocList = () => {
   // C (Cancelado)
   // H (Homologado),
 
-  const switchSituationByTab = (newValue: number) => {
-    let type = '';
-    switch (newValue) {
-      case 0:
-        type = 'D';
-        break;
-      case 1:
-        type = 'E';
-        break;
-      case 2:
-        type = 'R';
-        break;
-      case 3:
-        type = 'C';
-        break;
-      case 4:
-        type = 'O';
-        break;
-      case 5:
-        type = 'H';
-        break;
-      default:
-        return 'H';
-    }
-
-    return type;
+  const switchSituationByTab = (tabId: TabIdentifier): string => {
+    const tab = TABS_CONFIG.find(t => t.id === tabId);
+    return tab?.situacao || 'H';
   };
 
-  const handleChange = (event: React.SyntheticEvent | null, newValue: number) => {
-    const type: string = switchSituationByTab(newValue);
+  const handleChange = (event: React.SyntheticEvent | null, newTabId: TabIdentifier) => {
+    const type: string = switchSituationByTab(newTabId);
 
-    if (type == 'D') {
-      dispatch(listarDistribuicao({ page: page, size: pageSize, sort: 'id,DESC' }));
-      setValue(newValue);
+    if (type === 'D' || newTabId === TabIdentifier.COPIA_CONTROLADA || newTabId === TabIdentifier.DISTRIBUICAO) {
+      dispatch(listarDistribuicao({ page, size: pageSize, sort: 'id,DESC' }));
+      setSelectedTab(newTabId);
       return;
     }
+
     const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
     dispatch(
       listdocs({
@@ -341,7 +392,7 @@ const InfodocList = () => {
         page: 0,
       })
     );
-    setValue(newValue);
+    setSelectedTab(newTabId);
   };
 
   const columns = [
@@ -358,19 +409,24 @@ const InfodocList = () => {
     'Ações',
   ];
 
-  const columnsDistribuicao = [
+  const columnsDistribuicao = ['Código', 'Título', 'Revisão', 'Data', 'Área/Processo', 'Status Doc', 'Ações'];
+
+  const columnsDistribuicaoDetalhada = [
+    'Tipo Controle',
+    'Status Doc',
     'Código',
     'Título',
-    // 'Emissor',
     'Revisão',
-    'Data',
-    'Área/Processo',
-    // 'Origem',
-    'Status',
-    // 'Status',
-    // 'Distribuição',
+    'Cóp. Eletr.',
+    'Cóp. Física',
+    'Recebido por',
+    'Dt. Entrega',
+    'Devolvido por',
+    'Dt. Devolução',
+    'Situação',
     'Ações',
   ];
+
   const handleCloseUploadFileModal = () => {
     setUploadFileModal(false);
   };
@@ -381,12 +437,12 @@ const InfodocList = () => {
 
   const handleCancelDocumentModal = () => {
     setCancelDocumentModal(false);
-    handleChange(null, 3);
+    handleChange(null, TabIdentifier.APROVACAO);
   };
 
   const handleDistributionModal = () => {
     setDistributionModal(false);
-    handleChange(null, 0);
+    handleChange(null, TabIdentifier.COPIA_CONTROLADA);
   };
 
   const formatDateToString = (date: Date) => {
@@ -401,24 +457,141 @@ const InfodocList = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const onEditClicked = (infodoc: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    setIdDocUpdating(infodoc.doc.id!!);
-    setUploadFileUpdate(true);
-
-    // H - homolog
-    // R - revisão
-    // O - obsoleto
-    // C - cancelado
+  const onEditClicked = (infodoc: InfoDoc): void => {
+    if (infodoc.doc.id) {
+      setIdDocUpdating(infodoc.doc.id);
+      setUploadFileUpdate(true);
+    }
   };
 
-  const openDocToValidation = (event, infodoc: InfoDoc) => {
-    // console.log(infodoc);
+  const onViewClicked = (infodoc: InfoDoc): void => {
+    if (infodoc.doc?.idArquivo) {
+      openViewDocument(infodoc.doc.idArquivo);
+    }
+  };
 
-    if (
-      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDACAO ||
-      infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDAREV
-      // || (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.REVISAO &&  infodoc?.movimentacao?.enumTipoMovDoc == EnumTipoMovDoc.EMITIR)
-    ) {
+  const onDownloadClicked = (infodoc: InfoDoc): void => {
+    if (infodoc.doc?.idArquivo) {
+      downloadDocument(infodoc.doc.idArquivo);
+    }
+  };
+
+  const onPrintClicked = (infodoc: InfoDoc): void => {
+    setCurrentInfodoc(infodoc);
+    setDistributionModal(true);
+  };
+
+  const onCancelClicked = (infodoc: InfoDoc): void => {
+    setCurrentInfodoc(infodoc);
+    setCancelDocumentModal(true);
+  };
+
+  const onCancelDistribuition = async (distribuition: DistribuicaoCompleta, event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+    if (distribuition.idDocumentacao) {
+      const resDoc = await dispatch(getInfoDocById(distribuition.idDocumentacao));
+      const infoDoc = resDoc.payload as InfoDoc;
+      setCurrentInfodoc(infoDoc);
+      setCancelDocumentModal(true);
+    }
+  };
+
+  const handleCloseUpdateModal = () => {
+    setUploadFileUpdate(false);
+  };
+
+  const openViewDocument = async (id: number) => {
+    if (!id) return;
+
+    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+
+    try {
+      const response = await axios.get(downloadUrl, {
+        responseType: 'blob',
+      });
+
+      // Extrai o nome do arquivo do header no formato específico do seu sistema
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = contentDisposition?.split(';')[1];
+      fileName = fileName?.split('=')[1];
+      fileName = fileName?.split('_').slice(5).join('_')?.replace(/"/g, '');
+
+      if (!fileName) {
+        fileName = `arquivo-${id}`;
+      }
+
+      const contentType = response.headers['content-type'];
+      const isViewableType =
+        contentType === 'application/pdf' || contentType === 'image/jpeg' || contentType === 'image/jpg' || contentType === 'image/png';
+
+      if (isViewableType) {
+        // Cria o blob e abre em nova aba
+        const blob = new Blob([response.data], { type: contentType });
+        const fileUrl = URL.createObjectURL(blob);
+        const newWindow = window.open(fileUrl, '_blank');
+
+        // Fallback caso o navegador bloqueie o window.open
+        if (!newWindow) {
+          toast.error('O navegador bloqueou a abertura do documento. Por favor, permita popups para este site.');
+        }
+
+        setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+      } else {
+        // Para outros tipos de arquivo, faz o download
+        const blob = new Blob([response.data], { type: contentType });
+        import('js-file-download').then(fileDownload => {
+          fileDownload.default(blob, fileName);
+        });
+        toast.info('Iniciando download do arquivo...');
+      }
+    } catch (error) {
+      console.error('Erro ao processar o documento:', error);
+      toast.error('Erro ao processar o documento. Tente novamente.');
+    }
+  };
+
+  const downloadDocument = async (id: number) => {
+    if (!id) return;
+
+    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+
+    try {
+      const response = await axios.request({
+        responseType: 'arraybuffer',
+        url: downloadUrl,
+        method: 'get',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+      });
+
+      // Extrair o nome do arquivo do header
+      let fileName = response.headers['content-disposition']?.split(';')[1];
+      fileName = fileName?.split('=')[1];
+      fileName = fileName?.split('_').slice(5).join('_');
+
+      // Remover aspas se existirem
+      fileName = fileName?.replace(/"/g, '') || `arquivo-${id}`;
+
+      // Determinar o tipo do arquivo pelo Content-Type
+      const contentType = response.headers['content-type'];
+      const file = new Blob([response.data], { type: contentType });
+
+      // Usar o nome do arquivo original no download
+      import('js-file-download').then(fileDownload => {
+        fileDownload.default(file, fileName);
+      });
+    } catch (error) {
+      console.error('Erro ao baixar o documento:', error);
+      toast.error('Erro ao baixar o documento. Tente novamente.');
+    }
+  };
+
+  const onOpenUploadFileModal = (): void => {
+    setUploadFileModal(true);
+  };
+
+  const openDocToValidation = (event: React.MouseEvent, infodoc: InfoDoc): void => {
+    if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDACAO || infodoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDAREV) {
       navigate(`/infodoc/validation/${infodoc.doc.id}`);
     } else if (
       infodoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVACAO ||
@@ -431,76 +604,13 @@ const InfodocList = () => {
     }
   };
 
-  const onViewClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    downloadDocument(infodocEvent.doc?.idArquivo!!);
-  };
-
-  const onPrintClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    // navigate(`/somepath/${id}`);
-    setCurrentInfodoc(infodocEvent);
-    setDistributionModal(true);
-    // alert('Imprimir Doc - Em Desenvolvimento!');
-  };
-
-  const onCancelClicked = (infodocEvent: InfoDoc, event: React.MouseEvent<HTMLButtonElement>): void => {
-    // navigate(`/somepath/${id}`);
-    // alert('Cancelar Doc - Em Desenvolvimento!');
-    setCurrentInfodoc(infodocEvent);
-    setCancelDocumentModal(true);
-  };
-
-  const onCancelDistribuition = async (distribuition: DistribuicaoCompleta, event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
-    const resDoc = await dispatch(getInfoDocById(distribuition.idDocumentacao!!));
-    const infoDoc = resDoc.payload as InfoDoc;
-
-    setCurrentInfodoc(infoDoc);
-    setCancelDocumentModal(true);
-  };
-
-  const handleCloseUpdateModal = () => {
-    setUploadFileUpdate(false);
-  };
-
-  const downloadDocument = async (id: number) => {
-    if (id) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
-
-      await axios
-        .request({
-          responseType: 'arraybuffer',
-          url: downloadUrl,
-          method: 'get',
-          headers: {
-            'Content-Type': 'application/octet-stream',
-          },
-        })
-        .then(result => {
-          const fileDownload = require('js-file-download');
-          let fileName = result.headers['content-disposition'].split(';')[1];
-          fileName = fileName.split('=')[1];
-          fileName = fileName.split('_').slice(5).join('_');
-
-          const file = new Blob([result.data], { type: 'application/octet-stream' });
-
-          fileDownload(file, `${fileName}`);
-        });
-    }
-  };
-
-  const onOpenUploadFileModal = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    const userLogin = filterUser(userLoginID);
-    setUploadFileModal(true);
-    // TEM O USUARIO, MAS NAO VEM AS PERMISSOES.
-    // TODO:  PEGAR A LISTA DE PROCESSOS E PEDIR AS PERMISSOES PARA PODER VALIDAR AS ACOES DO USUARIO
-  };
-
   const handleApplyFilters = () => {
     const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa } = filters;
 
-    const _situacao = switchSituationByTab(value);
+    const _situacao = switchSituationByTab(selectedTab);
 
     if (_situacao === 'D') {
-      dispatch(listarDistribuicao({ page: page, size: pageSize, sort: 'id,DESC' }));
+      dispatch(listarDistribuicao({ page, size: pageSize, sort: 'id,DESC' }));
     } else {
       dispatch(
         listdocs({
@@ -523,293 +633,97 @@ const InfodocList = () => {
       dtFim: null,
       idProcesso: 0,
       origem: null,
-      situacao: switchSituationByTab(value),
+      situacao: switchSituationByTab(selectedTab),
       pesquisa: null,
     });
   };
 
   // const verifyUser = (doc: InfoDoc) => doc.doc.idUsuarioCriacao == userLoginID
 
-  const handleClickDistribuition = (distribuicao: DistribuicaoCompleta) => {
-    navigate(`receive/${distribuicao.idDistribuicaoDoc}`, { state: distribuicao });
-  };
-  const renderTable = () => {
-    if (infodocs?.length > 0) {
-      return (
-        <>
-          <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
-            <Table sx={{ width: '100%' }}>
-              <TableHead>
-                <TableRow>
-                  {columns.map(col => (
-                    // eslint-disable-next-line react/jsx-key
-                    <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {infodocs
-                  ?.filter((infodoc: InfoDoc) => infodoc.doc.idUsuarioCriacao === userQMS.id || isSGQ)
-                  ?.map((infodoc: InfoDoc) => (
-                    <TableRow key={infodoc.doc.id} style={{ cursor: infodoc.doc.enumSituacao !== 'H' ? 'pointer' : 'auto' }}>
-                      <Tooltip title={infodoc.doc.descricaoDoc}>
-                        <TableCell>{infodoc.doc.codigo}</TableCell>
-                      </Tooltip>
-                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.titulo}</TableCell>
-                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>
-                        {filterUser(infodoc.doc.idUsuarioCriacao)?.nome}
-                      </TableCell>
-                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>{infodoc.doc.revisao ?? 0}</TableCell>
-                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>
-                        {infodoc.doc.dataCricao ? formatDateToString(new Date(infodoc.doc.dataCricao)) : '-'}
-                      </TableCell>
-                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>{filterProcess(infodoc.doc.idProcesso)}</TableCell>
-                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>{filterOrigin(infodoc.doc.origem)}</TableCell>
-                      <TableCell onClick={event => openDocToValidation(event, infodoc)}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          {getSituacaoIcon(infodoc?.doc.enumSituacao).text}
-                        </Box>
-                      </TableCell>
-                      {/* <TableCell onClick={event => openDocToValidation(event, infodoc)}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(infodoc.doc.status).icon}</Box>
-                    </TableCell> */}
-                      <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
-                        <IconButton
-                          title="Revisar"
-                          color="primary"
-                          disabled={infodoc.doc.enumSituacao !== 'H' || !isSGQ}
-                          onClick={event => onEditClicked(infodoc, event)}
-                          // onClick={event => openDocToValidation(event, infodoc)}
-                        >
-                          <EditIcon sx={{ color: infodoc.doc.enumSituacao !== 'H' || !isSGQ ? '#cacaca' : '#e6b200' }} />
-                        </IconButton>
-                        <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => onViewClicked(infodoc, event)}>
-                          <VisibilityIcon sx={{ color: '#0EBDCE' }} />
-                        </IconButton>
-                        <IconButton
-                          id="btn-print"
-                          title="Imprimir"
-                          color="primary"
-                          onClick={event => onPrintClicked(infodoc, event)}
-                          // onClick={event => setDistributionModal(true)}
-                          disabled={
-                            infodoc.doc.enumSituacao === 'C' ||
-                            (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
-                            (infodoc.doc.enumSituacao === 'H' && !isSGQ)
-                          }
-                          // disabled
-                        >
-                          <PrintIcon sx={{ color: infodoc.doc.enumSituacao != 'H' ? '#cacaca' : '#03AC59' }} />
-                          {/* <PrintIcon sx={{ color: '#cacaca' }} /> */}
-                        </IconButton>
-                        <Tooltip title="Somente SGQ pode Cancelar documentos homologados">
-                          <Box>
-                            <IconButton
-                              id="btn-cancel"
-                              title="Cancelar"
-                              color="primary"
-                              onClick={event => onCancelClicked(infodoc, event)}
-                              // disabled={infodoc.doc.enumSituacao === 'H' && !isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id}
-                              disabled={infodoc.doc.enumSituacao !== 'H' && !isSGQ}
-                            >
-                              <CancelIcon
-                                sx={{
-                                  color:
-                                    infodoc.doc.enumSituacao === 'H' && (isSGQ || infodoc.doc.idUsuarioCriacao == userQMS.id)
-                                      ? '#FF0000'
-                                      : '#cacaca',
-                                }}
-                              />
-                            </IconButton>
-                          </Box>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
-            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
-            <TablePagination
-              component="div"
-              count={totalItemsDoc}
-              labelDisplayedRows={displayedRowsLabel}
-              labelRowsPerPage="Itens por página:"
-              onPageChange={onPageChanged}
-              onRowsPerPageChange={onRowsPerPageChanged}
-              page={page}
-              rowsPerPage={pageSize}
-              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
-            />
-          </Row>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <Row className="justify-content-center mt-5">
-            <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
-          </Row>
-          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
-            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
-            <TablePagination
-              component="div"
-              count={totalItemsDoc}
-              labelDisplayedRows={displayedRowsLabel}
-              labelRowsPerPage="Itens por página:"
-              onPageChange={onPageChanged}
-              onRowsPerPageChange={onRowsPerPageChanged}
-              page={page}
-              rowsPerPage={pageSize}
-              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
-            />
-          </Row>
-        </>
-      );
+  const handleClickDistribuition = async (distribuicao: DistribuicaoCompleta) => {
+    if (distribuicao.idDocumentacao) {
+      const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao));
+      const infoDoc = resDoc.payload as InfoDoc;
+      if (infoDoc?.doc?.idArquivo) {
+        openViewDocument(infoDoc.doc.idArquivo);
+      }
     }
   };
 
-  const renderTableDistribuition = () => {
-    if (distribuitions?.length > 0) {
-      return (
-        <>
-          <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
-            <Table sx={{ width: '100%' }}>
-              <TableHead>
-                <TableRow>
-                  {columnsDistribuicao.map(col => (
-                    // eslint-disable-next-line react/jsx-key
-                    <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {distribuitions
-                  ?.filter((distribuicao: DistribuicaoCompleta) =>
-                    userQMS.processos.some(processo => processo.id === distribuicao.idProcesso)
-                  )
-                  ?.map((distribuicao: DistribuicaoCompleta) => (
-                    <TableRow
-                      key={distribuicao.idDistribuicaoDoc}
-                      style={{ cursor: 'pointer' }}
-                      onClick={event => handleClickDistribuition(distribuicao)}
-                    >
-                      <Tooltip title={distribuicao.codigo}>
-                        <TableCell>{distribuicao.codigo}</TableCell>
-                      </Tooltip>
-                      <TableCell>{distribuicao.titulo}</TableCell>
-                      {/* <TableCell>{filterUser(distribuicao.idUsuarioDevolucao)?.nome}</TableCell> */}
-                      <TableCell>{distribuicao.revisao}</TableCell>
-                      <TableCell>{distribuicao.dataEntrega ? formatDateToString(new Date(distribuicao.dataEntrega)) : '-'}</TableCell>
-                      <TableCell>{filterProcess(distribuicao.idProcesso)}</TableCell>
-                      {/* <TableCell>{filterOrigin('')}</TableCell> */}
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{distribuicao.enumStatusDoc}</Box>
-                      </TableCell>
-                      {/* <TableCell onClick={event => openDocToValidation(event, distribuicao)}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getStatusIcon(distribuicao.doc.status).icon}</Box>
-                    </TableCell> */}
-                      <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
-                        {/* <IconButton
-                        title="Revisar"
-                        color="primary"
-                        disabled={distribuicao.doc.enumSituacao !== 'H' || !isSGQ}
-                        onClick={event => onEditClicked(distribuicao, event)}
-                        // onClick={event => openDocToValidation(event, distribuicao)}
-                      >
-                        <EditIcon sx={{ color: distribuicao.doc.enumSituacao !== 'H' || !isSGQ ? '#cacaca' : '#e6b200' }} />
-                      </IconButton> */}
-                        <IconButton id="btn-view" title="Visualizar" color="primary" onClick={event => null}>
-                          <VisibilityIcon sx={{ color: '#0EBDCE' }} />
-                        </IconButton>
-                        {/* <IconButton
-                        id="btn-print"
-                        title="Imprimir"
-                        color="primary"
-                        onClick={event => onPrintClicked(infodoc, event)}
-                        // onClick={event => setDistributionModal(true)}
-                        disabled={
-                          infodoc.doc.enumSituacao === 'C' ||
-                          (!isSGQ && infodoc.doc.idUsuarioCriacao !== userQMS.id) ||
-                          (infodoc.doc.enumSituacao === 'H' && !isSGQ)
-                        }
-                      >
-                        <PrintIcon sx={{ color: '#cacaca' }} />
-                      </IconButton> */}
-                        <Tooltip title="Somente SGQ e usuario criador podem cancelar">
-                          <Box>
-                            <IconButton
-                              id="btn-cancel"
-                              title="Cancelar"
-                              color="primary"
-                              onClick={event => {
-                                event.stopPropagation();
-                                onCancelDistribuition(distribuicao, event);
-                              }}
-                              disabled={!isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id}
-                            >
-                              <CancelIcon
-                                sx={{
-                                  color: !isSGQ && distribuicao.idUsuarioEntrega !== userQMS.id ? '#cacaca' : '#FF0000',
-                                }}
-                              />
-                            </IconButton>
-                          </Box>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
-            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
-            <TablePagination
-              component="div"
-              count={totalItemsDist}
-              labelDisplayedRows={displayedRowsLabel}
-              labelRowsPerPage="Itens por página:"
-              onPageChange={onPageChanged}
-              onRowsPerPageChange={onRowsPerPageChanged}
-              page={page}
-              rowsPerPage={pageSize}
-              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
-            />
-          </Row>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <Row className="justify-content-center mt-5">
-            <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
-          </Row>
-          <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
-            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
-            <TablePagination
-              component="div"
-              count={totalItemsDist}
-              labelDisplayedRows={displayedRowsLabel}
-              labelRowsPerPage="Itens por página:"
-              onPageChange={onPageChanged}
-              onRowsPerPageChange={onRowsPerPageChanged}
-              page={page}
-              rowsPerPage={pageSize}
-              rowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-              style={{ display: 'flex', alignContent: 'center', width: '390px' }}
-            />
-          </Row>
-        </>
-      );
+  const handleDownloadDistribuition = async (distribuicao: DistribuicaoCompleta) => {
+    if (distribuicao.idDocumentacao) {
+      const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao));
+      const infoDoc = resDoc.payload as InfoDoc;
+      if (infoDoc?.doc?.idArquivo) {
+        downloadDocument(infoDoc.doc.idArquivo);
+      }
     }
+  };
+
+  const renderTable = () => {
+    return (
+      <DocumentsTable
+        documents={infodocs}
+        page={page}
+        pageSize={pageSize}
+        totalItems={totalItemsDoc}
+        isSGQ={isSGQ}
+        userQMSId={userQMS.id}
+        users={users}
+        processes={processes}
+        enums={enums}
+        onPageChange={onPageChanged}
+        onRowsPerPageChange={onRowsPerPageChanged}
+        onEditClick={onEditClicked}
+        onViewClick={onViewClicked}
+        onDownloadClick={onDownloadClicked}
+        onPrintClick={onPrintClicked}
+        onCancelClick={onCancelClicked}
+        openDocToValidation={openDocToValidation}
+        currentTab={TABS_CONFIG.findIndex(tab => tab.id === selectedTab)}
+      />
+    );
+  };
+
+  const renderTableDistribuition = () => {
+    return (
+      <ControlledCopyTab
+        distribuitions={distribuitions}
+        userProcessos={userQMS.processos}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={onPageChanged}
+        onRowsPerPageChange={onRowsPerPageChanged}
+        handleClickDistribuition={handleClickDistribuition}
+        handleDownloadDistribuition={handleDownloadDistribuition}
+      />
+    );
+  };
+
+  const renderTableDistribuicaoDetalhada = () => {
+    return (
+      <DistributionTab
+        distribuitions={distribuitions}
+        userProcessos={userQMS.processos}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={onPageChanged}
+        onRowsPerPageChange={onRowsPerPageChanged}
+        handleClickDistribuition={handleClickDistribuition}
+        handleDownloadDistribuition={handleDownloadDistribuition}
+      />
+    );
   };
 
   const account = useAppSelector(state => state.authentication.account);
   const isSgq = hasAnyAuthority(account.authorities, [AUTHORITIES.SGQ]);
+  const canAccessSolicitacaoValidacao = hasAnyAuthority(account.authorities, [
+    AUTHORITIES.ADMIN,
+    AUTHORITIES.SGQ,
+    'ROLE_EMISSOR',
+    'ROLE_APROVADOR',
+  ]);
+  const canAccessAprovacao = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_APROVADOR']);
 
   return (
     // ////////////////////////////////////
@@ -819,15 +733,11 @@ const InfodocList = () => {
         <DistributionDialog
           open={distributionModal}
           handleClose={handleDistributionModal}
-          documentTitle={currentInfodoc?.doc?.titulo!!}
+          documentTitle={currentInfodoc?.doc?.titulo}
           idDoc={currentInfodoc?.doc.id}
         />
         <UploadInfoFile open={uploadFileModal} handleClose={handleCloseUploadFileModal} />
-        <RequestCopyDialog
-          open={requestCopyModal}
-          handleClose={handleCloseRequestCopyModal}
-          documentTitle={currentInfodoc?.doc?.titulo!!}
-        />
+        <RequestCopyDialog open={requestCopyModal} handleClose={handleCloseRequestCopyModal} documentTitle={currentInfodoc?.doc?.titulo} />
         <CancelDocumentDialog
           open={cancelDocumentModal}
           handleClose={handleCancelDocumentModal}
@@ -845,114 +755,43 @@ const InfodocList = () => {
         </Breadcrumbs>
         <h1 className="title">Lista Informação Documentada</h1>
 
-        <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
-          <Button
-            variant="contained"
-            className="primary-button me-2 infodoc-list-form-field"
-            style={{ marginRight: '10px', height: '58px' }}
-            onClick={event => onOpenUploadFileModal(event)}
-            title="Novo Registro"
-          >
-            Novo Registro
-          </Button>
-
-          <FormControl className="me-2">
-            <DatePicker
-              selected={filters.dtIni}
-              onChange={date => setFilters({ ...filters, dtIni: date })}
-              dateFormat="dd/MM/yyyy"
-              className="infodoc-list-date-picker mt-4"
-              id="start-date-picker"
-              placeholderText="Data de início"
-            />
-            <label htmlFor="start-date-picker" className="infodoc-list-date-label">
-              Início
-            </label>
-          </FormControl>
-          <FormControl className="infodoc-list-form-field me-2">
-            <DatePicker
-              selected={filters.dtFim}
-              onChange={date => setFilters({ ...filters, dtFim: date })}
-              dateFormat={'dd/MM/yyyy'}
-              className="infodoc-list-date-picker mt-4"
-              placeholderText="Data de fim"
-            />
-            <label htmlFor="" className="infodoc-list-date-label">
-              Fim
-            </label>
-          </FormControl>
-          <FormControl className="infodoc-list-form-field me-2">
-            <InputLabel>Processo</InputLabel>
-            <Select
-              value={filters.idProcesso}
-              onChange={e => setFilters({ ...filters, idProcesso: parseInt(e.target.value.toString()) })}
-              label="Processo"
-            >
-              <MenuItem value={0}>Selecionar</MenuItem>
-              {processes?.map((process, index) => (
-                <MenuItem key={index} value={process.id}>
-                  {process.nome}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl>
-            <TextField
-              label="Pesquisa"
-              style={{ minWidth: '20vw' }}
-              onChange={event => {
-                setFilters({ ...filters, pesquisa: event.target.value });
-              }}
-              placeholder="Descrição"
-              value={filters.pesquisa || ''}
-            />
-          </FormControl>
-
-          <Button
-            variant="contained"
-            className="secondary-button me-2 rnc-list-form-field"
-            style={{ height: '49px', width: '60px', marginLeft: '7px' }}
-            onClick={clearFilters}
-            title="Limpar"
-          >
-            Limpar
-          </Button>
-        </div>
+        <FilterSection
+          filters={filters}
+          processes={processes}
+          onFilterChange={setFilters}
+          onClearFilters={clearFilters}
+          onNewRegister={onOpenUploadFileModal}
+        />
 
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-              <Tab label="Cópia Controlada" {...a11yProps(0)} />
-              <Tab label="Solicitação e Validação" {...a11yProps(1)} />
-              <Tab label="Aprovação" {...a11yProps(2)} />
-              {/* <Tab label="Lista Mestra" {...a11yProps(3)} /> */}
-              {isSgq && <Tab label="Cancelado" {...a11yProps(4)} />}
-              {isSgq && <Tab label="Obsoleto" {...a11yProps(5)} />}
-              {isSgq && <Tab label="Homologados" {...a11yProps(6)} />}
+            <Tabs value={selectedTab} onChange={handleChange} aria-label="basic tabs example">
+              {TABS_CONFIG.map(tab => {
+                if (!tab.requiresPermission || hasAnyAuthority(account.authorities, tab.requiresPermission)) {
+                  return <Tab key={tab.id} label={tab.label} value={tab.id} />;
+                }
+                return null;
+              })}
             </Tabs>
           </Box>
-          <CustomTabPanel value={value} index={0}>
-            {renderTableDistribuition()}
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={1}>
-            {renderTable()}
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={2}>
-            {renderTable()}
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={3}>
-            {renderTable()}
-          </CustomTabPanel>
-          {/* <CustomTabPanel value={value} index={4}>
-            {renderTable()}
-          </CustomTabPanel> */}
-          <CustomTabPanel value={value} index={4}>
-            {renderTable()}
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={5}>
-            {renderTable()}
-          </CustomTabPanel>
+          {TABS_CONFIG.map(tab => {
+            if (!tab.requiresPermission || hasAnyAuthority(account.authorities, tab.requiresPermission)) {
+              return (
+                <CustomTabPanel key={tab.id} value={selectedTab} index={tab.id}>
+                  {tab.id === TabIdentifier.COPIA_CONTROLADA && renderTableDistribuition()}
+                  {tab.id === TabIdentifier.DISTRIBUICAO && renderTableDistribuicaoDetalhada()}
+                  {[
+                    TabIdentifier.SOLICITACAO_VALIDACAO,
+                    TabIdentifier.APROVACAO,
+                    TabIdentifier.CANCELADO,
+                    TabIdentifier.OBSOLETO,
+                    TabIdentifier.HOMOLOGADOS,
+                  ].includes(tab.id) && renderTable()}
+                </CustomTabPanel>
+              );
+            }
+            return null;
+          })}
         </Box>
       </div>
     </div>
