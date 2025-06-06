@@ -68,6 +68,7 @@ import DistributionTab from './tabs/distribution-tab';
 import DocumentsTable from './tabs/documents-table';
 import FilterSection from './components/filter-section';
 import { IUser } from 'app/shared/model/user.model';
+import { toast } from 'react-toastify';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -203,6 +204,7 @@ interface DocumentsTableProps {
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onEditClick: (infodoc: InfoDoc) => void;
   onViewClick: (infodoc: InfoDoc) => void;
+  onDownloadClick: (infodoc: InfoDoc) => void;
   onPrintClick: (infodoc: InfoDoc) => void;
   onCancelClick: (infodoc: InfoDoc) => void;
   openDocToValidation: (event: React.MouseEvent, infodoc: InfoDoc) => void;
@@ -464,6 +466,12 @@ const InfodocList = () => {
 
   const onViewClicked = (infodoc: InfoDoc): void => {
     if (infodoc.doc?.idArquivo) {
+      openViewDocument(infodoc.doc.idArquivo);
+    }
+  };
+
+  const onDownloadClicked = (infodoc: InfoDoc): void => {
+    if (infodoc.doc?.idArquivo) {
       downloadDocument(infodoc.doc.idArquivo);
     }
   };
@@ -491,30 +499,90 @@ const InfodocList = () => {
     setUploadFileUpdate(false);
   };
 
-  const downloadDocument = async (id: number) => {
-    if (id) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+  const openViewDocument = async (id: number) => {
+    if (!id) return;
 
-      await axios
-        .request({
-          responseType: 'arraybuffer',
-          url: downloadUrl,
-          method: 'get',
-          headers: {
-            'Content-Type': 'application/octet-stream',
-          },
-        })
-        .then(result => {
-          import('js-file-download').then(fileDownload => {
-            let fileName = result.headers['content-disposition'].split(';')[1];
-            fileName = fileName.split('=')[1];
-            fileName = fileName.split('_').slice(5).join('_');
+    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
 
-            const file = new Blob([result.data], { type: 'application/octet-stream' });
+    try {
+      const response = await axios.get(downloadUrl, {
+        responseType: 'blob',
+      });
 
-            fileDownload.default(file, `${fileName}`);
-          });
+      // Extrai o nome do arquivo do header no formato específico do seu sistema
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = contentDisposition?.split(';')[1];
+      fileName = fileName?.split('=')[1];
+      fileName = fileName?.split('_').slice(5).join('_')?.replace(/"/g, '');
+
+      if (!fileName) {
+        fileName = `arquivo-${id}`;
+      }
+
+      const contentType = response.headers['content-type'];
+      const isViewableType =
+        contentType === 'application/pdf' || contentType === 'image/jpeg' || contentType === 'image/jpg' || contentType === 'image/png';
+
+      if (isViewableType) {
+        // Cria o blob e abre em nova aba
+        const blob = new Blob([response.data], { type: contentType });
+        const fileUrl = URL.createObjectURL(blob);
+        const newWindow = window.open(fileUrl, '_blank');
+
+        // Fallback caso o navegador bloqueie o window.open
+        if (!newWindow) {
+          toast.error('O navegador bloqueou a abertura do documento. Por favor, permita popups para este site.');
+        }
+
+        setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+      } else {
+        // Para outros tipos de arquivo, faz o download
+        const blob = new Blob([response.data], { type: contentType });
+        import('js-file-download').then(fileDownload => {
+          fileDownload.default(blob, fileName);
         });
+        toast.info('Iniciando download do arquivo...');
+      }
+    } catch (error) {
+      console.error('Erro ao processar o documento:', error);
+      toast.error('Erro ao processar o documento. Tente novamente.');
+    }
+  };
+
+  const downloadDocument = async (id: number) => {
+    if (!id) return;
+
+    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+
+    try {
+      const response = await axios.request({
+        responseType: 'arraybuffer',
+        url: downloadUrl,
+        method: 'get',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+      });
+
+      // Extrair o nome do arquivo do header
+      let fileName = response.headers['content-disposition']?.split(';')[1];
+      fileName = fileName?.split('=')[1];
+      fileName = fileName?.split('_').slice(5).join('_');
+
+      // Remover aspas se existirem
+      fileName = fileName?.replace(/"/g, '') || `arquivo-${id}`;
+
+      // Determinar o tipo do arquivo pelo Content-Type
+      const contentType = response.headers['content-type'];
+      const file = new Blob([response.data], { type: contentType });
+
+      // Usar o nome do arquivo original no download
+      import('js-file-download').then(fileDownload => {
+        fileDownload.default(file, fileName);
+      });
+    } catch (error) {
+      console.error('Erro ao baixar o documento:', error);
+      toast.error('Erro ao baixar o documento. Tente novamente.');
     }
   };
 
@@ -577,6 +645,16 @@ const InfodocList = () => {
       const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao));
       const infoDoc = resDoc.payload as InfoDoc;
       if (infoDoc?.doc?.idArquivo) {
+        openViewDocument(infoDoc.doc.idArquivo);
+      }
+    }
+  };
+
+  const handleDownloadDistribuition = async (distribuicao: DistribuicaoCompleta) => {
+    if (distribuicao.idDocumentacao) {
+      const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao));
+      const infoDoc = resDoc.payload as InfoDoc;
+      if (infoDoc?.doc?.idArquivo) {
         downloadDocument(infoDoc.doc.idArquivo);
       }
     }
@@ -598,6 +676,7 @@ const InfodocList = () => {
         onRowsPerPageChange={onRowsPerPageChanged}
         onEditClick={onEditClicked}
         onViewClick={onViewClicked}
+        onDownloadClick={onDownloadClicked}
         onPrintClick={onPrintClicked}
         onCancelClick={onCancelClicked}
         openDocToValidation={openDocToValidation}
@@ -616,6 +695,7 @@ const InfodocList = () => {
         onPageChange={onPageChanged}
         onRowsPerPageChange={onRowsPerPageChanged}
         handleClickDistribuition={handleClickDistribuition}
+        handleDownloadDistribuition={handleDownloadDistribuition}
       />
     );
   };
@@ -630,6 +710,7 @@ const InfodocList = () => {
         onPageChange={onPageChanged}
         onRowsPerPageChange={onRowsPerPageChanged}
         handleClickDistribuition={handleClickDistribuition}
+        handleDownloadDistribuition={handleDownloadDistribuition}
       />
     );
   };

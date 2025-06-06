@@ -1,7 +1,10 @@
 import React from 'react';
 import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Box } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import { Row } from 'reactstrap';
+import { useNavigate } from 'react-router-dom';
 import { DistribuicaoCompleta } from '../../../models/distribuicao';
 import { formatDateToString, filterProcess, getTipoControleText } from '../infodoc-list.utils';
 
@@ -13,6 +16,7 @@ interface DistributionTabProps {
   onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleClickDistribuition: (distribuicao: DistribuicaoCompleta) => Promise<void>;
+  handleDownloadDistribuition: (distribuicao: DistribuicaoCompleta) => Promise<void>;
 }
 
 const columnsDistribuicaoDetalhada = [
@@ -43,7 +47,10 @@ const DistributionTab: React.FC<DistributionTabProps> = ({
   onPageChange,
   onRowsPerPageChange,
   handleClickDistribuition,
+  handleDownloadDistribuition,
 }) => {
+  const navigate = useNavigate();
+
   const filteredDistribuitions = distribuitions?.filter((distribuicao: DistribuicaoCompleta) =>
     userProcessos.some(processo => processo.id === distribuicao.idProcesso)
   );
@@ -101,8 +108,51 @@ const DistributionTab: React.FC<DistributionTabProps> = ({
                 <TableCell>{distribuicao.dataDevolucao ? formatDateToString(new Date(distribuicao.dataDevolucao)) : '-'}</TableCell>
                 <TableCell>{distribuicao.situacaoDistribuicao || '-'}</TableCell>
                 <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <IconButton id="btn-view" title="Visualizar" color="primary" onClick={() => handleClickDistribuition(distribuicao)}>
+                  <IconButton
+                    id="btn-view"
+                    title="Visualizar"
+                    color="primary"
+                    onClick={() => {
+                      void handleClickDistribuition(distribuicao);
+                    }}
+                  >
                     <VisibilityIcon sx={{ color: '#0EBDCE' }} />
+                  </IconButton>
+                  <IconButton
+                    id="btn-download"
+                    title="Download"
+                    color="primary"
+                    onClick={() => {
+                      void handleDownloadDistribuition(distribuicao);
+                    }}
+                  >
+                    <GetAppIcon sx={{ color: '#0EBDCE' }} />
+                  </IconButton>
+                  <IconButton
+                    id="btn-receive"
+                    title="Recebimento"
+                    color="primary"
+                    disabled={distribuicao.enumTipoControleDoc === 'C' && distribuicao.situacaoDistribuicao !== 'RECOLHIDO'}
+                    onClick={() =>
+                      navigate(`receive/${distribuicao.idDistribuicaoDoc}`, {
+                        state: {
+                          ...distribuicao,
+                          from: 'distribution',
+                          isControlled: distribuicao.enumTipoControleDoc === 'C',
+                        },
+                      })
+                    }
+                  >
+                    <ReceiptIcon
+                      sx={{
+                        color:
+                          distribuicao.enumTipoControleDoc === 'C'
+                            ? distribuicao.situacaoDistribuicao !== 'RECOLHIDO'
+                              ? '#ccc'
+                              : '#03AC59'
+                            : '#03AC59',
+                      }}
+                    />
                   </IconButton>
                 </TableCell>
               </TableRow>

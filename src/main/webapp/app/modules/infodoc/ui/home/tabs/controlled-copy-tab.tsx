@@ -2,6 +2,7 @@ import React from 'react';
 import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Box } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import { Row } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
 import { DistribuicaoCompleta } from '../../../models/distribuicao';
@@ -15,6 +16,7 @@ interface ControlledCopyTabProps {
   onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleClickDistribuition: (distribuicao: DistribuicaoCompleta) => Promise<void>;
+  handleDownloadDistribuition: (distribuicao: DistribuicaoCompleta) => Promise<void>;
 }
 
 const columnsDistribuicao = ['Código', 'Título', 'Revisão', 'Data', 'Área/Processo', 'Status Doc', 'Ações'];
@@ -31,12 +33,14 @@ const ControlledCopyTab: React.FC<ControlledCopyTabProps> = ({
   onPageChange,
   onRowsPerPageChange,
   handleClickDistribuition,
+  handleDownloadDistribuition,
 }) => {
   const navigate = useNavigate();
 
   const filteredDistribuitions = distribuitions
     ?.filter((distribuicao: DistribuicaoCompleta) => userProcessos.some(processo => processo.id === distribuicao.idProcesso))
-    ?.filter((distribuicao: DistribuicaoCompleta) => distribuicao.situacaoDistribuicao === 'DISTRIBUIDO' || !distribuicao.dataDevolucao);
+    ?.filter((distribuicao: DistribuicaoCompleta) => distribuicao.situacaoDistribuicao === 'DISTRIBUIDO' || !distribuicao.dataDevolucao)
+    ?.filter((distribuicao: DistribuicaoCompleta) => distribuicao.enumTipoControleDoc === 'C');
 
   if (!filteredDistribuitions?.length) {
     return (
@@ -91,16 +95,35 @@ const ControlledCopyTab: React.FC<ControlledCopyTabProps> = ({
                     id="btn-view"
                     title="Visualizar"
                     color="primary"
-                    onClick={() => handleClickDistribuition(distribuicao)}
+                    onClick={() => {
+                      void handleClickDistribuition(distribuicao);
+                    }}
                     disabled={!distribuicao.dataEntrega}
                   >
                     <VisibilityIcon sx={{ color: !distribuicao.dataEntrega ? '#ccc' : '#0EBDCE' }} />
                   </IconButton>
                   <IconButton
+                    id="btn-download"
+                    title="Download"
+                    color="primary"
+                    onClick={() => {
+                      void handleDownloadDistribuition(distribuicao);
+                    }}
+                  >
+                    <GetAppIcon sx={{ color: '#0EBDCE' }} />
+                  </IconButton>
+                  <IconButton
                     id="btn-receive"
                     title="Recebimento"
                     color="primary"
-                    onClick={() => navigate(`receive/${distribuicao.idDistribuicaoDoc}`, { state: distribuicao })}
+                    onClick={() =>
+                      navigate(`receive/${distribuicao.idDistribuicaoDoc}`, {
+                        state: {
+                          ...distribuicao,
+                          from: 'controlled-copy',
+                        },
+                      })
+                    }
                   >
                     <ReceiptIcon sx={{ color: '#03AC59' }} />
                   </IconButton>

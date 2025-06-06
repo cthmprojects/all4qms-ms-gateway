@@ -90,7 +90,10 @@ export const ComproveRecebimento = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
-  const distribuicao = location.state as DistribuicaoCompleta;
+  const state = location.state as { from?: string; isControlled?: boolean } & DistribuicaoCompleta;
+  const distribuicao = state;
+  const isFromDistribution = state?.from === 'distribution';
+  const isControlled = state?.isControlled;
 
   const [idProcesso, setIdProcesso] = useState<number>(-1);
   const [idUsuarioEntrega, setIdUsuarioEntrega] = useState<number>(-1);
@@ -131,7 +134,7 @@ export const ComproveRecebimento = () => {
   }, []);
 
   const requestDoc = async () => {
-    const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao!!));
+    const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao));
     const infoDoc = resDoc.payload as InfoDoc;
 
     setTipoControleDoc(infoDoc.doc.tipoDoc ?? '');
@@ -170,22 +173,25 @@ export const ComproveRecebimento = () => {
   };
 
   const cancelDocument = () => {
-    navigate('/infodoc');
+    if (isFromDistribution) {
+      navigate('/infodoc', { state: { activeTab: 'DISTRIBUICAO' } }); // Tab de Distribuição
+    } else {
+      navigate('/infodoc', { state: { activeTab: 'COPIA_CONTROLADA' } }); // Tab de Cópia Controlada
+    }
   };
 
   const saveDocument = async () => {
     setIsLoading(true);
     try {
       const distri: DetalheDistribuicao = {
-        // ...distribuition,
-        id: distribuicao.idDistribuicaoDoc!!,
-        idDistribuicaoDoc: distribuicao.idDistribuicaoDoc!!,
+        id: distribuicao.idDistribuicaoDoc,
+        idDistribuicaoDoc: distribuicao.idDistribuicaoDoc,
         idUsuarioEntrega: idUsuarioEntrega < 0 ? distribuicao.idUsuarioEntrega : idUsuarioEntrega,
-        dataEntrega: dataEntrega!!,
-        comentarioEntrega: comentarioEntrega,
+        dataEntrega,
+        comentarioEntrega,
         idUsuarioDevolucao: idUsuarioDevolucao < 0 ? distribuicao.idUsuarioDevolucao : idUsuarioDevolucao,
-        dataDevolucao: dataDevolucao!!,
-        comentarioDevolucao: comentarioDevolucao,
+        dataDevolucao,
+        comentarioDevolucao,
       };
 
       const resStoreDist = await dispatch(atualizarDetailDistribuicao(distri));
@@ -195,7 +201,11 @@ export const ComproveRecebimento = () => {
         setIsLoading(false);
         toast.success(`Distribuição recebida com sucesso!`);
 
-        navigate('/infodoc');
+        if (isFromDistribution) {
+          navigate('/infodoc', { state: { activeTab: 'DISTRIBUICAO' } }); // Tab de Distribuição
+        } else {
+          navigate('/infodoc', { state: { activeTab: 'COPIA_CONTROLADA' } }); // Tab de Cópia Controlada
+        }
         return resDist;
       } else {
         toast.error(`Não foi possivel receber distribuição de Documento, tente novamente mais tarde!`);
@@ -208,6 +218,13 @@ export const ComproveRecebimento = () => {
       setIsLoading(false);
       return null;
     }
+  };
+
+  // Função para determinar se um campo deve estar desabilitado
+  const isFieldDisabled = () => {
+    if (!isFromDistribution) return false; // Se não veio da aba distribuição, campos editáveis
+    if (!isControlled) return false; // Se não é controlado, campos editáveis
+    return true; // Se é controlado e veio da distribuição, campos desabilitados
   };
 
   return (
@@ -230,7 +247,14 @@ export const ComproveRecebimento = () => {
 
         <Stack direction="column" spacing={2}>
           <Stack direction="row" spacing={2}>
-            <TextField label="Código" name="number" autoComplete="off" value={codigo} onChange={e => setCodigo(e.target.value)} />
+            <TextField
+              label="Código"
+              name="number"
+              autoComplete="off"
+              value={codigo}
+              onChange={e => setCodigo(e.target.value)}
+              disabled={isFieldDisabled()}
+            />
             <TextField
               sx={{ width: '50%' }}
               label="Título"
@@ -238,20 +262,25 @@ export const ComproveRecebimento = () => {
               autoComplete="off"
               value={titulo}
               onChange={e => setTitulo(e.target.value)}
-              slotProps={{ input: { readOnly: true } }}
+              disabled={isFieldDisabled()}
             />
             <TextField
               label="Tipo"
               name="Tipo"
               value={TipoControleDoc}
-              slotProps={{ input: { readOnly: true } }}
+              disabled={isFieldDisabled()}
               onChange={e => setTipoControleDoc(e.target.value)}
             />
           </Stack>
           <Stack direction="row" spacing={2}>
             <FormControl style={{ width: '50%' }}>
               <InputLabel>Responsável</InputLabel>
-              <Select label="Responsável" value={idUsuarioEntrega} onChange={event => setIdUsuarioEntrega(Number(event.target.value))}>
+              <Select
+                label="Responsável"
+                value={idUsuarioEntrega}
+                onChange={event => setIdUsuarioEntrega(Number(event.target.value))}
+                disabled={isFieldDisabled()}
+              >
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -261,7 +290,12 @@ export const ComproveRecebimento = () => {
             </FormControl>
             <FormControl style={{ width: '20%' }}>
               <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={idProcesso} onChange={event => setIdProcesso(Number(event.target.value))}>
+              <Select
+                label="Área / Processo"
+                value={idProcesso}
+                onChange={event => setIdProcesso(Number(event.target.value))}
+                disabled={isFieldDisabled()}
+              >
                 {processes.map((process: any, i) => (
                   <MenuItem value={process.id} key={`process-${i}`}>
                     {process.nome}
@@ -271,7 +305,12 @@ export const ComproveRecebimento = () => {
             </FormControl>
             <FormControl style={{ width: '15%' }}>
               <InputLabel>Recebido</InputLabel>
-              <Select label="Recebido" value={String(isRecebido)} onChange={event => setIsRecebido(event.target.value === 'true')}>
+              <Select
+                label="Recebido"
+                value={String(isRecebido)}
+                onChange={event => setIsRecebido(event.target.value === 'true')}
+                disabled={isFieldDisabled()}
+              >
                 {['Sim', 'Não'].map((label, index) => (
                   <MenuItem key={index} value={String(index === 0)}>
                     {label}
@@ -285,6 +324,7 @@ export const ComproveRecebimento = () => {
                 onChange={date => setDataEntrega(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
+                disabled={isFieldDisabled()}
               />
               <label htmlFor="" className="rnc-date-label">
                 Data
@@ -299,12 +339,18 @@ export const ComproveRecebimento = () => {
             name="ncArea"
             value={comentarioEntrega || ''}
             onChange={e => setComentarioEntrega(e.target.value)}
+            disabled={isFieldDisabled()}
           />
 
           <Stack direction="row" spacing={2}>
             <FormControl style={{ width: '50%' }}>
               <InputLabel>SGQ</InputLabel>
-              <Select label="SGQ" value={idUsuarioDevolucao} onChange={event => setIdUsuarioDevolucao(Number(event.target.value))}>
+              <Select
+                label="SGQ"
+                value={idUsuarioDevolucao}
+                onChange={event => setIdUsuarioDevolucao(Number(event.target.value))}
+                disabled={isFieldDisabled()}
+              >
                 {usersSGQ.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -314,7 +360,12 @@ export const ComproveRecebimento = () => {
             </FormControl>
             <FormControl style={{ width: '17.5%' }}>
               <InputLabel>Justificado</InputLabel>
-              <Select label="Justificado" value={String(isJustify)} onChange={event => setIsJustify(event.target.value === 'true')}>
+              <Select
+                label="Justificado"
+                value={String(isJustify)}
+                onChange={event => setIsJustify(event.target.value === 'true')}
+                disabled={isFieldDisabled()}
+              >
                 {['Sim', 'Não'].map((label, index) => (
                   <MenuItem key={index} value={String(index === 0)}>
                     {label}
@@ -324,7 +375,12 @@ export const ComproveRecebimento = () => {
             </FormControl>
             <FormControl style={{ width: '17.5%' }}>
               <InputLabel>Devolvido</InputLabel>
-              <Select label="Devolvido" value={String(isDevolvido)} onChange={event => setIsDevolvido(event.target.value === 'true')}>
+              <Select
+                label="Devolvido"
+                value={String(isDevolvido)}
+                onChange={event => setIsDevolvido(event.target.value === 'true')}
+                disabled={isFieldDisabled()}
+              >
                 {['Sim', 'Não'].map((label, index) => (
                   <MenuItem key={index} value={String(index === 0)}>
                     {label}
@@ -338,6 +394,7 @@ export const ComproveRecebimento = () => {
                 onChange={date => setDataDevolucao(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
+                disabled={isFieldDisabled()}
               />
               <label htmlFor="" className="rnc-date-label">
                 Data
@@ -352,6 +409,7 @@ export const ComproveRecebimento = () => {
             name="ncArea"
             value={comentarioDevolucao || ''}
             onChange={e => setComentarioDevolucao(e.target.value)}
+            disabled={isFieldDisabled()}
           />
 
           <Box style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
@@ -363,9 +421,11 @@ export const ComproveRecebimento = () => {
             >
               Voltar
             </Button>
-            <Button onClick={saveDocument} style={{ background: '#e6b200', color: '#4e4d4d' }}>
-              Confirmar
-            </Button>
+            {!isFieldDisabled() && (
+              <Button onClick={() => void saveDocument()} style={{ background: '#e6b200', color: '#4e4d4d' }}>
+                Confirmar
+              </Button>
+            )}
             {/* <Button
               // disabled={!validateFields()}
               onClick={() => fowardDocument()}

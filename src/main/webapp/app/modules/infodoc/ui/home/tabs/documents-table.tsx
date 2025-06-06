@@ -16,6 +16,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ShareIcon from '@mui/icons-material/Share';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import { Row } from 'reactstrap';
 import { InfoDoc } from '../../../models';
 import { formatDateToString, filterProcess } from '../infodoc-list.utils';
@@ -34,6 +35,7 @@ interface DocumentsTableProps {
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onEditClick: (doc: InfoDoc) => void;
   onViewClick: (doc: InfoDoc) => void;
+  onDownloadClick: (doc: InfoDoc) => void;
   onPrintClick: (doc: InfoDoc) => void;
   onCancelClick: (doc: InfoDoc) => void;
   openDocToValidation: (event: React.MouseEvent, doc: InfoDoc) => void;
@@ -60,6 +62,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   onRowsPerPageChange,
   onEditClick,
   onViewClick,
+  onDownloadClick,
   onPrintClick,
   onCancelClick,
   openDocToValidation,
@@ -124,9 +127,14 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     // Tabs: 4 = Cancelado, 5 = Obsoleto
     if (currentTab === 4 || currentTab === 5) {
       return (
-        <IconButton title="Visualizar" color="primary" onClick={() => onViewClick(doc)}>
-          <VisibilityIcon sx={{ color: '#0EBDCE' }} />
-        </IconButton>
+        <>
+          <IconButton title="Visualizar" color="primary" onClick={() => onViewClick(doc)}>
+            <VisibilityIcon sx={{ color: '#0EBDCE' }} />
+          </IconButton>
+          <IconButton title="Download" color="primary" onClick={() => onDownloadClick(doc)}>
+            <GetAppIcon sx={{ color: '#0EBDCE' }} />
+          </IconButton>
+        </>
       );
     }
 
@@ -137,6 +145,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         </IconButton>
         <IconButton title="Visualizar" color="primary" onClick={() => onViewClick(doc)}>
           <VisibilityIcon sx={{ color: '#0EBDCE' }} />
+        </IconButton>
+        <IconButton title="Download" color="primary" onClick={() => onDownloadClick(doc)}>
+          <GetAppIcon sx={{ color: '#0EBDCE' }} />
         </IconButton>
         <IconButton
           title="Distribuir"
