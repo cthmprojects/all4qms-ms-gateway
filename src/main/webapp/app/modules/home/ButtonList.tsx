@@ -52,7 +52,7 @@ const ButtonList = () => {
   );
 
   const buttons = [
-    { icon: <FontAwesomeIcon icon="calendar-check" />, link: 'goals/', legenda: 'Objetivos e Metas', serviceId: 'all4qmsmsgoals' },
+    { icon: <FontAwesomeIcon icon="calendar-check" />, link: 'goals/', legenda: 'Objetivos e Metas', serviceId: 'all4qmsmsmetaind' },
     { icon: <FontAwesomeIcon icon="file-lines" />, link: '/infodoc', legenda: 'Informação Documentada', serviceId: 'all4qmsmsinfodoc' },
     {
       icon: <FontAwesomeIcon icon="crosshairs" />,
@@ -72,7 +72,7 @@ const ButtonList = () => {
       icon: <FontAwesomeIcon icon="chart-line" />,
       link: '/strategic-planning',
       legenda: 'Planejamento Estratégico',
-      serviceId: 'all4qmsmsstrategic',
+      serviceId: 'all4qmsmsauditplan',
     },
   ];
 
