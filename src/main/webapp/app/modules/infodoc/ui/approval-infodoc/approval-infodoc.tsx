@@ -537,7 +537,7 @@ export const ApprovalDocument = () => {
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <TextField
               id="text-field-keyword"
               label="Escreva aqui..."
@@ -549,12 +549,12 @@ export const ApprovalDocument = () => {
             <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
               <AddCircle fontSize="large" />
             </IconButton>
-          </div>
-          <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
+          </div> */}
+          {/* <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
             {keywordList.map((keyword: string, index: number) => (
               <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
             ))}
-          </div>
+          </div> */}
           <div
             className="p-2 mt-3"
             style={{ display: 'flex', alignItems: 'center', color: 'red', justifyItems: 'right', justifyContent: 'flex-end' }}

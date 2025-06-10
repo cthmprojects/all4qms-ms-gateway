@@ -34,7 +34,7 @@ import { Row } from 'reactstrap';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
@@ -69,6 +69,7 @@ import DocumentsTable from './tabs/documents-table';
 import FilterSection from './components/filter-section';
 import { IUser } from 'app/shared/model/user.model';
 import { toast } from 'react-toastify';
+import { TabIdentifier } from './tab-identifier';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -153,16 +154,6 @@ const getTipoControleText = (tipo: string) => {
   }
 };
 
-enum TabIdentifier {
-  COPIA_CONTROLADA = 'COPIA_CONTROLADA',
-  DISTRIBUICAO = 'DISTRIBUICAO',
-  SOLICITACAO_VALIDACAO = 'SOLICITACAO_VALIDACAO',
-  APROVACAO = 'APROVACAO',
-  CANCELADO = 'CANCELADO',
-  OBSOLETO = 'OBSOLETO',
-  HOMOLOGADOS = 'HOMOLOGADOS',
-}
-
 interface TabInfo {
   id: TabIdentifier;
   label: string;
@@ -213,6 +204,7 @@ interface DocumentsTableProps {
 
 const InfodocList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
   const [startDate, setStartDate] = useState(new Date());
   const [value, setValue] = useState(0);
@@ -228,7 +220,14 @@ const InfodocList = () => {
   const [idDocUpdating, setIdDocUpdating] = useState(0);
   const [isSGQ, setIsSGQ] = useState(false);
   const [currentInfodoc, setCurrentInfodoc] = useState<InfoDoc>();
-  const [selectedTab, setSelectedTab] = useState<TabIdentifier>(TabIdentifier.COPIA_CONTROLADA);
+  const [selectedTab, setSelectedTab] = useState<TabIdentifier>(() => {
+    const state = location.state as { selectedTab?: TabIdentifier };
+    return state?.selectedTab || TabIdentifier.COPIA_CONTROLADA;
+  });
+
+  useEffect(() => {
+    handleChange(null, selectedTab);
+  }, []);
 
   const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -680,7 +679,7 @@ const InfodocList = () => {
         onPrintClick={onPrintClicked}
         onCancelClick={onCancelClicked}
         openDocToValidation={openDocToValidation}
-        currentTab={TABS_CONFIG.findIndex(tab => tab.id === selectedTab)}
+        currentTab={selectedTab}
       />
     );
   };

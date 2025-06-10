@@ -324,7 +324,7 @@ export const DetailDocument = () => {
             onChange={() => {}}
           />
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <TextField
               id="text-field-keyword"
               label="Escreva aqui..."
@@ -341,7 +341,7 @@ export const DetailDocument = () => {
             {keywordList.map((kw, index) => (
               <Chip key={index} label={kw} onDelete={event => onKeywordRemoved(event, index)} className="me-2" disabled />
             ))}
-          </div>
+          </div> */}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px', justifyItems: 'right' }} className="mt-5">
             <Button variant="contained" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={handleBack}>

@@ -19,9 +19,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import InfoIcon from '@mui/icons-material/Info';
 import { Row } from 'reactstrap';
-import { InfoDoc } from '../../../models';
+import { InfoDoc, EnumStatusDoc } from '../../../models';
 import { formatDateToString, filterProcess } from '../infodoc-list.utils';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { TabIdentifier } from '../tab-identifier';
 
 interface DocumentsTableProps {
   documents: InfoDoc[];
@@ -41,10 +42,10 @@ interface DocumentsTableProps {
   onPrintClick: (doc: InfoDoc) => void;
   onCancelClick: (doc: InfoDoc) => void;
   openDocToValidation: (event: React.MouseEvent, doc: InfoDoc) => void;
-  currentTab: number;
+  currentTab: TabIdentifier;
 }
 
-const columns = ['Código', 'Título', 'Emissor', 'Revisão', 'Data', 'Área/Processo', 'Origem', 'Situação', 'Ações'];
+const columns = ['Código', 'Título', 'Emissor', 'Revisão', 'Data', 'Área/Processo', 'Origem', 'Situação', 'Status', 'Ações'];
 
 function displayedRowsLabel({ from, to, count }) {
   return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
@@ -111,29 +112,64 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   const getSituacaoIcon = (situacao: string) => {
     switch (situacao) {
       case 'E':
-        return 'EM EDIÇÃO';
+        return 'Em edição';
       case 'H':
-        return 'HOMOLOGADO';
+        return 'Homologado';
       case 'R':
-        return 'EM REVISÃO';
+        return 'Em revisão';
       case 'O':
-        return 'OBSOLETO';
+        return 'Obsoleto';
       case 'C':
-        return 'CANCELADO';
+        return 'Cancelado';
       case 'D':
-        return 'EM DISTRIBUIÇÃO';
+        return 'Em distribuição';
       default:
-        return 'INDEFINIDO';
+        return 'Indefinido';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'EMISSAO':
+        return 'Em emissão';
+      case 'VALIDACAO':
+        return 'Em validação';
+      case 'APROVACAO':
+        return 'Em aprovação';
+      case 'REVISAO':
+        return 'Em revisão';
+      case 'VALIDAREV':
+        return 'Em validação da revisão';
+      case 'APROVAREV':
+        return 'Em aprovação da revisão';
+      case 'DISTRIBUICAO':
+        return 'Em distribuição';
+      case 'ASSINATURA':
+        return 'Em assinatura';
+      case 'CANCELAMENTO':
+        return 'Em cancelamento';
+      case 'CANCELADO':
+        return 'Cancelado';
+      case 'APROVACANC':
+        return 'Em aprovação do cancelamento';
+      case 'CONCLUIDO':
+        return 'Concluído';
+      default:
+        return '-';
     }
   };
 
   const handleDetailsClick = (doc: InfoDoc) => {
-    navigate(`/infodoc/details/${doc.doc.id}`);
+    navigate(`/infodoc/details/${doc.doc.id}`, {
+      state: {
+        from: currentTab,
+      },
+    });
   };
 
   const renderActions = (doc: InfoDoc) => {
-    // Tabs: 4 = Cancelado, 5 = Obsoleto, 6 = Homologados
-    if (currentTab === 4 || currentTab === 5) {
+    // Tabs: CANCELADO, OBSOLETO, HOMOLOGADOS
+    if (currentTab === TabIdentifier.CANCELADO || currentTab === TabIdentifier.OBSOLETO) {
       return (
         <>
           <IconButton title="Visualizar" color="primary" onClick={() => onViewClick(doc)}>
@@ -146,8 +182,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       );
     }
 
-    // Se estiver na aba Homologados (currentTab === 6)
-    if (currentTab === 6) {
+    // Se estiver na aba Homologados
+    if (currentTab === TabIdentifier.HOMOLOGADOS) {
       return (
         <>
           <IconButton title="Detalhes" color="primary" onClick={() => handleDetailsClick(doc)}>
@@ -248,9 +284,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         <Table sx={{ width: '100%' }}>
           <TableHead>
             <TableRow>
-              {columns.map(col => (
-                <TableCell key={col} align={col !== 'Ações' ? 'left' : 'center'}>
-                  {col}
+              {columns.map((column, index) => (
+                <TableCell key={index} align={index !== columns.length - 1 ? 'left' : 'center'}>
+                  {column}
                 </TableCell>
               ))}
             </TableRow>
@@ -273,6 +309,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   <TableCell onClick={event => openDocToValidation(event, doc)}>{filterOrigin(doc.doc.origem)}</TableCell>
                   <TableCell onClick={event => openDocToValidation(event, doc)}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(doc.doc.enumSituacao)}</Box>
+                  </TableCell>
+                  <TableCell onClick={event => openDocToValidation(event, doc)}>
+                    {getStatusText(doc.movimentacao?.enumStatus) || '-'}
                   </TableCell>
                   <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>{renderActions(doc)}</TableCell>
                 </TableRow>
