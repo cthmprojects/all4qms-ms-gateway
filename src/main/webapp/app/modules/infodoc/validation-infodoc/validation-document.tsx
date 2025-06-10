@@ -39,6 +39,7 @@ import { toast } from 'react-toastify';
 import { IUsuario } from '../../../shared/model/usuario.model';
 import UploadInfoFile from '../ui/dialogs/upload-dialog/upload-files';
 import { getResumeIaByToken, getTokenResumeIA } from '../reducers/anexo.reducer';
+import { TabIdentifier } from '../ui/home/tab-identifier';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -266,7 +267,7 @@ export const ValidationDocument = () => {
   };
 
   const cancelUpdate = () => {
-    navigate('/infodoc');
+    navigate('/infodoc', { state: { selectedTab: TabIdentifier.SOLICITACAO_VALIDACAO } });
   };
 
   const saveDoc = (situacao?: EnumSituacao): Doc => {
@@ -307,6 +308,7 @@ export const ValidationDocument = () => {
 
       await dispatch(getInfoDocById(id!!));
       setIsLoading(false);
+      navigate('/infodoc', { state: { selectedTab: TabIdentifier.SOLICITACAO_VALIDACAO } });
       return resDoc;
     } else {
       toast.error('Erro ao salvar documento, tente novamente.');
@@ -373,7 +375,7 @@ export const ValidationDocument = () => {
             motivoReprovacao: '',
           })
         );
-        navigate('/infodoc');
+        navigate('/infodoc', { state: { selectedTab: TabIdentifier.SOLICITACAO_VALIDACAO } });
         setIsLoading(false);
       })
       .catch(e => {
