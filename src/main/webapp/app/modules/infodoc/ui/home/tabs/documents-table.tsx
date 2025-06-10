@@ -17,9 +17,11 @@ import ShareIcon from '@mui/icons-material/Share';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import InfoIcon from '@mui/icons-material/Info';
 import { Row } from 'reactstrap';
 import { InfoDoc } from '../../../models';
 import { formatDateToString, filterProcess } from '../infodoc-list.utils';
+import { useNavigate } from 'react-router-dom';
 
 interface DocumentsTableProps {
   documents: InfoDoc[];
@@ -68,6 +70,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   openDocToValidation,
   currentTab,
 }) => {
+  const navigate = useNavigate();
+
   const filterUser = (id: number) => {
     if (!users || users.length <= 0) {
       return '-';
@@ -123,8 +127,12 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     }
   };
 
+  const handleDetailsClick = (doc: InfoDoc) => {
+    navigate(`/infodoc/details/${doc.doc.id}`);
+  };
+
   const renderActions = (doc: InfoDoc) => {
-    // Tabs: 4 = Cancelado, 5 = Obsoleto
+    // Tabs: 4 = Cancelado, 5 = Obsoleto, 6 = Homologados
     if (currentTab === 4 || currentTab === 5) {
       return (
         <>
@@ -138,6 +146,37 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       );
     }
 
+    // Se estiver na aba Homologados (currentTab === 6)
+    if (currentTab === 6) {
+      return (
+        <>
+          <IconButton title="Detalhes" color="primary" onClick={() => handleDetailsClick(doc)}>
+            <InfoIcon sx={{ color: '#0EBDCE' }} />
+          </IconButton>
+          <IconButton title="Revisar" color="primary" disabled={!isSGQ} onClick={() => onEditClick(doc)}>
+            <EditIcon sx={{ color: !isSGQ ? '#cacaca' : '#e6b200' }} />
+          </IconButton>
+          <IconButton title="Visualizar" color="primary" onClick={() => onViewClick(doc)}>
+            <VisibilityIcon sx={{ color: '#0EBDCE' }} />
+          </IconButton>
+          <IconButton title="Download" color="primary" onClick={() => onDownloadClick(doc)}>
+            <GetAppIcon sx={{ color: '#0EBDCE' }} />
+          </IconButton>
+          <IconButton title="Distribuir" color="primary" onClick={() => onPrintClick(doc)} disabled={!isSGQ}>
+            <ShareIcon sx={{ color: !isSGQ ? '#cacaca' : '#03AC59' }} />
+          </IconButton>
+          <Tooltip title="Somente SGQ pode Cancelar documentos homologados">
+            <Box>
+              <IconButton title="Cancelar" color="primary" onClick={() => onCancelClick(doc)} disabled={!isSGQ}>
+                <CancelIcon sx={{ color: isSGQ ? '#FF0000' : '#cacaca' }} />
+              </IconButton>
+            </Box>
+          </Tooltip>
+        </>
+      );
+    }
+
+    // Demais abas mantém o comportamento original
     return (
       <>
         <IconButton title="Revisar" color="primary" disabled={doc.doc.enumSituacao !== 'H' || !isSGQ} onClick={() => onEditClick(doc)}>

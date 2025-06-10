@@ -13,6 +13,7 @@ import { ReducersMapObject, combineReducers } from 'redux';
 import UpdateDocument from './update/update-document';
 import ValidationDocument from './validation-infodoc/validation-document';
 import ApprovalDocument from './ui/approval-infodoc/approval-infodoc';
+import DetailDocument from './ui/detail-infodoc/detail-document';
 import ComproveRecebimento from './ui/distribuitions/comprove-recebimento';
 
 const InfodocRoutes = () => {
@@ -27,6 +28,7 @@ const InfodocRoutes = () => {
         <Route path="upload-file/update/:id/:idFile" element={<UpdateDocument />} />
         <Route path="validation/:id" element={<ValidationDocument />} />
         <Route path="approval/:id" element={<ApprovalDocument />} />
+        <Route path="details/:id" element={<DetailDocument />} />
         <Route path="receive/:id" element={<ComproveRecebimento />} />
       </ErrorBoundaryRoutes>
     </div>
