@@ -103,16 +103,6 @@ const ControlledCopyTab: React.FC<ControlledCopyTabProps> = ({
                     <VisibilityIcon sx={{ color: !distribuicao.dataEntrega ? '#ccc' : '#0EBDCE' }} />
                   </IconButton>
                   <IconButton
-                    id="btn-download"
-                    title="Download"
-                    color="primary"
-                    onClick={() => {
-                      void handleDownloadDistribuition(distribuicao);
-                    }}
-                  >
-                    <GetAppIcon sx={{ color: '#0EBDCE' }} />
-                  </IconButton>
-                  <IconButton
                     id="btn-receive"
                     title="Recebimento"
                     color="primary"
