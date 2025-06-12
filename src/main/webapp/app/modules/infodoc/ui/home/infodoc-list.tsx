@@ -71,6 +71,11 @@ import { IUser } from 'app/shared/model/user.model';
 import { toast } from 'react-toastify';
 import { TabIdentifier } from './tab-identifier';
 
+interface WaterMarkRequest {
+  tipoControle: string;
+  nomeUsuario: string;
+}
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: TabIdentifier;
@@ -498,13 +503,13 @@ const InfodocList = () => {
     setUploadFileUpdate(false);
   };
 
-  const openViewDocument = async (id: number) => {
+  const openViewDocument = async (id: number, waterMarkRequest?: WaterMarkRequest) => {
     if (!id) return;
 
     const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
 
     try {
-      const response = await axios.get(downloadUrl, {
+      const response = await axios.post(downloadUrl, waterMarkRequest || {}, {
         responseType: 'blob',
       });
 
@@ -557,7 +562,7 @@ const InfodocList = () => {
       const response = await axios.request({
         responseType: 'arraybuffer',
         url: downloadUrl,
-        method: 'get',
+        method: 'post',
         headers: {
           'Content-Type': 'application/octet-stream',
         },
@@ -644,7 +649,12 @@ const InfodocList = () => {
       const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao));
       const infoDoc = resDoc.payload as InfoDoc;
       if (infoDoc?.doc?.idArquivo) {
-        openViewDocument(infoDoc.doc.idArquivo);
+        const tipoControle = distribuicao.enumTipoControleDoc === 'C' ? 'C' : 'N';
+        const waterMarkRequest: WaterMarkRequest = {
+          tipoControle,
+          nomeUsuario: `${userQMS.nome}`,
+        };
+        openViewDocument(infoDoc.doc.idArquivo, waterMarkRequest);
       }
     }
   };

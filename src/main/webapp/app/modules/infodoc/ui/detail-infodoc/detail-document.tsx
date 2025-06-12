@@ -80,11 +80,11 @@ export const DetailDocument = () => {
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
-  const [origin, setOrigin] = useState('externa');
+  const [origin, setOrigin] = useState('');
   const [processes, setProcesses] = useState<Process[]>([]);
   const [selectedProcess, setSelectedProcess] = useState<number | undefined>(undefined);
   const [noValidate, setNoValidate] = useState(false);
-  const [validDate, setValidDate] = useState(new Date());
+  const [validDate, setValidDate] = useState<Date | null>(null);
   const [documentDescription, setDocumentDescription] = useState('');
   const [notificationPreviousDate, setNotificationPreviousDate] = useState('0');
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
@@ -126,7 +126,8 @@ export const DetailDocument = () => {
         const result = await axios.request({
           responseType: 'arraybuffer',
           url: downloadUrl,
-          method: 'get',
+          method: 'post',
+          data: {},
           headers: {
             'Content-Type': 'application/octet-stream',
           },
@@ -154,7 +155,7 @@ export const DetailDocument = () => {
   const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
   useEffect(() => {
-    if (actualInfoDoc) {
+    if (actualInfoDoc && enums && processes) {
       setEmitter(actualInfoDoc.doc.idUsuarioCriacao);
       setEmittedDate(new Date(actualInfoDoc.doc.dataCricao));
       setDescription(actualInfoDoc.doc.justificativa);
@@ -162,13 +163,13 @@ export const DetailDocument = () => {
       setTitle(actualInfoDoc.doc.titulo);
       setOrigin(actualInfoDoc.doc.origem);
       setSelectedProcess(actualInfoDoc.doc.idProcesso);
-      setValidDate(new Date(actualInfoDoc.doc.dataValidade));
+      setNoValidate(actualInfoDoc.doc.ignorarValidade);
+      setValidDate(actualInfoDoc.doc.ignorarValidade ? null : new Date(actualInfoDoc.doc.dataValidade));
       setDocumentDescription(actualInfoDoc.doc.descricaoDoc);
       setNotificationPreviousDate(actualInfoDoc.doc.idPrazo?.toString() || '0');
       setKeywordList(actualInfoDoc.doc.distribuicao?.split(',') || []);
-      setNoValidate(actualInfoDoc.doc.dataValidade?.toString().includes('2999-12-31'));
     }
-  }, [actualInfoDoc]);
+  }, [actualInfoDoc, enums, processes]);
 
   return (
     <div className="padding-container">
@@ -190,7 +191,7 @@ export const DetailDocument = () => {
             <div className="d-flex align-items-center">
               <FormControl style={{ width: '30%' }}>
                 <InputLabel>Emissor</InputLabel>
-                <Select value={emitter || ''} label="Emissor" disabled>
+                <Select value={emitter || ''} label="Emissor" readOnly>
                   {users?.map(user => (
                     <MenuItem key={user.id} value={user.id}>
                       {user.nome}
@@ -209,7 +210,7 @@ export const DetailDocument = () => {
               </div>
 
               <FormControl className="ms-2 mt-4">
-                <DatePicker selected={emittedDate} onChange={() => {}} className="date-picker" dateFormat={'dd/MM/yyyy'} disabled />
+                <DatePicker selected={emittedDate} onChange={() => {}} className="date-picker" dateFormat={'dd/MM/yyyy'} readOnly />
                 <label htmlFor="" className="rnc-date-label">
                   Data
                 </label>
@@ -222,7 +223,7 @@ export const DetailDocument = () => {
               sx={{ borderRadius: '6px' }}
               name="ncArea"
               value={description || ''}
-              disabled
+              readOnly
               onChange={() => {}}
             />
           </div>
@@ -250,9 +251,9 @@ export const DetailDocument = () => {
               <FormControl style={{ width: '100%' }} disabled>
                 <InputLabel>Origem</InputLabel>
                 <Select label="Origem" value={origin} onChange={() => {}}>
-                  {enums?.origemDoc?.map(origem => (
-                    <MenuItem key={origem.value} value={origem.value}>
-                      {origem.label}
+                  {enums?.origem?.map((e: any, idx) => (
+                    <MenuItem key={idx} value={e.nome}>
+                      {e.valor.toUpperCase()}
                     </MenuItem>
                   ))}
                 </Select>
@@ -261,7 +262,7 @@ export const DetailDocument = () => {
             <Grid item xs={2}>
               <FormControl style={{ width: '100%' }} disabled>
                 <InputLabel>Área / Processo</InputLabel>
-                <Select label="Área / Processo" value={selectedProcess} onChange={() => {}}>
+                <Select label="Área / Processo" value={selectedProcess || ''} onChange={() => {}}>
                   {processes.map((process: any, i) => (
                     <MenuItem value={process.id} key={`process-${i}`}>
                       {process.nome}

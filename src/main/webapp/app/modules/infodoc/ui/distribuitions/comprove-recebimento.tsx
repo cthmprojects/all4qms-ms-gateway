@@ -49,6 +49,7 @@ import { getUsersByProcess } from '../../../../entities/usuario/reducers/usuario
 import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
 import { DetalheDistribuicao, Distribuicao, DistribuicaoCompleta } from '../../models/distribuicao';
 import { atualizarDetailDistribuicao, buscarDetailDistribuicao, buscarDistribuicao } from '../../reducers/distribuicao.reducer';
+import { TabIdentifier } from '../../ui/home/tab-identifier';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -174,9 +175,9 @@ export const ComproveRecebimento = () => {
 
   const cancelDocument = () => {
     if (isFromDistribution) {
-      navigate('/infodoc', { state: { activeTab: 'DISTRIBUICAO' } }); // Tab de Distribuição
+      navigate('/infodoc', { state: { selectedTab: TabIdentifier.DISTRIBUICAO } }); // Alterado para TabIdentifier
     } else {
-      navigate('/infodoc', { state: { activeTab: 'COPIA_CONTROLADA' } }); // Tab de Cópia Controlada
+      navigate('/infodoc', { state: { selectedTab: TabIdentifier.COPIA_CONTROLADA } }); // Alterado para TabIdentifier
     }
   };
 
@@ -202,9 +203,9 @@ export const ComproveRecebimento = () => {
         toast.success(`Distribuição recebida com sucesso!`);
 
         if (isFromDistribution) {
-          navigate('/infodoc', { state: { activeTab: 'DISTRIBUICAO' } }); // Tab de Distribuição
+          navigate('/infodoc', { state: { selectedTab: TabIdentifier.DISTRIBUICAO } }); // Tab de Distribuição
         } else {
-          navigate('/infodoc', { state: { activeTab: 'COPIA_CONTROLADA' } }); // Tab de Cópia Controlada
+          navigate('/infodoc', { state: { selectedTab: TabIdentifier.COPIA_CONTROLADA } }); // Tab de Cópia Controlada
         }
         return resDist;
       } else {
