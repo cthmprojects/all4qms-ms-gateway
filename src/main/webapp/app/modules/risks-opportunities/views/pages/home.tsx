@@ -46,6 +46,8 @@ import { getProbabilities } from '../../reducers/probabilities.reducer';
 import { getRiskDecisions } from '../../reducers/risk-decisions.reducer';
 import { deleteRO, listROFiltro, resetRiskOportunity } from '../../reducers/risks-opportunities.reducer';
 import { getSeverities } from '../../reducers/severities.reducer';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { AUTHORITIES } from 'app/config/constants';
 
 // Example
 const getSituacaoIcon = situacao => {
@@ -161,6 +163,8 @@ const Home = () => {
   };
 
   useEffect(listRo, [filters, page, pageSize, tab]);
+  const account = useAppSelector(state => state.authentication.account);
+  const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR', 'ROLE_APROVADOR']);
 
   const TableRendered = (
     <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
@@ -244,12 +248,13 @@ const Home = () => {
     >
       <Button
         variant="contained"
-        className="primary-button me-2"
+        className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} me-2`}
         style={{ marginRight: '10px', height: '42px', width: '185px' }}
         onClick={() => {
           navigate(tab === 0 ? '/risks-opportunities/risk' : '/risks-opportunities/opportunity');
         }}
         title="Novo Registro"
+        disabled={!canAccessNewRegister}
       >
         Novo
       </Button>
@@ -325,12 +330,13 @@ const Home = () => {
 
       <Button
         variant="contained"
-        className="primary-button me-2"
+        className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} me-2`}
         style={{ marginRight: '10px', height: '42px', width: '185px' }}
         onClick={() => {
           navigate('configurations');
         }}
         title="Configurações"
+        disabled={!canAccessNewRegister}
       >
         Configurações
       </Button>
@@ -338,7 +344,6 @@ const Home = () => {
   );
 
   return (
-    //////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
         <Breadcrumbs aria-label="breadcrumb">

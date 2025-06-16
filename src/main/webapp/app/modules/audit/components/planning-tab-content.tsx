@@ -1,3 +1,4 @@
+import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
 import {
   Alert,
   Box,
@@ -12,26 +13,29 @@ import {
   TableRow,
   TextField,
 } from '@mui/material';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { MaterialSelect } from 'app/shared/components/select/material-select';
+import { usePaginator } from 'app/shared/hooks/usePaginator';
+import { TiposAuditoria } from 'app/shared/model/constants';
+import { capitalize } from 'lodash';
 import { useEffect, useMemo } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Button, Row, Table } from 'reactstrap';
 import { useDebounce } from 'use-debounce';
 import { queryClientAudit } from '..';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { usePaginator } from 'app/shared/hooks/usePaginator';
-import { TiposAuditoria } from 'app/shared/model/constants';
-import { MaterialSelect } from 'app/shared/components/select/material-select';
+import { handleFilter } from '../audit-helper';
 import { getPaginatedAuditor, getPaginatedPlanejamento } from '../audit-service';
-import { handleFilter, renderValueCronograma } from '../audit-helper';
-import { CronogramaAuditoria, PlanejamentoAuditoria } from '../audit-models';
-import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
-import { capitalize } from 'lodash';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { AUTHORITIES } from 'app/config/constants';
+import { useAppSelector } from 'app/config/store';
 
 const columns = ['Código', 'Tipo de Auditoria', 'Processos', 'Responsáveis', 'Requisitos Específicos', 'Ações'];
 
 export const PlanningTabContent = () => {
   const navigate = useNavigate();
+  const account = useAppSelector(state => state.authentication.account);
+  const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR', 'ROLE_APROVADOR']);
 
   const { data: plannings, isLoading: isLoadingtimelineList } = useQuery({
     queryKey: ['plannings/list'],
@@ -102,10 +106,11 @@ export const PlanningTabContent = () => {
       >
         <Button
           variant="contained"
-          className="primary-button infodoc-list-form-field"
+          className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} infodoc-list-form-field`}
           style={{ marginRight: '10px', height: '58px' }}
           onClick={() => navigate('/audit/planning/new')}
           title="Novo Registro"
+          disabled={!canAccessNewRegister}
         >
           Novo Planejamento
         </Button>

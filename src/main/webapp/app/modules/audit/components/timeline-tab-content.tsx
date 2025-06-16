@@ -1,3 +1,4 @@
+import { Edit as EditIcon } from '@mui/icons-material';
 import {
   Box,
   IconButton,
@@ -12,22 +13,25 @@ import {
   TextField,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
+import { MaterialSelect } from 'app/shared/components/select/material-select';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
+import { TiposAuditoria } from 'app/shared/model/constants';
+import { EnumStatusAuditoria } from 'app/shared/model/enumerations/enum-status-auditoria';
+import { forwardRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Row, Table } from 'reactstrap';
-import { getPaginatedCronograma } from '../audit-service';
-import { forwardRef, useEffect, useMemo } from 'react';
 import { queryClientAudit } from '..';
-import { MaterialSelect } from 'app/shared/components/select/material-select';
-import { TiposAuditoria } from 'app/shared/model/constants';
 import { CronogramaAuditoria } from '../audit-models';
-import { Edit as EditIcon } from '@mui/icons-material';
-import { EnumStatusAuditoria } from 'app/shared/model/enumerations/enum-status-auditoria';
+import { getPaginatedCronograma } from '../audit-service';
 
+import { AUTHORITIES } from 'app/config/constants';
+import { useAppSelector } from 'app/config/store';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
 import DatePicker from 'react-datepicker';
-import { handleFilter, partesLabel, renderValueModelo } from '../audit-helper';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useDebounce } from 'use-debounce';
+import { handleFilter, renderValueModelo } from '../audit-helper';
+
 const columns = ['Modelo de auditoria', 'Data', 'Escopo', 'Status', 'Ações'];
 
 const Custom = forwardRef(({ children, onClick }: any, ref) => (
@@ -38,6 +42,8 @@ const Custom = forwardRef(({ children, onClick }: any, ref) => (
 
 export const TimelineTabContent = () => {
   const navigate = useNavigate();
+  const account = useAppSelector(state => state.authentication.account);
+  const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR', 'ROLE_APROVADOR']);
 
   const { data: timelineList, isLoading: isLoadingtimelineList } = useQuery({
     queryKey: ['timeline/list'],
@@ -71,10 +77,11 @@ export const TimelineTabContent = () => {
       <div style={{ paddingBottom: '30px', display: 'inline-flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
         <Button
           variant="contained"
-          className="primary-button infodoc-list-form-field"
+          className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} infodoc-list-form-field`}
           style={{ marginRight: '10px', height: '58px' }}
           onClick={() => navigate('/audit/timeline/new')}
           title="Novo Registro"
+          disabled={!canAccessNewRegister}
         >
           Nova Auditoria
         </Button>
