@@ -94,13 +94,16 @@ const HomeGoalsList = () => {
   }, [filters, page, pageSize]);
 
   const columns = ['Metas', 'Indicador/Controle', 'Resultados', 'Situação', 'Atualização', 'Ações'];
-  const getSituacaoIcon = (parcial: boolean | null, metaAtingida: boolean | null) => {
-    if (parcial === null || metaAtingida === null) {
+  const getSituacaoIcon = (parcial: boolean | null, metaAtingida: boolean | null, resultadoFinal: boolean | null) => {
+    console.log(parcial, metaAtingida, resultadoFinal);
+    if (parcial === null && metaAtingida === null && resultadoFinal === null) {
       return { icon: <PendingOutlinedIcon color="error" />, text: 'Meta Não Avaliada' };
-    } else if (parcial && !metaAtingida) {
+    } else if (parcial && !resultadoFinal) {
       return { icon: <CheckIcon color="success" />, text: 'Meta Parcial' };
-    } else if ((parcial && metaAtingida) || (!parcial && metaAtingida)) {
-      return { icon: <TaskAltIcon color="success" />, text: 'Meta Atingida' };
+    } else if (resultadoFinal && metaAtingida) {
+      return { icon: <TaskAltIcon color="success" />, text: 'Resultado Final - Meta Atingida' };
+    } else if (resultadoFinal && !metaAtingida) {
+      return { icon: <TaskAltIcon color="info" />, text: 'Resultado Final - Meta Não Atingida' };
     }
 
     return { icon: <PendingOutlinedIcon color="info" />, text: 'Meta Não Avaliada' };
@@ -165,8 +168,10 @@ const HomeGoalsList = () => {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Tooltip title={getSituacaoIcon(!!goalResult.parcial, !!goalResult.metaAtingida).text}>
-                            {getSituacaoIcon(!!goalResult.parcial, !!goalResult.metaAtingida).icon}
+                          <Tooltip
+                            title={getSituacaoIcon(!!goalResult.parcial, !!goalResult.metaAtingida, !!goalResult.resultadoFinal).text}
+                          >
+                            {getSituacaoIcon(!!goalResult.parcial, !!goalResult.metaAtingida, !!goalResult.resultadoFinal).icon}
                           </Tooltip>
                         </Box>
                       </TableCell>
@@ -288,10 +293,10 @@ const HomeGoalsList = () => {
                 onChange={e => setFilters({ ...filters, situacao: e?.target?.value?.toString() })}
                 label="Situação"
               >
-                {['FINALIZADO', 'PARCIAL']?.map(
+                {['META ATINGIDA', 'PARCIAL', 'RESULTADO FINAL']?.map(
                   (
                     situacao,
-                    index // F = Finalizado; P = Parcial
+                    index // F = Finalizado; P = Parcial; R = Resultado Final (Meta Atingida)
                   ) => (
                     <MenuItem key={index} value={EnumSituacao[situacao]}>
                       {situacao}
