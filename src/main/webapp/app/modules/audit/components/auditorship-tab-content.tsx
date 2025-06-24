@@ -27,14 +27,21 @@ import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
 import { Process } from 'app/modules/rnc/models';
 import { IUsuario } from 'app/shared/model/usuario.model';
 
-const columns = ['Planejamento', 'Processo', 'Data', 'Início / Término', 'RNC', 'ROM', 'Ações'];
+const columns = ['Planejamento', 'Processo', 'Data', 'Início / Término', 'RNC', 'ROM', 'Situação', 'Ações'];
 
 export const AuditorshipTabContent = () => {
   const navigate = useNavigate();
 
   const { data: schedules, isLoading: isLoadingSchedules } = useQuery({
     queryKey: ['schedule/list'],
-    queryFn: () => getPaginatedAgendamento({ page, size: pageSize, finalizado: false, ...handleFilter(getValues()) }),
+    queryFn() {
+      const filters = handleFilter(getValues()) as Record<string, any>;
+      // Remove o filtro finalizado se for string vazia
+      if (filters.finalizado === '') {
+        delete filters.finalizado;
+      }
+      return getPaginatedAgendamento({ page, size: pageSize, ...filters });
+    },
     staleTime: 60000, // Dados ficam atualizados por 1 minuto,
   });
 
@@ -46,7 +53,7 @@ export const AuditorshipTabContent = () => {
     defaultValues: {
       search: '',
       tipo: '',
-      finalizado: false,
+      finalizado: '',
       planejamento: '',
     },
     mode: 'onBlur',
@@ -73,11 +80,11 @@ export const AuditorshipTabContent = () => {
   });
 
   function pickProccess(id: number) {
-    return processes?.find(item => item.id == id) as Process;
+    return processes?.find(item => item.id === id);
   }
 
   function pickUser(id: number) {
-    return users?.find(item => item.id == id) as IUsuario;
+    return users?.find(item => item.id === id);
   }
 
   useEffect(() => {
@@ -126,6 +133,18 @@ export const AuditorshipTabContent = () => {
             )}
           />
 
+          <Controller
+            name="finalizado"
+            control={control}
+            render={({ field }) => (
+              <MaterialSelect onChange={null} label="Situação" fullWidth {...field} sx={{ minWidth: '120px' }}>
+                <MenuItem value="">Todos</MenuItem>
+                <MenuItem value="false">Em Aberto</MenuItem>
+                <MenuItem value="true">Validado</MenuItem>
+              </MaterialSelect>
+            )}
+          />
+
           <TextField label="Pesquisa" style={{ minWidth: '16vw' }} placeholder="Descrição" {...register('search')} />
 
           <Button
@@ -146,7 +165,7 @@ export const AuditorshipTabContent = () => {
             <TableRow>
               {columns.map(col => (
                 // eslint-disable-next-line react/jsx-key
-                <TableCell key={col} align={col != 'Ações' ? 'left' : 'center'}>
+                <TableCell key={col} align={col !== 'Ações' ? 'left' : 'center'}>
                   {col}
                 </TableCell>
               ))}
@@ -166,6 +185,7 @@ export const AuditorshipTabContent = () => {
                 </TableCell>
                 <TableCell>{schedule.ncsNumber}</TableCell>
                 <TableCell>{schedule.omsNumber}</TableCell>
+                <TableCell>{schedule.isReagendado ? 'Reagendado' : schedule.isFinalizado ? 'Validado' : 'Em Aberto'}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
                     {schedule.isReagendado ? (

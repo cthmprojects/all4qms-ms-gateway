@@ -43,6 +43,8 @@ const defaultAgendamento = {
   horaInicial: '' as unknown as Date,
   horaFinal: '' as unknown as Date,
   idProcesso: '' as unknown as number,
+  isFinalizado: false,
+  isReagendado: false,
 } as AgendamentoAuditoria;
 
 export const ScheduleNewEdit = () => {
@@ -51,7 +53,7 @@ export const ScheduleNewEdit = () => {
   const [open, setOpen] = useState(false);
   const [openValidate, setOpenValidate] = useState(false);
 
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const idSchedule = searchParams.get('idSchedule');
 
@@ -84,16 +86,19 @@ export const ScheduleNewEdit = () => {
     Error,
     Partial<AgendamentoAuditoria>
   >({
-    mutationFn: (newPayload: Partial<AgendamentoAuditoria>) =>
-      newPayload.isFinalizado ? reagendar({ ...getValues(), ...newPayload }) : persistManyAgendamentos(formForArray.getValues().array),
+    async mutationFn(newPayload: Partial<AgendamentoAuditoria>) {
+      if (newPayload.isFinalizado) {
+        return await persistAgendamento({ ...getValues(), ...newPayload });
+      } else {
+        return await persistManyAgendamentos(formForArray.getValues().array);
+      }
+    },
     onSuccess: whenSave,
   });
 
   const { mutate: getCurentSchedule, data: currentSchedule } = useMutation({
     mutationFn: () => getAgendamentoById(Number(idSchedule)),
-    onSuccess: (agendamento: AgendamentoAuditoria) => {
-      reset(agendamento);
-    },
+    onSuccess: (agendamento: AgendamentoAuditoria) => reset(agendamento),
   });
 
   const { data: planning, mutate: getPlanning } = useMutation({
@@ -113,8 +118,18 @@ export const ScheduleNewEdit = () => {
     navigate(-1);
   }
 
-  function whenSave(agendamento: AgendamentoAuditoria) {
-    navigate(-1);
+  function whenSave(result: AgendamentoAuditoria | AgendamentoAuditoria[]) {
+    // Se o resultado é um array, significa que foi persistManyAgendamentos (novo agendamento)
+    if (Array.isArray(result)) {
+      navigate(-1);
+    } else {
+      // Se é um objeto único, verifica se foi validado
+      if (result.isFinalizado) {
+        navigate(`/audit/auditorship/edit/${result.id}`);
+      } else {
+        navigate(-1);
+      }
+    }
   }
 
   function onClose() {
@@ -167,6 +182,7 @@ export const ScheduleNewEdit = () => {
       <Box display="flex" flexDirection="column" justifyContent="center">
         {fields.map((item, idx) => (
           <Card
+            key={item.key}
             sx={{
               display: 'flex',
               gap: '10px',
@@ -176,14 +192,7 @@ export const ScheduleNewEdit = () => {
             }}
           >
             <Box width="95%" paddingBottom="24px">
-              <ScheduleForm
-                key={item.key}
-                prefix={`array.${idx}`}
-                processes={processes}
-                formObject={formForArray}
-                planning={planning}
-                users={users}
-              />
+              <ScheduleForm prefix={`array.${idx}`} processes={processes} formObject={formForArray} planning={planning} users={users} />
             </Box>
             {hasMoreItens ? (
               <span>
