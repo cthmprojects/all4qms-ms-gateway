@@ -79,10 +79,12 @@ async function saveAuditoria(auditoria: Auditoria) {
 }
 
 async function saveRnc(naoConformidade: NaoConformidade) {
-  var form_data = new FormData();
+  const form_data = new FormData();
 
-  for (var key in naoConformidade) {
-    form_data.append(key, naoConformidade[key]);
+  for (const key in naoConformidade) {
+    if (Object.prototype.hasOwnProperty.call(naoConformidade, key)) {
+      form_data.append(key, naoConformidade[key]);
+    }
   }
   const { data } = await axios.post<NonConformityAudit>(`${RncBaseUrl}/descricao-nao-conformidades`, form_data);
   return data;
@@ -187,7 +189,7 @@ export const getPaginatedPlanejamento = addToast(
       data.content.map(async item => {
         const newReturn = parseRawPlanejamento(item);
         const result = (await getPaginatedAgendamento({ page: 0, size: 100, finalizado: false, planejamento: newReturn.id })).content
-          .filter(item => !item.isReagendado)
+          .filter(schedule => !schedule.isReagendado)
           .reduce(
             (acc, agendamento) => {
               acc.responsibleNames.push(agendamento?.responsavelAuditoria?.nome);
@@ -406,7 +408,7 @@ function filterNcOmList(item: NcOmAuditoria) {
 
 async function saveRegistroAuditoria({ agendamento, base, ncList, omList }: RegistrarAuditoriaForm) {
   const registro = await persistRegistro(base);
-  const newAgendamento = updateAgendamento({ ...agendamento, registro });
+  const newAgendamento = await updateAgendamento({ ...agendamento, registro });
   const newNcOmList = ncList
     .concat(omList)
     .filter(filterNcOmList)
@@ -468,12 +470,14 @@ export const persistModelo = addToast(
 /** Não Conformidade ou Oportunidade de Melhoria de Auditoria **/
 
 async function saveNcOmAuditoria(descricaoNcOm: NcOmAuditoria) {
-  var form_data = new FormData();
+  const form_data = new FormData();
 
   const { anexo, ...rest } = descricaoNcOm;
 
-  for (var key in rest) {
-    !!descricaoNcOm[key] && form_data.append(key, descricaoNcOm[key]);
+  for (const key in rest) {
+    if (Object.prototype.hasOwnProperty.call(rest, key)) {
+      !!descricaoNcOm[key] && form_data.append(key, descricaoNcOm[key]);
+    }
   }
   anexo?.length && form_data.append('anexo', anexo[0]);
   const { data } = await axios.post<NonConformityAudit>(`${AuditBaseUrl}/auditoria/registros/descncoms`, form_data);
@@ -481,12 +485,14 @@ async function saveNcOmAuditoria(descricaoNcOm: NcOmAuditoria) {
 }
 
 async function updateNcOmAuditoria(descricaoNcOm: NcOmAuditoria) {
-  var form_data = new FormData();
+  const form_data = new FormData();
 
   const { anexo, ...rest } = descricaoNcOm;
 
-  for (var key in rest) {
-    !!descricaoNcOm[key] && form_data.append(key, descricaoNcOm[key]);
+  for (const key in rest) {
+    if (Object.prototype.hasOwnProperty.call(rest, key)) {
+      !!descricaoNcOm[key] && form_data.append(key, descricaoNcOm[key]);
+    }
   }
 
   anexo?.length && form_data.append('anexo', anexo[0]);

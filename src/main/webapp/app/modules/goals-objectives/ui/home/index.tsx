@@ -32,20 +32,18 @@ import NoteAltOutlinedIcon from '@mui/icons-material/NoteAltOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckIcon from '@mui/icons-material/Check';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import './metas.css';
-import DatePicker from 'react-datepicker';
 import { registerLocale } from 'react-datepicker';
 import ptBR from 'date-fns/locale/pt-BR';
 import { format } from 'date-fns';
 
 import { Storage } from 'react-jhipster';
 
-import axios, { AxiosResponse } from 'axios';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
-import { ListMeta, Meta, MetaResultado } from '../../models/goals';
+import { ListMeta } from '../../models/goals';
 import { EnumSituacao } from '../../models/enums';
 import { getAllMetasFilter, ListMetasInterface, ListPagination } from '../../reducers/metas-list.reducer';
 import { usePaginator } from 'app/shared/hooks/usePaginator';
@@ -68,14 +66,8 @@ const HomeGoalsList = () => {
   const processes = useAppSelector<Array<Process>>(state => state.all4qmsmsgatewayrnc.process.entities);
   const metasLista: ListPagination = useAppSelector<ListPagination>(state => state.all4qmsmsmetaind.metasLista.entity);
 
-  const [startDate, setStartDate] = useState(new Date());
-  const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
-  // const [usersSGQ, setUsersSGQ] = useState<[]>([]);
-  const [isSGQ, setIsSGQ] = useState<Boolean>(false);
-  const [goalsList, setGoalsList] = useState<ListMeta[]>([]);
-  /**
-   * Filters
-   */
+  const [isSGQ, setIsSGQ] = useState<boolean>(false);
+
   const [filters, setFilters] = useState<ListMetasInterface>(initialFilter);
 
   const { page, pageSize, paginator } = usePaginator(metasLista.totalElements);
@@ -88,44 +80,33 @@ const HomeGoalsList = () => {
     handleApplyFilters();
   }, [page]);
 
-  // const getUsersSGQ = async () => {
-  //   const resUsers = await dispatch(getUsersAsAdminSGQ('ROLE_SGQ'));
-  //   const users_ = (resUsers.payload as AxiosResponse).data || [];
-
-  //   const filteredUser = users.filter(user => users_.some(firstUser => firstUser.id === user.user.id));
-  //   setUsersSGQ(filteredUser);
-  // };
-
-  // const enums: Enums = useAppSelector<Enums>(state => state.all4qmsmsgatewayro.enums.entity);
-
-  const fetchMetasAllFilter = async () => {
-    const resMetasContent = await dispatch(getAllMetasFilter({}));
-    const listMetasRes: ListPagination = (resMetasContent.payload as AxiosResponse).data || {};
-    setGoalsList(listMetasRes.content);
-  };
-
   useEffect(() => {
     dispatch(getProcesses());
-    // dispatch(getUsers({}));
     dispatch(getAllMetasFilter({}));
-    // fetchMetasAllFilter();
 
     const roles = Storage.local.get('ROLE');
-    const isSGQ = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles?.includes(item));
-    setIsSGQ(isSGQ);
+    const hasSGQRole = ['ROLE_ADMIN', 'ROLE_SGQ'].some(item => roles?.includes(item));
+    setIsSGQ(hasSGQRole);
   }, []);
 
   useEffect(() => {
     handleApplyFilters();
   }, [filters, page, pageSize]);
 
-  //---------------------------------------------------------------
-
   const columns = ['Metas', 'Indicador/Controle', 'Resultados', 'Situação', 'Atualização', 'Ações'];
-  const getSituacaoIcon = (parcial, metaAtingida) => {
-    if (parcial && metaAtingida) return { icon: <CheckIcon color="success" />, text: 'Meta Atingida' };
-    if (!parcial && metaAtingida) return { icon: <TaskAltIcon color="success" />, text: 'Meta Parcial' };
-    else return { icon: <CancelOutlinedIcon color="error" />, text: 'Meta Não Atingida' };
+  const getSituacaoIcon = (parcial: boolean | null, metaAtingida: boolean | null, resultadoFinal: boolean | null) => {
+    console.log(parcial, metaAtingida, resultadoFinal);
+    if (parcial === null && metaAtingida === null && resultadoFinal === null) {
+      return { icon: <PendingOutlinedIcon color="error" />, text: 'Meta Não Avaliada' };
+    } else if (parcial && !resultadoFinal) {
+      return { icon: <CheckIcon color="success" />, text: 'Meta Parcial' };
+    } else if (resultadoFinal && metaAtingida) {
+      return { icon: <TaskAltIcon color="success" />, text: 'Resultado Final - Meta Atingida' };
+    } else if (resultadoFinal && !metaAtingida) {
+      return { icon: <TaskAltIcon color="info" />, text: 'Resultado Final - Meta Não Atingida' };
+    }
+
+    return { icon: <PendingOutlinedIcon color="info" />, text: 'Meta Não Avaliada' };
   };
 
   const formatDateToString = (date: Date) => {
@@ -143,8 +124,6 @@ const HomeGoalsList = () => {
   const handleApplyFilters = () => {
     const { idProcesso, ano, mes, situacao, pesquisa } = filters;
 
-    // !processes && dispatch(getProcesses());
-
     dispatch(
       getAllMetasFilter({
         idProcesso: idProcesso || ('' as unknown as number),
@@ -153,7 +132,7 @@ const HomeGoalsList = () => {
         situacao: situacao || '',
         pesquisa: pesquisa || '',
         size: pageSize,
-        page: page,
+        page,
       })
     );
   };
@@ -172,19 +151,16 @@ const HomeGoalsList = () => {
                 <TableRow>
                   {columns.map(col => (
                     // eslint-disable-next-line react/jsx-key
-                    <TableCell align={col != 'Ações' ? 'left' : 'center'}>{col}</TableCell>
+                    <TableCell align={col !== 'Ações' ? 'left' : 'center'}>{col}</TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {metasLista?.content.map((goalResult: ListMeta, index) => (
-                  // <Tooltip title={goalResult.meta.metaObjetivo.desdobramentoSGQ}>
-                  <Tooltip title={''}>
+                  <Tooltip title={''} key={index}>
                     <TableRow key={index}>
-                      {/* <TableCell onClick={event => null}>{goalResult.meta.descricao}</TableCell> */}
                       <TableCell>{goalResult.descricao}</TableCell>
                       <TableCell>{goalResult.indicadorControle}</TableCell>
-                      {/* <TableCell onClick={event => null}>{goalResult.meta.avaliacaoResultado}</TableCell> */}
                       <TableCell>
                         {goalResult.avaliacao}
                         <br />
@@ -192,7 +168,11 @@ const HomeGoalsList = () => {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          {getSituacaoIcon(goalResult.parcial, goalResult.metaAtingida).icon}
+                          <Tooltip
+                            title={getSituacaoIcon(!!goalResult.parcial, !!goalResult.metaAtingida, !!goalResult.resultadoFinal).text}
+                          >
+                            {getSituacaoIcon(!!goalResult.parcial, !!goalResult.metaAtingida, !!goalResult.resultadoFinal).icon}
+                          </Tooltip>
                         </Box>
                       </TableCell>
                       <TableCell>{goalResult.lancadoEm ? formatDateToString(new Date(goalResult.lancadoEm)) : '-'}</TableCell>
@@ -228,7 +208,6 @@ const HomeGoalsList = () => {
             </Table>
           </TableContainer>
           <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
-            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
             {paginator}
           </Row>
         </>
@@ -240,7 +219,6 @@ const HomeGoalsList = () => {
             <span style={{ color: '#7d7d7d' }}>Nenhum item encontrado.</span>
           </Row>
           <Row className="justify-content-center mt-5" style={{ flex: 1 }}>
-            {/* <Pagination count={10} style={{ width: '370px' }} /> */}
             {paginator}
           </Row>
         </>
@@ -249,7 +227,6 @@ const HomeGoalsList = () => {
   };
 
   return (
-    //////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
         <Breadcrumbs aria-label="breadcrumb">
@@ -280,7 +257,6 @@ const HomeGoalsList = () => {
                 onChange={e => setFilters({ ...filters, idProcesso: Number(e.target.value.toString()) })}
                 label="Processo"
               >
-                {/* <MenuItem value={0}>Selecionar</MenuItem> */}
                 {processes?.map((process, index) => (
                   <MenuItem key={index} value={process.id}>
                     {process.nome}
@@ -317,10 +293,10 @@ const HomeGoalsList = () => {
                 onChange={e => setFilters({ ...filters, situacao: e?.target?.value?.toString() })}
                 label="Situação"
               >
-                {['FINALIZADO', 'PARCIAL']?.map(
+                {['META ATINGIDA', 'PARCIAL', 'RESULTADO FINAL']?.map(
                   (
                     situacao,
-                    index // F = Finalizado; P = Parcial
+                    index // F = Finalizado; P = Parcial; R = Resultado Final (Meta Atingida)
                   ) => (
                     <MenuItem key={index} value={EnumSituacao[situacao]}>
                       {situacao}

@@ -15,9 +15,14 @@ import { useEffect, useMemo } from 'react';
 import { ModeloAuditoria } from '../audit-models';
 import { Edit as EditIcon, Event as EventIcon } from '@mui/icons-material';
 import { queryClientAudit } from '..';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { AUTHORITIES } from 'app/config/constants';
+import { useAppSelector } from 'app/config/store';
 
 export const ModelTabContent = () => {
   const navigate = useNavigate();
+  const account = useAppSelector(state => state.authentication.account);
+  const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR', 'ROLE_APROVADOR']);
 
   const { control, register, reset, getValues } = useForm({
     defaultValues: {
@@ -51,10 +56,11 @@ export const ModelTabContent = () => {
       <div style={{ paddingBottom: '30px', display: 'inline-flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
         <Button
           variant="contained"
-          className="primary-button me-2 infodoc-list-form-field"
+          className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} me-2 infodoc-list-form-field`}
           style={{ marginRight: '10px', height: '58px', textTransform: 'uppercase' }}
           onClick={() => navigate('/audit/model/new')}
           title="Novo Modelo"
+          disabled={!canAccessNewRegister}
         >
           Novo Modelo
         </Button>

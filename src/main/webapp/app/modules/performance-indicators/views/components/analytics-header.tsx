@@ -1,5 +1,8 @@
 import { BarChartOutlined, ClearOutlined, SearchOutlined } from '@mui/icons-material';
 import { Autocomplete, Button, Stack, TextField } from '@mui/material';
+import { AUTHORITIES } from 'app/config/constants';
+import { useAppSelector } from 'app/config/store';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
 import { useEffect, useState } from 'react';
 import { Indicator, SummarizedProcess } from '../../models';
 import { getYearRange, onAutocompleteChanged, onTextChanged } from '../../utils';
@@ -19,6 +22,9 @@ const AnalyticsHeader = ({
   onSearchRequested,
   processes,
 }: AnalyticsHeaderProps) => {
+  const account = useAppSelector(state => state.authentication.account);
+  const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR', 'ROLE_APROVADOR']);
+
   const [indicator, setIndicator] = useState<Indicator | null>(null);
   const [process, setProcess] = useState<SummarizedProcess | null>(null);
   const [query, setQuery] = useState<string>('');
@@ -41,8 +47,8 @@ const AnalyticsHeader = ({
       <Button
         onClick={_ => onAddIndicatorRequested()}
         sx={{
-          background: '#e6b200',
-          color: '#4e4d4d',
+          background: !canAccessNewRegister ? '#e6b200' : '#4e4d4d',
+          color: !canAccessNewRegister ? '#4e4d4d' : '#e6b200',
           '& .MuiButton-startIcon': {
             marginTop: 0,
           },
@@ -51,6 +57,7 @@ const AnalyticsHeader = ({
           },
         }}
         variant="contained"
+        disabled={!canAccessNewRegister}
       >
         Novo Registro
       </Button>

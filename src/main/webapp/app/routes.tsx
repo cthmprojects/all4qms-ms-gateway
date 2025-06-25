@@ -101,7 +101,7 @@ const AppRoutes = (props: IRoutesProps) => {
         <Route
           path="audit/*"
           element={
-            <PrivateRoute hasAnyAuthorities={[AUTHORITIES.SGQ]}>
+            <PrivateRoute>
               <AuditRoutes />
             </PrivateRoute>
           }

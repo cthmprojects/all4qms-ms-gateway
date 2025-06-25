@@ -1,27 +1,28 @@
-import { Box, Breadcrumbs, Button, Fab, FormControl, FormControlLabel, IconButton, Switch, TextField, Typography } from '@mui/material';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
-import { Controller, UseFormReturn, useForm, useWatch } from 'react-hook-form';
-import { QueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { toast } from 'react-toastify';
-import { createResult, getMeta, getMetaResultAttatchment, getMetaResults } from '../../goal-result.service';
+import { Box, Breadcrumbs, Button, Fab, FormControl, FormControlLabel, IconButton, Switch, TextField, Typography } from '@mui/material';
+import { QueryClient, useMutation } from '@tanstack/react-query';
 import { MaterialDatepicker } from 'app/shared/components/input/material-datepicker';
 import { AttachmentButton } from 'app/shared/layout/AttachmentButton';
 import axios from 'axios';
-import { useDebounce, useDebouncedCallback } from 'use-debounce';
+import { useEffect, useState } from 'react';
+import { Controller, UseFormReturn, useForm, useWatch } from 'react-hook-form';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useDebouncedCallback } from 'use-debounce';
+import { createResult, getMeta, getMetaResults } from '../../goal-result.service';
 
 type ResultItemProps = {
   save: (formMethods: UseFormReturn<any>) => void;
   initialPayload?: any;
   onDelete?: () => void;
   isPending?: boolean;
+  hasAnyResultFinal: boolean;
 };
 
 const queryClient = new QueryClient();
 
-const ResultItem = ({ save, initialPayload, onDelete, isPending }: ResultItemProps) => {
+const ResultItem = ({ save, initialPayload, onDelete, isPending, hasAnyResultFinal }: ResultItemProps) => {
   const formMethods = useForm({
     defaultValues: initialPayload
       ? initialPayload
@@ -30,6 +31,7 @@ const ResultItem = ({ save, initialPayload, onDelete, isPending }: ResultItemPro
           periodo: null,
           parcial: false,
           metaAtingida: false,
+          resultadoFinal: false,
           avaliacao: '',
           analise: '',
           anexos: null,
@@ -40,15 +42,16 @@ const ResultItem = ({ save, initialPayload, onDelete, isPending }: ResultItemPro
   const metaId = initialPayload?.id;
 
   const { control, setValue, register, formState } = formMethods;
-  const field = (field: string) => register(field as any, { required: 'Campo obrigatório' });
+  const registerField = (field: string) => register(field as any, { required: 'Campo obrigatório' });
 
   useEffect(() => {
-    field('periodo');
-    field('lancadoEm');
+    registerField('periodo');
+    registerField('lancadoEm');
   }, []);
 
   const periodo = useWatch({ control, name: 'periodo' });
   const lancadoEm = useWatch({ control, name: 'lancadoEm' });
+  const resultadoFinal = useWatch({ control, name: 'resultadoFinal' });
 
   const isDisabled = !!initialPayload?.id;
 
@@ -96,25 +99,27 @@ const ResultItem = ({ save, initialPayload, onDelete, isPending }: ResultItemPro
           />
         </FormControl>
 
-        <Controller
-          control={control}
-          name="parcial"
-          render={({ field: { value, onChange } }) => (
-            <FormControlLabel
-              control={<Switch disabled={isDisabled} onChange={onChange} checked={value} />}
-              label="parcial"
-              labelPlacement="top"
-            />
-          )}
-        />
+        {resultadoFinal && (
+          <Controller
+            control={control}
+            name="metaAtingida"
+            render={({ field: { value, onChange } }) => (
+              <FormControlLabel
+                control={<Switch disabled={isDisabled} onChange={onChange} checked={value} />}
+                label="meta atingida"
+                labelPlacement="top"
+              />
+            )}
+          />
+        )}
 
         <Controller
           control={control}
-          name="metaAtingida"
+          name="resultadoFinal"
           render={({ field: { value, onChange } }) => (
             <FormControlLabel
               control={<Switch disabled={isDisabled} onChange={onChange} checked={value} />}
-              label="meta atingida"
+              label="resultado final"
               labelPlacement="top"
             />
           )}
@@ -136,11 +141,11 @@ const ResultItem = ({ save, initialPayload, onDelete, isPending }: ResultItemPro
           control={control}
           name={'anexos'}
           render={({ field: { value, onChange, ...field } }) => {
-            return <AttachmentButton {...(initialPayload?.id ? { download } : {})} onChange={onChange} />;
+            return <AttachmentButton {...(initialPayload?.id ? { download: () => void download() } : {})} onChange={onChange} />;
           }}
         />
 
-        {initialPayload?.id && (
+        {initialPayload?.id && !hasAnyResultFinal && (
           <IconButton sx={{ marginLeft: 'auto' }} onClick={onDelete}>
             <DeleteIcon />
           </IconButton>
@@ -155,13 +160,15 @@ const ResultItem = ({ save, initialPayload, onDelete, isPending }: ResultItemPro
         )}
       />
 
-      <Controller
-        control={control}
-        name="analise"
-        render={({ field }) => (
-          <TextField disabled={isDisabled} multiline rows={3} fullWidth label="Análise Crítica / Eficácia dos Resultados" {...field} />
-        )}
-      />
+      {resultadoFinal && (
+        <Controller
+          control={control}
+          name="analise"
+          render={({ field }) => (
+            <TextField disabled={isDisabled} multiline rows={3} fullWidth label="Análise Crítica / Eficácia dos Resultados" {...field} />
+          )}
+        />
+      )}
 
       {!isDisabled && (
         <Box display="flex" justifyContent="flex-end">
@@ -206,7 +213,7 @@ export const ResultPage = () => {
   const createMutation = useMutation(
     {
       mutationFn: createResult,
-      onSuccess: () => {
+      onSuccess() {
         setIsShowingNewForm(false);
         getResultadoMeta();
         toast.success('Resultado cadastrado com sucesso');
@@ -218,6 +225,8 @@ export const ResultPage = () => {
   function saveItem(formMethods: UseFormReturn<any>) {
     const { anexos, ...payload } = formMethods.getValues();
     payload.meta = { id: metaId };
+    // Define parcial como true se resultadoFinal for false
+    payload.parcial = !payload.resultadoFinal;
 
     const formData = new FormData();
     formData.append('metaResultadoDTO', JSON.stringify(payload));
@@ -262,7 +271,7 @@ export const ResultPage = () => {
         <TextField fullWidth label="Descrição Ação" multiline rows={3} value={meta?.acao || ''} disabled />
       </div>
 
-      {!!results?.length && (
+      {!!results?.length && !results.some(result => result.resultadoFinal) && (
         <Box display="flex" justifyContent="end" position="relative">
           <Fab sx={{ position: 'absolute', top: '195px', marginRight: '15px' }} onClick={() => setIsShowingNewForm(!isShowingNewForm)}>
             {isShowingNewForm ? <DeleteIcon /> : <AddIcon />}
@@ -272,11 +281,23 @@ export const ResultPage = () => {
 
       <Box display="flex" flexDirection="column" gap="15px" paddingRight="110px" mt="20px">
         {(isShowingNewForm || !results?.length) && !isLoadingResults && (
-          <ResultItem save={debouncedSave} isPending={createMutation.isPending} />
+          <ResultItem
+            save={debouncedSave}
+            isPending={createMutation.isPending}
+            hasAnyResultFinal={results?.some(result => result.resultadoFinal)}
+          />
         )}
-        {(results || []).map((field, index) => (
-          <ResultItem save={debouncedSave} key={field.id} initialPayload={field} onDelete={() => deleteMetaResult(field.id)} />
-        ))}
+        {(results || [])
+          .sort((a, b) => b.id - a.id)
+          .map((field, index) => (
+            <ResultItem
+              save={debouncedSave}
+              key={field.id}
+              initialPayload={field}
+              onDelete={() => void deleteMetaResult(field.id)}
+              hasAnyResultFinal={results?.some(result => result.resultadoFinal)}
+            />
+          ))}
       </Box>
 
       {/* Botões de salvar ou cancelar */}

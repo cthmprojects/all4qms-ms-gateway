@@ -9,6 +9,7 @@ export interface ListMeta {
   analise: String;
   parcial: Boolean;
   metaAtingida: Boolean;
+  resultadoFinal: Boolean;
   lancadoEm: Date;
   indicadorControle: string;
 }
@@ -40,6 +41,7 @@ export type MetaResultado = {
   analise: String;
   parcial: Boolean;
   metaAtingida: Boolean;
+  resultadoFinal: Boolean;
   lancadoEm: Date;
   periodo: Date;
   meta: Meta;
