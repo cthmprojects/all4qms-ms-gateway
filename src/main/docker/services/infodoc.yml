@@ -1,0 +1,20 @@
+# Infodoc service configuration
+services:
+  infodoc:
+    image: all4qms-ms-infodoc
+    volumes:
+      - /c/QMS/Anexos/DOCS:/tmp/anexos/docs
+    environment:
+      - _JAVA_OPTIONS=${_JAVA_OPTIONS}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=${MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - SPRING_CLOUD_CONFIG_URI=${SPRING_CLOUD_CONFIG_URI}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/${DB_INFODOC}
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/${DB_INFODOC}
+      - JHIPSTER_SLEEP=${INFODOC_SLEEP}
+      - QMS_REGISTRY_HOST=${QMS_REGISTRY_HOST}
+      - QMS_REGISTRY_PROTOCOLO=${QMS_REGISTRY_PROTOCOLO}
+      - IA_HOST=${IA_HOST}
+    ports:
+      - 8083:8083

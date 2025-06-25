@@ -3,7 +3,10 @@ const axios = require('axios');
 const url = require('url');
 const https = require('https');
 
-const PORT = 3000; // Porta em que o servidor proxy vai rodar
+const PORT = process.env.PROXY_PORT || 3000; // Porta em que o servidor proxy vai rodar
+const GATEWAY_URL = process.env.GATEWAY_URL || 'https://all4qms-gateway.vdeveloper.com.br'; // URL do gateway
+const GATEWAY_HOST = process.env.GATEWAY_HOST || 'all4qms-gateway.vdeveloper.com.br'; // Host do gateway
+
 const app = express();
 
 // Middleware para fazer o parsing do corpo da requisição como JSON
@@ -34,13 +37,12 @@ app.use('*', (req, res) => {
   if (req.method !== 'OPTIONS') {
     const axiosConfig = {
       method: req.method.toLowerCase(),
-      url: `https://all4qms-gateway.cthmprojetos.com${req.originalUrl}`,
-      /* headers: {
-        ...req.headers, // Copia todos os headers da requisição original
-        host: 'all4qms-gateway.cthmprojetos.com', // Define o header 'Host' com o servidor destino
-        origin: 'https://all4qms-gateway.cthmprojetos.com', // Define o header 'Origin' com base na origem da requisição
-        referer: 'https://all4qms-gateway.cthmprojetos.com', // Define o header 'Referer' com base no referer da requisição
-      }, */
+      url: `${GATEWAY_URL}${req.originalUrl}`,
+      headers: {
+        host: GATEWAY_HOST, // Define o header 'Host' com o servidor destino
+        origin: GATEWAY_URL, // Define o header 'Origin' com base na origem da requisição
+        referer: GATEWAY_URL, // Define o header 'Referer' com base no referer da requisição
+      },
       /* httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Configuração do agente HTTPS para ignorar a verificação do certificado SSL
       validateStatus: false, // Para lidar com códigos de status de resposta personalizados
       adapter: axiosBrotliAdapter, */
@@ -77,4 +79,6 @@ app.use('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor Express rodando na porta ${PORT}`);
+  console.log(`Proxy configurado para: ${GATEWAY_URL}`);
+  console.log(`Host configurado para: ${GATEWAY_HOST}`);
 });
