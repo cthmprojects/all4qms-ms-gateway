@@ -1,54 +1,24 @@
-import {
-  Box,
-  Breadcrumbs,
-  Checkbox,
-  Chip,
-  CircularProgress,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Textarea, styled } from '@mui/joy';
+import { Box, Breadcrumbs, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material';
+import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { UserQMS, getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
+import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
+import axios, { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Row } from 'reactstrap';
-import { useAppDispatch, useAppSelector } from 'app/config/store';
-import { getUsers, UserQMS } from 'app/entities/usuario/reducers/usuario.reducer';
-import { IUsuario } from 'app/shared/model/usuario.model';
-import DatePicker from 'react-datepicker';
-import { Textarea, styled } from '@mui/joy';
-import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { AddCircle } from '@mui/icons-material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import axios, { AxiosResponse } from 'axios';
 // import downloadFile from '../infodoc-store';
-import { listEnums } from '../../reducers/enums.reducer';
-import { toast } from 'react-toastify';
-import {
-  SendEmail,
-  createInfoDoc,
-  deleteInfoDoc,
-  getInfoDocById,
-  notifyEmailAllSGQs,
-  notifyEmailInfoDoc,
-  updateInfoDoc,
-} from '../../reducers/infodoc.reducer';
-import { InfoDoc, Doc, Movimentacao, EnumTipoMovDoc, EnumStatusDoc, EnumSituacao } from '../../models';
-import { downloadAnexo } from '../../reducers/anexo.reducer';
-import { atualizarMovimentacao, cadastrarMovimentacao } from '../../reducers/movimentacao.reducer';
+import { AUTHORITIES } from 'app/config/constants';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
 import { Storage } from 'react-jhipster';
-import { getUsersAsAdminSGQ } from '../../../administration/user-management/user-management.reducer';
+import { toast } from 'react-toastify';
 import { getUsersByProcess } from '../../../../entities/usuario/reducers/usuario.reducer';
 import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
-import { DetalheDistribuicao, Distribuicao, DistribuicaoCompleta } from '../../models/distribuicao';
-import { atualizarDetailDistribuicao, buscarDetailDistribuicao, buscarDistribuicao } from '../../reducers/distribuicao.reducer';
+import { InfoDoc } from '../../models';
+import { DetalheDistribuicao, DistribuicaoCompleta } from '../../models/distribuicao';
+import { atualizarDetailDistribuicao, buscarDetailDistribuicao } from '../../reducers/distribuicao.reducer';
+import { getInfoDocById } from '../../reducers/infodoc.reducer';
 import { TabIdentifier } from '../../ui/home/tab-identifier';
 
 const StyledLabel = styled('label')(({ theme }) => ({
@@ -95,6 +65,7 @@ export const ComproveRecebimento = () => {
   const distribuicao = state;
   const isFromDistribution = state?.from === 'distribution';
   const isControlled = state?.isControlled;
+  const account = useAppSelector(state => state.authentication.account);
 
   const [idProcesso, setIdProcesso] = useState<number>(-1);
   const [idUsuarioEntrega, setIdUsuarioEntrega] = useState<number>(-1);
@@ -117,6 +88,7 @@ export const ComproveRecebimento = () => {
   const [usersSGQ, setUsersSGQ] = useState<UserQMS[]>([]);
   const [infoDocId, setInfoDocId] = useState(-1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const distribuition: DetalheDistribuicao = useAppSelector(state => state.all4qmsmsgateway.distribuicao.entity);
@@ -157,6 +129,11 @@ export const ComproveRecebimento = () => {
       setIsRecebido(!!distribuition.idUsuarioEntrega);
       setIsDevolvido(!!distribuition.comentarioDevolucao?.trim());
       setIsJustify(!!distribuition.comentarioEntrega?.trim());
+
+      // Carregar usuários filtrados pelo processo da distribuição
+      if (distribuicao.idProcesso) {
+        filterUsersByProcess(distribuicao.idProcesso);
+      }
     }
   }, [distribuition]);
 
@@ -172,6 +149,29 @@ export const ComproveRecebimento = () => {
     );
     setUsersSGQ(filteredUserByProcess);
   };
+
+  // Função para filtrar usuários por processo
+  const filterUsersByProcess = async (processId: number) => {
+    if (processId > 0) {
+      try {
+        const resUsersByProcess = await dispatch(getUsersByProcess(processId));
+        const usersByProcess = (resUsersByProcess.payload as AxiosResponse).data || [];
+        setFilteredUsers(usersByProcess);
+      } catch (error) {
+        console.error('Erro ao buscar usuários por processo:', error);
+        setFilteredUsers([]);
+      }
+    } else {
+      setFilteredUsers([]);
+    }
+  };
+
+  // Atualizar usuários filtrados quando o processo mudar
+  useEffect(() => {
+    if (idProcesso > 0) {
+      filterUsersByProcess(idProcesso);
+    }
+  }, [idProcesso]);
 
   const cancelDocument = () => {
     if (isFromDistribution) {
@@ -223,9 +223,13 @@ export const ComproveRecebimento = () => {
 
   // Função para determinar se um campo deve estar desabilitado
   const isFieldDisabled = () => {
-    if (!isFromDistribution) return false; // Se não veio da aba distribuição, campos editáveis
-    if (!isControlled) return false; // Se não é controlado, campos editáveis
-    return true; // Se é controlado e veio da distribuição, campos desabilitados
+    // Campos Código, Título, Tipo e Processo sempre desabilitados para todos os casos
+    return true;
+  };
+
+  // Função para verificar se o usuário tem acesso ADMIN ou SGQ
+  const hasAdminOrSGQAccess = () => {
+    return hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]);
   };
 
   return (
@@ -255,6 +259,9 @@ export const ComproveRecebimento = () => {
               value={codigo}
               onChange={e => setCodigo(e.target.value)}
               disabled={isFieldDisabled()}
+              InputProps={{
+                readOnly: isFieldDisabled(),
+              }}
             />
             <TextField
               sx={{ width: '50%' }}
@@ -264,6 +271,9 @@ export const ComproveRecebimento = () => {
               value={titulo}
               onChange={e => setTitulo(e.target.value)}
               disabled={isFieldDisabled()}
+              InputProps={{
+                readOnly: isFieldDisabled(),
+              }}
             />
             <TextField
               label="Tipo"
@@ -271,18 +281,16 @@ export const ComproveRecebimento = () => {
               value={TipoControleDoc}
               disabled={isFieldDisabled()}
               onChange={e => setTipoControleDoc(e.target.value)}
+              InputProps={{
+                readOnly: isFieldDisabled(),
+              }}
             />
           </Stack>
           <Stack direction="row" spacing={2}>
             <FormControl style={{ width: '50%' }}>
               <InputLabel>Responsável</InputLabel>
-              <Select
-                label="Responsável"
-                value={idUsuarioEntrega}
-                onChange={event => setIdUsuarioEntrega(Number(event.target.value))}
-                disabled={isFieldDisabled()}
-              >
-                {users.map((user, i) => (
+              <Select label="Responsável" value={idUsuarioEntrega} onChange={event => setIdUsuarioEntrega(Number(event.target.value))}>
+                {filteredUsers.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
                   </MenuItem>
@@ -296,6 +304,9 @@ export const ComproveRecebimento = () => {
                 value={idProcesso}
                 onChange={event => setIdProcesso(Number(event.target.value))}
                 disabled={isFieldDisabled()}
+                inputProps={{
+                  readOnly: isFieldDisabled(),
+                }}
               >
                 {processes.map((process: any, i) => (
                   <MenuItem value={process.id} key={`process-${i}`}>
@@ -306,12 +317,7 @@ export const ComproveRecebimento = () => {
             </FormControl>
             <FormControl style={{ width: '15%' }}>
               <InputLabel>Recebido</InputLabel>
-              <Select
-                label="Recebido"
-                value={String(isRecebido)}
-                onChange={event => setIsRecebido(event.target.value === 'true')}
-                disabled={isFieldDisabled()}
-              >
+              <Select label="Recebido" value={String(isRecebido)} onChange={event => setIsRecebido(event.target.value === 'true')}>
                 {['Sim', 'Não'].map((label, index) => (
                   <MenuItem key={index} value={String(index === 0)}>
                     {label}
@@ -325,7 +331,6 @@ export const ComproveRecebimento = () => {
                 onChange={date => setDataEntrega(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled={isFieldDisabled()}
               />
               <label htmlFor="" className="rnc-date-label">
                 Data
@@ -340,78 +345,64 @@ export const ComproveRecebimento = () => {
             name="ncArea"
             value={comentarioEntrega || ''}
             onChange={e => setComentarioEntrega(e.target.value)}
-            disabled={isFieldDisabled()}
           />
 
-          <Stack direction="row" spacing={2}>
-            <FormControl style={{ width: '50%' }}>
-              <InputLabel>SGQ</InputLabel>
-              <Select
-                label="SGQ"
-                value={idUsuarioDevolucao}
-                onChange={event => setIdUsuarioDevolucao(Number(event.target.value))}
-                disabled={isFieldDisabled()}
-              >
-                {usersSGQ.map((user, i) => (
-                  <MenuItem value={user.id} key={`user-${i}`}>
-                    {user.nome}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl style={{ width: '17.5%' }}>
-              <InputLabel>Justificado</InputLabel>
-              <Select
-                label="Justificado"
-                value={String(isJustify)}
-                onChange={event => setIsJustify(event.target.value === 'true')}
-                disabled={isFieldDisabled()}
-              >
-                {['Sim', 'Não'].map((label, index) => (
-                  <MenuItem key={index} value={String(index === 0)}>
-                    {label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl style={{ width: '17.5%' }}>
-              <InputLabel>Devolvido</InputLabel>
-              <Select
-                label="Devolvido"
-                value={String(isDevolvido)}
-                onChange={event => setIsDevolvido(event.target.value === 'true')}
-                disabled={isFieldDisabled()}
-              >
-                {['Sim', 'Não'].map((label, index) => (
-                  <MenuItem key={index} value={String(index === 0)}>
-                    {label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl style={{ width: '15%', height: '50px' }}>
-              <DatePicker
-                selected={dataDevolucao}
-                onChange={date => setDataDevolucao(date)}
-                className="date-picker"
-                dateFormat={'dd/MM/yyyy'}
-                disabled={isFieldDisabled()}
+          {hasAdminOrSGQAccess() && (
+            <>
+              <Stack direction="row" spacing={2}>
+                <FormControl style={{ width: '50%' }}>
+                  <InputLabel>SGQ</InputLabel>
+                  <Select label="SGQ" value={idUsuarioDevolucao} onChange={event => setIdUsuarioDevolucao(Number(event.target.value))}>
+                    {usersSGQ.map((user, i) => (
+                      <MenuItem value={user.id} key={`user-${i}`}>
+                        {user.nome}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl style={{ width: '17.5%' }}>
+                  <InputLabel>Justificado</InputLabel>
+                  <Select label="Justificado" value={String(isJustify)} onChange={event => setIsJustify(event.target.value === 'true')}>
+                    {['Sim', 'Não'].map((label, index) => (
+                      <MenuItem key={index} value={String(index === 0)}>
+                        {label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl style={{ width: '17.5%' }}>
+                  <InputLabel>Devolvido</InputLabel>
+                  <Select label="Devolvido" value={String(isDevolvido)} onChange={event => setIsDevolvido(event.target.value === 'true')}>
+                    {['Sim', 'Não'].map((label, index) => (
+                      <MenuItem key={index} value={String(index === 0)}>
+                        {label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl style={{ width: '15%', height: '50px' }}>
+                  <DatePicker
+                    selected={dataDevolucao}
+                    onChange={date => setDataDevolucao(date)}
+                    className="date-picker"
+                    dateFormat={'dd/MM/yyyy'}
+                  />
+                  <label htmlFor="" className="rnc-date-label">
+                    Data
+                  </label>
+                </FormControl>
+              </Stack>
+              <Textarea
+                className="w-100"
+                slots={{ textarea: justifyDevolution }}
+                slotProps={{ textarea: { placeholder: '' } }}
+                sx={{ borderRadius: '6px' }}
+                name="ncArea"
+                value={comentarioDevolucao || ''}
+                onChange={e => setComentarioDevolucao(e.target.value)}
               />
-              <label htmlFor="" className="rnc-date-label">
-                Data
-              </label>
-            </FormControl>
-          </Stack>
-          <Textarea
-            className="w-100"
-            slots={{ textarea: justifyDevolution }}
-            slotProps={{ textarea: { placeholder: '' } }}
-            sx={{ borderRadius: '6px' }}
-            name="ncArea"
-            value={comentarioDevolucao || ''}
-            onChange={e => setComentarioDevolucao(e.target.value)}
-            disabled={isFieldDisabled()}
-          />
+            </>
+          )}
 
           <Box style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button
@@ -422,21 +413,9 @@ export const ComproveRecebimento = () => {
             >
               Voltar
             </Button>
-            {!isFieldDisabled() && (
-              <Button onClick={() => void saveDocument()} style={{ background: '#e6b200', color: '#4e4d4d' }}>
-                Confirmar
-              </Button>
-            )}
-            {/* <Button
-              // disabled={!validateFields()}
-              onClick={() => fowardDocument()}
-              className="ms-3"
-              variant="contained"
-              color="primary"
-              style={{ background: '#e6b200', color: '#4e4d4d' }}
-            >
-              Encaminhar
-            </Button> */}
+            <Button onClick={() => void saveDocument()} style={{ background: '#e6b200', color: '#4e4d4d' }}>
+              Confirmar
+            </Button>
           </Box>
         </Stack>
       </Box>

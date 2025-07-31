@@ -6,7 +6,6 @@ import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import Processo from './processo';
 import ProcessoDetail from './processo-detail';
 import ProcessoUpdate from './processo-update';
-import ProcessoDeleteDialog from './processo-delete-dialog';
 
 const ProcessoRoutes = () => (
   <ErrorBoundaryRoutes>
@@ -15,7 +14,6 @@ const ProcessoRoutes = () => (
     <Route path=":id">
       <Route index element={<ProcessoDetail />} />
       <Route path="edit" element={<ProcessoUpdate />} />
-      <Route path="delete" element={<ProcessoDeleteDialog />} />
     </Route>
   </ErrorBoundaryRoutes>
 );

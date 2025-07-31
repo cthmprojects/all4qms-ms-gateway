@@ -1,75 +1,49 @@
 /* eslint-disable radix */
 /* eslint-disable no-console */
-import {
-  Breadcrumbs,
-  Button,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  Select,
-  Box,
-  Tabs,
-  Tab,
-  Tooltip,
-  TextField,
-  TablePagination,
-} from '@mui/material';
+import { Box, Breadcrumbs, Button, Tab, Tabs, Typography } from '@mui/material';
 
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ShareIcon from '@mui/icons-material/Share';
-import CancelIcon from '@mui/icons-material/Cancel';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import DatePicker from 'react-datepicker';
-import React, { useEffect, useState } from 'react';
-import { Row } from 'reactstrap';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import BlockIcon from '@mui/icons-material/Block';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import BlockIcon from '@mui/icons-material/Block';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import EditIcon from '@mui/icons-material/Edit';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import HourglassFullIcon from '@mui/icons-material/HourglassFull';
 import InfoIcon from '@mui/icons-material/Info';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import { AUTHORITIES } from 'app/config/constants';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
-import './infodoc.css';
-import { EnumStatusDoc, EnumTipoMovDoc, InfoDoc, StatusEnum } from '../../models';
-import { getInfoDocById, listdocs } from '../../reducers/infodoc.reducer';
-import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
-import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
-import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
-import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
-import { Storage } from 'react-jhipster';
 import { getUsers, UserQMS } from 'app/entities/usuario/reducers/usuario.reducer';
-import { getUsersAsAdminSGQ } from 'app/modules/administration/user-management/user-management.reducer';
 import { Process } from 'app/modules/rnc/models';
 import { getProcesses } from 'app/modules/rnc/reducers/process.reducer';
-import { listEnums } from '../../reducers/enums.reducer';
-import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
-import axios, { AxiosResponse } from 'axios';
-import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
 import { hasAnyAuthority } from 'app/shared/auth/private-route';
-import { AUTHORITIES } from 'app/config/constants';
-import { listarDistribuicao } from '../../reducers/distribuicao.reducer';
+import { IUser } from 'app/shared/model/user.model';
+import axios, { AxiosResponse } from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Storage } from 'react-jhipster';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { getUsersAsGQ } from '../../../../entities/usuario/usuario.reducer';
+import { EnumStatusDoc, InfoDoc, StatusEnum } from '../../models';
 import { DistribuicaoCompleta } from '../../models/distribuicao';
+import { listarDistribuicao, listarDistribuicaoComFiltros } from '../../reducers/distribuicao.reducer';
+import { listEnums } from '../../reducers/enums.reducer';
+import { getInfoDocById, listdocs } from '../../reducers/infodoc.reducer';
+import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
+import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
+import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
+import UploadInfoFile from '../dialogs/upload-dialog/upload-files';
+import UploadInfoFileUpdate from '../dialogs/upload-file-update-dialog/upload-file-update';
+import ControlledCopyFilterSection from './components/controlled-copy-filter-section';
+import DistributionFilterSection from './components/distribution-filter-section';
+import FilterSection from './components/filter-section';
+import './infodoc.css';
+import { TabIdentifier } from './tab-identifier';
 import ControlledCopyTab from './tabs/controlled-copy-tab';
 import DistributionTab from './tabs/distribution-tab';
 import DocumentsTable from './tabs/documents-table';
-import FilterSection from './components/filter-section';
-import { IUser } from 'app/shared/model/user.model';
-import { toast } from 'react-toastify';
-import { TabIdentifier } from './tab-identifier';
 
 interface WaterMarkRequest {
   tipoControle: string;
@@ -230,9 +204,29 @@ const InfodocList = () => {
     return state?.selectedTab || TabIdentifier.COPIA_CONTROLADA;
   });
 
+  // Estado para filtros de distribuição
+  const [distributionFilters, setDistributionFilters] = useState({});
+  const [filterTimeout, setFilterTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+
+  // Estado para filtros de cópia controlada
+  const [controlledCopyFilters, setControlledCopyFilters] = useState({});
+  const [controlledCopyFilterTimeout, setControlledCopyFilterTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     handleChange(null, selectedTab);
   }, []);
+
+  // Limpar timeout quando componente for desmontado
+  useEffect(() => {
+    return () => {
+      if (filterTimeout) {
+        clearTimeout(filterTimeout);
+      }
+      if (controlledCopyFilterTimeout) {
+        clearTimeout(controlledCopyFilterTimeout);
+      }
+    };
+  }, [filterTimeout, controlledCopyFilterTimeout]);
 
   const infodocs: Array<InfoDoc> = useAppSelector(state => state.all4qmsmsgateway.infodoc.entities);
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
@@ -397,6 +391,74 @@ const InfodocList = () => {
       })
     );
     setSelectedTab(newTabId);
+  };
+
+  const handleDistributionFiltersChange = (filters: any) => {
+    setDistributionFilters(filters);
+
+    // Limpar timeout anterior
+    if (filterTimeout) {
+      clearTimeout(filterTimeout);
+    }
+
+    // Criar novo timeout para debounce
+    const timeout = setTimeout(() => {
+      // Resetar página quando aplicar filtros
+      setPage(0);
+
+      // Filtrar valores vazios e undefined
+      const cleanFilters = Object.keys(filters).reduce((acc, key) => {
+        const value = filters[key];
+        if (value !== undefined && value !== null && value !== '') {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as any);
+
+      // Chamar a action para buscar com filtros
+      if (Object.keys(cleanFilters).length > 0) {
+        dispatch(listarDistribuicaoComFiltros({ ...cleanFilters, page: 0, size: pageSize, sort: 'id,DESC' }));
+      } else {
+        // Se não há filtros, usar a busca normal
+        dispatch(listarDistribuicao({ page: 0, size: pageSize, sort: 'id,DESC' }));
+      }
+    }, 500); // 500ms de debounce
+
+    setFilterTimeout(timeout);
+  };
+
+  const handleControlledCopyFiltersChange = (filters: any) => {
+    setControlledCopyFilters(filters);
+
+    // Limpar timeout anterior
+    if (controlledCopyFilterTimeout) {
+      clearTimeout(controlledCopyFilterTimeout);
+    }
+
+    // Criar novo timeout para debounce
+    const timeout = setTimeout(() => {
+      // Resetar página quando aplicar filtros
+      setPage(0);
+
+      // Filtrar valores vazios e undefined
+      const cleanFilters = Object.keys(filters).reduce((acc, key) => {
+        const value = filters[key];
+        if (value !== undefined && value !== null && value !== '') {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as any);
+
+      // Chamar a action para buscar com filtros
+      if (Object.keys(cleanFilters).length > 0) {
+        dispatch(listarDistribuicaoComFiltros({ ...cleanFilters, page: 0, size: pageSize, sort: 'id,DESC' }));
+      } else {
+        // Se não há filtros, usar a busca normal
+        dispatch(listarDistribuicao({ page: 0, size: pageSize, sort: 'id,DESC' }));
+      }
+    }, 500); // 500ms de debounce
+
+    setControlledCopyFilterTimeout(timeout);
   };
 
   const columns = [
@@ -714,6 +776,7 @@ const InfodocList = () => {
       <DistributionTab
         distribuitions={distribuitions}
         userProcessos={userQMS.processos}
+        processes={processes}
         page={page}
         pageSize={pageSize}
         onPageChange={onPageChanged}
@@ -733,6 +796,7 @@ const InfodocList = () => {
     'ROLE_APROVADOR',
   ]);
   const canAccessAprovacao = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_APROVADOR']);
+  const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR']);
 
   return (
     // ////////////////////////////////////
@@ -764,13 +828,53 @@ const InfodocList = () => {
         </Breadcrumbs>
         <h1 className="title">Lista Informação Documentada</h1>
 
-        <FilterSection
-          filters={filters}
-          processes={processes}
-          onFilterChange={setFilters}
-          onClearFilters={clearFilters}
-          onNewRegister={onOpenUploadFileModal}
-        />
+        <div className="row" style={{ alignItems: 'center' }}>
+          <div className="col-auto">
+            <Button
+              variant="contained"
+              className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} me-2 infodoc-list-form-field`}
+              onClick={onOpenUploadFileModal}
+              style={{ height: '49px', width: '60px' }}
+              disabled={!canAccessNewRegister}
+            >
+              Novo Registro
+            </Button>
+          </div>
+
+          <div className="col">
+            {selectedTab === TabIdentifier.DISTRIBUICAO ? (
+              <DistributionFilterSection
+                filters={distributionFilters}
+                processes={processes}
+                enums={enums}
+                onFilterChange={handleDistributionFiltersChange}
+                onClearFilters={() => {
+                  setDistributionFilters({});
+                  dispatch(listarDistribuicao({ page: 0, size: pageSize }));
+                }}
+              />
+            ) : selectedTab === TabIdentifier.COPIA_CONTROLADA ? (
+              <ControlledCopyFilterSection
+                filters={controlledCopyFilters}
+                processes={processes}
+                onFilterChange={handleControlledCopyFiltersChange}
+                onClearFilters={() => {
+                  setControlledCopyFilters({});
+                  dispatch(listarDistribuicao({ page: 0, size: pageSize }));
+                }}
+              />
+            ) : (
+              <FilterSection
+                filters={filters}
+                processes={processes}
+                onFilterChange={setFilters}
+                onClearFilters={clearFilters}
+                onNewRegister={onOpenUploadFileModal}
+                showNewRegisterButton={false}
+              />
+            )}
+          </div>
+        </div>
 
         <Box sx={{ width: '100%' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

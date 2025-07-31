@@ -20,7 +20,7 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import InfoIcon from '@mui/icons-material/Info';
 import { Row } from 'reactstrap';
 import { InfoDoc, EnumStatusDoc } from '../../../models';
-import { formatDateToString, filterProcess } from '../infodoc-list.utils';
+import { formatDateToString } from '../infodoc-list.utils';
 import { Link, useNavigate } from 'react-router-dom';
 import { TabIdentifier } from '../tab-identifier';
 

@@ -6,7 +6,6 @@ import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import Funcao from './funcao';
 import FuncaoDetail from './funcao-detail';
 import FuncaoUpdate from './funcao-update';
-import FuncaoDeleteDialog from './funcao-delete-dialog';
 
 const FuncaoRoutes = () => (
   <ErrorBoundaryRoutes>
@@ -15,7 +14,6 @@ const FuncaoRoutes = () => (
     <Route path=":id">
       <Route index element={<FuncaoDetail />} />
       <Route path="edit" element={<FuncaoUpdate />} />
-      <Route path="delete" element={<FuncaoDeleteDialog />} />
     </Route>
   </ErrorBoundaryRoutes>
 );
