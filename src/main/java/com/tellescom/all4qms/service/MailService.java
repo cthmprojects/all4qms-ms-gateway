@@ -11,6 +11,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -43,6 +44,9 @@ public class MailService {
     private final MessageSource messageSource;
 
     private final SpringTemplateEngine templateEngine;
+
+    @Value("${GATEWAY_URL:https://all4qms-gateway.vdeveloper.com.br}")
+    private String gatewayUrl;
 
     public MailService(
         JHipsterProperties jHipsterProperties,
@@ -130,10 +134,11 @@ public class MailService {
                 "Seja bem vindo ao sistema All4QMS!!\n\n" +
                 "Seu usuário é: %s e sua senha padrão é %s\n\n" +
                 "Ao entrar no sistema pela primeira vez, aconselhamos que troque a senha.\n\n" +
-                "Link: https://all4qms-gateway.cthmprojetos.com/login ",
+                "Link: %s/login ",
                 user.getFirstName(),
                 user.getLogin(),
-                pass
+                pass,
+                gatewayUrl
             )
         );
         log.debug("Email de nova conta enviado para '{}'", user.getEmail());

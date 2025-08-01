@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Button, Row, Col, FormText } from 'reactstrap';
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Row, Col } from 'reactstrap';
 import { isNumber, Translate, translate, ValidatedField, ValidatedForm } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -13,10 +13,13 @@ import { getEntities as getUsuarios } from 'app/entities/usuario/usuario.reducer
 import { IFuncao } from 'app/shared/model/funcao.model';
 import { getEntity, updateEntity, createEntity, reset } from './funcao.reducer';
 
+import { Box, Breadcrumbs, Button, CircularProgress, Divider, Paper, Typography } from '@mui/material';
+
 export const FuncaoUpdate = () => {
   const dispatch = useAppDispatch();
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { id } = useParams<'id'>();
   const isNew = id === undefined;
@@ -80,95 +83,82 @@ export const FuncaoUpdate = () => {
         };
 
   return (
-    <div>
-      <Row className="justify-content-center">
-        <Col md="8">
-          <h2 id="all4QmsMsGatewayApp.funcao.home.createOrEditLabel" data-cy="FuncaoCreateUpdateHeading">
-            <Translate contentKey="all4QmsMsGatewayApp.funcao.home.createOrEditLabel">Create or edit a Funcao</Translate>
-          </h2>
-        </Col>
-      </Row>
-      <Row className="justify-content-center">
-        <Col md="8">
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity}>
-              {!isNew ? (
+    <>
+      {loading ? (
+        <Box
+          sx={{
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      ) : (
+        <div className="padding-container">
+          <div className="container-style">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }} to={'/'}>
+                Home
+              </Link>
+              <Link style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }} to={'/funcao'}>
+                Funções
+              </Link>
+              <Typography className="link">{isNew ? 'Criar Função' : 'Editar Função'}</Typography>
+            </Breadcrumbs>
+            <h1 className="title">{isNew ? 'Criar Função' : 'Editar Função'}</h1>
+
+            <Paper sx={{ padding: '30px', marginTop: '20px' }}>
+              <ValidatedForm defaultValues={defaultValues()} onSubmit={saveEntity}>
+                {!isNew ? (
+                  <ValidatedField
+                    name="id"
+                    required
+                    readOnly
+                    id="funcao-id"
+                    label={translate('global.field.id')}
+                    validate={{ required: true }}
+                  />
+                ) : null}
                 <ValidatedField
-                  name="id"
-                  required
-                  readOnly
-                  id="funcao-id"
-                  label={translate('global.field.id')}
-                  validate={{ required: true }}
+                  label={translate('all4QmsMsGatewayApp.funcao.nome')}
+                  id="funcao-nome"
+                  name="nome"
+                  data-cy="nome"
+                  type="text"
+                  validate={{
+                    required: { value: true, message: translate('entity.validation.required') },
+                  }}
                 />
-              ) : null}
-              <ValidatedField
-                label="Nome"
-                id="funcao-nome"
-                name="nome"
-                data-cy="nome"
-                type="text"
-                validate={{
-                  required: { value: true, message: translate('entity.validation.required') },
-                }}
-              />
-              <ValidatedField label="Descricao" id="funcao-descricao" name="descricao" data-cy="descricao" type="text" />
-              <ValidatedField
-                label="Criado Em"
-                id="funcao-criadoEm"
-                name="criadoEm"
-                data-cy="criadoEm"
-                type="datetime-local"
-                placeholder="YYYY-MM-DD HH:mm"
-              />
-              <ValidatedField
-                label="Atualizado Em"
-                id="funcao-atualizadoEm"
-                name="atualizadoEm"
-                data-cy="atualizadoEm"
-                type="datetime-local"
-                placeholder="YYYY-MM-DD HH:mm"
-              />
-              <ValidatedField id="funcao-criadoPor" name="criadoPor" data-cy="criadoPor" label="Criado Por" type="select">
-                <option value="" key="0" />
-                {usuarios
-                  ? usuarios.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <ValidatedField id="funcao-atualizadoPor" name="atualizadoPor" data-cy="atualizadoPor" label="Atualizado Por" type="select">
-                <option value="" key="0" />
-                {usuarios
-                  ? usuarios.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.nome}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
-              <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/funcao" replace color="info">
-                <FontAwesomeIcon icon="arrow-left" />
-                &nbsp;
-                <span className="d-none d-md-inline">
-                  <Translate contentKey="entity.action.back">Back</Translate>
-                </span>
-              </Button>
-              &nbsp;
-              <Button color="primary" id="save-entity" data-cy="entityCreateSaveButton" type="submit" disabled={updating}>
-                <FontAwesomeIcon icon="save" />
-                &nbsp;
-                <Translate contentKey="entity.action.save">Save</Translate>
-              </Button>
-            </ValidatedForm>
-          )}
-        </Col>
-      </Row>
-    </div>
+                <ValidatedField
+                  label={translate('all4QmsMsGatewayApp.funcao.descricao')}
+                  id="funcao-descricao"
+                  name="descricao"
+                  data-cy="descricao"
+                  type="text"
+                />
+                <div style={{ paddingTop: '30px' }}>
+                  <Button type="submit" variant="contained" className="primary-button" style={{ marginRight: '10px' }} disabled={updating}>
+                    <FontAwesomeIcon icon="save" />
+                    &nbsp;
+                    {translate('entity.action.save')}
+                  </Button>
+                  <Button variant="contained" className="secondary-button" onClick={handleClose} disabled={updating}>
+                    <FontAwesomeIcon icon="arrow-left" />
+                    &nbsp;
+                    <span>{translate('entity.action.back')}</span>
+                  </Button>
+                </div>
+              </ValidatedForm>
+            </Paper>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -3,7 +3,7 @@
     <option name="ALTERNATIVE_JRE_PATH" value="C:\Program Files\Java\jdk-17" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <envs>
-      <env name="QMS_REGISTRY_HOST" value="all4qms-registry.cthmprojetos.com" />
+      <env name="QMS_REGISTRY_HOST" value="all4qms-registry.vdeveloper.com.br" />
       <env name="QMS_REGISTRY_PROTOCOLO" value="https" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="com.tellescom.all4qms.All4QmsMsGatewayApp" />

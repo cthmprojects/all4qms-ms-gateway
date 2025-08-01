@@ -1,11 +1,13 @@
 package com.tellescom.all4qms.web.rest;
 
+import com.tellescom.all4qms.domain.Authority;
 import com.tellescom.all4qms.domain.request.UsuarioRequest;
 import com.tellescom.all4qms.domain.request.UsuarioUpdateRequest;
 import com.tellescom.all4qms.domain.response.GestorResponse;
 import com.tellescom.all4qms.domain.response.UsuarioResponse;
 import com.tellescom.all4qms.repository.UsuarioRepository;
 import com.tellescom.all4qms.security.AuthoritiesConstants;
+import com.tellescom.all4qms.service.UserService;
 import com.tellescom.all4qms.service.UsuarioService;
 import com.tellescom.all4qms.service.dto.UserDTO;
 import com.tellescom.all4qms.service.dto.UsuarioDTO;
@@ -13,7 +15,10 @@ import com.tellescom.all4qms.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -54,9 +59,12 @@ public class UsuarioResource {
 
     private final UsuarioRepository usuarioRepository;
 
-    public UsuarioResource(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
+    private final UserService userService;
+
+    public UsuarioResource(UsuarioService usuarioService, UsuarioRepository usuarioRepository, UserService userService) {
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
+        this.userService = userService;
     }
 
     /**
@@ -317,5 +325,54 @@ public class UsuarioResource {
                         .build()
                 )
             );
+    }
+
+    @GetMapping("/{id}/authorities")
+    public Mono<ResponseEntity<Set<String>>> getUsuarioAuthorities(@PathVariable Long id) {
+        log.debug("REST request to get Usuario authorities : {}", id);
+        return usuarioService
+            .findOne(id)
+            .flatMap(usuarioDTO -> {
+                if (usuarioDTO.getUser() != null && usuarioDTO.getUser().getLogin() != null) {
+                    return userService
+                        .getUserWithAuthoritiesByLogin(usuarioDTO.getUser().getLogin())
+                        .map(user -> user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet()))
+                        .map(ResponseEntity::ok);
+                } else {
+                    return Mono.just(ResponseEntity.ok(Set.<String>of()));
+                }
+            })
+            .switchIfEmpty(Mono.just(ResponseEntity.ok(Set.<String>of())));
+    }
+
+    @PostMapping("/authorities-batch")
+    public Mono<ResponseEntity<Map<Long, Set<String>>>> getUsuariosAuthoritiesBatch(@RequestBody List<Long> userIds) {
+        log.debug("REST request to get Usuarios authorities batch for {} users", userIds.size());
+
+        if (userIds == null || userIds.isEmpty()) {
+            return Mono.just(ResponseEntity.ok(Map.of()));
+        }
+
+        return Flux
+            .fromIterable(userIds)
+            .flatMap(userId ->
+                usuarioService
+                    .findOne(userId)
+                    .flatMap(usuarioDTO -> {
+                        if (usuarioDTO.getUser() != null && usuarioDTO.getUser().getLogin() != null) {
+                            return userService
+                                .getUserWithAuthoritiesByLogin(usuarioDTO.getUser().getLogin())
+                                .map(user ->
+                                    Map.entry(userId, user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet()))
+                                )
+                                .switchIfEmpty(Mono.just(Map.entry(userId, Set.<String>of())));
+                        } else {
+                            return Mono.just(Map.entry(userId, Set.<String>of()));
+                        }
+                    })
+                    .switchIfEmpty(Mono.just(Map.entry(userId, Set.<String>of())))
+            )
+            .collectMap(Map.Entry::getKey, Map.Entry::getValue)
+            .map(ResponseEntity::ok);
     }
 }

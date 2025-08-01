@@ -1,16 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Table } from 'reactstrap';
-import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
+import { Row } from 'reactstrap';
+import { getSortState, JhiPagination } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
 import { IProcesso } from 'app/shared/model/processo.model';
-import { getEntities } from './processo.reducer';
+import { IUsuario } from 'app/shared/model/usuario.model';
+import { getEntities, deleteEntity, createEntity, updateEntity } from './processo.reducer';
+
+import {
+  Box,
+  Breadcrumbs,
+  Button,
+  CircularProgress,
+  Divider,
+  Paper,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  TextField,
+  IconButton,
+  Chip,
+  Table,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import { useConfirmDialog } from 'app/shared/hooks/useConfirmDialog';
 
 export const Processo = () => {
   const dispatch = useAppDispatch();
@@ -22,9 +50,39 @@ export const Processo = () => {
     overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
 
+  // Estados para filtros
+  const [filters, setFilters] = useState({
+    numero: '',
+    nome: '',
+    descricao: '',
+    setor: '',
+    responsavel: '',
+  });
+
+  // Estados para modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingProcesso, setEditingProcesso] = useState<IProcesso | null>(null);
+  const [formData, setFormData] = useState({
+    numero: '',
+    nome: '',
+    descricao: '',
+    setor: '',
+    responsavel: '',
+  });
+
   const processoList = useAppSelector(state => state.all4qmsmsgateway.processo.entities);
   const loading = useAppSelector(state => state.all4qmsmsgateway.processo.loading);
   const totalItems = useAppSelector(state => state.all4qmsmsgateway.processo.totalItems);
+  const updateSuccess = useAppSelector(state => state.all4qmsmsgateway.processo.updateSuccess);
+
+  // Usuário logado
+  const accountQms = useAppSelector(state => state.authentication.accountQms);
+
+  // Dados para filtros
+  const setors = useAppSelector(state => state.all4qmsmsgateway.setor.entities);
+  const usuarios = useAppSelector(state => state.all4qmsmsgateway.usuario.entities);
+
+  const { ConfirmDialog, showDialog } = useConfirmDialog();
 
   const getAllEntities = () => {
     dispatch(
@@ -48,6 +106,13 @@ export const Processo = () => {
     sortEntities();
   }, [paginationState.activePage, paginationState.order, paginationState.sort]);
 
+  // Recarregar lista quando houver sucesso na criação/edição
+  useEffect(() => {
+    if (updateSuccess) {
+      getAllEntities();
+    }
+  }, [updateSuccess]);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const page = params.get('page');
@@ -61,15 +126,7 @@ export const Processo = () => {
         order: sortSplit[1],
       });
     }
-  }, [location.search]);
-
-  const sort = p => () => {
-    setPaginationState({
-      ...paginationState,
-      order: paginationState.order === ASC ? DESC : ASC,
-      sort: p,
-    });
-  };
+  }, [location.search, navigate, paginationState]);
 
   const handlePagination = currentPage =>
     setPaginationState({
@@ -77,139 +134,318 @@ export const Processo = () => {
       activePage: currentPage,
     });
 
-  const handleSyncList = () => {
-    sortEntities();
+  const clearFilters = () => {
+    setFilters({
+      numero: '',
+      nome: '',
+      descricao: '',
+      setor: '',
+      responsavel: '',
+    });
+  };
+
+  const filteredProcessoList = processoList.filter(processo => {
+    const numeroMatch = !filters.numero || processo.numero?.toLowerCase().includes(filters.numero.toLowerCase());
+
+    const nomeMatch = !filters.nome || processo.nome?.toLowerCase().includes(filters.nome.toLowerCase());
+
+    const descricaoMatch = !filters.descricao || processo.descricao?.toLowerCase().includes(filters.descricao.toLowerCase());
+
+    const setorMatch = !filters.setor || processo.setor?.toLowerCase().includes(filters.setor.toLowerCase());
+
+    const responsavelMatch = !filters.responsavel || processo.responsavel?.toLowerCase().includes(filters.responsavel.toLowerCase());
+
+    return numeroMatch && nomeMatch && descricaoMatch && setorMatch && responsavelMatch;
+  });
+
+  const handleDelete = (id: number) => {
+    showDialog({
+      title: 'Confirmar exclusão',
+      content: 'Tem certeza que deseja excluir este processo?',
+      onConfirm: () => {
+        dispatch(deleteEntity(id));
+      },
+    });
+  };
+
+  const handleOpenCreateModal = () => {
+    setEditingProcesso(null);
+    setFormData({ numero: '', nome: '', descricao: '', setor: '', responsavel: '' });
+    setModalOpen(true);
+  };
+
+  const handleOpenEditModal = (processo: IProcesso) => {
+    setEditingProcesso(processo);
+    setFormData({
+      numero: processo.numero || '',
+      nome: processo.nome || '',
+      descricao: processo.descricao || '',
+      setor: processo.setor || '',
+      responsavel: processo.responsavel || '',
+    });
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setEditingProcesso(null);
+    setFormData({ numero: '', nome: '', descricao: '', setor: '', responsavel: '' });
+  };
+
+  const handleSave = () => {
+    if (!formData.nome.trim()) {
+      return; // Apenas nome é obrigatório
+    }
+
+    const processoData = {
+      ...editingProcesso,
+      numero: formData.numero.trim(),
+      nome: formData.nome.trim(),
+      descricao: formData.descricao.trim(),
+      setor: formData.setor.trim(),
+      responsavel: formData.responsavel.trim(),
+    };
+
+    if (editingProcesso) {
+      // Edição: mantém o criador original, atualiza apenas o atualizador
+      processoData.atualizadoPor = accountQms as IUsuario;
+    } else {
+      // Criação: define tanto criador quanto atualizador
+      processoData.criadoPor = accountQms as IUsuario;
+      processoData.atualizadoPor = accountQms as IUsuario;
+    }
+
+    if (editingProcesso) {
+      dispatch(updateEntity(processoData));
+    } else {
+      dispatch(createEntity(processoData));
+    }
+
+    handleCloseModal();
   };
 
   return (
-    <div>
-      <h2 id="processo-heading" data-cy="ProcessoHeading">
-        Processos
-        <div className="d-flex justify-content-end">
-          <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
-            <FontAwesomeIcon icon="sync" spin={loading} /> Atualizar lista
-          </Button>
-          <Link to="/processo/new" className="btn btn-primary jh-create-entity" id="jh-create-entity" data-cy="entityCreateButton">
-            <FontAwesomeIcon icon="plus" />
-            &nbsp; Criar novo Processo
-          </Link>
-        </div>
-      </h2>
-      <div className="table-responsive">
-        {processoList && processoList.length > 0 ? (
-          <Table responsive>
-            <thead>
-              <tr>
-                <th className="hand" onClick={sort('id')}>
-                  ID <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('numero')}>
-                  Numero <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('nome')}>
-                  Nome <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('descricao')}>
-                  Descricao <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('setor')}>
-                  Setor <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('responsavel')}>
-                  Responsavel <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('setorResponsavel')}>
-                  Setor Responsavel <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('criadoEm')}>
-                  Criado Em <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('atualizadoEm')}>
-                  Atualizado Em <FontAwesomeIcon icon="sort" />
-                </th>
-                <th>
-                  Criado Por <FontAwesomeIcon icon="sort" />
-                </th>
-                <th>
-                  Atualizado Por <FontAwesomeIcon icon="sort" />
-                </th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {processoList.map((processo, i) => (
-                <tr key={`entity-${i}`} data-cy="entityTable">
-                  <td>
-                    <Button tag={Link} to={`/processo/${processo.id}`} color="link" size="sm">
-                      {processo.id}
-                    </Button>
-                  </td>
-                  <td>{processo.numero}</td>
-                  <td>{processo.nome}</td>
-                  <td>{processo.descricao}</td>
-                  <td>{processo.setor}</td>
-                  <td>{processo.responsavel}</td>
-                  <td>{processo.setorResponsavel}</td>
-                  <td>{processo.criadoEm ? <TextFormat type="date" value={processo.criadoEm} format={APP_DATE_FORMAT} /> : null}</td>
-                  <td>
-                    {processo.atualizadoEm ? <TextFormat type="date" value={processo.atualizadoEm} format={APP_DATE_FORMAT} /> : null}
-                  </td>
-                  <td>{processo.criadoPor ? <Link to={`/usuario/${processo.criadoPor.id}`}>{processo.criadoPor.nome}</Link> : ''}</td>
-                  <td>
-                    {processo.atualizadoPor ? <Link to={`/usuario/${processo.atualizadoPor.id}`}>{processo.atualizadoPor.nome}</Link> : ''}
-                  </td>
-                  <td className="text-end">
-                    <div className="btn-group flex-btn-group-container">
-                      <Button tag={Link} to={`/processo/${processo.id}`} color="info" size="sm" data-cy="entityDetailsButton">
-                        <FontAwesomeIcon icon="eye" /> <span className="d-none d-md-inline">Visualizar</span>
-                      </Button>
-                      <Button
-                        tag={Link}
-                        to={`/processo/${processo.id}/edit?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`}
-                        color="primary"
-                        size="sm"
-                        data-cy="entityEditButton"
-                      >
-                        <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
-                      </Button>
-                      <Button
-                        tag={Link}
-                        to={`/processo/${processo.id}/delete?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`}
-                        color="danger"
-                        size="sm"
-                        data-cy="entityDeleteButton"
-                      >
-                        <FontAwesomeIcon icon="trash" /> <span className="d-none d-md-inline">Excluir</span>
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        ) : (
-          !loading && <div className="alert alert-warning">Nenhum Processo encontrado</div>
-        )}
-      </div>
-      {totalItems ? (
-        <div className={processoList && processoList.length > 0 ? '' : 'd-none'}>
-          <div className="justify-content-center d-flex">
-            <JhiItemCount page={paginationState.activePage} total={totalItems} itemsPerPage={paginationState.itemsPerPage} />
-          </div>
-          <div className="justify-content-center d-flex">
-            <JhiPagination
-              activePage={paginationState.activePage}
-              onSelect={handlePagination}
-              maxButtons={5}
-              itemsPerPage={paginationState.itemsPerPage}
-              totalItems={totalItems}
-            />
-          </div>
-        </div>
+    <>
+      {loading ? (
+        <Box
+          sx={{
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
       ) : (
-        ''
+        <div className="padding-container">
+          <div className="container-style">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }} to={'/'}>
+                Home
+              </Link>
+              <Typography className="link">Processos</Typography>
+            </Breadcrumbs>
+            <h1 className="title">Processos</h1>
+            <div style={{ paddingBottom: '30px' }}>
+              <Button variant="contained" className="primary-button" style={{ marginRight: '10px' }} onClick={handleOpenCreateModal}>
+                CADASTRAR
+              </Button>
+              <Button variant="contained" className="update-button" onClick={() => getAllEntities()}>
+                ATUALIZAR
+              </Button>
+            </div>
+            <Divider sx={{ borderColor: '#7d7d7d' }}></Divider>
+
+            {/* Filtros */}
+            <Box sx={{ padding: '20px 0', display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+              <TextField
+                label="Número"
+                value={filters.numero}
+                onChange={e => setFilters({ ...filters, numero: e.target.value })}
+                size="small"
+                sx={{ minWidth: 150 }}
+              />
+
+              <TextField
+                label="Nome"
+                value={filters.nome}
+                onChange={e => setFilters({ ...filters, nome: e.target.value })}
+                size="small"
+                sx={{ minWidth: 200 }}
+              />
+
+              <TextField
+                label="Descrição"
+                value={filters.descricao}
+                onChange={e => setFilters({ ...filters, descricao: e.target.value })}
+                size="small"
+                sx={{ minWidth: 200 }}
+              />
+
+              <TextField
+                label="Setor"
+                value={filters.setor}
+                onChange={e => setFilters({ ...filters, setor: e.target.value })}
+                size="small"
+                sx={{ minWidth: 150 }}
+              />
+
+              <TextField
+                label="Responsável"
+                value={filters.responsavel}
+                onChange={e => setFilters({ ...filters, responsavel: e.target.value })}
+                size="small"
+                sx={{ minWidth: 150 }}
+              />
+
+              <Button
+                variant="contained"
+                onClick={clearFilters}
+                sx={{
+                  height: '40px',
+                  backgroundColor: '#6c757d',
+                  '&:hover': { backgroundColor: '#5a6268' },
+                }}
+              >
+                Limpar
+              </Button>
+            </Box>
+
+            {/* Tabela */}
+            {filteredProcessoList && filteredProcessoList.length > 0 ? (
+              <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
+                <Table sx={{ width: '100%' }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Número</TableCell>
+                      <TableCell>Nome</TableCell>
+                      <TableCell>Descrição</TableCell>
+                      <TableCell>Setor</TableCell>
+                      <TableCell>Responsável</TableCell>
+                      <TableCell>Criado por</TableCell>
+                      <TableCell>Data criação</TableCell>
+                      <TableCell align="center">Ações</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredProcessoList.map((processo, i) => (
+                      <TableRow key={`entity-${i}`} data-cy="entityTable">
+                        <TableCell>{processo.numero}</TableCell>
+                        <TableCell>{processo.nome}</TableCell>
+                        <TableCell>{processo.descricao}</TableCell>
+                        <TableCell>{processo.setor}</TableCell>
+                        <TableCell>{processo.responsavel}</TableCell>
+                        <TableCell>
+                          {processo.criadoPor ? (
+                            <Chip
+                              label={processo.criadoPor.nome}
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              sx={{ fontSize: '0.75rem', height: '20px' }}
+                            />
+                          ) : (
+                            '-'
+                          )}
+                        </TableCell>
+                        <TableCell>{processo.criadoEm ? new Date(processo.criadoEm).toLocaleDateString('pt-BR') : '-'}</TableCell>
+                        <TableCell align="center">
+                          <IconButton color="primary" size="small" onClick={() => handleOpenEditModal(processo)} data-cy="entityEditButton">
+                            <FontAwesomeIcon icon="pencil-alt" />
+                          </IconButton>
+                          <IconButton color="error" size="small" onClick={() => handleDelete(processo.id)} data-cy="entityDeleteButton">
+                            <FontAwesomeIcon icon="trash" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Row className="justify-content-center mt-5">
+                <span style={{ color: '#7d7d7d' }}>Nenhum processo encontrado.</span>
+              </Row>
+            )}
+
+            {/* Paginação */}
+            {totalItems ? (
+              <div className={filteredProcessoList && filteredProcessoList.length > 0 ? '' : 'd-none'}>
+                <div className="justify-content-center d-flex">
+                  <JhiPagination
+                    activePage={paginationState.activePage}
+                    onSelect={handlePagination}
+                    maxButtons={5}
+                    itemsPerPage={paginationState.itemsPerPage}
+                    totalItems={totalItems}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
       )}
-    </div>
+      {ConfirmDialog}
+
+      {/* Modal de Criação/Edição */}
+      <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="md" fullWidth>
+        <DialogTitle>{editingProcesso ? 'Editar Processo' : 'Criar Processo'}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              fullWidth
+              label="Número"
+              value={formData.numero}
+              onChange={e => setFormData({ ...formData, numero: e.target.value })}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Nome *"
+              value={formData.nome}
+              onChange={e => setFormData({ ...formData, nome: e.target.value })}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Descrição"
+              value={formData.descricao}
+              onChange={e => setFormData({ ...formData, descricao: e.target.value })}
+              margin="normal"
+              multiline
+              rows={3}
+            />
+            <TextField
+              fullWidth
+              label="Setor"
+              value={formData.setor}
+              onChange={e => setFormData({ ...formData, setor: e.target.value })}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Responsável"
+              value={formData.responsavel}
+              onChange={e => setFormData({ ...formData, responsavel: e.target.value })}
+              margin="normal"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="inherit">
+            Cancelar
+          </Button>
+          <Button onClick={handleSave} variant="contained" disabled={!formData.nome.trim()}>
+            Salvar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

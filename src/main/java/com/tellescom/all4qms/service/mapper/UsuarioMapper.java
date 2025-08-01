@@ -1,5 +1,6 @@
 package com.tellescom.all4qms.service.mapper;
 
+import com.tellescom.all4qms.domain.Authority;
 import com.tellescom.all4qms.domain.Funcao;
 import com.tellescom.all4qms.domain.Processo;
 import com.tellescom.all4qms.domain.Setor;

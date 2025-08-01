@@ -10,15 +10,6 @@ export const formatDateToString = (date: Date): string => {
   return `${day}/${month}/${year}`;
 };
 
-export const filterProcess = (id: number): string => {
-  if (!id) {
-    return '-';
-  }
-
-  // Esta função será implementada posteriormente quando tivermos acesso ao estado global
-  return id.toString();
-};
-
 export const getTipoControleText = (tipo: string): string => {
   switch (tipo) {
     case 'C':

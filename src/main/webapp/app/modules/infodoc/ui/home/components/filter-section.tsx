@@ -19,24 +19,34 @@ interface FilterSectionProps {
   onFilterChange: (filters: any) => void;
   onClearFilters: () => void;
   onNewRegister: () => void;
+  showNewRegisterButton?: boolean;
 }
 
-const FilterSection: React.FC<FilterSectionProps> = ({ filters, processes, onFilterChange, onClearFilters, onNewRegister }) => {
+const FilterSection: React.FC<FilterSectionProps> = ({
+  filters,
+  processes,
+  onFilterChange,
+  onClearFilters,
+  onNewRegister,
+  showNewRegisterButton = true,
+}) => {
   const account = useAppSelector(state => state.authentication.account);
   const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR', 'ROLE_APROVADOR']);
 
   return (
-    <div style={{ paddingBottom: '30px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
-      <Button
-        variant="contained"
-        className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} me-2 infodoc-list-form-field`}
-        style={{ marginRight: '10px', height: '58px' }}
-        onClick={onNewRegister}
-        title="Novo Registro"
-        disabled={!canAccessNewRegister}
-      >
-        Novo Registro
-      </Button>
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
+      {showNewRegisterButton && (
+        <Button
+          variant="contained"
+          className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} me-2 infodoc-list-form-field`}
+          style={{ marginRight: '10px', height: '58px' }}
+          onClick={onNewRegister}
+          title="Novo Registro"
+          disabled={!canAccessNewRegister}
+        >
+          Novo Registro
+        </Button>
+      )}
 
       <FormControl className="me-2">
         <DatePicker

@@ -19,17 +19,64 @@ const initialState: EntityState<DistribuicaoCompleta | DetalheDistribuicao> = {
   updating: false,
   links: null,
 };
+
 interface ListParams {
   page?: number;
   size?: number;
   sort?: string;
 }
-export const listarDistribuicao = createAsyncThunk('distribuicao/listar', async (listMetasParams: ListParams) => {
-  const query = buildQueryParams(listMetasParams);
 
-  const url: string = `${apiDistribuicaoUrl}/paginado${query}`;
-  return await axios.get<ListPagination>(url);
+interface DistributionFilterParams {
+  tipoControle?: string;
+  codigo?: string;
+  titulo?: string;
+  idProcesso?: number;
+  situacao?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export const listarDistribuicao = createAsyncThunk('distribuicao/fetch_entity_list', async (params: ListParams) => {
+  const { page, size, sort } = params;
+  const queryParams: string[] = [];
+
+  if (page) {
+    queryParams.push(`page=${page}`);
+  }
+  if (size) {
+    queryParams.push(`size=${size}`);
+  }
+  if (sort) {
+    queryParams.push(`sort=${sort}`);
+  }
+
+  const queryString = queryParams.join('&');
+  return axios.get<ListPagination>(`${apiDistribuicaoUrl}/paginado${queryString ? `?${queryString}` : ''}`);
 });
+
+export const listarDistribuicaoComFiltros = createAsyncThunk(
+  'distribuicao/fetch_entity_list_with_filters',
+  async (params: DistributionFilterParams) => {
+    const { page, size, sort, ...filters } = params;
+    const queryParams: string[] = [];
+
+    if (page) {
+      queryParams.push(`page=${page}`);
+    }
+    if (size) {
+      queryParams.push(`size=${size}`);
+    }
+    if (sort) {
+      queryParams.push(`sort=${sort}`);
+    }
+
+    const queryString = queryParams.join('&');
+    const url = `${apiDistribuicaoUrl}/paginado/filtrado${queryString ? `?${queryString}` : ''}`;
+
+    return axios.post<ListPagination>(url, filters);
+  }
+);
 
 export const buscarDistribuicao = createAsyncThunk('distribuicao/buscar', async (id: number | string) => {
   return await axios.get<DistribuicaoCompleta>(`${apiDistribuicaoUrl}/${id}`);
@@ -72,6 +119,14 @@ const DistribuicaoReducer = createEntitySlice({
         state.loading = false;
       })
       .addMatcher(isFulfilled(listarDistribuicao), (state, action) => {
+        return {
+          ...state,
+          entities: action.payload.data.content,
+          entity: null,
+          totalItems: action.payload.data.totalElements,
+        };
+      })
+      .addMatcher(isFulfilled(listarDistribuicaoComFiltros), (state, action) => {
         return {
           ...state,
           entities: action.payload.data.content,

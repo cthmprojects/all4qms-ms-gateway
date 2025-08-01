@@ -1,16 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Table } from 'reactstrap';
-import { Translate, TextFormat, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
+import { Row } from 'reactstrap';
+import { getSortState, JhiPagination } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
 import { IFuncao } from 'app/shared/model/funcao.model';
-import { getEntities } from './funcao.reducer';
+import { IUsuario } from 'app/shared/model/usuario.model';
+import { getEntities, deleteEntity, createEntity, updateEntity } from './funcao.reducer';
+
+import {
+  Box,
+  Breadcrumbs,
+  Button,
+  CircularProgress,
+  Divider,
+  Paper,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  TextField,
+  IconButton,
+  Chip,
+  Table,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import { useConfirmDialog } from 'app/shared/hooks/useConfirmDialog';
 
 export const Funcao = () => {
   const dispatch = useAppDispatch();
@@ -22,9 +46,29 @@ export const Funcao = () => {
     overridePaginationStateWithQueryParams(getSortState(location, ITEMS_PER_PAGE, 'id'), location.search)
   );
 
+  // Estados para filtros
+  const [filters, setFilters] = useState({
+    nome: '',
+    descricao: '',
+  });
+
+  // Estados para modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingFuncao, setEditingFuncao] = useState<IFuncao | null>(null);
+  const [formData, setFormData] = useState({
+    nome: '',
+    descricao: '',
+  });
+
   const funcaoList = useAppSelector(state => state.all4qmsmsgateway.funcao.entities);
   const loading = useAppSelector(state => state.all4qmsmsgateway.funcao.loading);
   const totalItems = useAppSelector(state => state.all4qmsmsgateway.funcao.totalItems);
+  const updateSuccess = useAppSelector(state => state.all4qmsmsgateway.funcao.updateSuccess);
+
+  // Usuário logado
+  const accountQms = useAppSelector(state => state.authentication.accountQms);
+
+  const { ConfirmDialog, showDialog } = useConfirmDialog();
 
   const getAllEntities = () => {
     dispatch(
@@ -48,6 +92,13 @@ export const Funcao = () => {
     sortEntities();
   }, [paginationState.activePage, paginationState.order, paginationState.sort]);
 
+  // Recarregar lista quando houver sucesso na criação/edição
+  useEffect(() => {
+    if (updateSuccess) {
+      getAllEntities();
+    }
+  }, [updateSuccess]);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const page = params.get('page');
@@ -61,15 +112,7 @@ export const Funcao = () => {
         order: sortSplit[1],
       });
     }
-  }, [location.search]);
-
-  const sort = p => () => {
-    setPaginationState({
-      ...paginationState,
-      order: paginationState.order === ASC ? DESC : ASC,
-      sort: p,
-    });
-  };
+  }, [location.search, navigate, paginationState]);
 
   const handlePagination = currentPage =>
     setPaginationState({
@@ -77,119 +120,252 @@ export const Funcao = () => {
       activePage: currentPage,
     });
 
-  const handleSyncList = () => {
-    sortEntities();
+  const clearFilters = () => {
+    setFilters({
+      nome: '',
+      descricao: '',
+    });
+  };
+
+  const filteredFuncaoList = funcaoList.filter(funcao => {
+    const nomeMatch = !filters.nome || funcao.nome?.toLowerCase().includes(filters.nome.toLowerCase());
+
+    const descricaoMatch = !filters.descricao || funcao.descricao?.toLowerCase().includes(filters.descricao.toLowerCase());
+
+    return nomeMatch && descricaoMatch;
+  });
+
+  const handleDelete = (id: number) => {
+    showDialog({
+      title: 'Confirmar exclusão',
+      content: 'Tem certeza que deseja excluir esta função?',
+      onConfirm: () => {
+        dispatch(deleteEntity(id));
+      },
+    });
+  };
+
+  const handleOpenCreateModal = () => {
+    setEditingFuncao(null);
+    setFormData({ nome: '', descricao: '' });
+    setModalOpen(true);
+  };
+
+  const handleOpenEditModal = (funcao: IFuncao) => {
+    setEditingFuncao(funcao);
+    setFormData({
+      nome: funcao.nome || '',
+      descricao: funcao.descricao || '',
+    });
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setEditingFuncao(null);
+    setFormData({ nome: '', descricao: '' });
+  };
+
+  const handleSave = () => {
+    if (!formData.nome.trim()) {
+      return; // Nome é obrigatório
+    }
+
+    const funcaoData = {
+      ...editingFuncao,
+      nome: formData.nome.trim(),
+      descricao: formData.descricao.trim(),
+    };
+
+    if (editingFuncao) {
+      // Edição: mantém o criador original, atualiza apenas o atualizador
+      funcaoData.atualizadoPor = accountQms as IUsuario;
+    } else {
+      // Criação: define tanto criador quanto atualizador
+      funcaoData.criadoPor = accountQms as IUsuario;
+      funcaoData.atualizadoPor = accountQms as IUsuario;
+    }
+
+    if (editingFuncao) {
+      dispatch(updateEntity(funcaoData));
+    } else {
+      dispatch(createEntity(funcaoData));
+    }
+
+    handleCloseModal();
   };
 
   return (
-    <div>
-      <h2 id="funcao-heading" data-cy="FuncaoHeading">
-        Funcaos
-        <div className="d-flex justify-content-end">
-          <Button className="me-2" color="info" onClick={handleSyncList} disabled={loading}>
-            <FontAwesomeIcon icon="sync" spin={loading} /> Atualizar lista
-          </Button>
-          <Link to="/funcao/new" className="btn btn-primary jh-create-entity" id="jh-create-entity" data-cy="entityCreateButton">
-            <FontAwesomeIcon icon="plus" />
-            &nbsp; Criar novo Funcao
-          </Link>
-        </div>
-      </h2>
-      <div className="table-responsive">
-        {funcaoList && funcaoList.length > 0 ? (
-          <Table responsive>
-            <thead>
-              <tr>
-                <th className="hand" onClick={sort('id')}>
-                  ID <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('nome')}>
-                  Nome <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('descricao')}>
-                  Descricao <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('criadoEm')}>
-                  Criado Em <FontAwesomeIcon icon="sort" />
-                </th>
-                <th className="hand" onClick={sort('atualizadoEm')}>
-                  Atualizado Em <FontAwesomeIcon icon="sort" />
-                </th>
-                <th>
-                  Criado Por <FontAwesomeIcon icon="sort" />
-                </th>
-                <th>
-                  Atualizado Por <FontAwesomeIcon icon="sort" />
-                </th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {funcaoList.map((funcao, i) => (
-                <tr key={`entity-${i}`} data-cy="entityTable">
-                  <td>
-                    <Button tag={Link} to={`/funcao/${funcao.id}`} color="link" size="sm">
-                      {funcao.id}
-                    </Button>
-                  </td>
-                  <td>{funcao.nome}</td>
-                  <td>{funcao.descricao}</td>
-                  <td>{funcao.criadoEm ? <TextFormat type="date" value={funcao.criadoEm} format={APP_DATE_FORMAT} /> : null}</td>
-                  <td>{funcao.atualizadoEm ? <TextFormat type="date" value={funcao.atualizadoEm} format={APP_DATE_FORMAT} /> : null}</td>
-                  <td>{funcao.criadoPor ? <Link to={`/usuario/${funcao.criadoPor.id}`}>{funcao.criadoPor.nome}</Link> : ''}</td>
-                  <td>{funcao.atualizadoPor ? <Link to={`/usuario/${funcao.atualizadoPor.id}`}>{funcao.atualizadoPor.nome}</Link> : ''}</td>
-                  <td className="text-end">
-                    <div className="btn-group flex-btn-group-container">
-                      <Button tag={Link} to={`/funcao/${funcao.id}`} color="info" size="sm" data-cy="entityDetailsButton">
-                        <FontAwesomeIcon icon="eye" /> <span className="d-none d-md-inline">Visualizar</span>
-                      </Button>
-                      <Button
-                        tag={Link}
-                        to={`/funcao/${funcao.id}/edit?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`}
-                        color="primary"
-                        size="sm"
-                        data-cy="entityEditButton"
-                      >
-                        <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Editar</span>
-                      </Button>
-                      <Button
-                        tag={Link}
-                        to={`/funcao/${funcao.id}/delete?page=${paginationState.activePage}&sort=${paginationState.sort},${paginationState.order}`}
-                        color="danger"
-                        size="sm"
-                        data-cy="entityDeleteButton"
-                      >
-                        <FontAwesomeIcon icon="trash" /> <span className="d-none d-md-inline">Excluir</span>
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        ) : (
-          !loading && <div className="alert alert-warning">Nenhum Funcao encontrado</div>
-        )}
-      </div>
-      {totalItems ? (
-        <div className={funcaoList && funcaoList.length > 0 ? '' : 'd-none'}>
-          <div className="justify-content-center d-flex">
-            <JhiItemCount page={paginationState.activePage} total={totalItems} itemsPerPage={paginationState.itemsPerPage} />
-          </div>
-          <div className="justify-content-center d-flex">
-            <JhiPagination
-              activePage={paginationState.activePage}
-              onSelect={handlePagination}
-              maxButtons={5}
-              itemsPerPage={paginationState.itemsPerPage}
-              totalItems={totalItems}
-            />
-          </div>
-        </div>
+    <>
+      {loading ? (
+        <Box
+          sx={{
+            display: 'flex',
+            width: '100vw',
+            height: '100vh',
+            background: '#c6c6c6',
+            zIndex: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
       ) : (
-        ''
+        <div className="padding-container">
+          <div className="container-style">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link style={{ textDecoration: 'none', color: '#49a7ea', fontWeight: 400 }} to={'/'}>
+                Home
+              </Link>
+              <Typography className="link">Funções</Typography>
+            </Breadcrumbs>
+            <h1 className="title">Funções</h1>
+            <div style={{ paddingBottom: '30px' }}>
+              <Button variant="contained" className="primary-button" style={{ marginRight: '10px' }} onClick={handleOpenCreateModal}>
+                CADASTRAR
+              </Button>
+              <Button variant="contained" className="update-button" onClick={() => getAllEntities()}>
+                ATUALIZAR
+              </Button>
+            </div>
+            <Divider sx={{ borderColor: '#7d7d7d' }}></Divider>
+
+            {/* Filtros */}
+            <Box sx={{ padding: '20px 0', display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+              <TextField
+                label="Nome"
+                value={filters.nome}
+                onChange={e => setFilters({ ...filters, nome: e.target.value })}
+                size="small"
+                sx={{ minWidth: 200 }}
+              />
+
+              <TextField
+                label="Descrição"
+                value={filters.descricao}
+                onChange={e => setFilters({ ...filters, descricao: e.target.value })}
+                size="small"
+                sx={{ minWidth: 200 }}
+              />
+
+              <Button
+                variant="contained"
+                onClick={clearFilters}
+                sx={{
+                  height: '40px',
+                  backgroundColor: '#6c757d',
+                  '&:hover': { backgroundColor: '#5a6268' },
+                }}
+              >
+                Limpar
+              </Button>
+            </Box>
+
+            {/* Tabela */}
+            {filteredFuncaoList && filteredFuncaoList.length > 0 ? (
+              <TableContainer component={Paper} style={{ marginTop: '30px', boxShadow: 'none' }}>
+                <Table sx={{ width: '100%' }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Nome</TableCell>
+                      <TableCell>Descrição</TableCell>
+                      <TableCell>Criado por</TableCell>
+                      <TableCell>Data criação</TableCell>
+                      <TableCell align="center">Ações</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredFuncaoList.map((funcao, i) => (
+                      <TableRow key={`entity-${i}`} data-cy="entityTable">
+                        <TableCell>{funcao.nome}</TableCell>
+                        <TableCell>{funcao.descricao}</TableCell>
+                        <TableCell>
+                          {funcao.criadoPor ? (
+                            <Chip
+                              label={funcao.criadoPor.nome}
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              sx={{ fontSize: '0.75rem', height: '20px' }}
+                            />
+                          ) : (
+                            '-'
+                          )}
+                        </TableCell>
+                        <TableCell>{funcao.criadoEm ? new Date(funcao.criadoEm).toLocaleDateString('pt-BR') : '-'}</TableCell>
+                        <TableCell align="center">
+                          <IconButton color="primary" size="small" onClick={() => handleOpenEditModal(funcao)} data-cy="entityEditButton">
+                            <FontAwesomeIcon icon="pencil-alt" />
+                          </IconButton>
+                          <IconButton color="error" size="small" onClick={() => handleDelete(funcao.id)} data-cy="entityDeleteButton">
+                            <FontAwesomeIcon icon="trash" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Row className="justify-content-center mt-5">
+                <span style={{ color: '#7d7d7d' }}>Nenhuma função encontrada.</span>
+              </Row>
+            )}
+
+            {/* Paginação */}
+            {totalItems ? (
+              <div className={filteredFuncaoList && filteredFuncaoList.length > 0 ? '' : 'd-none'}>
+                <div className="justify-content-center d-flex">
+                  <JhiPagination
+                    activePage={paginationState.activePage}
+                    onSelect={handlePagination}
+                    maxButtons={5}
+                    itemsPerPage={paginationState.itemsPerPage}
+                    totalItems={totalItems}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
       )}
-    </div>
+      {ConfirmDialog}
+
+      {/* Modal de Criação/Edição */}
+      <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingFuncao ? 'Editar Função' : 'Criar Função'}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              fullWidth
+              label="Nome *"
+              value={formData.nome}
+              onChange={e => setFormData({ ...formData, nome: e.target.value })}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Descrição"
+              value={formData.descricao}
+              onChange={e => setFormData({ ...formData, descricao: e.target.value })}
+              margin="normal"
+              multiline
+              rows={3}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="inherit">
+            Cancelar
+          </Button>
+          <Button onClick={handleSave} variant="contained" disabled={!formData.nome.trim()}>
+            Salvar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

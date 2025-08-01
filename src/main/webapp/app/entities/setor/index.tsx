@@ -6,7 +6,6 @@ import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 import Setor from './setor';
 import SetorDetail from './setor-detail';
 import SetorUpdate from './setor-update';
-import SetorDeleteDialog from './setor-delete-dialog';
 
 const SetorRoutes = () => (
   <ErrorBoundaryRoutes>
@@ -15,7 +14,6 @@ const SetorRoutes = () => (
     <Route path=":id">
       <Route index element={<SetorDetail />} />
       <Route path="edit" element={<SetorUpdate />} />
-      <Route path="delete" element={<SetorDeleteDialog />} />
     </Route>
   </ErrorBoundaryRoutes>
 );

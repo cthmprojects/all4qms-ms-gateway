@@ -1,12 +1,11 @@
-import React from 'react';
-import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Box } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import { Row } from 'reactstrap';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Row } from 'reactstrap';
 import { DistribuicaoCompleta } from '../../../models/distribuicao';
-import { formatDateToString, filterProcess } from '../infodoc-list.utils';
+import { formatDateToString } from '../infodoc-list.utils';
 
 interface ControlledCopyTabProps {
   distribuitions: DistribuicaoCompleta[];
@@ -19,7 +18,7 @@ interface ControlledCopyTabProps {
   handleDownloadDistribuition: (distribuicao: DistribuicaoCompleta) => Promise<void>;
 }
 
-const columnsDistribuicao = ['Código', 'Título', 'Revisão', 'Data', 'Área/Processo', 'Status Doc', 'Ações'];
+const columnsDistribuicao = ['Código', 'Título', 'Revisão', 'Data', 'Área/Processo', 'Ações'];
 
 function displayedRowsLabel({ from, to, count }) {
   return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
@@ -36,6 +35,20 @@ const ControlledCopyTab: React.FC<ControlledCopyTabProps> = ({
   handleDownloadDistribuition,
 }) => {
   const navigate = useNavigate();
+
+  // Função para filtrar o nome do processo baseado no ID
+  const filterProcessName = (id: number): string => {
+    if (!userProcessos || userProcessos.length <= 0) {
+      return '-';
+    }
+
+    if (id) {
+      const processo = userProcessos.find(process => process.id === id);
+      return processo ? processo.nome : '-';
+    }
+
+    return '-';
+  };
 
   const filteredDistribuitions = distribuitions
     ?.filter((distribuicao: DistribuicaoCompleta) => userProcessos.some(processo => processo.id === distribuicao.idProcesso))
@@ -86,10 +99,7 @@ const ControlledCopyTab: React.FC<ControlledCopyTabProps> = ({
                 <TableCell>{distribuicao.titulo}</TableCell>
                 <TableCell>{distribuicao.revisao}</TableCell>
                 <TableCell>{distribuicao.dataEntrega ? formatDateToString(new Date(distribuicao.dataEntrega)) : '-'}</TableCell>
-                <TableCell>{filterProcess(distribuicao.idProcesso)}</TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{distribuicao.enumStatusDoc}</Box>
-                </TableCell>
+                <TableCell>{filterProcessName(distribuicao.idProcesso)}</TableCell>
                 <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                   <IconButton
                     id="btn-view"

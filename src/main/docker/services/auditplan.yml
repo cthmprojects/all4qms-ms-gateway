@@ -1,0 +1,27 @@
+# Auditplan service configuration
+services:
+  auditplan:
+    image: all4qmsmsauditplan
+    environment:
+      - _JAVA_OPTIONS=${_JAVA_OPTIONS}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=${MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - SPRING_CLOUD_CONFIG_URI=${SPRING_CLOUD_CONFIG_URI}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/${DB_AUDITPLAN}
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/${DB_AUDITPLAN}
+      - JHIPSTER_SLEEP=${AUDITPLAN_SLEEP}
+      - QMS_REGISTRY_HOST=${QMS_REGISTRY_HOST}
+      - QMS_REGISTRY_PROTOCOLO=${QMS_REGISTRY_PROTOCOLO}
+      - IA_HOST=${IA_HOST}
+    ports:
+      - 8086:8086
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:8086/management/health
+      interval: 5s
+      timeout: 5s
+      retries: 40

@@ -1,0 +1,21 @@
+# RNC service configuration
+services:
+  rnc:
+    image: all4qmsmsrnc
+    volumes:
+      - /c/QMS/Anexos/DNC:/tmp/anexos/dnc
+    environment:
+      - _JAVA_OPTIONS=${_JAVA_OPTIONS}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=${MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - SPRING_CLOUD_CONFIG_URI=${SPRING_CLOUD_CONFIG_URI}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/${DB_RNC}
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/${DB_RNC}
+      - JHIPSTER_SLEEP=${RNC_SLEEP}
+      - QMS_REGISTRY_HOST=${QMS_REGISTRY_HOST}
+      - QMS_REGISTRY_PROTOCOLO=${QMS_REGISTRY_PROTOCOLO}
+      - IA_HOST=${IA_HOST}
+      - SERVER_GATEWAY=${SERVER_GATEWAY}
+    ports:
+      - 8082:8082

@@ -1,0 +1,78 @@
+import React from 'react';
+import { FormControl, InputLabel, Select, MenuItem, TextField, Button } from '@mui/material';
+
+interface ControlledCopyFilters {
+  codigo?: string;
+  titulo?: string;
+  idProcesso?: number;
+}
+
+interface ControlledCopyFilterSectionProps {
+  filters: ControlledCopyFilters;
+  processes: any[];
+  onFilterChange: (filters: ControlledCopyFilters) => void;
+  onClearFilters: () => void;
+}
+
+const ControlledCopyFilterSection: React.FC<ControlledCopyFilterSectionProps> = ({
+  filters,
+  processes,
+  onFilterChange,
+  onClearFilters,
+}) => {
+  const handleFilterChange = (field: keyof ControlledCopyFilters, value: any) => {
+    onFilterChange({ ...filters, [field]: value });
+  };
+
+  const clearAllFilters = () => {
+    onClearFilters();
+  };
+
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
+      <TextField
+        label="Código"
+        value={filters.codigo || ''}
+        onChange={e => handleFilterChange('codigo', e.target.value || undefined)}
+        sx={{ minWidth: 120 }}
+        className="me-2"
+      />
+
+      <TextField
+        label="Título"
+        value={filters.titulo || ''}
+        onChange={e => handleFilterChange('titulo', e.target.value || undefined)}
+        sx={{ minWidth: 200 }}
+        className="me-2"
+      />
+
+      <FormControl className="me-2" sx={{ minWidth: 150 }}>
+        <InputLabel>Área/Processo</InputLabel>
+        <Select
+          value={filters.idProcesso || ''}
+          onChange={e => handleFilterChange('idProcesso', e.target.value ? parseInt(e.target.value.toString()) : undefined)}
+          label="Área/Processo"
+        >
+          <MenuItem value="">Todos</MenuItem>
+          {processes?.map((process, index) => (
+            <MenuItem key={index} value={process.id}>
+              {process.nome}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Button
+        variant="contained"
+        className="secondary-button me-2 rnc-list-form-field"
+        style={{ height: '49px', width: '60px', marginLeft: '7px' }}
+        onClick={clearAllFilters}
+        title="Limpar"
+      >
+        Limpar
+      </Button>
+    </div>
+  );
+};
+
+export default ControlledCopyFilterSection;
