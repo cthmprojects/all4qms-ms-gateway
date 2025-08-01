@@ -1,7 +1,0 @@
-# Cloudflare Tunnel service configuration
-services:
-  tunnel:
-    container_name: cloudflared-tunnel
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run --token eyJhIjoiMWI0NWU0MDk3OWM3YmQ5MDc1YjNkOGU0ZDgyMWExZTEiLCJ0IjoiMTI0MzM0MzItOGUyOC00YjdhLTg5ZTEtODdiNGI5OWU1NGNiIiwicyI6Ik9UZG1OVEF5TTJJdE5HSmhaaTAwWW1JeUxXRmtaR1l0TlRSa1lqRXpOR0V6WVdNeSJ9
