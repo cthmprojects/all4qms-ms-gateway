@@ -37,10 +37,6 @@ services:
       service: auditplan
     env_file:
       - ./.env
-  tunnel:
-    extends:
-      file: ./services/tunnel.yml
-      service: tunnel
 networks:
   default:
     name: all4qms
