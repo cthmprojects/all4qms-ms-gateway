@@ -568,10 +568,10 @@ const InfodocList = () => {
   const openViewDocument = async (id: number, waterMarkRequest?: WaterMarkRequest) => {
     if (!id) return;
 
-    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+    const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}/original`;
 
     try {
-      const response = await axios.post(downloadUrl, waterMarkRequest || {}, {
+      const response = await axios.get(downloadUrl, {
         responseType: 'blob',
       });
 
@@ -792,14 +792,18 @@ const InfodocList = () => {
   const canAccessSolicitacaoValidacao = hasAnyAuthority(account.authorities, [
     AUTHORITIES.ADMIN,
     AUTHORITIES.SGQ,
-    'ROLE_EMISSOR',
-    'ROLE_APROVADOR',
+    AUTHORITIES.EMISSOR,
+    AUTHORITIES.APROVADOR,
   ]);
-  const canAccessAprovacao = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_APROVADOR']);
-  const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR']);
+  const canAccessAprovacao = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, AUTHORITIES.APROVADOR]);
+  const canAccessNewRegister = hasAnyAuthority(account.authorities, [
+    AUTHORITIES.ADMIN,
+    AUTHORITIES.SGQ,
+    AUTHORITIES.EMISSOR,
+    AUTHORITIES.APROVADOR,
+  ]);
 
   return (
-    // ////////////////////////////////////
     <div className="padding-container">
       <div className="container-style">
         <UploadInfoFileUpdate open={uploadFileUpdate} handleClose={handleCloseUpdateModal} id={idDocUpdating} />

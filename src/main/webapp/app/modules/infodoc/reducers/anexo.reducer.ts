@@ -6,8 +6,8 @@ import { Doc, DocAttachment, DocumentacaoRequest, InfoDoc, UploadAnexo } from '.
 const apiAttachmentUrl = 'services/all4qmsmsinfodoc/api/infodoc/anexos';
 const apiAttachmentDownloadUrl = 'services/all4qmsmsinfodoc/api/infodoc/anexos/download/';
 // const apiInputDocIA = 'https://api-llm-all4qms.cthmprojetos.com/api/inputDoc';
-const apiInputDocIA = '/external-api/api/inputDoc';
-const apiGetLLMResultIA = '/external-api/api/getLLMResult';
+const apiInputDocIA = 'services/all4qmsmsinfodoc/api/llm/process-document';
+const apiGetLLMResultIA = 'services/all4qmsmsinfodoc/api/llm/status';
 
 // Initial State
 const initialState: EntityState<DocAttachment> = {
@@ -65,10 +65,10 @@ export interface Iquery {
 export const getResumeIaByToken = createAsyncThunk('anexos/get', async (params: Iquery) => {
   let _query = '';
 
-  if (params?.token) _query = `token=${params?.token}`;
-  else _query = `filename=${params?.nameFile}`;
+  if (params?.token) _query = `/${params?.token}`;
+  else _query = `/${params?.nameFile}`;
 
-  const url = `${apiGetLLMResultIA}?${_query}`;
+  const url = `${apiGetLLMResultIA}${_query}`;
   return axios.get<DocAttachment>(url);
 });
 

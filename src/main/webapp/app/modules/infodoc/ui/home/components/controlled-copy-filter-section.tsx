@@ -29,7 +29,7 @@ const ControlledCopyFilterSection: React.FC<ControlledCopyFilterSectionProps> = 
   };
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%', marginTop: '1.5rem', marginBottom: '1.5rem' }}>
       <TextField
         label="Código"
         value={filters.codigo || ''}

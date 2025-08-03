@@ -92,14 +92,14 @@ export const ApprovalDocument = () => {
   const navigate = useNavigate();
   const { id, idFile } = useParams();
 
-  const [emitter, setEmitter] = useState<number | undefined>(undefined);
+  const [emitter, setEmitter] = useState<string>('');
   const [emittedDate, setEmittedDate] = useState(new Date());
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
   const [origin, setOrigin] = useState('externa');
   const [processes, setProcesses] = useState<Process[]>([]);
-  const [selectedProcess, setSelectedProcess] = useState<number | undefined>(undefined);
+  const [selectedProcess, setSelectedProcess] = useState<string>('');
   const [noValidate, setNoValidate] = useState(false);
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
@@ -165,7 +165,7 @@ export const ApprovalDocument = () => {
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (actualInfoDoc) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc?.idArquivo}`;
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc?.idArquivo}/original`;
 
       await axios
         .request({
@@ -193,7 +193,7 @@ export const ApprovalDocument = () => {
     navigate('/infodoc');
   };
 
-  const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
+  const users = useAppSelector(state => state.all4qmsmsgateway.usuario.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
   const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
@@ -210,21 +210,29 @@ export const ApprovalDocument = () => {
       getMoviment();
 
       setCode(actualInfoDoc.doc?.codigo!!);
-      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao!!);
+      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao?.toString() || '');
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
       setDescription(actualInfoDoc.doc?.descricaoDoc!!);
       setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
       setTitle(actualInfoDoc.doc?.titulo!!);
       setOrigin(actualInfoDoc.doc?.origem!!);
-      setSelectedProcess(actualInfoDoc.doc?.idProcesso!!);
 
-      if (actualInfoDoc.doc?.dataValidade) {
-        setNoValidate(false);
-        setValidDate(new Date(actualInfoDoc.doc.dataValidade));
-      } else {
+      // Definir selectedProcess apenas se o processo existir na lista
+      const docProcessId = actualInfoDoc.doc?.idProcesso?.toString();
+      if (docProcessId && processes.some(process => process.id.toString() === docProcessId)) {
+        setSelectedProcess(docProcessId);
+      } else if (processes.length > 0) {
+        // Se o processo do documento não existir na lista, usar o primeiro disponível
+        setSelectedProcess(processes[0].id.toString());
+      }
+
+      if (actualInfoDoc.doc?.ignorarValidade) {
         setNoValidate(true);
         setValidDate(new Date(2999, 11, 31));
         setNotificationPreviousDate('0');
+      } else {
+        setNoValidate(false);
+        setValidDate(actualInfoDoc.doc?.dataValidade ? new Date(actualInfoDoc.doc.dataValidade) : new Date());
       }
     }
 
@@ -378,7 +386,7 @@ export const ApprovalDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(Number(event.target.value) || undefined)}>
+              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -464,11 +472,7 @@ export const ApprovalDocument = () => {
             <Grid item xs={2}>
               <FormControl style={{ width: '100%' }} disabled>
                 <InputLabel>Área / Processo</InputLabel>
-                <Select
-                  label="Área / Processo"
-                  value={selectedProcess}
-                  onChange={event => setSelectedProcess(Number(event.target.value) || undefined)}
-                >
+                <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
                   {processes.map((process: any, i) => (
                     <MenuItem value={process.id} key={`process-${i}`}>
                       {process.nome}

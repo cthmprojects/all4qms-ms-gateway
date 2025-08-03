@@ -120,14 +120,13 @@ export const DetailDocument = () => {
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (actualInfoDoc) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc?.idArquivo}`;
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${actualInfoDoc.doc?.idArquivo}/original`;
 
       try {
         const result = await axios.request({
           responseType: 'arraybuffer',
           url: downloadUrl,
-          method: 'post',
-          data: {},
+          method: 'get',
           headers: {
             'Content-Type': 'application/octet-stream',
           },
