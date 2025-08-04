@@ -34,7 +34,7 @@ const DistributionFilterSection: React.FC<DistributionFilterSectionProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%', marginTop: '1.5rem', marginBottom: '1.5rem' }}>
       <FormControl className="me-2" sx={{ minWidth: 150 }}>
         <InputLabel>Tipo Controle</InputLabel>
         <Select

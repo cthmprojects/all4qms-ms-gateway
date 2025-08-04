@@ -40,6 +40,7 @@ import { IUsuario } from '../../../shared/model/usuario.model';
 import UploadInfoFile from '../ui/dialogs/upload-dialog/upload-files';
 import { getResumeIaByToken, getTokenResumeIA } from '../reducers/anexo.reducer';
 import { TabIdentifier } from '../ui/home/tab-identifier';
+import ResumoIA from '../components/resumo-ia/resumo-ia.component';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -71,9 +72,15 @@ const DocumentDescription = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicE
 });
 
 const getProcesses = async () => {
-  const apiUrl = 'services/all4qmsmsgateway/api/processos';
-  const response = await axios.get(`${apiUrl}`);
-  return response.data;
+  try {
+    const apiUrl = 'services/all4qmsmsgateway/api/processos';
+    const response = await axios.get(`${apiUrl}`);
+    console.log('Processos carregados:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao carregar processos:', error);
+    return [];
+  }
 };
 
 const getDocById = async (id: any) => {
@@ -81,10 +88,6 @@ const getDocById = async (id: any) => {
   return data;
 };
 
-type resIAType = {
-  Status: number;
-  LLMResponse: string;
-};
 export const ValidationDocument = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -92,6 +95,7 @@ export const ValidationDocument = () => {
 
   const [emitter, setEmitter] = useState('');
   const [emittedDate, setEmittedDate] = useState(new Date());
+  const [showResumoIA, setShowResumoIA] = useState(false);
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
@@ -106,12 +110,10 @@ export const ValidationDocument = () => {
   const [idNewFile, setIdNewFile] = useState<number>(-1);
   const [idOldFile, setIdOldFile] = useState<number>(-1);
   const [fileUploaded, SetFile] = useState<File>();
-  const [timerGetIA, SetTimerGetIA] = useState<any>();
-  const [countTryGetIA, setCountTryGetIA] = useState<number>(0);
 
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
   const [keyword, setKeyword] = useState<string>('');
-  const [loadingIA, setLoadingIA] = useState<boolean>(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [openUploadFile, setOpenUploadFile] = useState(false);
@@ -125,9 +127,7 @@ export const ValidationDocument = () => {
     dispatch(getInfoDocById(id!!));
     getProcesses().then(data => {
       setProcesses(data);
-      if (data.length > 0) {
-        setSelectedProcess(data[0].id);
-      }
+      // Não definir selectedProcess aqui, deixar para quando o documento carregar
     });
 
     const roles = Storage.local.get('ROLE');
@@ -149,6 +149,10 @@ export const ValidationDocument = () => {
     setKeyword('');
   };
 
+  const handleDescricaoChange = (novaDescricao: string) => {
+    setDescription(novaDescricao);
+  };
+
   const onNoValidateChanged = () => {
     if (noValidate) {
       setNoValidate(false);
@@ -168,81 +172,10 @@ export const ValidationDocument = () => {
     return emitter && emittedDate && documentDescription && code && title && selectedProcess;
   };
 
-  const consultResumeIA = async tokenResumeIA => {
-    if (!tokenResumeIA || countTryGetIA > 10) {
-      clearInterval(timerGetIA);
-      setDocumentDescription('Servidor de IA fora do ar. Tente novamente mais tarde.');
-      console.error('Erro ao carrecar IA resume, token undefined: ', tokenResumeIA);
-      setLoadingIA(false);
-      return;
-    }
-
-    const resResume = await dispatch(getResumeIaByToken({ token: tokenResumeIA }));
-    const resumeIA: resIAType = (resResume.payload as AxiosResponse).data;
-
-    // PROCESSING = 1,
-    // PENDING = 2,
-    // DONE = 3,
-    // FAILED = 4,
-    // DO_NOT_EXISTS = 5,
-    // TOKEN_AND_FILENAME_MISSING = 6
-
-    switch (resumeIA.Status) {
-      case 1:
-        setCountTryGetIA(countTryGetIA + 1);
-        return;
-      case 2:
-        setCountTryGetIA(countTryGetIA + 1);
-        return;
-      case 3:
-        clearInterval(timerGetIA);
-        setDocumentDescription(resumeIA.LLMResponse);
-        setLoadingIA(false);
-        break;
-      case 4:
-        clearInterval(timerGetIA);
-        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
-        console.error('Erro ao carrecar IA resume: ', resumeIA.LLMResponse);
-        setLoadingIA(false);
-        break;
-      case 5:
-        clearInterval(timerGetIA);
-        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
-        console.error('Erro ao carrecar IA resume: ', resumeIA.LLMResponse);
-        setLoadingIA(false);
-        break;
-      default:
-        clearInterval(timerGetIA);
-        setDocumentDescription('Não foi possível carregar o documento automaticamente. Tente novamente mais tarde.');
-        setLoadingIA(false);
-        return;
-    }
-    // setLoadingIA(false);
-    // console.log('resumeIA: ', tokenResumeIA);
-  };
-  const handleGetResume = async () => {
-    try {
-      if (!fileUploaded) {
-        toast.warn('Não foi encontrado nem um documento revisado anexado, anexe-o antes e tente novamente.');
-      }
-      setLoadingIA(true);
-      const resToken = await dispatch(getTokenResumeIA(fileUploaded));
-      const tokenResumeIA = (resToken.payload as AxiosResponse).data;
-
-      setDocumentDescription('Resumo da descrição do documento anexado, sendo gerado automaticamente, aguarde...');
-      const _timerGetIA = setInterval(() => consultResumeIA(tokenResumeIA), 5000);
-      SetTimerGetIA(_timerGetIA);
-    } catch (err) {
-      console.error('Error handleGetResume: ', err);
-      clearInterval(timerGetIA);
-      setLoadingIA(false);
-    }
-  };
-
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
     if (actualInfoDoc) {
       const idFile = idOldFile > 0 ? idOldFile : actualInfoDoc.doc?.idArquivo;
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${idFile}`;
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${idFile}/original`;
 
       await axios
         .request({
@@ -322,7 +255,10 @@ export const ValidationDocument = () => {
   const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
 
   useEffect(() => {
-    if (actualInfoDoc) {
+    if (actualInfoDoc && processes.length > 0) {
+      console.log('Carregando dados do documento:', actualInfoDoc);
+      console.log('Processos disponíveis:', processes);
+
       setCode(actualInfoDoc.doc?.codigo!!);
       setEmitter(actualInfoDoc.doc?.idUsuarioCriacao?.toString()!!);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
@@ -330,7 +266,19 @@ export const ValidationDocument = () => {
       setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
       setTitle(actualInfoDoc.doc?.titulo!!);
       setOrigin(actualInfoDoc.doc?.origem!!);
-      setSelectedProcess(actualInfoDoc.doc?.idProcesso?.toString()!!);
+
+      // Definir selectedProcess apenas se o processo existir na lista
+      const docProcessId = actualInfoDoc.doc?.idProcesso?.toString();
+      console.log('ID do processo do documento:', docProcessId);
+
+      if (docProcessId && processes.some(process => process.id.toString() === docProcessId)) {
+        console.log('Processo encontrado na lista, definindo selectedProcess:', docProcessId);
+        setSelectedProcess(docProcessId);
+      } else if (processes.length > 0) {
+        // Se o processo do documento não existir na lista, usar o primeiro disponível
+        console.log('Processo não encontrado, usando primeiro da lista:', processes[0].id);
+        setSelectedProcess(processes[0].id.toString());
+      }
 
       if (!actualInfoDoc.doc?.ignorarValidade) {
         setNoValidate(false);
@@ -345,7 +293,7 @@ export const ValidationDocument = () => {
       //   setIdNewFile(actualInfoDoc.doc.idArquivo!!);
       // }
     }
-  }, [actualInfoDoc]);
+  }, [actualInfoDoc, processes]);
 
   const approveDocument = async () => {
     setIsLoading(true);
@@ -601,15 +549,6 @@ export const ValidationDocument = () => {
                 <MenuItem value="60d">60 dias antes</MenuItem>
               </Select>
             </FormControl>
-            <LoadingButton
-              variant="outlined"
-              size="large"
-              loading={loadingIA}
-              sx={{ backgroundColor: '#0EBDCE', color: '#000', height: '60px' }}
-              onClick={() => handleGetResume()}
-            >
-              Gerar Resumo IA documento
-            </LoadingButton>
           </Box>
           <Textarea
             className="w-100"
@@ -622,24 +561,18 @@ export const ValidationDocument = () => {
             onChange={e => setDocumentDescription(e.target.value)}
           />
 
-          {/* <div className="mt-4">
-            <TextField
-              id="text-field-keyword"
-              label="Escreva aqui..."
-              style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
-              onChange={onKeywordChanged}
-              value={keyword}
-              disabled={!isSGQ}
+          {/* Componente Resumo IA */}
+          <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#f8f9fa' }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, color: '#666' }}>
+              🤖 <strong>Resumo IA</strong> - Processamento assíncrono que não bloqueia sua tela
+            </Typography>
+            <ResumoIA
+              idDocumento={parseInt(id)}
+              idAnexo={idNewFile > 0 ? idNewFile : actualInfoDoc?.doc?.idArquivo || parseInt(idFile)}
+              descricaoAtual={documentDescription}
+              onDescricaoChange={handleDescricaoChange}
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled={!isSGQ}>
-              <AddCircle fontSize="large" />
-            </IconButton>
-          </div>
-          <div className="p-2 mt-3" style={{ width: '100%', border: '1px solid #c6c6c6', borderRadius: '4px', minHeight: '100px' }}>
-            {keywordList.map((keyword: string, index: number) => (
-              <Chip label={keyword} onDelete={event => onKeywordRemoved(event, index)} className="me-2" />
-            ))}
-          </div> */}
+          </Box>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
             <Button

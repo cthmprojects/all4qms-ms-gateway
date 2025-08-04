@@ -1,10 +1,8 @@
-import React from 'react';
 import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import DatePicker from 'react-datepicker';
-import { Process } from 'app/modules/rnc/models';
 import { useAppSelector } from 'app/config/store';
-import { hasAnyAuthority } from 'app/shared/auth/private-route';
-import { AUTHORITIES } from 'app/config/constants';
+import { Process } from 'app/modules/rnc/models';
+import React from 'react';
+import DatePicker from 'react-datepicker';
 
 interface FilterSectionProps {
   filters: {
@@ -22,32 +20,9 @@ interface FilterSectionProps {
   showNewRegisterButton?: boolean;
 }
 
-const FilterSection: React.FC<FilterSectionProps> = ({
-  filters,
-  processes,
-  onFilterChange,
-  onClearFilters,
-  onNewRegister,
-  showNewRegisterButton = true,
-}) => {
-  const account = useAppSelector(state => state.authentication.account);
-  const canAccessNewRegister = hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ, 'ROLE_EMISSOR', 'ROLE_APROVADOR']);
-
+const FilterSection: React.FC<FilterSectionProps> = ({ filters, processes, onFilterChange, onClearFilters }) => {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
-      {showNewRegisterButton && (
-        <Button
-          variant="contained"
-          className={`${!canAccessNewRegister ? 'secondary-button' : 'primary-button'} me-2 infodoc-list-form-field`}
-          style={{ marginRight: '10px', height: '58px' }}
-          onClick={onNewRegister}
-          title="Novo Registro"
-          disabled={!canAccessNewRegister}
-        >
-          Novo Registro
-        </Button>
-      )}
-
       <FormControl className="me-2">
         <DatePicker
           selected={filters.dtIni}

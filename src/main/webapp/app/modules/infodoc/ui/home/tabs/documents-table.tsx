@@ -51,6 +51,15 @@ function displayedRowsLabel({ from, to, count }) {
   return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
 }
 
+// Função para filtrar colunas baseado na tab atual
+const getFilteredColumns = (currentTab: TabIdentifier) => {
+  // Ocultar coluna "Ações" nas tabs SOLICITACAO_VALIDACAO e APROVACAO
+  if (currentTab === TabIdentifier.SOLICITACAO_VALIDACAO || currentTab === TabIdentifier.APROVACAO) {
+    return columns.filter(column => column !== 'Ações');
+  }
+  return columns;
+};
+
 const DocumentsTable: React.FC<DocumentsTableProps> = ({
   documents,
   page,
@@ -254,6 +263,104 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     );
   };
 
+  // Função para renderizar as células baseado nas colunas filtradas
+  const renderTableCells = (doc: InfoDoc) => {
+    const filteredColumns = getFilteredColumns(currentTab);
+    const cells = [];
+
+    // Código
+    if (filteredColumns.includes('Código')) {
+      cells.push(
+        <Tooltip key="codigo" title={doc.doc.descricaoDoc}>
+          <TableCell>{doc.doc.codigo}</TableCell>
+        </Tooltip>
+      );
+    }
+
+    // Título
+    if (filteredColumns.includes('Título')) {
+      cells.push(
+        <TableCell key="titulo" onClick={event => openDocToValidation(event, doc)}>
+          {doc.doc.titulo}
+        </TableCell>
+      );
+    }
+
+    // Emissor
+    if (filteredColumns.includes('Emissor')) {
+      cells.push(
+        <TableCell key="emissor" onClick={event => openDocToValidation(event, doc)}>
+          {filterUser(doc.doc.idUsuarioCriacao)}
+        </TableCell>
+      );
+    }
+
+    // Revisão
+    if (filteredColumns.includes('Revisão')) {
+      cells.push(
+        <TableCell key="revisao" onClick={event => openDocToValidation(event, doc)}>
+          {doc.doc.revisao ?? 0}
+        </TableCell>
+      );
+    }
+
+    // Data
+    if (filteredColumns.includes('Data')) {
+      cells.push(
+        <TableCell key="data" onClick={event => openDocToValidation(event, doc)}>
+          {doc.doc.dataCricao ? formatDateToString(new Date(doc.doc.dataCricao)) : '-'}
+        </TableCell>
+      );
+    }
+
+    // Área/Processo
+    if (filteredColumns.includes('Área/Processo')) {
+      cells.push(
+        <TableCell key="processo" onClick={event => openDocToValidation(event, doc)}>
+          {filterProcessName(doc.doc.idProcesso)}
+        </TableCell>
+      );
+    }
+
+    // Origem
+    if (filteredColumns.includes('Origem')) {
+      cells.push(
+        <TableCell key="origem" onClick={event => openDocToValidation(event, doc)}>
+          {filterOrigin(doc.doc.origem)}
+        </TableCell>
+      );
+    }
+
+    // Situação
+    if (filteredColumns.includes('Situação')) {
+      cells.push(
+        <TableCell key="situacao" onClick={event => openDocToValidation(event, doc)}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(doc.doc.enumSituacao)}</Box>
+        </TableCell>
+      );
+    }
+
+    // Status
+    if (filteredColumns.includes('Status')) {
+      cells.push(
+        <TableCell key="status" onClick={event => openDocToValidation(event, doc)}>
+          {getStatusText(doc.movimentacao?.enumStatus) || '-'}
+        </TableCell>
+      );
+    }
+
+    // Ações (só renderiza se a coluna não estiver oculta)
+    if (filteredColumns.includes('Ações')) {
+      cells.push(
+        <TableCell key="acoes" sx={{ display: 'flex', justifyContent: 'center' }}>
+          {renderActions(doc)}
+        </TableCell>
+      );
+    }
+
+    return cells;
+  };
+
   if (!documents?.length) {
     return (
       <>
@@ -284,8 +391,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         <Table sx={{ width: '100%' }}>
           <TableHead>
             <TableRow>
-              {columns.map((column, index) => (
-                <TableCell key={index} align={index !== columns.length - 1 ? 'left' : 'center'}>
+              {getFilteredColumns(currentTab).map((column, index) => (
+                <TableCell key={index} align={index !== getFilteredColumns(currentTab).length - 1 ? 'left' : 'center'}>
                   {column}
                 </TableCell>
               ))}
@@ -296,24 +403,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
               ?.filter((doc: InfoDoc) => doc.doc.idUsuarioCriacao === userQMSId || isSGQ)
               ?.map((doc: InfoDoc) => (
                 <TableRow key={doc.doc.id} style={{ cursor: doc.doc.enumSituacao !== 'H' ? 'pointer' : 'auto' }}>
-                  <Tooltip title={doc.doc.descricaoDoc}>
-                    <TableCell>{doc.doc.codigo}</TableCell>
-                  </Tooltip>
-                  <TableCell onClick={event => openDocToValidation(event, doc)}>{doc.doc.titulo}</TableCell>
-                  <TableCell onClick={event => openDocToValidation(event, doc)}>{filterUser(doc.doc.idUsuarioCriacao)}</TableCell>
-                  <TableCell onClick={event => openDocToValidation(event, doc)}>{doc.doc.revisao ?? 0}</TableCell>
-                  <TableCell onClick={event => openDocToValidation(event, doc)}>
-                    {doc.doc.dataCricao ? formatDateToString(new Date(doc.doc.dataCricao)) : '-'}
-                  </TableCell>
-                  <TableCell onClick={event => openDocToValidation(event, doc)}>{filterProcessName(doc.doc.idProcesso)}</TableCell>
-                  <TableCell onClick={event => openDocToValidation(event, doc)}>{filterOrigin(doc.doc.origem)}</TableCell>
-                  <TableCell onClick={event => openDocToValidation(event, doc)}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{getSituacaoIcon(doc.doc.enumSituacao)}</Box>
-                  </TableCell>
-                  <TableCell onClick={event => openDocToValidation(event, doc)}>
-                    {getStatusText(doc.movimentacao?.enumStatus) || '-'}
-                  </TableCell>
-                  <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>{renderActions(doc)}</TableCell>
+                  {renderTableCells(doc)}
                 </TableRow>
               ))}
           </TableBody>

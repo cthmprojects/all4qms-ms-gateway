@@ -152,7 +152,7 @@ export const NewDocument = () => {
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
     setIsLoading(true);
     if (id) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}`;
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}/original`;
 
       await axios
         .request({
