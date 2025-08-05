@@ -18,6 +18,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import InfoIcon from '@mui/icons-material/Info';
+import HistoryIcon from '@mui/icons-material/History';
 import { Row } from 'reactstrap';
 import { InfoDoc, EnumStatusDoc } from '../../../models';
 import { formatDateToString } from '../infodoc-list.utils';
@@ -176,6 +177,14 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     });
   };
 
+  const handleHistoryClick = (doc: InfoDoc) => {
+    navigate(`/infodoc/history/${doc.doc.codigo}`, {
+      state: {
+        from: currentTab,
+      },
+    });
+  };
+
   const renderActions = (doc: InfoDoc) => {
     // Tabs: CANCELADO, OBSOLETO, HOMOLOGADOS
     if (currentTab === TabIdentifier.CANCELADO || currentTab === TabIdentifier.OBSOLETO) {
@@ -197,6 +206,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         <>
           <IconButton title="Detalhes" color="primary" onClick={() => handleDetailsClick(doc)}>
             <InfoIcon sx={{ color: '#0EBDCE' }} />
+          </IconButton>
+          <IconButton title="Histórico" color="primary" onClick={() => handleHistoryClick(doc)}>
+            <HistoryIcon sx={{ color: '#0EBDCE' }} />
           </IconButton>
           <IconButton title="Revisar" color="primary" disabled={!isSGQ} onClick={() => onEditClick(doc)}>
             <EditIcon sx={{ color: !isSGQ ? '#cacaca' : '#e6b200' }} />

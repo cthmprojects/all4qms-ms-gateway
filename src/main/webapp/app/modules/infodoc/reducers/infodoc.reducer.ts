@@ -148,6 +148,11 @@ export const getInfoDocById = createAsyncThunk('docs/get', async (id: number | s
   return newResponse;
 });
 
+export const getDocumentRevisions = createAsyncThunk('docs/revisions', async (codigo: string) => {
+  const { data } = await axios.get<InfoDoc[]>(`${apiDocumentacaoUrl}/revisoes/${codigo}`);
+  return data;
+});
+
 export interface cancelDocParams {
   id: number;
   userLoginID: number;
@@ -254,6 +259,16 @@ const InfoDocSlice = createEntitySlice({
           ...state,
           loading: false,
           entity: action.payload,
+        };
+      })
+      .addMatcher(isPending(getDocumentRevisions), (state, action) => {
+        state.loading = true;
+      })
+      .addMatcher(isFulfilled(getDocumentRevisions), (state, action) => {
+        return {
+          ...state,
+          loading: false,
+          entities: action.payload,
         };
       });
   },
