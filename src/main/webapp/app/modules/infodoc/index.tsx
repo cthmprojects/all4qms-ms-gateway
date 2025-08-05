@@ -15,6 +15,7 @@ import ValidationDocument from './validation-infodoc/validation-document';
 import ApprovalDocument from './ui/approval-infodoc/approval-infodoc';
 import DetailDocument from './ui/detail-infodoc/detail-document';
 import ComproveRecebimento from './ui/distribuitions/comprove-recebimento';
+import DocumentHistory from './ui/detail-infodoc/document-history';
 
 const InfodocRoutes = () => {
   const store = getStore();
@@ -29,6 +30,7 @@ const InfodocRoutes = () => {
         <Route path="validation/:id" element={<ValidationDocument />} />
         <Route path="approval/:id" element={<ApprovalDocument />} />
         <Route path="details/:id" element={<DetailDocument />} />
+        <Route path="history/:codigo" element={<DocumentHistory />} />
         <Route path="receive/:id" element={<ComproveRecebimento />} />
       </ErrorBoundaryRoutes>
     </div>
