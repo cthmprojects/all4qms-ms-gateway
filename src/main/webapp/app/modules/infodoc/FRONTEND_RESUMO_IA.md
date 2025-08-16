@@ -103,7 +103,7 @@ const handleDescricaoChange = (novaDescricao: string) => {
 
 ### 3. **Acompanhamento de Status**
 
-- Polling a cada 5 segundos
+- Polling a cada 30 segundos (30000ms)
 - Atualização visual do status em tempo real
 - Notificações toast para mudanças de status
 - Parada automática quando concluído
@@ -165,7 +165,7 @@ const handleDescricaoChange = (novaDescricao: string) => {
 
 ### 1. **Polling Inteligente**
 
-- Verificação automática a cada 5 segundos
+- Verificação automática a cada 30 segundos (30000ms)
 - Parada quando status é DONE ou ERROR
 - Limpeza automática de intervalos
 - Tratamento de erros de rede

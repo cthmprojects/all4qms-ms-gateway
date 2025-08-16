@@ -156,7 +156,7 @@ const ResumoIA: React.FC<ResumoIAProps> = ({ idDocumento, idAnexo, descricaoAtua
       } catch (error) {
         console.error('Erro no polling:', error);
       }
-    }, 5000); // Verificar a cada 5 segundos
+    }, 30000);
 
     setPollingInterval(interval);
   };
