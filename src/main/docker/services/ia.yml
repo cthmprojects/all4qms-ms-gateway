@@ -1,0 +1,10 @@
+# IA service configuration
+services:
+  ia:
+    image: all4qms-ms-ia
+    environment:
+      - _JAVA_OPTIONS=${_JAVA_OPTIONS}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+    ports:
+      - 27000:8000
+    entrypoint: uvicorn main:app --host 0.0.0.0

@@ -37,6 +37,18 @@ services:
       service: auditplan
     env_file:
       - ./.env
+  llmqms:
+    extends:
+      file: ./services/llmqms.yml
+      service: llmqms
+    env_file:
+      - ./.env
+  ia:
+    extends:
+      file: ./services/ia.yml
+      service: ia
+    env_file:
+      - ./.env
 networks:
   default:
     name: all4qms
