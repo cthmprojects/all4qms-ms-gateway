@@ -16,6 +16,7 @@ services:
       - QMS_REGISTRY_HOST=${QMS_REGISTRY_HOST}
       - QMS_REGISTRY_PROTOCOLO=${QMS_REGISTRY_PROTOCOLO}
       - IA_HOST=${IA_HOST}
+      - LLM-HOST=${LLM-HOST:-https://all4qms-llm.vdeveloper.com.br}
       - INTERVALO_CONSULTA_RESUMO=${INTERVALO_CONSULTA_RESUMO:-60000}
     ports:
       - 8083:8083

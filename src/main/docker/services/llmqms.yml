@@ -1,0 +1,11 @@
+# LLMQMS service configuration
+services:
+  llmqms:
+    image: llmqms
+    volumes:
+      - ${LLM_DATA_PATH:-./data/llm}:/app/data/
+    environment:
+      - LLM_MODEL_FILE_GGUF=${LLM_MODEL_FILE_GGUF:-/app/data/DeepSeek-R1-Distill-Llama-8B-Q4_K_M.gguf}
+      - DB_PATH=${LLM_DB_PATH:-/app/data/llmdb.db}
+    ports:
+      - 8889:5216

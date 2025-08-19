@@ -14,6 +14,8 @@ src/main/docker/
     ├── risco.yml
     ├── metaind.yml
     ├── auditplan.yml
+    ├── llmqms.yml
+    ├── ia.yml
     └── tunnel.yml
 ```
 
@@ -36,6 +38,7 @@ Edite o arquivo `.env` conforme necessário:
 QMS_REGISTRY_HOST=meu-registry.exemplo.com
 GATEWAY_URL=https://meu-gateway.exemplo.com
 IA_HOST=https://meu-ia.exemplo.com
+LLM-HOST=https://meu-llm.exemplo.com
 ```
 
 ### **3. Variáveis Disponíveis**
@@ -72,9 +75,16 @@ IA_HOST=https://meu-ia.exemplo.com
 - `GATEWAY_HOST`: Host do gateway
 - `PROXY_PORT`: Porta do proxy (padrão: `3000`)
 
-#### **IA Service**
+#### **IA Service (via Cloudflare)**
 
-- `IA_HOST`: URL do serviço de IA (padrão: `https://all4qms-ia.vdeveloper.com.br`)
+- `IA_HOST`: URL do serviço de IA via Cloudflare (padrão: `https://all4qms-ia.vdeveloper.com.br`)
+
+#### **LLM Service (via Cloudflare)**
+
+- `LLM-HOST`: URL do serviço LLM via Cloudflare (padrão: `https://all4qms-llm.vdeveloper.com.br`)
+- `LLM_DATA_PATH`: Caminho para dados do modelo LLM (padrão: `./data/llm`)
+- `LLM_MODEL_FILE_GGUF`: Arquivo do modelo LLM (padrão: `/app/data/DeepSeek-R1-Distill-Llama-8B-Q4_K_M.gguf`)
+- `LLM_DB_PATH`: Caminho do banco de dados LLM (padrão: `/app/data/llmdb.db`)
 
 #### **Server Communication**
 
@@ -89,6 +99,15 @@ IA_HOST=https://meu-ia.exemplo.com
 - `RISCO_SLEEP`: Tempo de espera do Risco (40s)
 - `METAIND_SLEEP`: Tempo de espera do Metaind (50s)
 - `AUDITPLAN_SLEEP`: Tempo de espera do Auditplan (60s)
+
+#### **Database Names**
+
+- `DB_GATEWAY`: all4qmsMsGateway
+- `DB_RNC`: all4qmsnsrnc
+- `DB_INFODOC`: all4qmsmsinfodoc
+- `DB_RISCO`: all4qmsmsrisco
+- `DB_METAIND`: all4qmsmsmetaind
+- `DB_AUDITPLAN`: all4qmsmsauditplan
 
 ## 🚀 Execução
 
@@ -108,7 +127,7 @@ docker-compose -f src/main/docker/app.yml up gateway
 docker-compose -f src/main/docker/app.yml up gateway rnc
 
 # Todos exceto tunnel
-docker-compose -f src/main/docker/app.yml up gateway rnc infodoc risco metaind auditplan
+docker-compose -f src/main/docker/app.yml up gateway rnc infodoc risco metaind auditplan llmqms ia
 ```
 
 ### **Execução com Variáveis Personalizadas**
@@ -122,6 +141,20 @@ export QMS_REGISTRY_HOST=meu-registry.com
 docker-compose -f src/main/docker/app.yml up -d
 ```
 
+## 🌐 Comunicação entre Serviços
+
+### **Comunicação via Cloudflare**
+
+Os serviços se comunicam através do Cloudflare usando URLs externas:
+
+- **IA Service**: `https://all4qms-ia.vdeveloper.com.br`
+- **LLM Service**: `https://all4qms-llm.vdeveloper.com.br`
+
+### **Mapeamento de Portas**
+
+- **LLM Service**: `8889:5216` (externo:interno)
+- **IA Service**: `27000:8000` (externo:interno)
+
 ## 📋 Benefícios
 
 1. **✅ Centralização**: Todas as variáveis em um local
@@ -130,6 +163,7 @@ docker-compose -f src/main/docker/app.yml up -d
 4. **✅ Reutilização**: Mesmas variáveis para todos os serviços
 5. **✅ Versionamento**: Controle de versão das configurações
 6. **✅ Segurança**: Arquivo .env pode ser ignorado no git
+7. **✅ Cloudflare**: Comunicação segura via HTTPS
 
 ## 🔒 Segurança
 
@@ -137,17 +171,25 @@ docker-compose -f src/main/docker/app.yml up -d
 - Use `env.example` como template
 - Nunca commite senhas ou tokens no repositório
 - Use variáveis de ambiente do sistema para dados sensíveis
+- Comunicação via Cloudflare com HTTPS
 
-## 🛠️ Troubleshooting
+## 🐛 Troubleshooting
 
-### **Problema**: Variáveis não são carregadas
+### **Problemas Comuns**
 
-**Solução**: Verifique se o arquivo `.env` existe na pasta `docker/`
+1. **Erro de comunicação com LLM/IA**
 
-### **Problema**: Serviços não conseguem se conectar
+   - Verificar se as URLs do Cloudflare estão acessíveis
+   - Confirmar se o túnel do Cloudflare está funcionando
+   - Verificar se as variáveis `LLM-HOST` e `IA_HOST` estão corretas
 
-**Solução**: Verifique as URLs no arquivo `.env`
+2. **Serviços não iniciam**
 
-### **Problema**: Banco de dados não encontrado
+   - Verificar se as imagens Docker foram construídas
+   - Confirmar se as variáveis de ambiente estão definidas
+   - Verificar logs dos containers
 
-**Solução**: Verifique os nomes dos bancos (`DB_*`) no `.env`
+3. **Problemas de rede**
+   - Confirmar se todos os serviços estão na rede `all4qms`
+   - Verificar se as portas não estão conflitando
+   - Testar conectividade entre containers
