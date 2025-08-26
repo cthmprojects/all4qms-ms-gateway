@@ -1,39 +1,33 @@
 /* eslint-disable no-console */
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import { Textarea, styled } from '@mui/joy';
 import {
-  Box,
   Breadcrumbs,
+  Button,
   Checkbox,
-  Chip,
   FormControl,
   FormControlLabel,
   Grid,
-  IconButton,
   InputLabel,
   MenuItem,
   Select,
   TextField,
   Typography,
-  Button,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Row } from 'reactstrap';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getUsers } from 'app/entities/usuario/reducers/usuario.reducer';
-import DatePicker from 'react-datepicker';
-import { Textarea, styled } from '@mui/joy';
 import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-register/styled-components';
-import { AddCircle, Download } from '@mui/icons-material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 import axios from 'axios';
-import { listEnums } from '../../reducers/enums.reducer';
-import { Doc, InfoDoc, Process, StatusEnum } from '../../models';
-import { getInfoDocById } from '../../reducers/infodoc.reducer';
+import fileDownload from 'js-file-download';
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
 import { Storage } from 'react-jhipster';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { UserQMS } from '../../../../entities/usuario/reducers/usuario.reducer';
-import fileDownload from 'js-file-download';
+import { InfoDoc, Process } from '../../models';
+import { listEnums } from '../../reducers/enums.reducer';
+import { getInfoDocById } from '../../reducers/infodoc.reducer';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -81,6 +75,7 @@ export const DetailDocument = () => {
   const [code, setCode] = useState('');
   const [title, setTitle] = useState('');
   const [origin, setOrigin] = useState('');
+  const [revisao, setRevisao] = useState('');
   const [processes, setProcesses] = useState<Process[]>([]);
   const [selectedProcess, setSelectedProcess] = useState<number | undefined>(undefined);
   const [noValidate, setNoValidate] = useState(false);
@@ -161,6 +156,7 @@ export const DetailDocument = () => {
       setCode(actualInfoDoc.doc.codigo);
       setTitle(actualInfoDoc.doc.titulo);
       setOrigin(actualInfoDoc.doc.origem);
+      setRevisao(actualInfoDoc.doc.revisao?.toString() || '0');
       setSelectedProcess(actualInfoDoc.doc.idProcesso);
       setNoValidate(actualInfoDoc.doc.ignorarValidade);
       setValidDate(actualInfoDoc.doc.ignorarValidade ? null : new Date(actualInfoDoc.doc.dataValidade));
@@ -199,15 +195,6 @@ export const DetailDocument = () => {
                 </Select>
               </FormControl>
 
-              <div style={{ display: 'flex', alignItems: 'center' }} className="ms-2">
-                <h3 className="p-0 m-0" style={{ fontSize: '15px' }}>
-                  Situação:
-                </h3>
-                <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  {actualInfoDoc?.doc?.revisao && actualInfoDoc?.doc?.revisao > 1 ? 'Revisão' : 'Edição'}
-                </h3>
-              </div>
-
               <FormControl className="ms-2 mt-4">
                 <DatePicker selected={emittedDate} onChange={() => {}} className="date-picker" dateFormat={'dd/MM/yyyy'} readOnly />
                 <label htmlFor="" className="rnc-date-label">
@@ -245,6 +232,9 @@ export const DetailDocument = () => {
                 disabled
                 onChange={() => {}}
               />
+            </Grid>
+            <Grid item xs={1}>
+              <TextField label="Revisão" name="number" autoComplete="off" value={revisao} disabled onChange={() => {}} />
             </Grid>
             <Grid item xs={2}>
               <FormControl style={{ width: '100%' }} disabled>

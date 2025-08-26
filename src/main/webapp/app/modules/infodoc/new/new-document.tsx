@@ -46,6 +46,8 @@ import { Storage } from 'react-jhipster';
 import { getUsersAsAdminSGQ } from '../../administration/user-management/user-management.reducer';
 import { getUsersByProcess } from '../../../entities/usuario/reducers/usuario.reducer';
 import { getUsersAsGQ } from '../../../entities/usuario/usuario.reducer';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { AUTHORITIES } from 'app/config/constants';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -175,7 +177,11 @@ export const NewDocument = () => {
           setIsLoading(false);
         });
     }
-    setIsLoading(false);
+  };
+
+  // Função para verificar se o usuário tem acesso ADMIN ou SGQ
+  const hasAdminOrSGQAccess = () => {
+    return hasAnyAuthority(currentUser.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]);
   };
 
   const cancelDocument = () => {
@@ -320,7 +326,7 @@ export const NewDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)}>
+              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)} disabled={!hasAdminOrSGQAccess()}>
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}

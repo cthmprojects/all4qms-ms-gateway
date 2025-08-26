@@ -30,12 +30,31 @@ const StyledLabel = styled('label')(({ theme }) => ({
   transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
 }));
 
+// Estilos para campos desabilitados
+const DisabledDatePicker = styled(DatePicker)(({ theme }) => ({
+  '&.disabled': {
+    '& input': {
+      color: '#666666 !important',
+      backgroundColor: '#f5f5f5 !important',
+    },
+  },
+}));
+
+const DisabledTextarea = styled(Textarea)(({ theme }) => ({
+  '&.disabled': {
+    '& textarea': {
+      color: '#666666 !important',
+      backgroundColor: '#f5f5f5 !important',
+    },
+  },
+}));
+
 const JustifyFalta = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicElements['textarea']>(function InnerTextarea(props, ref) {
   const id = React.useId();
   return (
     <React.Fragment>
       <StyledTextarea minRows={5} cols={30} {...props} ref={ref} id={id} />
-      <StyledLabel htmlFor={id}>Comentário de Entrega</StyledLabel>
+      <StyledLabel htmlFor={id}>Comentário de Recebimento</StyledLabel>
     </React.Fragment>
   );
 });
@@ -45,7 +64,7 @@ const justifyDevolution = React.forwardRef<HTMLTextAreaElement, JSX.IntrinsicEle
   return (
     <React.Fragment>
       <StyledTextarea minRows={5} cols={30} {...props} ref={ref} id={id} />
-      <StyledLabel htmlFor={id}>Comentário de Recebimento</StyledLabel>
+      <StyledLabel htmlFor={id}>Comentário de Recolhimento</StyledLabel>
     </React.Fragment>
   );
 });
@@ -66,6 +85,7 @@ export const ComproveRecebimento = () => {
   const isFromDistribution = state?.from === 'distribution';
   const isControlled = state?.isControlled;
   const account = useAppSelector(state => state.authentication.account);
+  const accountQms = useAppSelector(state => state.authentication.accountQms);
 
   const [idProcesso, setIdProcesso] = useState<number>(-1);
   const [idUsuarioEntrega, setIdUsuarioEntrega] = useState<number>(-1);
@@ -84,7 +104,6 @@ export const ComproveRecebimento = () => {
   const [isRecebido, setIsRecebido] = useState(false);
   const [isDevolvido, setIsDevolvido] = useState(false);
   const [processes, setProcesses] = useState([]);
-  const [currentUser, _] = useState(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const [usersSGQ, setUsersSGQ] = useState<UserQMS[]>([]);
   const [infoDocId, setInfoDocId] = useState(-1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -106,6 +125,21 @@ export const ComproveRecebimento = () => {
     });
   }, []);
 
+  // Efeito separado para definir o usuário logado automaticamente
+  useEffect(() => {
+    if (accountQms && accountQms.id) {
+      // Definir usuário logado como responsável APENAS se não há responsável definido
+      if (!distribuicao?.idUsuarioEntrega) {
+        setIdUsuarioEntrega(accountQms.id);
+      }
+
+      // Definir usuário logado como SGQ APENAS se não há SGQ definido
+      if (!distribuicao?.idUsuarioDevolucao) {
+        setIdUsuarioDevolucao(accountQms.id);
+      }
+    }
+  }, [accountQms, distribuicao]);
+
   const requestDoc = async () => {
     const resDoc = await dispatch(getInfoDocById(distribuicao.idDocumentacao));
     const infoDoc = resDoc.payload as InfoDoc;
@@ -116,7 +150,14 @@ export const ComproveRecebimento = () => {
   useEffect(() => {
     if (distribuition) {
       requestDoc();
-      setIdUsuarioEntrega(distribuicao.idUsuarioEntrega ?? -1);
+
+      // Usar o responsável existente ou o usuário logado se não houver
+      if (distribuition.idUsuarioEntrega) {
+        setIdUsuarioEntrega(distribuition.idUsuarioEntrega);
+      } else if (accountQms && accountQms.id) {
+        setIdUsuarioEntrega(accountQms.id);
+      }
+
       setIdProcesso(distribuicao.idProcesso ?? -1);
 
       setCodigo(distribuicao.codigo ?? '');
@@ -125,7 +166,16 @@ export const ComproveRecebimento = () => {
       setDataDevolucao(distribuition.dataDevolucao ? new Date(distribuition.dataDevolucao) : null);
       setComentarioEntrega(distribuition.comentarioEntrega ?? '');
       setComentarioDevolucao(distribuition.comentarioDevolucao ?? '');
-      setIdUsuarioDevolucao(distribuition.idUsuarioDevolucao ?? -1);
+
+      // SEMPRE usar o usuário logado como SGQ
+      console.log('Debug - distribuition.idUsuarioDevolucao:', distribuition.idUsuarioDevolucao);
+      console.log('Debug - accountQms.id:', accountQms?.id);
+
+      if (accountQms && accountQms.id) {
+        console.log('Debug - Usando usuário logado como SGQ:', accountQms.id);
+        setIdUsuarioDevolucao(accountQms.id);
+      }
+
       setIsRecebido(!!distribuition.idUsuarioEntrega);
       setIsDevolvido(!!distribuition.comentarioDevolucao?.trim());
       setIsJustify(!!distribuition.comentarioEntrega?.trim());
@@ -144,9 +194,30 @@ export const ComproveRecebimento = () => {
     const resUsersByProcess = await dispatch(getUsersByProcess(idProcess));
     const usersByProcess_ = (resUsersByProcess.payload as AxiosResponse).data || [];
 
+    console.log('Debug - users_ (SGQ):', users_);
+    console.log('Debug - usersByProcess_:', usersByProcess_);
+    console.log('Debug - accountQms:', accountQms);
+
     const filteredUserByProcess: UserQMS[] = usersByProcess_.filter((userPro: UserQMS) =>
       users_.some(firstUser => firstUser.id === userPro.user.id)
     );
+    console.log('Debug - filteredUserByProcess:', filteredUserByProcess);
+
+    // Verificar se o usuário logado está na lista de SGQ
+    if (accountQms && accountQms.id) {
+      const currentUserInSGQ = filteredUserByProcess.some(user => user.id === accountQms.id);
+      console.log('Debug - currentUserInSGQ:', currentUserInSGQ);
+
+      // Se o usuário logado não está na lista de SGQ, adicionar
+      if (!currentUserInSGQ) {
+        const currentUserInProcess = usersByProcess_.find(user => user.id === accountQms.id);
+        if (currentUserInProcess) {
+          console.log('Debug - Adicionando usuário logado à lista SGQ:', currentUserInProcess);
+          filteredUserByProcess.push(currentUserInProcess);
+        }
+      }
+    }
+
     setUsersSGQ(filteredUserByProcess);
   };
 
@@ -156,7 +227,18 @@ export const ComproveRecebimento = () => {
       try {
         const resUsersByProcess = await dispatch(getUsersByProcess(processId));
         const usersByProcess = (resUsersByProcess.payload as AxiosResponse).data || [];
-        setFilteredUsers(usersByProcess);
+
+        console.log('Debug - usersByProcess:', usersByProcess);
+        console.log('Debug - accountQms:', accountQms);
+
+        // Garantir que o usuário logado sempre esteja na lista
+        let finalUsers = [...usersByProcess];
+        if (accountQms && accountQms.id) {
+          // Verificar se o usuário logado existe na lista usando o ID da tabela usuario
+          const currentUserExists = usersByProcess.some(user => user.id === accountQms.id);
+        }
+
+        setFilteredUsers(finalUsers);
       } catch (error) {
         console.error('Erro ao buscar usuários por processo:', error);
         setFilteredUsers([]);
@@ -227,6 +309,34 @@ export const ComproveRecebimento = () => {
     return true;
   };
 
+  // Função para verificar se o campo Responsável deve estar desabilitado
+  const isResponsavelDisabled = () => {
+    // Campo Responsável desabilitado somente se o usuário NÃO tiver perfil SGQ ou ADMIN
+    return !hasAdminOrSGQAccess();
+  };
+
+  // Função para verificar se o campo SGQ deve estar desabilitado
+  const isSGQDisabled = () => {
+    // Campo SGQ desabilitado somente se o usuário NÃO tiver perfil SGQ ou ADMIN
+    return !hasAdminOrSGQAccess();
+  };
+
+  // Função para verificar se os campos de recebimento devem estar desabilitados
+  const isRecebimentoFieldsDisabled = () => {
+    // Se a situação da distribuição for "DISTRIBUIDO" ou "RECOLHIDO" e já existe usuário de entrega,
+    // significa que o recebimento foi comprovado, então os campos devem estar desabilitados
+    return (
+      (distribuicao?.situacaoDistribuicao === 'DISTRIBUIDO' || distribuicao?.situacaoDistribuicao === 'RECOLHIDO') &&
+      !!distribuicao?.idUsuarioEntrega
+    );
+  };
+
+  // Função para verificar se os campos de recolhimento devem estar desabilitados/readonly
+  const isRecolhimentoFieldsDisabled = () => {
+    // Se a situação da distribuição for "RECOLHIDO", os campos de recolhimento devem estar desabilitados/readonly
+    return distribuicao?.situacaoDistribuicao === 'RECOLHIDO';
+  };
+
   // Função para verificar se o usuário tem acesso ADMIN ou SGQ
   const hasAdminOrSGQAccess = () => {
     return hasAnyAuthority(account.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]);
@@ -289,9 +399,17 @@ export const ComproveRecebimento = () => {
           <Stack direction="row" spacing={2}>
             <FormControl style={{ width: '50%' }}>
               <InputLabel>Responsável</InputLabel>
-              <Select label="Responsável" value={idUsuarioEntrega} onChange={event => setIdUsuarioEntrega(Number(event.target.value))}>
+              <Select
+                label="Responsável"
+                value={idUsuarioEntrega}
+                onChange={event => setIdUsuarioEntrega(Number(event.target.value))}
+                disabled={isResponsavelDisabled()}
+                inputProps={{
+                  readOnly: isResponsavelDisabled(),
+                }}
+              >
                 {filteredUsers.map((user, i) => (
-                  <MenuItem value={user.id} key={`user-${i}`}>
+                  <MenuItem value={user.id || user.id} key={`user-${i}`}>
                     {user.nome}
                   </MenuItem>
                 ))}
@@ -303,9 +421,9 @@ export const ComproveRecebimento = () => {
                 label="Área / Processo"
                 value={idProcesso}
                 onChange={event => setIdProcesso(Number(event.target.value))}
-                disabled={isFieldDisabled()}
+                disabled={isFieldDisabled() || isRecebimentoFieldsDisabled()}
                 inputProps={{
-                  readOnly: isFieldDisabled(),
+                  readOnly: isFieldDisabled() || isRecebimentoFieldsDisabled(),
                 }}
               >
                 {processes.map((process: any, i) => (
@@ -317,7 +435,12 @@ export const ComproveRecebimento = () => {
             </FormControl>
             <FormControl style={{ width: '15%' }}>
               <InputLabel>Recebido</InputLabel>
-              <Select label="Recebido" value={String(isRecebido)} onChange={event => setIsRecebido(event.target.value === 'true')}>
+              <Select
+                label="Recebido"
+                value={String(isRecebido)}
+                onChange={event => setIsRecebido(event.target.value === 'true')}
+                disabled={isRecebimentoFieldsDisabled()}
+              >
                 {['Sim', 'Não'].map((label, index) => (
                   <MenuItem key={index} value={String(index === 0)}>
                     {label}
@@ -326,25 +449,27 @@ export const ComproveRecebimento = () => {
               </Select>
             </FormControl>
             <FormControl style={{ width: '15%', height: '50px' }}>
-              <DatePicker
+              <DisabledDatePicker
                 selected={dataEntrega}
                 onChange={date => setDataEntrega(date)}
-                className="date-picker"
+                className={`date-picker ${isRecebimentoFieldsDisabled() ? 'disabled' : ''}`}
                 dateFormat={'dd/MM/yyyy'}
+                readOnly={isRecebimentoFieldsDisabled()}
               />
               <label htmlFor="" className="rnc-date-label">
                 Data
               </label>
             </FormControl>
           </Stack>
-          <Textarea
-            className="w-100"
+          <DisabledTextarea
+            className={`w-100 ${isRecebimentoFieldsDisabled() ? 'disabled' : ''}`}
             slots={{ textarea: JustifyFalta }}
-            slotProps={{ textarea: { placeholder: '' } }}
+            slotProps={{ textarea: { placeholder: '', readOnly: isRecebimentoFieldsDisabled() } }}
             sx={{ borderRadius: '6px' }}
             name="ncArea"
             value={comentarioEntrega || ''}
             onChange={e => setComentarioEntrega(e.target.value)}
+            readOnly={isRecebimentoFieldsDisabled()}
           />
 
           {hasAdminOrSGQAccess() && (
@@ -352,9 +477,14 @@ export const ComproveRecebimento = () => {
               <Stack direction="row" spacing={2}>
                 <FormControl style={{ width: '50%' }}>
                   <InputLabel>SGQ</InputLabel>
-                  <Select label="SGQ" value={idUsuarioDevolucao} onChange={event => setIdUsuarioDevolucao(Number(event.target.value))}>
+                  <Select
+                    label="SGQ"
+                    value={idUsuarioDevolucao}
+                    onChange={event => setIdUsuarioDevolucao(Number(event.target.value))}
+                    disabled={isSGQDisabled()}
+                  >
                     {usersSGQ.map((user, i) => (
-                      <MenuItem value={user.id} key={`user-${i}`}>
+                      <MenuItem value={user.id || user.id} key={`user-${i}`}>
                         {user.nome}
                       </MenuItem>
                     ))}
@@ -362,7 +492,12 @@ export const ComproveRecebimento = () => {
                 </FormControl>
                 <FormControl style={{ width: '17.5%' }}>
                   <InputLabel>Justificado</InputLabel>
-                  <Select label="Justificado" value={String(isJustify)} onChange={event => setIsJustify(event.target.value === 'true')}>
+                  <Select
+                    label="Justificado"
+                    value={String(isJustify)}
+                    onChange={event => setIsJustify(event.target.value === 'true')}
+                    disabled={isRecolhimentoFieldsDisabled()}
+                  >
                     {['Sim', 'Não'].map((label, index) => (
                       <MenuItem key={index} value={String(index === 0)}>
                         {label}
@@ -372,7 +507,12 @@ export const ComproveRecebimento = () => {
                 </FormControl>
                 <FormControl style={{ width: '17.5%' }}>
                   <InputLabel>Devolvido</InputLabel>
-                  <Select label="Devolvido" value={String(isDevolvido)} onChange={event => setIsDevolvido(event.target.value === 'true')}>
+                  <Select
+                    label="Devolvido"
+                    value={String(isDevolvido)}
+                    onChange={event => setIsDevolvido(event.target.value === 'true')}
+                    disabled={isRecolhimentoFieldsDisabled()}
+                  >
                     {['Sim', 'Não'].map((label, index) => (
                       <MenuItem key={index} value={String(index === 0)}>
                         {label}
@@ -381,25 +521,27 @@ export const ComproveRecebimento = () => {
                   </Select>
                 </FormControl>
                 <FormControl style={{ width: '15%', height: '50px' }}>
-                  <DatePicker
+                  <DisabledDatePicker
                     selected={dataDevolucao}
                     onChange={date => setDataDevolucao(date)}
-                    className="date-picker"
+                    className={`date-picker ${isRecolhimentoFieldsDisabled() ? 'disabled' : ''}`}
                     dateFormat={'dd/MM/yyyy'}
+                    readOnly={isRecolhimentoFieldsDisabled()}
                   />
                   <label htmlFor="" className="rnc-date-label">
                     Data
                   </label>
                 </FormControl>
               </Stack>
-              <Textarea
-                className="w-100"
+              <DisabledTextarea
+                className={`w-100 ${isRecolhimentoFieldsDisabled() ? 'disabled' : ''}`}
                 slots={{ textarea: justifyDevolution }}
-                slotProps={{ textarea: { placeholder: '' } }}
+                slotProps={{ textarea: { placeholder: '', readOnly: isRecolhimentoFieldsDisabled() } }}
                 sx={{ borderRadius: '6px' }}
                 name="ncArea"
                 value={comentarioDevolucao || ''}
                 onChange={e => setComentarioDevolucao(e.target.value)}
+                readOnly={isRecolhimentoFieldsDisabled()}
               />
             </>
           )}
@@ -413,9 +555,11 @@ export const ComproveRecebimento = () => {
             >
               Voltar
             </Button>
-            <Button onClick={() => void saveDocument()} style={{ background: '#e6b200', color: '#4e4d4d' }}>
-              Confirmar
-            </Button>
+            {distribuicao?.situacaoDistribuicao !== 'RECOLHIDO' && (
+              <Button onClick={() => void saveDocument()} style={{ background: '#e6b200', color: '#4e4d4d' }}>
+                Confirmar
+              </Button>
+            )}
           </Box>
         </Stack>
       </Box>

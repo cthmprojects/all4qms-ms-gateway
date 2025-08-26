@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { Row } from 'reactstrap';
 import { DistribuicaoCompleta } from '../../../models/distribuicao';
 import { formatDateToString } from '../infodoc-list.utils';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { useAppSelector } from 'app/config/store';
+import { AUTHORITIES } from 'app/config/constants';
 
 interface ControlledCopyTabProps {
   distribuitions: DistribuicaoCompleta[];
@@ -35,6 +38,15 @@ const ControlledCopyTab: React.FC<ControlledCopyTabProps> = ({
   handleDownloadDistribuition,
 }) => {
   const navigate = useNavigate();
+
+  // Hooks para verificar permissões do usuário
+  const account = useAppSelector(state => state.authentication.account);
+  const canReceive = hasAnyAuthority(account?.authorities, [
+    AUTHORITIES.ADMIN,
+    AUTHORITIES.SGQ,
+    AUTHORITIES.EMISSOR,
+    AUTHORITIES.APROVADOR,
+  ]);
 
   // Função para filtrar o nome do processo baseado no ID
   const filterProcessName = (id: number): string => {
@@ -124,8 +136,9 @@ const ControlledCopyTab: React.FC<ControlledCopyTabProps> = ({
                         },
                       })
                     }
+                    disabled={!canReceive}
                   >
-                    <ReceiptIcon sx={{ color: '#03AC59' }} />
+                    <ReceiptIcon sx={{ color: !canReceive ? '#ccc' : '#03AC59' }} />
                   </IconButton>
                 </TableCell>
               </TableRow>
