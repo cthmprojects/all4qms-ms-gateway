@@ -29,7 +29,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import axios, { AxiosResponse } from 'axios';
 import { RejectDocumentDialog } from '../dialogs/reject-document-dialog/reject-document-dialog';
 import { listEnums } from '../../reducers/enums.reducer';
-import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao, Process, StatusEnum } from '../../models';
+import { Doc, EnumStatusDoc, EnumTipoMovDoc, InfoDoc, Movimentacao, Process, StatusEnum, EnumSituacao } from '../../models';
 import {
   aprovarCancelDocument,
   cancelDocParams,
@@ -107,6 +107,7 @@ export const ApprovalDocument = () => {
   const [originList, setOriginList] = useState([]);
   const [idNewFile, setIdNewFile] = useState<number>();
   const [statusMoviment, setStatusMoviment] = useState<StatusEnum>();
+  const [statusDoc, setStatusDoc] = useState<EnumSituacao>();
 
   const [moviment, setMoviment] = useState<Movimentacao>();
   const [keywordList, setKeywordList] = useState<Array<string>>([]);
@@ -216,6 +217,7 @@ export const ApprovalDocument = () => {
       setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
       setTitle(actualInfoDoc.doc?.titulo!!);
       setOrigin(actualInfoDoc.doc?.origem!!);
+      setStatusDoc(actualInfoDoc.doc?.enumSituacao!!);
 
       // Definir selectedProcess apenas se o processo existir na lista
       const docProcessId = actualInfoDoc.doc?.idProcesso?.toString();
@@ -410,7 +412,7 @@ export const ApprovalDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  {actualInfoDoc?.doc?.revisao && actualInfoDoc?.doc?.revisao > 1 ? 'Revisão' : 'Edição'}
+                  {statusDoc === 'R' ? 'Revisão' : 'Edição'}
                 </h3>
                 {/* <img src="../../../../content/images/icone-emissao.png" className="ms-2" /> */}
               </div>

@@ -32,6 +32,8 @@ import { createInfoDoc, getInfoDocById, updateInfoDoc } from '../reducers/infodo
 import { atualizarMovimentacao, cadastrarMovimentacao } from '../reducers/movimentacao.reducer';
 import { Storage } from 'react-jhipster';
 import { toast } from 'react-toastify';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { AUTHORITIES } from 'app/config/constants';
 
 const StyledLabel = styled('label')(({ theme }) => ({
   position: 'absolute',
@@ -78,7 +80,7 @@ export const UpdateDocument = () => {
   const navigate = useNavigate();
   const { id, idFile } = useParams();
 
-  const [emitter, setEmitter] = useState<number>();
+  const [emitter, setEmitter] = useState<number | undefined>(undefined);
   const [emittedDate, setEmittedDate] = useState(new Date());
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
@@ -270,16 +272,21 @@ export const UpdateDocument = () => {
     navigate('/infodoc');
   };
 
+  // Função para verificar se o usuário tem acesso ADMIN ou SGQ
+  const hasAdminOrSGQAccess = () => {
+    return currentUser?.isAdmin || currentUser?.isGestor || hasAnyAuthority(currentUser?.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]);
+  };
+
   useEffect(() => {
-    if (actualInfoDoc) {
+    if (actualInfoDoc && actualInfoDoc.doc) {
       setCode(actualInfoDoc.doc.codigo!!);
-      setEmitter(actualInfoDoc.doc.idUsuarioCriacao!!);
       setEmittedDate(actualInfoDoc.doc?.dataCricao ? new Date(actualInfoDoc.doc?.dataCricao) : new Date());
       setDescription(actualInfoDoc.doc?.descricaoDoc!!);
       setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
       setTitle(actualInfoDoc.doc?.titulo!!);
       setOrigin(actualInfoDoc.doc?.origem!!);
       setSelectedProcess(actualInfoDoc.doc?.idProcesso!!);
+
       if (actualInfoDoc.doc?.dataValidade) {
         setNoValidate(false);
         setValidDate(new Date(actualInfoDoc.doc.dataValidade));
@@ -291,11 +298,12 @@ export const UpdateDocument = () => {
     }
   }, [actualInfoDoc]);
 
+  // useEffect específico para definir o emissor
   useEffect(() => {
-    if (users && actualInfoDoc) {
-      setEmitter(actualInfoDoc.doc?.idUsuarioCriacao);
+    if (actualInfoDoc && actualInfoDoc.doc && actualInfoDoc.doc.idUsuarioCriacao) {
+      setEmitter(actualInfoDoc.doc.idUsuarioCriacao);
     }
-  }, [users]);
+  }, [actualInfoDoc]);
 
   useEffect(() => {
     setOriginList(enums?.origem);
@@ -327,7 +335,12 @@ export const UpdateDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select disabled label="Emissor" value={emitter} onChange={event => setEmitter(Number(event.target.value))}>
+              <Select
+                disabled={!hasAdminOrSGQAccess()}
+                label="Emissor"
+                value={emitter || ''}
+                onChange={event => setEmitter(Number(event.target.value))}
+              >
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
