@@ -411,13 +411,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {documents
-              ?.filter((doc: InfoDoc) => doc.doc.idUsuarioCriacao === userQMSId || isSGQ)
-              ?.map((doc: InfoDoc) => (
-                <TableRow key={doc.doc.id} style={{ cursor: doc.doc.enumSituacao !== 'H' ? 'pointer' : 'auto' }}>
-                  {renderTableCells(doc)}
-                </TableRow>
-              ))}
+            {documents?.map((doc: InfoDoc) => (
+              <TableRow key={doc.doc.id} style={{ cursor: doc.doc.enumSituacao !== 'H' ? 'pointer' : 'auto' }}>
+                {renderTableCells(doc)}
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

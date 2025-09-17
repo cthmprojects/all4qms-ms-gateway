@@ -450,7 +450,7 @@ export const ApprovalDocument = () => {
             <Grid item xs={1}>
               <TextField label="Código" name="number" autoComplete="off" value={code} disabled onChange={e => setCode(e.target.value)} />
             </Grid>
-            <Grid item xs>
+            <Grid item xs={3}>
               <TextField
                 sx={{ width: '100%' }}
                 label="Título"
@@ -459,6 +459,16 @@ export const ApprovalDocument = () => {
                 value={title}
                 disabled
                 onChange={e => setTitle(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={1}>
+              <TextField
+                label="Revisão"
+                name="revisao"
+                autoComplete="off"
+                value={moviment?.idDocumentacao ? actualInfoDoc?.doc?.revisao ?? 0 : 0}
+                disabled={true}
+                onChange={() => {}}
               />
             </Grid>
             <Grid item xs={2}>

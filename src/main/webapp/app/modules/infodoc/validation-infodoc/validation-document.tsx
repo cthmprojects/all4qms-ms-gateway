@@ -216,7 +216,7 @@ export const ValidationDocument = () => {
       idArquivo: idNewFile > 0 ? idNewFile : actualInfoDoc.doc?.idArquivo,
       idProcesso: parseInt(selectedProcess),
       ignorarValidade: true,
-      enumSituacao: situacao || undefined,
+      enumSituacao: situacao || actualInfoDoc.doc?.enumSituacao, // ✅ CORREÇÃO: Manter situação original se não especificada
       tipoDoc: 'MA',
       // revisao: actualInfoDoc.doc?.revisao ? actualInfoDoc.doc?.revisao + 1 : 1,
       // idDocumentacaoAnterior: parseInt(id!!),
@@ -297,7 +297,7 @@ export const ValidationDocument = () => {
 
   const approveDocument = async () => {
     setIsLoading(true);
-    const resSave = await saveDocument(EnumSituacao.REVISAO);
+    const resSave = await saveDocument(); // Não alterar situação - manter original
     if (!resSave) {
       setIsLoading(false);
       return;
@@ -446,7 +446,7 @@ export const ValidationDocument = () => {
                 onChange={e => setCode(e.target.value)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <TextField
                 sx={{ width: '100%' }}
                 label="Título"
@@ -455,6 +455,16 @@ export const ValidationDocument = () => {
                 value={title}
                 disabled={!isSGQ}
                 onChange={e => setTitle(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={1}>
+              <TextField
+                label="Revisão"
+                name="revisao"
+                autoComplete="off"
+                value={actualInfoDoc?.doc?.revisao ?? 0}
+                disabled={true}
+                onChange={() => {}}
               />
             </Grid>
             <Grid item xs={2}>

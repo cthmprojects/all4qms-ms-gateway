@@ -30,7 +30,7 @@ import { EnumStatusDoc, InfoDoc, StatusEnum } from '../../models';
 import { DistribuicaoCompleta } from '../../models/distribuicao';
 import { listarDistribuicao, listarDistribuicaoComFiltros } from '../../reducers/distribuicao.reducer';
 import { listEnums } from '../../reducers/enums.reducer';
-import { getInfoDocById, listdocs } from '../../reducers/infodoc.reducer';
+import { getInfoDocById, listdocs, listdocsSolicitacaoValidacao, listdocsAprovacao } from '../../reducers/infodoc.reducer';
 import { CancelDocumentDialog } from '../dialogs/cancel-document-dialog/cancel-document-dialog';
 import { DistributionDialog } from '../dialogs/distribution-dialog/distribution-dialog';
 import { RequestCopyDialog } from '../dialogs/request-copy-dialog/request-copy-dialog';
@@ -195,6 +195,19 @@ const InfodocList = () => {
   const userLoginID = parseInt(Storage.session.get('ID_USUARIO'));
   const [userQMS, setUserQMS] = useState<UserQMS>(JSON.parse(Storage.session.get('USUARIO_QMS')));
   const [uploadFileUpdate, setUploadFileUpdate] = useState(false);
+
+  // Função para obter IDs dos processos do usuário
+  const getUserProcessIds = (): string => {
+    // Se o usuário é ADMIN ou SGQ, retorna string vazia para ver todos os processos
+    if (hasAnyAuthority(account?.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ])) {
+      return '';
+    }
+
+    if (!userQMS?.processos || userQMS.processos.length === 0) {
+      return '';
+    }
+    return userQMS.processos.map(p => p.id).join(',');
+  };
   const [usersSGQ, setUsersSGQ] = useState<[]>([]);
   const [idDocUpdating, setIdDocUpdating] = useState(0);
   const [isSGQ, setIsSGQ] = useState(false);
@@ -299,6 +312,7 @@ const InfodocList = () => {
         situacao,
         size: pageSize,
         page: 0,
+        userProcessIds: getUserProcessIds(),
       })
     );
 
@@ -378,18 +392,52 @@ const InfodocList = () => {
       return;
     }
 
-    const { dtIni, dtFim, idProcesso, origem, situacao } = filters;
-    dispatch(
-      listdocs({
-        dtIni: dtIni?.toISOString(),
-        dtFim: dtFim?.toISOString(),
-        idProcesso,
-        origem,
-        situacao: type,
-        size: pageSize,
-        page: 0,
-      })
-    );
+    const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa } = filters;
+
+    // Usar action específica para a aba "Solicitação e Validação"
+    if (newTabId === TabIdentifier.SOLICITACAO_VALIDACAO) {
+      dispatch(
+        listdocsSolicitacaoValidacao({
+          dtIni: dtIni?.toISOString(),
+          dtFim: dtFim?.toISOString(),
+          idProcesso,
+          origem,
+          pesquisa,
+          size: pageSize,
+          page: 0,
+          userProcessIds: getUserProcessIds(),
+        })
+      );
+    } else if (newTabId === TabIdentifier.APROVACAO) {
+      // Usar action específica para a aba "Aprovação"
+      dispatch(
+        listdocsAprovacao({
+          dtIni: dtIni?.toISOString(),
+          dtFim: dtFim?.toISOString(),
+          idProcesso,
+          origem,
+          pesquisa,
+          size: pageSize,
+          page: 0,
+          userProcessIds: getUserProcessIds(),
+        })
+      );
+    } else {
+      // Usar action padrão para outras abas
+      dispatch(
+        listdocs({
+          dtIni: dtIni?.toISOString(),
+          dtFim: dtFim?.toISOString(),
+          idProcesso,
+          origem,
+          situacao: type,
+          pesquisa,
+          size: pageSize,
+          page: 0,
+          userProcessIds: getUserProcessIds(),
+        })
+      );
+    }
     setSelectedTab(newTabId);
   };
 
@@ -417,7 +465,9 @@ const InfodocList = () => {
 
       // Chamar a action para buscar com filtros
       if (Object.keys(cleanFilters).length > 0) {
-        dispatch(listarDistribuicaoComFiltros({ ...cleanFilters, page: 0, size: pageSize, sort: 'id,DESC' }));
+        dispatch(
+          listarDistribuicaoComFiltros({ ...cleanFilters, userProcessIds: getUserProcessIds(), page: 0, size: pageSize, sort: 'id,DESC' })
+        );
       } else {
         // Se não há filtros, usar a busca normal
         dispatch(listarDistribuicao({ page: 0, size: pageSize, sort: 'id,DESC' }));
@@ -451,7 +501,9 @@ const InfodocList = () => {
 
       // Chamar a action para buscar com filtros
       if (Object.keys(cleanFilters).length > 0) {
-        dispatch(listarDistribuicaoComFiltros({ ...cleanFilters, page: 0, size: pageSize, sort: 'id,DESC' }));
+        dispatch(
+          listarDistribuicaoComFiltros({ ...cleanFilters, userProcessIds: getUserProcessIds(), page: 0, size: pageSize, sort: 'id,DESC' })
+        );
       } else {
         // Se não há filtros, usar a busca normal
         dispatch(listarDistribuicao({ page: 0, size: pageSize, sort: 'id,DESC' }));
@@ -508,7 +560,7 @@ const InfodocList = () => {
 
   const handleDistributionModal = () => {
     setDistributionModal(false);
-    handleChange(null, TabIdentifier.COPIA_CONTROLADA);
+    // ✅ CORREÇÃO: Não alterar a aba - manter a aba atual (Homologados)
   };
 
   const formatDateToString = (date: Date) => {
@@ -653,7 +705,7 @@ const InfodocList = () => {
   };
 
   const onOpenUploadFileModal = (): void => {
-    setUploadFileModal(true);
+    navigate('/infodoc/new');
   };
 
   const openDocToValidation = (event: React.MouseEvent, infodoc: InfoDoc): void => {
@@ -665,8 +717,9 @@ const InfodocList = () => {
       infodoc?.movimentacao?.enumStatus === EnumStatusDoc.CANCELAMENTO
     ) {
       navigate(`/infodoc/approval/${infodoc.doc.id}`);
-    } else if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.EMISSAO) {
-      navigate(`upload-file/update/${infodoc.doc.id}/${infodoc.doc.idArquivo}`);
+    } else if (infodoc?.movimentacao?.enumStatus === EnumStatusDoc.EMISSAO || infodoc?.movimentacao?.enumStatus === EnumStatusDoc.REVISAO) {
+      // Documentos em edição (EMISSAO) ou revisão (REVISAO) vão para a tela de edição
+      navigate(`/infodoc/upload-file/update/${infodoc.doc.id}/${infodoc.doc.idArquivo}`);
     }
   };
 
@@ -677,7 +730,36 @@ const InfodocList = () => {
 
     if (_situacao === 'D') {
       dispatch(listarDistribuicao({ page, size: pageSize, sort: 'id,DESC' }));
+    } else if (selectedTab === TabIdentifier.SOLICITACAO_VALIDACAO) {
+      // Usar action específica para a aba "Solicitação e Validação"
+      dispatch(
+        listdocsSolicitacaoValidacao({
+          dtIni: dtIni?.toISOString(),
+          dtFim: dtFim?.toISOString(),
+          idProcesso,
+          origem: origem ?? '',
+          pesquisa: pesquisa ?? '',
+          size: pageSize,
+          page,
+          userProcessIds: getUserProcessIds(),
+        })
+      );
+    } else if (selectedTab === TabIdentifier.APROVACAO) {
+      // Usar action específica para a aba "Aprovação"
+      dispatch(
+        listdocsAprovacao({
+          dtIni: dtIni?.toISOString(),
+          dtFim: dtFim?.toISOString(),
+          idProcesso,
+          origem: origem ?? '',
+          pesquisa: pesquisa ?? '',
+          size: pageSize,
+          page,
+          userProcessIds: getUserProcessIds(),
+        })
+      );
     } else {
+      // Usar action padrão para outras abas
       dispatch(
         listdocs({
           dtIni: dtIni?.toISOString(),
@@ -688,6 +770,7 @@ const InfodocList = () => {
           size: pageSize,
           pesquisa: pesquisa ?? '',
           page,
+          userProcessIds: getUserProcessIds(),
         })
       );
     }
