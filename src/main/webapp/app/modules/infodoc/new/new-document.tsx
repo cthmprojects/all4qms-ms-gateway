@@ -26,6 +26,7 @@ import { StyledTextarea } from 'app/modules/rnc/ui/new/register-types/general-re
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { AddCircle } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import UploadInfoFile from '../ui/dialogs/upload-dialog/upload-files';
 import axios, { AxiosResponse } from 'axios';
 import downloadFile from '../infodoc-store';
 import { listEnums } from '../reducers/enums.reducer';
@@ -110,6 +111,20 @@ export const NewDocument = () => {
   const [keyword, setKeyword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  // Novos estados para gerenciamento de arquivo
+  const [fileId, setFileId] = useState<number | null>(() => {
+    // Prioridade: ID da URL > localStorage > null
+    if (id) return parseInt(id);
+    const savedFileId = localStorage.getItem('infodoc_temp_fileId');
+    return savedFileId ? parseInt(savedFileId) : null;
+  });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(() => {
+    const savedFileName = localStorage.getItem('infodoc_temp_fileName');
+    return savedFileName ? new File([], savedFileName) : null;
+  });
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [fileUploadError, setFileUploadError] = useState<string>('');
+
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
     dispatch(listEnums());
@@ -153,38 +168,137 @@ export const NewDocument = () => {
 
   const onFileClicked = async (event: React.MouseEvent<HTMLButtonElement>) => {
     setIsLoading(true);
-    if (id) {
-      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${id}/original`;
+    const fileIdToUse = fileId || (id ? parseInt(id) : null);
 
-      await axios
-        .request({
+    if (fileIdToUse) {
+      const downloadUrl = `services/all4qmsmsinfodoc/api/infodoc/anexos/download/${fileIdToUse}/original`;
+
+      try {
+        const result = await axios.request({
           responseType: 'arraybuffer',
           url: downloadUrl,
           method: 'get',
           headers: {
             'Content-Type': 'application/octet-stream',
           },
-        })
-        .then(result => {
-          var fileDownload = require('js-file-download');
-          let fileName = result.headers['content-disposition'].split(';')[1];
-          fileName = fileName.split('=')[1];
-          fileName = fileName.split('_').slice(5).join('_');
-
-          const file = new Blob([result.data], { type: 'application/octet-stream' });
-
-          fileDownload(file, `${fileName}`);
-          setIsLoading(false);
         });
+
+        var fileDownload = require('js-file-download');
+        let fileName = result.headers['content-disposition'].split(';')[1];
+        fileName = fileName.split('=')[1];
+        fileName = fileName.split('_').slice(5).join('_');
+
+        const file = new Blob([result.data], { type: 'application/octet-stream' });
+        fileDownload(file, `${fileName}`);
+      } catch (error) {
+        console.error('Erro ao baixar arquivo:', error);
+        toast.error('Erro ao baixar arquivo. Tente novamente.');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      toast.error('Nenhum arquivo disponível para download');
+      setIsLoading(false);
     }
   };
 
   // Função para verificar se o usuário tem acesso ADMIN ou SGQ
+  // Usando a mesma lógica do infodoc-list.tsx
   const hasAdminOrSGQAccess = () => {
-    return hasAnyAuthority(currentUser.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]);
+    return hasAnyAuthority(account?.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]);
   };
 
-  const cancelDocument = () => {
+  // Funções de controle de permissão para campos
+  const isEmitterFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isCodeFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isTitleFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isValidityFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isNotificationFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isDescriptionFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isKeywordsFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  // Campos sempre habilitados (independente do perfil)
+  const isJustificationFieldEnabled = () => {
+    return true; // Sempre habilitado
+  };
+
+  const isDateFieldEnabled = () => {
+    return true; // Sempre habilitado
+  };
+
+  const isOriginFieldEnabled = () => {
+    return true; // Sempre habilitado
+  };
+
+  const isProcessFieldEnabled = () => {
+    return true; // Sempre habilitado
+  };
+
+  // Funções para gerenciamento de arquivo
+  const hasValidFile = () => {
+    return fileId && fileId > 0;
+  };
+
+  const validateAllFields = () => {
+    return emitter && emittedDate && selectedProcess && description && hasValidFile();
+  };
+
+  const getSaveButtonState = () => {
+    if (!hasValidFile()) {
+      return { disabled: true, text: 'Salvar (Arquivo obrigatório)' };
+    }
+    if (!validateFields()) {
+      return { disabled: true, text: 'Salvar (Campos obrigatórios)' };
+    }
+    return { disabled: false, text: 'Salvar' };
+  };
+
+  const getForwardButtonState = () => {
+    if (!hasValidFile()) {
+      return { disabled: true, text: 'Encaminhar (Arquivo obrigatório)' };
+    }
+    if (!validateFields()) {
+      return { disabled: true, text: 'Encaminhar (Campos obrigatórios)' };
+    }
+    return { disabled: false, text: 'Encaminhar' };
+  };
+
+  const handleOpenUploadModal = () => {
+    setUploadModalOpen(true);
+  };
+
+  const handleFileUploaded = (newFileId: number, file: File) => {
+    setFileId(newFileId);
+    setUploadedFile(file);
+    setFileUploadError('');
+    setUploadModalOpen(false);
+
+    // Salvar no localStorage para persistência
+    localStorage.setItem('infodoc_temp_fileId', newFileId.toString());
+    localStorage.setItem('infodoc_temp_fileName', file.name);
+  };
+
+  const goBackToList = () => {
     navigate('/infodoc');
   };
 
@@ -204,18 +318,24 @@ export const NewDocument = () => {
   };
 
   const saveDocument = async () => {
+    // Validação de arquivo obrigatório
+    if (!hasValidFile()) {
+      toast.error('Arquivo é obrigatório para salvar o documento');
+      return null;
+    }
+
     setIsLoading(true);
     try {
       const newInfoDoc: Doc = {
         idUsuarioCriacao: parseInt(emitter),
         dataCricao: emittedDate,
         descricaoDoc: description,
-        justificativa: '',
-        codigo: '',
-        titulo: '',
-        origem: 'I',
+        justificativa: documentDescription, // ✅ CORREÇÃO: Usar valor preenchido pelo usuário
+        codigo: code, // ✅ CORREÇÃO: Usar valor preenchido pelo usuário
+        titulo: title, // ✅ CORREÇÃO: Usar valor preenchido pelo usuário
+        origem: origin, // ✅ CORREÇÃO: Usar valor selecionado pelo usuário
         idProcesso: parseInt(selectedProcess),
-        idArquivo: parseInt(id!!),
+        idArquivo: fileId,
         ignorarValidade: true,
         enumSituacao: EnumSituacao.EDICAO,
         tipoDoc: 'MA',
@@ -225,6 +345,9 @@ export const NewDocument = () => {
       if (!noValidate) {
         newInfoDoc.ignorarValidade = false;
         newInfoDoc.dataValidade = validDate;
+        newInfoDoc.idPrazo = parseInt(notificationPreviousDate); // ✅ CORREÇÃO: Salvar período de notificação
+      } else {
+        newInfoDoc.idPrazo = 0; // Não notificar quando indeterminado
       }
 
       let resStoreDoc;
@@ -241,6 +364,10 @@ export const NewDocument = () => {
         setInfoDocId(resDoc?.doc?.id || -1);
         setInfoDocMovimentacao(resDoc?.movimentacao?.id || -1);
         toast.success(`Documento ${resDoc?.doc?.id} Salvo com sucesso!`);
+
+        // Limpar dados temporários do localStorage
+        localStorage.removeItem('infodoc_temp_fileId');
+        localStorage.removeItem('infodoc_temp_fileName');
 
         return resDoc;
       } else {
@@ -290,6 +417,7 @@ export const NewDocument = () => {
 
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
+  const account = useAppSelector(state => state.authentication.account);
 
   useEffect(() => {
     setOriginList(enums?.origem);
@@ -326,7 +454,12 @@ export const NewDocument = () => {
           <div style={{ display: 'flex', flexFlow: 'row wrap', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
-              <Select label="Emissor" value={emitter} onChange={event => setEmitter(event.target.value)} disabled={!hasAdminOrSGQAccess()}>
+              <Select
+                label="Emissor"
+                value={emitter}
+                onChange={event => setEmitter(event.target.value)}
+                disabled={!isEmitterFieldEnabled()}
+              >
                 {users.map((user, i) => (
                   <MenuItem value={user.id} key={`user-${i}`}>
                     {user.nome}
@@ -377,6 +510,53 @@ export const NewDocument = () => {
               onChange={e => setDescription(e.target.value)}
             />
           </div>
+
+          {/* Seção de Arquivo - Posição Discreta */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              py: 2,
+              px: 2,
+              backgroundColor: '#f8f9fa',
+              borderRadius: 1,
+              border: '1px solid #e9ecef',
+              mt: 2,
+            }}
+          >
+            <AttachFileIcon color={fileId ? 'success' : 'disabled'} />
+            <Typography variant="body2" sx={{ flex: 1, fontWeight: 500 }}>
+              {fileId ? `Arquivo: ${uploadedFile?.name || `ID ${fileId}`}` : 'Nenhum arquivo selecionado'}
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleOpenUploadModal}
+              sx={{
+                color: '#e6b200',
+                borderColor: '#e6b200',
+                '&:hover': {
+                  borderColor: '#d4a500',
+                  backgroundColor: '#fff8e1',
+                },
+              }}
+            >
+              {fileId ? 'Alterar' : 'Adicionar'}
+            </Button>
+            {!fileId && (
+              <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+                Obrigatório
+              </Typography>
+            )}
+          </Box>
+
+          {fileUploadError && (
+            <Typography variant="body2" color="error" sx={{ mt: 1, ml: 2 }}>
+              {fileUploadError}
+            </Typography>
+          )}
+
           <div>
             <h1 style={{ fontSize: '1.5rem' }} className="mt-4">
               Dados do documento
@@ -385,7 +565,14 @@ export const NewDocument = () => {
 
           <Grid container gap={2}>
             <Grid item xs={1}>
-              <TextField label="Código" name="number" autoComplete="off" value={code} disabled onChange={e => setCode(e.target.value)} />
+              <TextField
+                label="Código"
+                name="number"
+                autoComplete="off"
+                value={code}
+                disabled={!isCodeFieldEnabled()}
+                onChange={e => setCode(e.target.value)}
+              />
             </Grid>
             <Grid item xs={4}>
               <TextField
@@ -394,14 +581,14 @@ export const NewDocument = () => {
                 name="number"
                 autoComplete="off"
                 value={title}
-                disabled
+                disabled={!isTitleFieldEnabled()}
                 onChange={e => setTitle(e.target.value)}
               />
             </Grid>
             <Grid item xs={2}>
               <FormControl style={{ width: '100%' }}>
                 <InputLabel>Origem</InputLabel>
-                <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
+                <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)} disabled={!isOriginFieldEnabled()}>
                   {originList?.map((e: any, idx) => (
                     <MenuItem key={idx} value={e.nome}>
                       {e.valor}
@@ -413,7 +600,12 @@ export const NewDocument = () => {
             <Grid item xs={2}>
               <FormControl style={{ width: '100%' }}>
                 <InputLabel>Área / Processo</InputLabel>
-                <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(event.target.value)}>
+                <Select
+                  label="Área / Processo"
+                  value={selectedProcess}
+                  onChange={event => setSelectedProcess(event.target.value)}
+                  disabled={!isProcessFieldEnabled()}
+                >
                   {processes.map((process: any, i) => (
                     <MenuItem value={process.id} key={`process-${i}`}>
                       {process.nome}
@@ -423,16 +615,18 @@ export const NewDocument = () => {
               </FormControl>
             </Grid>
             <Grid item xs={2}>
-              <Button
-                fullWidth
-                variant="outlined"
-                size="large"
-                style={{ backgroundColor: '#E0E0E0', height: '55px' }}
-                onClick={event => onFileClicked(event)}
-              >
-                <AttachFileIcon className="pe-1 pb-1" />
-                Arquivo
-              </Button>
+              {infoDocId > 0 && (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  size="large"
+                  style={{ backgroundColor: '#E0E0E0', height: '55px' }}
+                  onClick={event => onFileClicked(event)}
+                >
+                  <AttachFileIcon className="pe-1 pb-1" />
+                  Arquivo
+                </Button>
+              )}
             </Grid>
           </Grid>
           <Box sx={{ display: 'flex', alignItems: 'center', py: 2, gap: 2 }}>
@@ -440,24 +634,24 @@ export const NewDocument = () => {
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
-              disabled
+              disabled={!isValidityFieldEnabled()}
             />
-            <FormControl style={{ height: '60px', width: '190px' }} disabled>
+            <FormControl style={{ height: '60px', width: '190px' }} disabled={!isValidityFieldEnabled()}>
               <DatePicker
                 selected={validDate}
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled
+                disabled={!isValidityFieldEnabled() || (isValidityFieldEnabled() && noValidate)}
               />
               <label htmlFor="" className="rnc-date-label" style={{ width: '70px' }}>
                 Validade
               </label>
             </FormControl>
-            <FormControl style={{ height: '60px', width: '190px' }} disabled>
+            <FormControl style={{ height: '60px', width: '190px' }} disabled={!isNotificationFieldEnabled()}>
               <InputLabel>Notificar antes de:</InputLabel>
               <Select
-                disabled
+                disabled={!isNotificationFieldEnabled() || (isNotificationFieldEnabled() && noValidate)}
                 style={{ height: '66px', boxShadow: 'inset 0 -1px 0 #ddd', width: '100%' }}
                 label="Notificar antes de:"
                 value={notificationPreviousDate}
@@ -479,7 +673,7 @@ export const NewDocument = () => {
             name="ncArea"
             value={documentDescription || ''}
             onChange={e => setDocumentDescription(e.target.value)}
-            disabled
+            disabled={!isDescriptionFieldEnabled()}
           />
 
           {/* <div className="mt-4">
@@ -489,9 +683,9 @@ export const NewDocument = () => {
               style={{ width: '40%', maxWidth: '400px', minWidth: '200px' }}
               onChange={onKeywordChanged}
               value={keyword}
-              disabled
+              disabled={!isKeywordsFieldEnabled()}
             />
-            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled>
+            <IconButton aria-label="Adicionar palavra chave" onClick={onKeywordAdded} disabled={!isKeywordsFieldEnabled()}>
               <AddCircle fontSize="large" />
             </IconButton>
           </div>
@@ -502,28 +696,30 @@ export const NewDocument = () => {
           </div> */}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', height: '45px' }} className="mt-5">
-            <Button
-              variant="contained"
-              className="me-3"
-              style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => cancelDocument()}
-            >
+            <Button variant="contained" className="me-3" style={{ background: '#d9d9d9', color: '#4e4d4d' }} onClick={() => goBackToList()}>
               Voltar
             </Button>
-            <Button onClick={() => saveDocument()}>
-              {' '}
-              {/* disabled={!validateFields()}>*/}
-              Salvar
+            <Button
+              onClick={() => saveDocument()}
+              disabled={getSaveButtonState().disabled}
+              style={{
+                backgroundColor: getSaveButtonState().disabled ? '#ccc' : '#e6b200',
+                color: '#4e4d4d',
+              }}
+            >
+              {getSaveButtonState().text}
             </Button>
             <Button
-              // disabled={!validateFields()}
               onClick={() => fowardDocument()}
               className="ms-3"
               variant="contained"
-              color="primary"
-              style={{ background: '#e6b200', color: '#4e4d4d' }}
+              disabled={getForwardButtonState().disabled}
+              style={{
+                backgroundColor: getForwardButtonState().disabled ? '#ccc' : '#e6b200',
+                color: '#4e4d4d',
+              }}
             >
-              Encaminhar
+              {getForwardButtonState().text}
             </Button>
           </div>
         </div>
@@ -547,6 +743,14 @@ export const NewDocument = () => {
           <CircularProgress size={80} />
         </Box>
       )}
+
+      {/* Modal de Upload */}
+      <UploadInfoFile
+        open={uploadModalOpen}
+        handleClose={() => setUploadModalOpen(false)}
+        onFileUploaded={(fileId: number, file: File) => handleFileUploaded(fileId, file)}
+        origin="new"
+      />
     </>
   );
 };

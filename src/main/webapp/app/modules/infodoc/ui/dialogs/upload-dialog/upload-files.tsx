@@ -13,12 +13,13 @@ import { updateInfoDoc } from '../../../reducers/infodoc.reducer';
 type UploadFileModalProps = {
   open: boolean;
   handleClose: () => void;
+  onFileUploaded?: (fileId: number, file: File) => void; // Nova prop para callback
   origin?: 'new' | 'edit';
   setIdNewFile?: React.Dispatch<React.SetStateAction<number>>;
   SetFile?: React.Dispatch<React.SetStateAction<File>>;
 };
 
-const UploadInfoFile = ({ open, handleClose, origin, setIdNewFile, SetFile }: UploadFileModalProps) => {
+const UploadInfoFile = ({ open, handleClose, onFileUploaded, origin, setIdNewFile, SetFile }: UploadFileModalProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [files, setFiles] = useState<Array<File>>([]);
@@ -51,9 +52,16 @@ const UploadInfoFile = ({ open, handleClose, origin, setIdNewFile, SetFile }: Up
         }
 
         if (response.payload?.data?.id) {
-          if (!origin || origin == 'new') navigate(`/infodoc/upload-file/new/${response.payload?.data?.id}`);
-          else {
-            setIdNewFile && setIdNewFile(parseInt(response.payload?.data?.id));
+          const uploadedFileId = parseInt(response.payload?.data?.id);
+
+          if (onFileUploaded) {
+            // Nova lógica: Chama callback em vez de navegar
+            onFileUploaded(uploadedFileId, files[0]);
+          } else if (!origin || origin == 'new') {
+            // Lógica antiga: Navega (para compatibilidade)
+            navigate(`/infodoc/upload-file/new/${uploadedFileId}`);
+          } else {
+            setIdNewFile && setIdNewFile(uploadedFileId);
             handleClose();
           }
         }

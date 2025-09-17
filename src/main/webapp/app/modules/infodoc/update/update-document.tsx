@@ -87,7 +87,7 @@ export const UpdateDocument = () => {
   const [title, setTitle] = useState('');
   const [origin, setOrigin] = useState('externa');
   const [processes, setProcesses] = useState([]);
-  const [selectedProcess, setSelectedProcess] = useState<number>();
+  const [selectedProcess, setSelectedProcess] = useState<number | string | undefined>();
   const [noValidate, setNoValidate] = useState(false);
   const [validDate, setValidDate] = useState(new Date());
   const [documentDescription, setDocumentDescription] = useState('');
@@ -108,6 +108,7 @@ export const UpdateDocument = () => {
   const users = useAppSelector(state => state.all4qmsmsgatewayrnc.users.entities);
   const enums = useAppSelector(state => state.all4qmsmsgateway.enums.enums);
   const actualInfoDoc: InfoDoc = useAppSelector(state => state.all4qmsmsgateway.infodoc.entity);
+  const account = useAppSelector(state => state.authentication.account);
 
   useEffect(() => {
     dispatch(getUsers({ page: 0, size: 100, sort: 'ASC' }));
@@ -116,9 +117,6 @@ export const UpdateDocument = () => {
 
     getProcesses().then(data => {
       setProcesses(data);
-      if (data.length > 0) {
-        setSelectedProcess(data[0].id);
-      }
     });
 
     const roles = Storage.local.get('ROLE');
@@ -190,7 +188,7 @@ export const UpdateDocument = () => {
 
   const saveDoc = (situation?: EnumSituacao): Doc => {
     const newInfoDoc: Doc = {
-      // id: parseInt(id!!),
+      ...actualInfoDoc.doc,
       idUsuarioCriacao: emitter,
       dataCricao: emittedDate,
       descricaoDoc: description,
@@ -199,9 +197,9 @@ export const UpdateDocument = () => {
       titulo: title,
       origem: origin,
       idArquivo: parseInt(idFile!!),
-      idProcesso: selectedProcess,
+      idProcesso: Number(selectedProcess),
       ignorarValidade: true,
-      enumSituacao: situation ? situation : EnumSituacao.EDICAO,
+      enumSituacao: situation ? situation : EnumSituacao.REVISAO,
       tipoDoc: 'MA',
       revisao: actualInfoDoc.doc?.revisao ?? undefined,
       // idDocumentacaoAnterior: parseInt(id!!),
@@ -210,6 +208,9 @@ export const UpdateDocument = () => {
     if (!noValidate) {
       newInfoDoc.ignorarValidade = false;
       newInfoDoc.dataValidade = validDate;
+      newInfoDoc.idPrazo = parseInt(notificationPreviousDate);
+    } else {
+      newInfoDoc.idPrazo = 0; // Não notificar quando indeterminado
     }
 
     return newInfoDoc;
@@ -260,7 +261,7 @@ export const UpdateDocument = () => {
       };
 
       dispatch(atualizarMovimentacao(novaMovimentacao));
-      navigate('/infodoc');
+      navigate('/infodoc', { state: { selectedTab: 'SOLICITACAO_VALIDACAO' } });
     } else {
       toast.error(`Não foi possivel salvar Documento, tente novamente mais tarde!`);
       setIsLoading(false);
@@ -269,12 +270,95 @@ export const UpdateDocument = () => {
   };
 
   const cancelUpdate = () => {
-    navigate('/infodoc');
+    navigate('/infodoc', { state: { selectedTab: 'SOLICITACAO_VALIDACAO' } });
   };
 
   // Função para verificar se o usuário tem acesso ADMIN ou SGQ
+  // Usando a mesma lógica do infodoc-list.tsx
   const hasAdminOrSGQAccess = () => {
-    return currentUser?.isAdmin || currentUser?.isGestor || hasAnyAuthority(currentUser?.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]);
+    return hasAnyAuthority(account?.authorities, [AUTHORITIES.ADMIN, AUTHORITIES.SGQ]);
+  };
+
+  // Funções de controle de permissão para campos
+  const isEmitterFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isCodeFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isTitleFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isValidityFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isNotificationFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  const isDescriptionFieldEnabled = () => {
+    return hasAdminOrSGQAccess();
+  };
+
+  // Campos sempre habilitados (independente do perfil)
+  const isJustificationFieldEnabled = () => {
+    return true; // Sempre habilitado
+  };
+
+  const isDateFieldEnabled = () => {
+    return true; // Sempre habilitado
+  };
+
+  const isOriginFieldEnabled = () => {
+    return true; // Sempre habilitado
+  };
+
+  const isProcessFieldEnabled = () => {
+    return true; // Sempre habilitado
+  };
+
+  // Função para determinar o breadcrumb correto baseado na situação do documento
+  const getBreadcrumbText = () => {
+    if (actualInfoDoc?.doc?.enumSituacao === EnumSituacao.EDICAO) {
+      return 'Editar';
+    } else if (actualInfoDoc?.doc?.enumSituacao === EnumSituacao.REVISAO) {
+      return 'Revisar';
+    }
+    return 'Editar'; // Default
+  };
+
+  // Função para determinar o status correto baseado na movimentação do documento
+  const getStatusText = () => {
+    if (actualInfoDoc?.movimentacao?.enumStatus === EnumStatusDoc.EMISSAO) {
+      return 'Em Emissão';
+    } else if (actualInfoDoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDACAO) {
+      return 'Em Validação';
+    } else if (actualInfoDoc?.movimentacao?.enumStatus === EnumStatusDoc.REVISAO) {
+      return 'Em Revisão';
+    } else if (actualInfoDoc?.movimentacao?.enumStatus === EnumStatusDoc.VALIDAREV) {
+      return 'Em Validação da Revisão';
+    } else if (actualInfoDoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVACAO) {
+      return 'Em Aprovação';
+    } else if (actualInfoDoc?.movimentacao?.enumStatus === EnumStatusDoc.APROVAREV) {
+      return 'Em Aprovação da Revisão';
+    }
+    return 'Em Emissão'; // Default
+  };
+
+  // Função para determinar a situação correta baseada na situação do documento
+  const getSituacaoText = () => {
+    if (actualInfoDoc?.doc?.enumSituacao === EnumSituacao.EDICAO) {
+      return 'Edição';
+    } else if (actualInfoDoc?.doc?.enumSituacao === EnumSituacao.REVISAO) {
+      return 'Revisão';
+    } else if (actualInfoDoc?.doc?.enumSituacao === EnumSituacao.HOMOLOGACAO) {
+      return 'Homologado';
+    }
+    return 'Edição'; // Default
   };
 
   useEffect(() => {
@@ -285,15 +369,24 @@ export const UpdateDocument = () => {
       setDocumentDescription(actualInfoDoc.doc?.justificativa!!);
       setTitle(actualInfoDoc.doc?.titulo!!);
       setOrigin(actualInfoDoc.doc?.origem!!);
-      setSelectedProcess(actualInfoDoc.doc?.idProcesso!!);
+      // Removido setSelectedProcess daqui - será definido no useEffect específico
 
-      if (actualInfoDoc.doc?.dataValidade) {
-        setNoValidate(false);
-        setValidDate(new Date(actualInfoDoc.doc.dataValidade));
-      } else {
+      // Carregar estado do checkbox "Indeterminado" baseado no campo ignorarValidade
+      if (actualInfoDoc.doc?.ignorarValidade) {
         setNoValidate(true);
         setValidDate(new Date(2999, 11, 31));
         setNotificationPreviousDate('0');
+      } else {
+        setNoValidate(false);
+        if (actualInfoDoc.doc?.dataValidade) {
+          setValidDate(new Date(actualInfoDoc.doc.dataValidade));
+        } else {
+          setValidDate(new Date());
+        }
+        // Carregar prazo de notificação se existir
+        if (actualInfoDoc.doc?.idPrazo) {
+          setNotificationPreviousDate(actualInfoDoc.doc.idPrazo.toString());
+        }
       }
     }
   }, [actualInfoDoc]);
@@ -313,6 +406,17 @@ export const UpdateDocument = () => {
     }
   }, [enums]);
 
+  // useEffect para garantir que o processo seja selecionado quando ambos os dados estiverem disponíveis
+  useEffect(() => {
+    if (actualInfoDoc?.doc?.idProcesso && processes.length > 0) {
+      const processId = actualInfoDoc.doc.idProcesso;
+      // Usar setTimeout para garantir que o componente seja renderizado primeiro
+      setTimeout(() => {
+        setSelectedProcess(processId);
+      }, 100);
+    }
+  }, [actualInfoDoc, processes]);
+
   return (
     <>
       <div style={{ background: '#fff' }} className="ms-5 me-5 pb-5 mb-5">
@@ -325,7 +429,7 @@ export const UpdateDocument = () => {
               Informações documentadas
             </Link>
             <Link to={'/infodoc'} style={{ textDecoration: 'none', color: '#606060', fontWeight: 400 }}>
-              Revisar
+              {getBreadcrumbText()}
             </Link>
             {/* <Typography style={{ color: '#606060' }}>Ficha de estoque</Typography> */}
           </Breadcrumbs>
@@ -336,7 +440,7 @@ export const UpdateDocument = () => {
             <FormControl style={{ width: '30%' }}>
               <InputLabel>Emissor</InputLabel>
               <Select
-                disabled={!hasAdminOrSGQAccess()}
+                disabled={!isEmitterFieldEnabled()}
                 label="Emissor"
                 value={emitter || ''}
                 onChange={event => setEmitter(Number(event.target.value))}
@@ -354,7 +458,7 @@ export const UpdateDocument = () => {
                   Status:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Em Revisão
+                  {getStatusText()}
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -364,7 +468,7 @@ export const UpdateDocument = () => {
                   Situação:
                 </h3>
                 <h3 className="p-0 m-0 ms-2" style={{ fontSize: '15px', color: '#00000099' }}>
-                  Revisão
+                  {getSituacaoText()}
                 </h3>
                 <img src="../../../../content/images/icone-emissao.png" className="ms-2" />
               </div>
@@ -375,6 +479,7 @@ export const UpdateDocument = () => {
                   onChange={date => setEmittedDate(date)}
                   className="date-picker"
                   dateFormat={'dd/MM/yyyy'}
+                  disabled={!isDateFieldEnabled()}
                 />
                 <label htmlFor="" className="rnc-date-label">
                   Data
@@ -389,6 +494,7 @@ export const UpdateDocument = () => {
               name="ncArea"
               value={description || ''}
               onChange={e => setDescription(e.target.value)}
+              disabled={!isJustificationFieldEnabled()}
             />
           </div>
           <div>
@@ -403,22 +509,32 @@ export const UpdateDocument = () => {
               className="me-2"
               autoComplete="off"
               value={code}
-              disabled
+              disabled={!isCodeFieldEnabled()}
               onChange={e => setCode(e.target.value)}
             />
             <TextField
-              sx={{ width: '30%' }}
+              sx={{ width: '25%' }}
               label="Título"
               name="number"
               className="me-2 ms-2"
               autoComplete="off"
               value={title}
+              disabled={!isTitleFieldEnabled()}
               onChange={e => setTitle(e.target.value)}
+            />
+            <TextField
+              label="Revisão"
+              name="revisao"
+              className="me-2 ms-2"
+              autoComplete="off"
+              value={actualInfoDoc?.doc?.revisao ?? 0}
+              disabled={true}
+              onChange={() => {}}
             />
 
             <FormControl sx={{ width: '15%' }} className="me-2 ms-2">
               <InputLabel>Origem</InputLabel>
-              <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)}>
+              <Select label="Origem" value={origin} onChange={event => setOrigin(event.target.value)} disabled={!isOriginFieldEnabled()}>
                 {originList?.map(e => (
                   <MenuItem value={e.nome}>{e.valor}</MenuItem>
                 ))}
@@ -427,7 +543,12 @@ export const UpdateDocument = () => {
 
             <FormControl sx={{ width: '22%' }} className="me-2 ms-2">
               <InputLabel>Área / Processo</InputLabel>
-              <Select label="Área / Processo" value={selectedProcess} onChange={event => setSelectedProcess(Number(event.target.value))}>
+              <Select
+                label="Área / Processo"
+                value={selectedProcess || ''}
+                onChange={event => setSelectedProcess(event.target.value)}
+                disabled={!isProcessFieldEnabled()}
+              >
                 {processes.map((process, i) => (
                   <MenuItem value={process?.id} key={`process-${i}`}>
                     {process.nome!!}
@@ -452,7 +573,7 @@ export const UpdateDocument = () => {
               className="me-2"
               control={<Checkbox checked={noValidate} onClick={() => onNoValidateChanged()} />}
               label="Indeterminado"
-              disabled
+              disabled={!isValidityFieldEnabled()}
             />
             <FormControl className="me-2 ms-2 mt-4">
               <DatePicker
@@ -460,7 +581,7 @@ export const UpdateDocument = () => {
                 onChange={date => setValidDate(date)}
                 className="date-picker"
                 dateFormat={'dd/MM/yyyy'}
-                disabled
+                disabled={!isValidityFieldEnabled() || (isValidityFieldEnabled() && noValidate)}
               />
               <label htmlFor="" className="rnc-date-label">
                 Validade
@@ -473,7 +594,7 @@ export const UpdateDocument = () => {
                 label="Notificar antes de:"
                 value={notificationPreviousDate}
                 onChange={event => setNotificationPreviousDate(event.target.value)}
-                disabled
+                disabled={!isNotificationFieldEnabled() || (isNotificationFieldEnabled() && noValidate)}
               >
                 <MenuItem value="0">Não notificar</MenuItem>
                 <MenuItem value="15d">15 dias antes</MenuItem>
@@ -491,6 +612,7 @@ export const UpdateDocument = () => {
             name="ncArea"
             value={documentDescription || ''}
             onChange={e => setDocumentDescription(e.target.value)}
+            disabled={!isDescriptionFieldEnabled()}
           />
 
           {/* <div className="mt-4">

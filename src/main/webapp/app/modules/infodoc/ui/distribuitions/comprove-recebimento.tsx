@@ -255,7 +255,7 @@ export const ComproveRecebimento = () => {
     }
   }, [idProcesso]);
 
-  const cancelDocument = () => {
+  const goBackToDistribution = () => {
     if (isFromDistribution) {
       navigate('/infodoc', { state: { selectedTab: TabIdentifier.DISTRIBUICAO } }); // Alterado para TabIdentifier
     } else {
@@ -551,7 +551,7 @@ export const ComproveRecebimento = () => {
               variant="contained"
               className="me-3"
               style={{ background: '#d9d9d9', color: '#4e4d4d' }}
-              onClick={() => cancelDocument()}
+              onClick={() => goBackToDistribution()}
             >
               Voltar
             </Button>

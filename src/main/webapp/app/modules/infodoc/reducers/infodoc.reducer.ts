@@ -28,6 +28,7 @@ interface ListParams {
   size?: number;
   pesquisa?: string;
   idProcesso?: number;
+  userProcessIds?: string; // IDs dos processos do usuário (separados por vírgula)
 }
 
 export interface SendEmail {
@@ -42,7 +43,7 @@ export interface SendEmail {
 }
 
 export const listdocs = createAsyncThunk('docs/list', async (params: ListParams) => {
-  const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa, page, size } = params;
+  const { dtIni, dtFim, idProcesso, origem, situacao, pesquisa, page, size, userProcessIds } = params;
 
   const queryParams: string[] = [];
 
@@ -70,6 +71,109 @@ export const listdocs = createAsyncThunk('docs/list', async (params: ListParams)
 
   if (pesquisa) {
     queryParams.push(`pesquisa=${pesquisa}`);
+  }
+
+  if (userProcessIds) {
+    queryParams.push(`userProcessIds=${userProcessIds}`);
+  }
+
+  if (page) {
+    queryParams.push(`page=${page}`);
+  }
+
+  if (size) {
+    queryParams.push(`size=${size}`);
+  }
+
+  queryParams.push(`cacheBuster=${new Date().getTime()}`);
+  const queryString = queryParams.join('&');
+
+  return axios.get<Array<InfoDoc>>(`${apiDocumentacaoUrl}${queryString ? `?${queryString}` : ''}`);
+});
+
+// Nova action específica para a aba "Solicitação e Validação"
+export const listdocsSolicitacaoValidacao = createAsyncThunk('docs/listSolicitacaoValidacao', async (params: ListParams) => {
+  const { dtIni, dtFim, idProcesso, origem, pesquisa, page, size, userProcessIds } = params;
+
+  const queryParams: string[] = [];
+
+  queryParams.push('sort=desc');
+
+  // Buscar documentos com situação E (EMISSAO ou VALIDACAO) OU situação R (REVISAO ou VALIDAREV)
+  queryParams.push('situacao=E,R');
+  queryParams.push('status=EMISSAO,VALIDACAO,REVISAO,VALIDAREV');
+
+  if (dtIni) {
+    queryParams.push(`dtIni=${dtIni}`);
+  }
+
+  if (dtFim) {
+    queryParams.push(`dtFim=${dtFim}`);
+  }
+
+  if (idProcesso) {
+    queryParams.push(`idProcesso=${idProcesso}`);
+  }
+
+  if (origem) {
+    queryParams.push(`origem=${origem}`);
+  }
+
+  if (pesquisa) {
+    queryParams.push(`pesquisa=${pesquisa}`);
+  }
+
+  if (userProcessIds) {
+    queryParams.push(`userProcessIds=${userProcessIds}`);
+  }
+
+  if (page) {
+    queryParams.push(`page=${page}`);
+  }
+
+  if (size) {
+    queryParams.push(`size=${size}`);
+  }
+
+  queryParams.push(`cacheBuster=${new Date().getTime()}`);
+  const queryString = queryParams.join('&');
+
+  return axios.get<Array<InfoDoc>>(`${apiDocumentacaoUrl}${queryString ? `?${queryString}` : ''}`);
+});
+
+export const listdocsAprovacao = createAsyncThunk('docs/listAprovacao', async (params: ListParams) => {
+  const { dtIni, dtFim, idProcesso, origem, pesquisa, page, size, userProcessIds } = params;
+
+  const queryParams: string[] = [];
+
+  queryParams.push('sort=desc');
+
+  // Buscar documentos com situação E (APROVACAO) OU situação R (APROVAREV)
+  queryParams.push('situacao=E,R');
+  queryParams.push('status=APROVACAO,APROVAREV');
+
+  if (dtIni) {
+    queryParams.push(`dtIni=${dtIni}`);
+  }
+
+  if (dtFim) {
+    queryParams.push(`dtFim=${dtFim}`);
+  }
+
+  if (idProcesso) {
+    queryParams.push(`idProcesso=${idProcesso}`);
+  }
+
+  if (origem) {
+    queryParams.push(`origem=${origem}`);
+  }
+
+  if (pesquisa) {
+    queryParams.push(`pesquisa=${pesquisa}`);
+  }
+
+  if (userProcessIds) {
+    queryParams.push(`userProcessIds=${userProcessIds}`);
   }
 
   if (page) {
@@ -232,6 +336,34 @@ const InfoDocSlice = createEntitySlice({
         state.loading = true;
       })
       .addMatcher(isFulfilled(listdocs), (state, action) => {
+        const { data, headers } = action.payload;
+
+        return {
+          ...state,
+          loading: false,
+          entities: data,
+          entity: null,
+          totalItems: parseInt(headers['x-total-count'], 10),
+        };
+      })
+      .addMatcher(isPending(listdocsSolicitacaoValidacao), (state, action) => {
+        state.loading = true;
+      })
+      .addMatcher(isFulfilled(listdocsSolicitacaoValidacao), (state, action) => {
+        const { data, headers } = action.payload;
+
+        return {
+          ...state,
+          loading: false,
+          entities: data,
+          entity: null,
+          totalItems: parseInt(headers['x-total-count'], 10),
+        };
+      })
+      .addMatcher(isPending(listdocsAprovacao), (state, action) => {
+        state.loading = true;
+      })
+      .addMatcher(isFulfilled(listdocsAprovacao), (state, action) => {
         const { data, headers } = action.payload;
 
         return {

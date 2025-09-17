@@ -32,6 +32,7 @@ interface DistributionFilterParams {
   titulo?: string;
   idProcesso?: number;
   situacao?: string;
+  userProcessIds?: string;
   page?: number;
   size?: number;
   sort?: string;
