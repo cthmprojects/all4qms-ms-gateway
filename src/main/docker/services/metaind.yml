@@ -10,20 +10,20 @@ services:
       - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=${MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
       - SPRING_CLOUD_CONFIG_URI=${SPRING_CLOUD_CONFIG_URI}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/${DB_METAIND}
-      - SPRING_LIQUIBASE_URL=jdbc:postgresql://all4qmsmsgateway-postgresql:5432/${DB_METAIND}
+      - SPRING_DATASOURCE_URL=${SPRING_LIQUIBASE_URL}${DB_METAIND}
+      - SPRING_LIQUIBASE_URL=${SPRING_LIQUIBASE_URL}${DB_METAIND}
       - JHIPSTER_SLEEP=${METAIND_SLEEP}
       - QMS_REGISTRY_HOST=${QMS_REGISTRY_HOST}
       - QMS_REGISTRY_PROTOCOLO=${QMS_REGISTRY_PROTOCOLO}
       - IA_HOST=${IA_HOST}
     ports:
-      - 8085:8085
+      - 9085:8085
     healthcheck:
       test:
         - CMD
         - curl
         - -f
-        - http://localhost:8085/management/health
+        - http://localhost:9085/management/health
       interval: 5s
       timeout: 5s
       retries: 40

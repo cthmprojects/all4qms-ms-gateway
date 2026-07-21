@@ -1,7 +1,7 @@
 # IA service configuration
 services:
   ia:
-    image: all4qms-ms-ia
+    image: ia
     environment:
       - _JAVA_OPTIONS=${_JAVA_OPTIONS}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
